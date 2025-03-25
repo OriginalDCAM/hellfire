@@ -1,6 +1,6 @@
 #pragma once
 #include "Camera.h"
-
+// Used the guide from learnOpenGL to make my Camera class
 class PerspectiveCamera : public Camera
 {
 private:

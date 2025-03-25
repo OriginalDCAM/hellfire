@@ -10,6 +10,7 @@
 #include "../Engine/Core/Graphics/GL/glsl.h"
 #include "../Engine/Core/Graphics/GL/IB.h"
 #include "../Engine/Core/Graphics/GL/Geometry/Cube.h"
+#include "../Engine/Core/Graphics/GL/Geometry/Plane.h"
 #include "../Engine/Helpers/PerspectiveCamera.h"
 
 //--------------------------------------------------------------------------------
@@ -25,11 +26,13 @@ unsigned const int DELTA_TIME = 10;
 
 // Global variables
 PerspectiveCamera* camera = nullptr;
-Cube* cube = nullptr;
+//Cube* cube = nullptr;
 Object3D* scene = nullptr;
-Cube* cube2 = nullptr;
+//Cube* cube2 = nullptr;
 Renderer* renderer = nullptr;
 GLuint program_id;
+
+std::vector<Cube*> cubes = {};
 
 bool keys[256] = { false };
 int last_mouse_x = WIDTH / 2;
@@ -99,7 +102,7 @@ void mouseWheel(int button, int dir, int x, int y) {
 	glutPostRedisplay();
 }
 
-
+// Main loop
 void Loop()
 {
 	// Calculate delta time
@@ -114,12 +117,16 @@ void Loop()
 	if (keys['d']) camera->process_keyboard(RIGHT, delta_time);
 	if (keys['q']) camera->process_keyboard(DOWN, delta_time);
 	if (keys['e']) camera->process_keyboard(UP, delta_time);
-	if (scene && camera && cube2 && cube)
+
+	if (scene && camera)
 	{
-		//cube->update();
+		for (auto* cube : cubes)
+		{
+			cube->update();
+		}
 
 		camera->update();
-		cube2->update();
+		//cube2->update();
 		scene->update_world_matrix();
 		renderer->Render(*scene, *camera);
 	}
@@ -161,18 +168,47 @@ void Setup()
 	camera = new PerspectiveCamera(45.0f, (float)WIDTH / HEIGHT, 0.1f, 100.0f);
 	camera->set_position(glm::vec3(0.0f, 0.0f, 10.0f)); // Position camera 10 units back
 
+	vector<glm::vec3> cubePositions = {
+	glm::vec3(0.0f,  0.0f,  0.0f),
+	glm::vec3(2.0f,  5.0f, -15.0f),
+	glm::vec3(-1.5f, -2.2f, -2.5f),
+	glm::vec3(-3.8f, -2.0f, -12.3f),
+	glm::vec3(2.4f, -0.4f, -3.5f),
+	glm::vec3(-1.7f,  3.0f, -7.5f),
+	glm::vec3(1.3f, -2.0f, -2.5f),
+	glm::vec3(1.5f,  2.0f, -2.5f),
+	glm::vec3(1.5f,  0.2f, -1.5f),
+	glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
 
-	cube = new Cube();
-	cube2 = new Cube();
+	for (auto const position : cubePositions)
+	{
+		auto* new_cube = new Cube(0.25, 0.25, 0.25);
+		new_cube->set_position(position);
+		new_cube->set_scale(glm::vec3(0.5f, 0.5f, 0.5f));
+		scene->add(new_cube);
+		cubes.push_back(new_cube);
+	}
 
-	scene->add(cube);
-	cube->add(cube2);
+	auto* plane = new Plane();
+	
+	plane->set_position(glm::vec3(0.0f,-5.0f, -0.0f));
+	plane->set_scale(glm::vec3(50.0f, 50.0f, 50.0f));
+	plane->set_rotation(90.0f, glm::vec3(1.0, 0.0, 0.0));
 
-	cube->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
-	cube2->set_position(glm::vec3(-3.0f, 0.0f, 0.0f));
-	cube->set_scale(glm::vec3(0.5, 0.5, 0.5));
+	scene->add(plane);
 
-	cube2->get_model().meshes[0].is_wireframe = true;
+	//cube = new Cube();
+	//cube2 = new Cube();
+
+	//scene->add(cube);
+	//cube->add(cube2);
+
+	//cube->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+	//cube2->set_position(glm::vec3(-3.0f, 0.0f, 0.0f));
+	//cube->set_scale(glm::vec3(0.5, 0.5, 0.5));
+
+	//cube2->get_model().meshes[0].is_wireframe = true;
 
 	scene->update_world_matrix();
 
@@ -210,7 +246,6 @@ int main(int argc, char** argv)
 
 	// Clean up
 	delete camera;
-	delete cube;
 	delete renderer;
 
 	return 0;

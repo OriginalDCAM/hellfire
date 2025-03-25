@@ -81,6 +81,15 @@
     <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Plane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Pyramid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Shape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game\Application.cpp">
@@ -114,6 +123,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Cube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Plane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Pyramid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Shape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
