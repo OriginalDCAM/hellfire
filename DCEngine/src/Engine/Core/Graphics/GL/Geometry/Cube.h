@@ -1,7 +1,7 @@
 #pragma once
-#include "../../../Object3D.h"
+#include "Shape.h"
 
-class Cube : public Object3D
+class Cube : public Shape 
 {
 	const std::vector<float> vertices = {
 		// front
@@ -53,11 +53,12 @@ class Cube : public Object3D
 	};
 
 public:
-	Cube();
+	Cube(float width, float height, float depth);
 
 	void draw_self(const glm::mat4& view, const glm::mat4& projection, GLuint shader_program) override;
 
 	void update() override;
-
-
+	void set_vertices() override;
+	void set_colors() override;
+	void set_uvs() override;
 };
