@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-#include <GL/freeglut_std.h>
+#include <GL/glut.h>
 
 #include "Vertex.h"
 
@@ -27,17 +27,17 @@ void Mesh::create_mesh()
 	IBO->bind();
 	IBO->pass_data(indices);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
 
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
 
 	// Unbind the buffers
 	VAO->unbind();
@@ -52,7 +52,8 @@ void Mesh::draw_mesh() const
 	if (is_wireframe)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	} else
+	}
+	else
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
