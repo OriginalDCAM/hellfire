@@ -82,7 +82,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -97,7 +97,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -111,7 +111,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -125,7 +125,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -136,9 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Shape.h" />
-    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Pyramid.h" />
-    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Plane.h" />
+    <ClInclude Include="src\Engine\Application.h" />
     <ClInclude Include="src\Engine\Core\Object3D.h" />
     <ClInclude Include="src\Engine\Core\Graphics\Renderer.h" />
     <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Cube.h" />
@@ -150,9 +148,10 @@
     <ClInclude Include="src\Engine\Core\Graphics\Texture.h" />
     <ClInclude Include="src\Engine\Core\Graphics\Textures.h" />
     <ClInclude Include="src\Engine\Core\Graphics\Vertex.h" />
-    <ClInclude Include="src\Engine\Helpers\PerspectiveCamera.h" />
+    <ClInclude Include="src\Engine\Core\SceneManager.h" />
+    <ClInclude Include="src\Engine\Cameras\PerspectiveCamera.h" />
     <ClInclude Include="src\Engine\Lighting\AmbientLight.h" />
-    <ClInclude Include="src\Engine\Helpers\Camera.h" />
+    <ClInclude Include="src\Engine\Cameras\Camera.h" />
     <ClInclude Include="src\Engine\Lighting\DirectionalLight.h" />
     <ClInclude Include="src\Engine\Core\Entity.h" />
     <ClInclude Include="src\Engine\Lighting\Light.h" />
@@ -161,11 +160,10 @@
     <ClInclude Include="src\Engine\Core\Graphics\GL\VB.h" />
     <ClInclude Include="src\Engine\Core\Graphics\Window.h" />
     <ClInclude Include="src\Engine\Core\World.h" />
+    <ClInclude Include="src\Engine\Objects\Scene.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Shape.cpp" />
-    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Pyramid.cpp" />
-    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Plane.cpp" />
+    <ClCompile Include="src\Engine\Application.cpp" />
     <ClCompile Include="src\Engine\Core\Object3D.cpp" />
     <ClCompile Include="src\Engine\Core\Graphics\Renderer.cpp" />
     <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Cube.cpp" />
@@ -174,9 +172,16 @@
     <ClCompile Include="src\Engine\Core\Graphics\Mesh.cpp" />
     <ClCompile Include="src\Engine\Core\Graphics\GL\VA.cpp" />
     <ClCompile Include="src\Engine\Core\Graphics\GL\VB.cpp" />
-    <ClCompile Include="src\Engine\Helpers\Camera.cpp" />
-    <ClCompile Include="src\Engine\Helpers\PerspectiveCamera.cpp" />
-    <ClCompile Include="src\Game\Application.cpp" />
+    <ClCompile Include="src\Engine\Core\SceneManager.cpp" />
+    <ClCompile Include="src\Engine\Cameras\Camera.cpp" />
+    <ClCompile Include="src\Engine\Cameras\PerspectiveCamera.cpp" />
+    <ClCompile Include="src\Engine\Objects\Scene.cpp" />
+    <ClCompile Include="src\Game\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="docs\datastructures.md" />
+    <None Include="fragmentshader.frag" />
+    <None Include="vertexshader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
