@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Engine\Helpers\Camera.h">
+    <ClInclude Include="src\Engine\Cameras\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Core\Graphics\Shader.h">
@@ -45,7 +45,7 @@
     <ClInclude Include="src\Engine\Lighting\AmbientLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Helpers\PerspectiveCamera.h">
+    <ClInclude Include="src\Engine\Cameras\PerspectiveCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Core\Graphics\GL\glsl.h">
@@ -81,11 +81,17 @@
     <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Core\SceneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Objects\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Game\Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Engine\Core\Graphics\GL\VB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -104,10 +110,10 @@
     <ClCompile Include="src\Engine\Core\Graphics\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Helpers\Camera.cpp">
+    <ClCompile Include="src\Engine\Cameras\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Helpers\PerspectiveCamera.cpp">
+    <ClCompile Include="src\Engine\Cameras\PerspectiveCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Core\Graphics\Mesh.cpp">
@@ -116,5 +122,22 @@
     <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Core\SceneManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Game\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Objects\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="docs\datastructures.md" />
+    <None Include="fragmentshader.frag" />
+    <None Include="vertexshader.vert" />
   </ItemGroup>
 </Project>
