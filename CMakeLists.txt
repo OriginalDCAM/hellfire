@@ -1,0 +1,65 @@
+cmake_minimum_required(VERSION 3.14)
+project(FinalAssignment VERSION 1.0)
+
+# Specify the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Configure paths to external libraries
+set(GLEW_ROOT_DIR "C:/Libraries/glew-2.0.0-win32/glew-2.0.0" CACHE PATH "GLEW root directory")
+set(GLUT_ROOT_DIR "C:/Libraries/freeglut-MSVC-3.0.0-2.mp/freeglut" CACHE PATH "GLUT root directory")
+# For GLM, set to the parent directory of the first glm folder
+set(GLM_ROOT_DIR "C:/Libraries/glm-0.9.6.3/glm" CACHE PATH "GLM root directory")
+
+# Add these paths to CMAKE_PREFIX_PATH to help find_package find them
+list(APPEND CMAKE_PREFIX_PATH ${GLEW_ROOT_DIR} ${GLUT_ROOT_DIR} ${GLM_ROOT_DIR})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Create GLM target manually - note the root directory is one level up from where glm/glm is
+if(NOT TARGET GLM::GLM AND EXISTS "${GLM_ROOT_DIR}")
+    add_library(GLM::GLM INTERFACE IMPORTED)
+    set_target_properties(GLM::GLM PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${GLM_ROOT_DIR}"
+    )
+    set(GLM_FOUND TRUE)
+endif()
+
+# Define GLEW target
+if(NOT TARGET GLEW::GLEW AND EXISTS "${GLEW_ROOT_DIR}")
+    set(GLEW_INCLUDE_DIR "${GLEW_ROOT_DIR}/include")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)  # 64-bit
+        set(GLEW_LIBRARY "${GLEW_ROOT_DIR}/lib/Release/x64/glew32.lib")
+    else()  # 32-bit
+        set(GLEW_LIBRARY "${GLEW_ROOT_DIR}/lib/Release/Win32/glew32.lib")
+    endif()
+    
+    add_library(GLEW::GLEW UNKNOWN IMPORTED)
+    set_target_properties(GLEW::GLEW PROPERTIES
+        IMPORTED_LOCATION "${GLEW_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${GLEW_INCLUDE_DIR}"
+    )
+endif()
+
+# Define GLUT target
+if(NOT TARGET GLUT::GLUT AND EXISTS "${GLUT_ROOT_DIR}")
+    set(GLUT_INCLUDE_DIR "${GLUT_ROOT_DIR}/include")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)  # 64-bit
+        set(GLUT_LIBRARY "${GLUT_ROOT_DIR}/lib/x64/freeglut.lib") # Adjust this path as needed
+    else()  # 32-bit
+        set(GLUT_LIBRARY "${GLUT_ROOT_DIR}/lib/freeglut.lib") # Adjust this path as needed
+    endif()
+    
+    add_library(GLUT::GLUT UNKNOWN IMPORTED)
+    set_target_properties(GLUT::GLUT PROPERTIES
+        IMPORTED_LOCATION "${GLUT_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${GLUT_INCLUDE_DIR}"
+    )
+endif()
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
+
+add_library(stb_image INTERFACE)
+target_include_directories(stb_image INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb)
+
+add_subdirectory(DCraft)
+add_subdirectory(Sandbox)
