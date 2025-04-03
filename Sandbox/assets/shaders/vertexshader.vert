@@ -11,9 +11,11 @@ layout(location = 3) in vec2 texCoords;
 
 // Outputs
 out vec3 vColor;
+out vec2 vTexCoords;
 
 void main()
 {
     gl_Position = MVP * vec4(position, 1.0);
     vColor = color;
+    vTexCoords = texCoords;
 }

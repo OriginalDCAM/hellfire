@@ -4,6 +4,14 @@
 
 namespace DCraft
 {
+    enum class TextureType {
+        DIFFUSE,
+        SPECULAR,
+        NORMAL,
+        AMBIENT_OCCLUSION,
+        ROUGHNESS,
+        METALLIC
+    };
     class Texture
     {
     public:
@@ -17,6 +25,9 @@ namespace DCraft
         Texture(const std::string& path);
         void bind(unsigned int slot = 0);
         void unbind();
+        TextureType type;
+
+        uint32_t get_id() { return texture_id_; }
 
     private:
         uint32_t texture_id_;
