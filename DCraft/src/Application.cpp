@@ -100,9 +100,6 @@ namespace DCraft {
         return program_id;
     }
 
-    void Application::configure_camera(float fov, float near_plane, float far_plane, glm::vec3 position) {
-    }
-
     void Application::initialize(int argc, char **argv) {
         std::clog << "Initializing application..." << '\n';
 
@@ -179,7 +176,7 @@ namespace DCraft {
         glutPostRedisplay();
     }
 
-    void Application::render_frame() {
+    void Application::render_frame() const {
         // Clear the screen
         renderer_->begin_frame();
 
@@ -213,6 +210,7 @@ namespace DCraft {
     }
 
     void Application::on_mouse_passive_motion(int x, int y) {
+        // if first mouse store the last x and y position.
         if (first_mouse_) {
             last_mouse_x_ = x;
             last_mouse_y_ = y;
@@ -220,18 +218,25 @@ namespace DCraft {
             return;
         }
 
+        // Calculate the offsets
         float x_offset = static_cast<float>(x - last_mouse_x_);
         float y_offset = static_cast<float>(last_mouse_y_ - y);
+
+        // Ignore large jumps
+        if (abs(x_offset) > 100 || abs(y_offset) > 100) {
+            last_mouse_x_ = x;
+            last_mouse_y_ = y;
+            return;
+        }
 
         last_mouse_x_ = x;
         last_mouse_y_ = y;
 
         scene_manager_.get_active_camera()->process_mouse_movement(x_offset, y_offset);
 
-        if (x < window_info_.width / 4 || x > window_info_.width * 3 / 4 || y < window_info_.height / 4 || y > window_info_.height * 3 / 4) {
+        // Warp when getting close to edges
+        if (x < 100 || x > window_info_.width - 100 || y < 100 || y > window_info_.height - 100) {
             glutWarpPointer(window_info_.width / 2, window_info_.height / 2);
-            last_mouse_x_ = window_info_.width / 2;
-            last_mouse_y_ = window_info_.height / 2;
         }
     }
 

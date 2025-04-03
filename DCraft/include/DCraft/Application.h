@@ -67,7 +67,7 @@ namespace DCraft {
 
         void update();
 
-        void render_frame();
+        void render_frame() const;
 
         /// public method function: on_key_down
         /// @param key ASCII table keycode
@@ -125,6 +125,8 @@ namespace DCraft {
         void set_callbacks(const ApplicationCallbacks &callbacks) { callbacks_ = callbacks; }
         void set_shader_program(uint32_t shader_program_id) { shader_program_id_ = shader_program_id; }
 
+        static Application& get_instance() { return *instance_; }
+
     protected:
         SceneManager scene_manager_;
         PerspectiveCamera *camera_ = nullptr;
@@ -141,6 +143,7 @@ namespace DCraft {
         bool keys_[512] = {false};
         // Window stuff
         bool is_fullscreen_ = false;
+        bool warping_ = false;
 
         // Programs
         std::vector<Camera *> cameras_;
@@ -166,8 +169,9 @@ namespace DCraft {
 
         static void timer_callback(int value) {
             if (instance_) {
+                
                 instance_->update();
-                glutTimerFunc(16, timer_callback, 0);
+                glutTimerFunc(1, timer_callback, 0);
             }
         }
 
