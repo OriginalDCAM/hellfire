@@ -1,4 +1,5 @@
 #pragma once
+#include "DCraft/Addons/PerspectiveCamera.h"
 #include "DCraft/Structs/Camera.h"
 #include "DCraft/Structs/Object3D.h"
 
@@ -22,7 +23,7 @@ namespace DCraft
         template<typename CameraType, typename... Args>
         CameraType* create_camera(const std::string& name, Args&& ... args)
         {
-            CameraType* camera = new CameraType(std::forward<Args>(args)...);
+            CameraType* camera = new CameraType(name, std::forward<Args>(args)...);
 
             cameras_.push_back(camera);
 
@@ -32,9 +33,10 @@ namespace DCraft
             }
 
             return camera;
-
         }
 
+        void add(Object3D* obj) override;
+        
         void set_active_camera(Camera* camera);
         Camera* get_active_camera() const { return active_camera_; }
         void destroy_camera(Camera* camera);

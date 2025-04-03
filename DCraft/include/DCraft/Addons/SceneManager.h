@@ -2,6 +2,7 @@
 
 #include "DCraft/Structs/Object3D.h"
 #include "DCraft/Structs/Camera.h"
+#include "DCraft/Structs/Scene.h"
 
 namespace DCraft
 {
@@ -35,14 +36,14 @@ namespace DCraft
 
 		void set_active_camera(Camera* camera)
 		{
-			active_camera_ = camera;
+			active_scene_->set_active_camera(camera);
 		}
 
 		Camera* get_active_camera() const
         {
-			if (!active_camera_) return nullptr;
+			if (!active_scene_->get_active_camera()) return nullptr;
 
-			return active_camera_;
+			return active_scene_->get_active_camera();
 		}
 
 		void set_active_scene(Scene* scene);
@@ -50,7 +51,7 @@ namespace DCraft
 		Object3D* root_node_;
 		std::vector<Object3D*> objects_;
 		Scene* active_scene_;
-		Camera* active_camera_;
+		// Camera* active_camera_;
 
 		// Helper methods
 		void register_object(Object3D* object);

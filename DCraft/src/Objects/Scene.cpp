@@ -5,7 +5,6 @@ namespace DCraft
     Scene::Scene(const std::string& name) : Object3D(), is_active_(false), active_camera_(nullptr)
     {
         set_name(name);
-        register_object(this);
     }
 
     Scene::~Scene()
@@ -25,10 +24,11 @@ namespace DCraft
 
     void Scene::update(float delta_time)
     {
-        if (!is_active_) return;
-        Object3D::update(delta_time);
+        for (auto obj: registered_objects_) {
+            obj->update(delta_time);
+        }
+        // Object3D::update(delta_time);
     }
-
 
     Object3D* Scene::create_object(const std::string& name = "GameObject")
     {
@@ -48,6 +48,12 @@ namespace DCraft
         glm::mat4 camera_projection = active_camera_->get_projection_matrix();
 
         Object3D::draw(camera_view, camera_projection, shader_program);
+    }
+
+    void Scene::add(Object3D *obj) {
+        Object3D::add(obj);
+
+        register_object(obj);
     }
 
     void Scene::set_active_camera(Camera* camera)
