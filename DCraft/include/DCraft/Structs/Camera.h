@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/detail/type_mat.hpp>
 
-#include "DCRaft/Structs/Object3D.h"
+#include "DCraft/Structs/Object3D.h"
 
 namespace DCraft
 {
@@ -18,7 +18,7 @@ namespace DCraft
     // Default camera values
     const float YAW = -90.0f;
     const float PITCH = 0.0f;
-    const float SPEED = 20.0f;
+    const float SPEED = 5.0f;
     const float SENSITIVITY = 0.1f;
     const float ZOOM = 45.0f;
 
@@ -44,7 +44,7 @@ namespace DCraft
 
     public:
         // Constructor
-        Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, -5.0f),
+        Camera(const std::string& name = "UnnamedCamera", glm::vec3 position = glm::vec3(0.0f, 0.0f, -5.0f),
             glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
             float yaw = YAW,
             float pitch = PITCH) :
@@ -56,6 +56,7 @@ namespace DCraft
             mouse_sensitivity_(SENSITIVITY),
             zoom_(ZOOM)
         {
+            set_name(name);
             set_position(position);
             update_camera_vectors();
         }

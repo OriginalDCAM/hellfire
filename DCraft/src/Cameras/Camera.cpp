@@ -14,6 +14,7 @@ namespace DCraft
     {
         float velocity = movement_speed_ * delta_time;
         glm::vec3 horizontal_front = glm::normalize(glm::vec3(front_.x, 0.0f, front_.z));
+        glm::vec3 vertical_up = glm::normalize(glm::vec3(0.0f, up_.y, 0.0f));
 
         if (direction == FORWARD)
             set_position(get_position() + horizontal_front * velocity);
@@ -24,9 +25,9 @@ namespace DCraft
         if (direction == RIGHT)
             set_position(get_position() + right_ * velocity);
         if (direction == DOWN)
-            set_position(get_position() - up_ * velocity);
+            set_position(get_position() - vertical_up * velocity);
         if (direction == UP)
-            set_position(get_position() + up_ * velocity);
+            set_position(get_position() + vertical_up * velocity);
 
 
     }
