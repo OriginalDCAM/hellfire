@@ -187,19 +187,19 @@ namespace DCraft {
         glutSwapBuffers();
     }
 
-    void Application::on_key_down(unsigned char key, int x, int y) {
+    void Application::on_key_down(unsigned char key) {
         keys_[key] = true;
     }
 
-    void Application::on_key_up(unsigned char key, int x, int y) {
+    void Application::on_key_up(unsigned char key) {
         keys_[key] = false;
     }
 
-    void Application::on_special_key_down(int key, int x, int y) {
+    void Application::on_special_key_down(int key) {
         keys_[key + 256] = true;
     }
 
-    void Application::on_special_key_up(int key, int x, int y) {
+    void Application::on_special_key_up(int key) {
         keys_[key + 256] = false;
     }
 
@@ -207,6 +207,8 @@ namespace DCraft {
     }
 
     void Application::on_mouse_motion(int x, int y) {
+        // For now
+        on_mouse_passive_motion(x, y);
     }
 
     void Application::on_mouse_passive_motion(int x, int y) {
@@ -232,7 +234,10 @@ namespace DCraft {
         last_mouse_x_ = x;
         last_mouse_y_ = y;
 
-        scene_manager_.get_active_camera()->process_mouse_movement(x_offset, y_offset);
+        if (callbacks_.on_mouse_moved) {
+            callbacks_.on_mouse_moved(x_offset, y_offset);
+        }
+
 
         // Warp when getting close to edges
         if (x < 100 || x > window_info_.width - 100 || y < 100 || y > window_info_.height - 100) {
@@ -253,16 +258,13 @@ namespace DCraft {
 
         glViewport(0, 0, width, height);
 
-        if (scene_manager_.get_active_camera()) {
-            scene_manager_.get_active_camera()->set_aspect_ratio(window_info_.aspect_ratio);
+        for (auto& camera : scene_manager_.get_cameras()) {
+            camera->set_aspect_ratio(window_info_.aspect_ratio);
         }
     }
 
     void Application::load_scene() {
         if (callbacks_.setup) {
-            window_info_.width = window_info_.width;
-            window_info_.height = window_info_.height;
-            window_info_.aspect_ratio = static_cast<float>(window_info_.width) / static_cast<float>(window_info_.height);
             callbacks_.setup(scene_manager_, window_info_);
         } else {
             scene_manager_.create_default_scene();

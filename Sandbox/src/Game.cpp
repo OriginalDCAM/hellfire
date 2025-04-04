@@ -11,13 +11,16 @@
 void Game::setup_callbacks(DCraft::Application &app) {
     DCraft::ApplicationCallbacks application_callbacks;
 
+    application_callbacks.init = [this](DCraft::Application &app) { init(app); };
     application_callbacks.setup = [this](DCraft::SceneManager &sm, const DCraft::WindowInfo &info) {
         setup(sm, info);
     };
-    application_callbacks.init = [this](DCraft::Application &app) { init(app); };
     application_callbacks.update = [this](float dt) { update(dt); };
     application_callbacks.process_input = [this](DCraft::Application &app, float dt) {
         handle_input(app, dt);
+    };
+    application_callbacks.on_mouse_moved = [this](float x_offset, float y_offset) {
+      process_mouse_movement(x_offset, y_offset);  
     };
 
     app.set_callbacks(application_callbacks);
@@ -40,7 +43,6 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     scene_manager_ = &sm;
 
     // SceneLoader scene_loader("pathtofile.json");
-
     initial_scene = sm.create_scene("Test Scene");
 
     initial_scene->set_position(0.0f, 0.0f, 0.0f);
@@ -52,14 +54,35 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     initial_scene->add(camera_);
     initial_scene->set_active_camera(camera_);
 
-    // Drone camera
+    // Create the drone camera
     drone_camera_ = initial_scene->create_camera<DCraft::PerspectiveCamera>(
-        "Drone Camera", 70.0, window.aspect_ratio, 0.1f, 200.0f);
+        "Drone Camera", 70.0f, window.aspect_ratio, 0.1f, 400.0f);
     drone_camera_->set_position(10.0f, 25.0f, 10.0f);
-    drone_camera_->set_target(.0f, 1.0f, 0.0f);
+    drone_camera_->set_target(0.0f, 0.0f, 0.0f);
     initial_scene->add(drone_camera_);
 
-    // Cube primitive object
+    main_camera_visual_ = new DCraft::Cube();
+    main_camera_visual_->set_name("Main Camera Visual");
+    main_camera_visual_->set_scale(glm::vec3(0.3f, 0.3f, 0.3f));
+    main_camera_visual_->set_position(camera_->get_position());
+    main_camera_visual_->set_texture("assets/textures/brick_pavement.jpg", DCraft::TextureType::DIFFUSE);
+    initial_scene->add(main_camera_visual_);
+
+    // Visual indicator for drone camera position
+    drone_camera_visual_ = new DCraft::Cube();
+    drone_camera_visual_->set_name("Drone Camera Visual");
+    drone_camera_visual_->set_scale(glm::vec3(0.3f, 0.3f, 0.3f));
+    drone_camera_visual_->set_position(drone_camera_->get_position());
+
+    // Direction indicator for drone camera
+    DCraft::Cube *drone_camera_direction = new DCraft::Cube();
+    drone_camera_direction->set_name("Drone Camera Direction");
+    drone_camera_direction->set_scale(glm::vec3(0.05f, 0.05f, 0.5f));
+    drone_camera_direction->set_position(0.0f, 0.0f, 1.0f);
+    drone_camera_visual_->add(drone_camera_direction);
+    drone_camera_visual_->set_texture("assets/textures/mossy_brick.jpg", DCraft::TextureType::DIFFUSE);
+    initial_scene->add(drone_camera_visual_);
+
     cube_ = new DCraft::Cube();
     cube_->set_name("Cool cube");
     cube_->set_rotation(90, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -102,7 +125,7 @@ void Game::handle_input(DCraft::Application &app, float delta_time) {
     if (app.is_key_pressed('e') || app.is_key_pressed('E')) {
         scene_manager_->get_active_camera()->process_keyboard(DCraft::UP, delta_time);
     }
-    if (app.is_key_pressed('z') || app.is_key_pressed('Z')) {
+    if (app.is_key_pressed('v') || app.is_key_pressed('V')) {
         if (!drone_key_processed && drone_toggle_timer <= 0.0f) {
             drone_mode_active = !drone_mode_active;
 
@@ -130,6 +153,53 @@ void Game::handle_input(DCraft::Application &app, float delta_time) {
     }
 }
 
-void Game::update(float delta_time) const {
+void Game::process_mouse_movement(float x_offset, float y_offset) {
+    scene_manager_->get_active_camera()->process_mouse_movement(x_offset, y_offset);
+
+}
+void Game::process_camera_movement() {
+    main_camera_visual_->set_position(camera_->get_position());
+    drone_camera_visual_->set_position(drone_camera_->get_position());
+
+    glm::vec3 main_front = camera_->get_front_vector();
+    glm::vec3 main_right = camera_->get_right_vector();
+    glm::vec3 main_up = camera_->get_up_vector();
+
+    glm::mat4 main_rotation(1.0f);
+    main_rotation[0] = glm::vec4(main_right, 0.0f);
+    main_rotation[1] = glm::vec4(main_up, 0.0f);
+    main_rotation[2] = glm::vec4(main_front, 0.0f);
+    main_rotation = glm::transpose(main_rotation);
+
+    main_camera_visual_->set_rotation_matrix(main_rotation);
+
+    glm::vec3 front = drone_camera_->get_front_vector();
+    glm::vec3 right = drone_camera_->get_right_vector();
+    glm::vec3 up = drone_camera_->get_up_vector();
+
+    // Build rotation matrix from these orthogonal vectors
+    glm::mat4 drone_rotation(1.0f);
+    drone_rotation[0] = glm::vec4(right, 0.0f);
+    drone_rotation[1] = glm::vec4(up, 0.0f);
+    drone_rotation[2] = glm::vec4(front, 0.0f);
+    drone_rotation = glm::transpose(drone_rotation);
+
+    drone_camera_visual_->set_rotation_matrix(drone_rotation);
+
+    // Apply rotations to camera visualizers
+    main_camera_visual_->set_rotation_matrix(main_rotation);
+
+    // Hide active camera's visualizer
+    if (drone_mode_active) {
+        drone_camera_visual_->set_scale(glm::vec3(0.0f)); // Hide drone camera when using it
+        main_camera_visual_->set_scale(glm::vec3(0.3f)); // Show main camera
+    } else {
+        drone_camera_visual_->set_scale(glm::vec3(0.3f)); // Show drone camera
+        main_camera_visual_->set_scale(glm::vec3(0.0f)); // Hide main camera when using it
+    }
+}
+
+void Game::update(float delta_time) {
+    process_camera_movement();
     initial_scene->update(delta_time);
 }

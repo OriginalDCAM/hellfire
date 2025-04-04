@@ -70,6 +70,15 @@ namespace DCraft
 
         float get_zoom() const { return zoom_; }
 
+        float get_pitch() const { return pitch_; }
+        float get_yaw() const { return yaw_; }
+
+        glm::vec3 get_front_vector() const { return front_; }
+        glm::vec3 get_up_vector() const { return up_; }
+        glm::vec3 get_right_vector() const { return right_; }
+        glm::vec3 get_world_up_vector() const { return world_up_; }
+        glm::vec3 get_camera_target() const { return target_; }
+
         // Override from Object3D
         void update(float dt) override {}
 

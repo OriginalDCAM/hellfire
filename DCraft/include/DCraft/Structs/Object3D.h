@@ -94,6 +94,10 @@ namespace DCraft
 
         const glm::mat4& get_model_matrix() const { return model_ptr_->transform; }
 
+        void set_rotation_matrix(const glm::mat4& rotation_matrix);
+        void set_translation_matrix(const glm::mat4& translation_matrix);
+        void set_scale_matrix(const glm::mat4& scale_matrix);
+
         virtual void add(Object3D* child)
         {
             // Check if the child is already in the children list
@@ -171,20 +175,8 @@ namespace DCraft
             return world_matrix_;
         }
 
-        void update_model_matrix()
-        {
-            model_ptr_->transform = glm::mat4(1.0f);
-            model_ptr_->transform = glm::translate(model_ptr_->transform, position_);
+        void update_model_matrix() const;
 
-            if (glm::length(rotation_axis_) > 0.0001f) {
-                glm::vec3 normalized_axis = glm::normalize(rotation_axis_);
-                model_ptr_->transform = glm::rotate(model_ptr_->transform, rotation_angle_, normalized_axis);
-            }
-
-            model_ptr_->transform = glm::scale(model_ptr_->transform, scale_);
-        }
-
-        
 
         // overload for the new operator to set the proper memory alignment for glm methods
         void* operator new(size_t size) {
@@ -207,6 +199,15 @@ namespace DCraft
         glm::vec3 rotation_axis_;
         float rotation_angle_;
 
+        // Transform matrices
+        glm::mat4 rotation_matrix_ = glm::mat4(1.0f);
+        bool use_rotation_matrix_ = false;
+
+        glm::mat4 translation_matrix_ = glm::mat4(1.0f);
+        bool use_translation_matrix_ = false;
+
+        glm::mat4 scale_matrix_ = glm::mat4(1.0f);
+        bool use_scale_matrix_ = false;
         
         std::shared_ptr<Model> model_ptr_;
 

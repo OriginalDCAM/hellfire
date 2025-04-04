@@ -34,6 +34,8 @@ namespace DCraft
 		Object3D* get_root_node() const { return root_node_; }
 		const std::vector<Object3D*>& get_objects() const { return objects_; }
 
+    	std::vector<Camera*> get_cameras() { return active_scene_->get_cameras(); };
+
 		void set_active_camera(Camera* camera)
 		{
 			active_scene_->set_active_camera(camera);

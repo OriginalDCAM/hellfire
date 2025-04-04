@@ -1,6 +1,7 @@
 #include "DCraft/Structs/Camera.h"
 
 #include <algorithm>
+#include <glm/gtc/quaternion.hpp>
 
 namespace DCraft
 {
@@ -71,7 +72,11 @@ namespace DCraft
         right_ = glm::normalize(glm::cross(front_, world_up_));
         up_ = glm::normalize(glm::cross(right_, front_));
 
-        // Update model matrix if needed
-        update_model_matrix();
+        // Create a rotation matrix from the view vectors
+        glm::mat4 rotation = glm::mat4(1.0f);
+        rotation = glm::rotate(rotation, glm::radians(yaw_), glm::vec3(0.0f, 1.0f, 0.0f));
+        rotation = glm::rotate(rotation, glm::radians(pitch_), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        set_rotation_matrix(rotation);
     }
 }
