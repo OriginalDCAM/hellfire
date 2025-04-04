@@ -24,7 +24,7 @@ Object3D* cube = new Object3D();
 cube->model.add_mesh(DCRAFT_CUBE_MESH);
 
 Scene scene = Scene("Example scene");
-SceneManager scenemanager = SceneManager();
+SceneManager* scenemanager = new SceneManager();
 scenemanager.add(scene);
 scenemanager.load("Example scene");
 // or for projects with multiple scene
