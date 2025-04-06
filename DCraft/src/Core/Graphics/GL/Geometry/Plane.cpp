@@ -27,7 +27,7 @@ Plane::Plane()
         indices_data.push_back(static_cast<unsigned int>(plane_elements[i]));
     }
 
-    Mesh planeMesh(vertices_data, indices_data, texture_data);
+    Mesh planeMesh(vertices_data, indices_data);
     add_mesh(planeMesh);
 	
     update_world_matrix();

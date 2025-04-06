@@ -45,6 +45,8 @@ private:
     
     DCraft::Cube *main_camera_visual_ = nullptr;
     DCraft::Cube *drone_camera_visual_ = nullptr;
+
+    std::unordered_map<std::string, DCraft::Material*> materials_;
     
     DCraft::Scene *initial_scene;
     DCraft::SceneManager *scene_manager_;

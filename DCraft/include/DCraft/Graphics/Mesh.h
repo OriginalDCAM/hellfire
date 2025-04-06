@@ -1,35 +1,35 @@
 #pragma once
-#include "DCraft/Graphics/Textures/Texture.h"
 #include "Vertex.h"
 #include "GL/IB.h"
 #include "GL/VA.h"
 #include "GL/VB.h"
+#include "Materials/Material.h"
 
-namespace DCraft
-{
-
-    struct Mesh
-    {
+namespace DCraft {
+    struct Mesh {
     public:
+        Mesh();
+        Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices);
+
+        ~Mesh();
+
         // mesh data
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-        std::vector<Texture*> textures;
+
+        Material *material = nullptr;
+
+        void set_material(Material *mat) { material = mat; }
+        Material *get_material() const { return material; }
 
         bool is_wireframe = false;
-        Mesh();
-        Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture*>& textures);
-        ~Mesh();
-        
-        void update_textures(const std::vector<Texture*>& new_textures) {
-            textures = new_textures;
-        }
 
-        void draw(uint32_t shader_program) const;
+        void draw() const;
+
     private:
-        VA* VAO;
-        VB* VBO;
-        IB* IBO;
+        VA *VAO;
+        VB *VBO;
+        IB *IBO;
 
         void create_mesh();
     };

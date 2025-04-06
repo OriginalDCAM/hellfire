@@ -55,7 +55,7 @@ namespace DCraft
         }
 
         // Create mesh and add to the model
-        Mesh cubeMesh(vertices_data, indices_data, texture_data);
+        Mesh cubeMesh(vertices_data, indices_data);
         add_mesh(cubeMesh);
 
         // Initialize transformations
