@@ -17,7 +17,7 @@ namespace DCraft
         std::vector<Texture*> textures;
 
         bool is_wireframe = false;
-
+        Mesh();
         Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture*>& textures);
         ~Mesh();
         
@@ -25,7 +25,7 @@ namespace DCraft
             textures = new_textures;
         }
 
-        void draw_mesh(uint32_t shader_program) const;
+        void draw(uint32_t shader_program) const;
     private:
         VA* VAO;
         VB* VBO;

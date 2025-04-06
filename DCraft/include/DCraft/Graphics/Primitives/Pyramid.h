@@ -1,10 +1,10 @@
 #pragma once
-#include "Shape.h"
+#include "Shape3D.h"
 #include "DCraft/Structs/Object3D.h"
 
 namespace DCraft
 {
-    class Pyramid : public Shape
+    class Pyramid : public Shape3D
     {
         const std::vector<float> vertices = {
             // Plane vertices
@@ -34,8 +34,6 @@ namespace DCraft
 
     public:
         Pyramid();
-
-        void draw_self(const glm::mat4& view, const glm::mat4& projection, GLuint shader_program) override;
 
         void update(float dt) override;
         void set_vertices() override;

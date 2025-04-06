@@ -56,30 +56,10 @@ namespace DCraft
 
         // Create mesh and add to the model
         Mesh cubeMesh(vertices_data, indices_data, texture_data);
-        get_model()->add_mesh(cubeMesh);
+        add_mesh(cubeMesh);
 
         // Initialize transformations
-        get_model()->transform = glm::mat4(1.0f);
-        world_matrix_ = glm::mat4(1.0f);
-        update_model_matrix();
-    }
-
-    void Cube::draw_self(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program)
-    {
-        glm::mat4 mvp = projection * view * get_world_matrix();
-
-        // Create a uniform for the model view projection matrix
-        unsigned int mvpLoc = glGetUniformLocation(shader_program, "MVP");
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
-
-        // If no there are no meshes for the model skip
-        if (!get_model()->meshes.empty())
-        {
-            for (auto& mesh : get_model()->meshes)
-            {
-                mesh.draw_mesh(shader_program);
-            }
-        }
+        update_world_matrix();
     }
 
     void Cube::update(float dt)

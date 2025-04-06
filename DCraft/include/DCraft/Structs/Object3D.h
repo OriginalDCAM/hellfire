@@ -2,15 +2,14 @@
 #include <algorithm>
 #include <memory>
 #include <string>
-#include <glm/detail/type_vec3.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <vector>
 #include <utility>
 
-#include "DCraft/Graphics/Model.h"
+#include "Transform3D.h"
+#include "DCraft/Graphics/Mesh.h"
 
 namespace DCraft
 {
-
     class alignas(16) Object3D
     {
     public:
@@ -21,12 +20,9 @@ namespace DCraft
                 delete child;
             }
             children_.clear();
+        }
 
-        }
-        Object3D() : position_(0.0f, 0.0f, 0.0f), scale_(1.0, 1.0f, 1.0f), rotation_axis_(0.0f, 0.0f, 0.0f), rotation_angle_(0.0f), world_matrix_(1.0f)
-        {
-            get_model()->transform = glm::mat4(1.0f);
-        }
+        Object3D() : transform_() {}
 
         void set_name(std::string name)
         {
@@ -38,61 +34,64 @@ namespace DCraft
             return name_;
         }
 
-        Model* get_model() {
-            if (!model_ptr_) {
-                model_ptr_ = std::make_unique<Model>();
+        // Mesh handling
+        void add_mesh(const Mesh& mesh)
+        {
+            if (!mesh_) {
+                mesh_ = std::make_unique<Mesh>(mesh);
+            } else {
+                *mesh_ = mesh;
             }
-            return model_ptr_.get();
         }
 
-        bool has_model() const {
-            return model_ptr_ != nullptr;
+        Mesh* get_mesh()
+        {
+            if (!mesh_) {
+                mesh_ = std::make_unique<Mesh>();
+            }
+            return mesh_.get();
         }
 
+        bool has_mesh() const
+        {
+            return mesh_ != nullptr;
+        }
 
-        const glm::vec3& get_position() const { return position_; }
+        const std::vector<unsigned int>& get_indices() const
+        {
+            static const std::vector<unsigned int> empty_indices;
+            return mesh_ ? mesh_->indices : empty_indices;
+        }
 
+        // Transform delegation methods
+        const glm::vec3& get_position() const { return transform_.get_position(); }
+        
         void set_position(const glm::vec3& new_position)
         {
-            position_ = new_position;
-            update_model_matrix();
+            transform_.set_position(new_position);
         }
 
         void set_position(const float x, const float y, const float z)
         {
-            position_ = glm::vec3(x, y, z);
-            update_model_matrix();
+            transform_.set_position(x, y, z);
         }
-
 
         void set_scale(const glm::vec3& new_scale)
         {
-            scale_ = new_scale;
-            update_model_matrix();
+            transform_.set_scale(new_scale);
         }
 
-        glm::vec3 get_current_scale() { return scale_; }
+        glm::vec3 get_current_scale() { return transform_.get_scale(); }
 
         void set_rotation(const float degrees, const glm::vec3& new_axis)
         {
-            rotation_angle_ = degrees * glm::pi<float>() / 180;
-            rotation_axis_ = new_axis;
-            update_model_matrix();
+            transform_.set_rotation(degrees, new_axis);
         }
 
-        float get_rotation_angle() const { return rotation_angle_; }
+        float get_rotation_angle() const { return transform_.get_rotation_angle(); }
 
-        const std::vector<unsigned int>& get_indices() const
-        {
-            if (model_ptr_->meshes.empty()) {
-                static const std::vector<unsigned int> empty_indices;
-                return empty_indices;
-            }
-
-            return model_ptr_->meshes[0].indices;
-        }
-
-        const glm::mat4& get_model_matrix() const { return model_ptr_->transform; }
+        const glm::mat4& get_local_matrix() const { return transform_.get_local_matrix(); }
+        const glm::mat4& get_world_matrix() const { return transform_.get_world_matrix(); }
 
         void set_rotation_matrix(const glm::mat4& rotation_matrix);
         void set_translation_matrix(const glm::mat4& translation_matrix);
@@ -110,7 +109,6 @@ namespace DCraft
                 }
 
                 children_.push_back(child);
-
                 child->parent_ = this;
             }
         }
@@ -122,7 +120,6 @@ namespace DCraft
             {
                 // Remove from children list
                 children_.erase(it);
-
                 child->parent_ = nullptr;
             }
         }
@@ -141,7 +138,6 @@ namespace DCraft
 
         virtual void draw_self(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program) {}
 
-
         virtual void draw(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program)
         {
             draw_self(view, projection, shader_program);
@@ -153,30 +149,20 @@ namespace DCraft
 
         void update_world_matrix()
         {
-            if (!model_ptr_) return;
-            glm::mat4 world_matrix = model_ptr_->transform;
-
+            const glm::mat4* parent_world_matrix = nullptr;
             if (parent_ != nullptr)
             {
-                world_matrix = parent_->get_world_matrix() * world_matrix;
+                parent_world_matrix = &parent_->get_world_matrix();
             }
-
-            world_matrix_ = world_matrix;
+            
+            transform_.update_world_matrix(parent_world_matrix);
 
             // Update Children
             for (auto* child : children_)
             {
                 child->update_world_matrix();
             }
-
         }
-
-        const glm::mat4& get_world_matrix() const {
-            return world_matrix_;
-        }
-
-        void update_model_matrix() const;
-
 
         // overload for the new operator to set the proper memory alignment for glm methods
         void* operator new(size_t size) {
@@ -189,29 +175,19 @@ namespace DCraft
             _aligned_free(ptr);
         }
 
+        // Access to transform for advanced operations
+        Transform3D& get_transform() { return transform_; }
+        const Transform3D& get_transform() const { return transform_; }
+
     private:
         std::vector<Object3D*> children_;
         Object3D* parent_ = nullptr;
         std::string name_;
-
-        glm::vec3 position_;
-        glm::vec3 scale_;
-        glm::vec3 rotation_axis_;
-        float rotation_angle_;
-
-        // Transform matrices
-        glm::mat4 rotation_matrix_ = glm::mat4(1.0f);
-        bool use_rotation_matrix_ = false;
-
-        glm::mat4 translation_matrix_ = glm::mat4(1.0f);
-        bool use_translation_matrix_ = false;
-
-        glm::mat4 scale_matrix_ = glm::mat4(1.0f);
-        bool use_scale_matrix_ = false;
         
-        std::shared_ptr<Model> model_ptr_;
-
-    protected:
-        glm::mat4 world_matrix_ = glm::mat4(1.0f);
+        // The transform component handles all transformation logic
+        Transform3D transform_;
+        
+        // Mesh is optional
+        std::unique_ptr<Mesh> mesh_;
     };
 }
