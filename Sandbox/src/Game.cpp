@@ -7,6 +7,8 @@
 
 #include "Game.h"
 
+#include "Scenes/SandboxScene.h"
+
 
 void Game::setup_callbacks(DCraft::Application &app) {
     DCraft::ApplicationCallbacks application_callbacks;
@@ -35,114 +37,17 @@ void Game::init(DCraft::Application &app) {
     uint32_t shader_program = app.create_shader_program("assets/shaders/vertexshader.vert",
                                                         "assets/shaders/fragmentshader.frag");
 
-    DCraft::Material *mossy_material = new DCraft::Material();
-    mossy_material->set_texture("assets/textures/mossy_brick.jpg", DCraft::TextureType::DIFFUSE);
-    mossy_material->set_shader(shader_program);
-
-    DCraft::Material *pavement_material = new DCraft::Material();
-    pavement_material->set_texture("assets/textures/brick_pavement.jpg", DCraft::TextureType::DIFFUSE);
-    pavement_material->set_shader(shader_program);
-
-
-    DCraft::Material *miquel_material = new DCraft::Material();
-    miquel_material->set_texture("assets/textures/miquel.jpg", DCraft::TextureType::DIFFUSE);
-    miquel_material->set_shader(shader_program);
-
-
-    DCraft::Material *plastic_green_material = new DCraft::Material();
-    plastic_green_material->set_texture("assets/textures/plastic_green.jpg", DCraft::TextureType::DIFFUSE);
-    plastic_green_material->set_shader(shader_program);
-
-
-    DCraft::Material *denzel_material = new DCraft::Material();
-    denzel_material->set_texture("assets/textures/denzel.jpg", DCraft::TextureType::DIFFUSE);
-    denzel_material->set_shader(shader_program);
-
-
-    DCraft::Material *plastic_blue_material = new DCraft::Material();
-    plastic_blue_material->set_texture("assets/textures/plastic_blue.jpg", DCraft::TextureType::DIFFUSE);
-    plastic_blue_material->set_shader(shader_program);
-
-    materials_ = {
-        {"PLASTIC_BLUE_MATERIAL", plastic_blue_material}, {"DENZEL_MATERIAL", denzel_material},
-        {"PLASTIC_GREEN_MATERIAL", plastic_green_material}, {"MIQUEL_MATERIAL", miquel_material},
-        {"MOSSY_MATERIAL", mossy_material}, {"PAVEMENT_MATERIAL", pavement_material}
-    };
-
     app.toggle_fullscreen();
     app.set_shader_program(shader_program);
 }
 
+
 void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     scene_manager_ = &sm;
-
-    // SceneLoader scene_loader("pathtofile.json");
-    initial_scene = sm.create_scene("Test Scene");
-
-    initial_scene->set_position(0.0f, 0.0f, 0.0f);
-
-    // Main camera
-    camera_ = initial_scene->create_camera<DCraft::PerspectiveCamera>(
-        "Main Camera", 70.0f, window.aspect_ratio, 0.1f, 400.0f);
-    camera_->set_position(0.0f, 2.0f, 10.0f);
-    initial_scene->add(camera_);
-    initial_scene->set_active_camera(camera_);
-
-    // Create the drone camera
-    drone_camera_ = initial_scene->create_camera<DCraft::PerspectiveCamera>(
-        "Drone Camera", 70.0f, window.aspect_ratio, 0.1f, 400.0f);
-    drone_camera_->set_position(10.0f, 25.0f, 10.0f);
-    drone_camera_->set_target(0.0f, 0.0f, 0.0f);
-    initial_scene->add(drone_camera_);
-
-    main_camera_visual_ = new DCraft::Cube();
-    main_camera_visual_->set_name("Main Camera Visual");
-    main_camera_visual_->set_scale(glm::vec3(0.0f));
-    main_camera_visual_->set_position(camera_->get_position());
-    main_camera_visual_->set_material(materials_["MIQUEL_MATERIAL"]);
-    initial_scene->add(main_camera_visual_);
-
-    // Visual indicator for drone camera position
-    drone_camera_visual_ = new DCraft::Cube();
-    drone_camera_visual_->set_name("Drone Camera Visual");
-    drone_camera_visual_->set_scale(glm::vec3(0.3f));
-    drone_camera_visual_->set_position(drone_camera_->get_position());
-    drone_camera_visual_->set_material(materials_["DENZEL_MATERIAL"]);
-
-    DCraft::Cube *main_camera_direction = new DCraft::Cube();
-    main_camera_direction->set_name("Main Camera Direction");
-    main_camera_direction->set_scale(glm::vec3(0.05f, 0.05f, 0.5f));
-    main_camera_direction->set_position(0.0f, 0.0f, 1.0f);
-    main_camera_direction->set_material(materials_["PLASTIC_GREEN_MATERIAL"]);
-    main_camera_visual_->add(main_camera_direction);
-
-    // Direction indicator for drone camera
-    DCraft::Cube *drone_camera_direction = new DCraft::Cube();
-    drone_camera_direction->set_name("Drone Camera Direction");
-    drone_camera_direction->set_scale(glm::vec3(0.05f, 0.05f, 0.5f));
-    drone_camera_direction->set_position(0.0f, 0.0f, 1.0f);
-    drone_camera_visual_->add(drone_camera_direction);
-    drone_camera_direction->set_material(materials_["PLASTIC_GREEN_MATERIAL"]);
-    initial_scene->add(drone_camera_visual_);
-
-    cube_ = new DCraft::Cube();
-    cube_->set_name("Cool cube");
-    cube_->set_rotation(90, glm::vec3(1.0f, 0.0f, 0.0f));
-    cube_->set_scale(glm::vec3(5.0f, 5.0f, 5.0f));
-    cube_->set_position(0.0f, 1.0f, 0.0f);
-    cube_->set_material(materials_["MOSSY_MATERIAL"]);
-    initial_scene->add(cube_);
-
-    // Plane primitive object
-    DCraft::Plane *plane = new DCraft::Plane();
-    plane->set_name("Ground");
-    plane->set_position(0, -10, 0);
-    plane->set_scale(glm::vec3(100.0f, 100.0f, 100.0f));
-    plane->set_rotation(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-    plane->set_material(materials_["PAVEMENT_MATERIAL"]);
-    initial_scene->add(plane);
-
-    sm.set_active_scene(initial_scene);
+    
+    scenes_["Sandbox"] = load_scene(sm, window);
+    
+    sm.set_active_scene(scenes_["Sandbox"]);
 }
 
 void Game::handle_input(DCraft::Application &app, float delta_time) {
@@ -174,11 +79,11 @@ void Game::handle_input(DCraft::Application &app, float delta_time) {
             const glm::vec3 visible_scale(0.3f);
             const glm::vec3 hidden_scale(0.0f);
             if (drone_mode_active) {
-                initial_scene->set_active_camera(drone_camera_);
+                scene_manager_->get_active_scene()->set_active_camera(drone_camera_);
                 std::clog << "Entering drone mode with the " << initial_scene->get_active_camera()->get_name() <<
                         '\n';
             } else {
-                initial_scene->set_active_camera(camera_);
+                scene_manager_->get_active_scene()->set_active_camera(camera_);
                 std::clog << "Leaving drone mode to the " << initial_scene->get_active_camera()->get_name() << '\n';
             }
 
@@ -207,8 +112,6 @@ void Game::process_mouse_movement(float x_offset, float y_offset) {
 
 void Game::process_camera_movement() {
     // Set the position to that of the camera
-    main_camera_visual_->set_position(camera_->get_position());
-    drone_camera_visual_->set_position(drone_camera_->get_position());
 
     // Get the cameras vector's
     glm::vec3 main_front = camera_->get_front_vector();
@@ -237,6 +140,7 @@ void Game::process_camera_movement() {
 }
 
 void Game::update(float delta_time) {
-    process_camera_movement();
-    initial_scene->update(delta_time);
+    for (auto& scene : scenes_) {
+        scene.second->update(delta_time);
+    }
 }

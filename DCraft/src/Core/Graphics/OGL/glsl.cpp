@@ -1,4 +1,4 @@
-#include "DCraft/Graphics/GL/glsl.h"
+#include "DCraft/Graphics/OGL/glsl.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>

@@ -16,7 +16,7 @@ namespace DCraft
 
         // Material properties
         void set_material(Material* material);
-        Material* get_material() const;
+        Material* get_material();
 
         // Geometry Access & modification
         const std::vector<float>& get_vertices() const;
@@ -34,7 +34,7 @@ namespace DCraft
         // Rebuild the Geometry
         void rebuild();
 
-        void draw_self(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program) override;
+        void draw_self(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program, void* renderer_context) override;
     
     protected:
         virtual void set_vertices();
@@ -47,7 +47,6 @@ namespace DCraft
         std::vector<float> colors_;
         std::vector<unsigned int> indices_;
         Texture* texture_ = nullptr;
-        Material* material_ = nullptr;
         bool wireframe_mode_ = false;
     };
 }

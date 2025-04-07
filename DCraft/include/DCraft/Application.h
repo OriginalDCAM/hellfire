@@ -128,6 +128,7 @@ namespace DCraft {
         float get_delta_time() const { return delta_time_; }
         void set_callbacks(const ApplicationCallbacks &callbacks) { callbacks_ = callbacks; }
         void set_shader_program(uint32_t shader_program_id) { shader_program_id_ = shader_program_id; }
+        uint32_t get_shader_program() const { return shader_program_id_; }
 
         static Application &get_instance() { return *instance_; }
 

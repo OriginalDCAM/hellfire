@@ -27,6 +27,7 @@ public:
 
     void init(DCraft::Application &app);
 
+
     void setup(DCraft::SceneManager &sm, DCraft::WindowInfo window);
 
     // Input handler
@@ -49,6 +50,7 @@ private:
     std::unordered_map<std::string, DCraft::Material*> materials_;
     
     DCraft::Scene *initial_scene;
+    std::unordered_map<std::string, DCraft::Scene*> scenes_;
     DCraft::SceneManager *scene_manager_;
 };
 

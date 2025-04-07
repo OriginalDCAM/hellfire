@@ -40,14 +40,14 @@ namespace DCraft
     
     }
 
-    void Scene::draw(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program)
+    void Scene::draw(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program, void* renderer_context = nullptr)
     {
         if (!is_active_ || !active_camera_) return;
 
         glm::mat4 camera_view = active_camera_->get_view_matrix();
         glm::mat4 camera_projection = active_camera_->get_projection_matrix();
 
-        Object3D::draw(camera_view, camera_projection, shader_program);
+        Object3D::draw(camera_view, camera_projection, shader_program, renderer_context);
     }
 
     void Scene::add(Object3D *obj) {

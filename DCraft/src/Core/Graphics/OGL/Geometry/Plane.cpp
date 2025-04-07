@@ -10,13 +10,21 @@ Plane::Plane()
     std::vector<unsigned int> indices_data;
     std::vector<Texture*> texture_data = {};
 
-    // Define the cube vertex data
+    glm::vec3 v0 = glm::vec3(vertices[0], vertices[1], vertices[2]);
+    glm::vec3 v1 = glm::vec3(vertices[3], vertices[4], vertices[5]);
+    glm::vec3 v2 = glm::vec3(vertices[6], vertices[7], vertices[8]);
+    
+    glm::vec3 edge1 = v1 - v0;
+    glm::vec3 edge2 = v2 - v0;
+    glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+    
+    // Define the plane vertex data
     for (size_t i = 0; i < 4; ++i)
     {
         Vertex v;
         v.position = glm::vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
         v.color = glm::vec3(colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2]);
-        v.normal = glm::vec3(0.0f);
+        v.normal = normal; 
         v.texCoords = glm::vec2(uvs[i * 2], uvs[i * 2 + 1]);
         vertices_data.push_back(v);
     }

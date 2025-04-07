@@ -49,6 +49,12 @@ namespace DCraft
 		}
 
 		void set_active_scene(Scene* scene);
+
+    	Scene* get_active_scene() const {
+    		if (!active_scene_) return nullptr;
+
+    		return active_scene_;
+    	}
 	private:
 		Object3D* root_node_;
 		std::vector<Object3D*> objects_;
