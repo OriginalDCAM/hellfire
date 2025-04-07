@@ -36,7 +36,7 @@ MaterialMap load_material_map() {
     plastic_green_material->set_ambient_color(glm::vec3(0.0f, 0.1f, 0.0f));
     plastic_green_material->set_diffuse_color(glm::vec3(0.0f, 0.8f, 0.0f));
     plastic_green_material->set_specular_color(glm::vec3(0.8f));
-    plastic_green_material->set_shininess(32.0f);
+    plastic_green_material->set_shininess(64.0f);
     
     auto* plastic_blue_material = new DCraft::PhongMaterial("PlasticBlue");
     plastic_blue_material->set_texture("assets/textures/plastic_blue.jpg", DCraft::TextureType::DIFFUSE);
@@ -80,24 +80,24 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(sun_light_visual);
     //
     // // Add a blue point light
-    auto* blue_light = new DCraft::PointLight("BlueLight");
+    auto* blue_light = new DCraft::PointLight("Blue Light");
     blue_light->set_position(5.0f, 2.0f, 5.0f);
     blue_light->set_color(glm::vec3(0.2f, 0.4f, 1.0f)); // Blue light
     blue_light->set_intensity(2.0f);
     blue_light->set_range(20.0f);
     blue_light->set_attenuation(1.0f);
     scene->add(blue_light);
-    //
-    // // Add a red point light
-    auto* red_light = new DCraft::PointLight("RedLight");
-    red_light->set_position(-5.0f, 1.0f, -5.0f);
-    red_light->set_color(glm::vec3(1.0f, 0.2f, 0.1f)); // Red light
-    red_light->set_intensity(1.5f);
-    red_light->set_range(15.0f);
-    red_light->set_attenuation(1.0f);
-    scene->add(red_light);
-    //
-    // // Create a visual indicator for the blue light
+    
+    // Add a red point light
+    auto* green_light = new DCraft::PointLight("Red Light");
+    green_light->set_position(-5.0f, 1.0f, -5.0f);
+    green_light->set_color(glm::vec3(0.2f, 1.0f, 0.1f)); // Red light
+    green_light->set_intensity(1.5f);
+    green_light->set_range(15.0f);
+    green_light->set_attenuation(1.0f);
+    scene->add(green_light);
+    
+    // Create a visual indicator for the blue light
     auto* blue_light_visual = new DCraft::Cube();
     blue_light_visual->set_name("Blue Light Visual");
     blue_light_visual->set_scale(glm::vec3(0.2f));
@@ -105,13 +105,13 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     blue_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
     scene->add(blue_light_visual);
     
-    // // Create a visual indicator for the red light
-    auto* red_light_visual = new DCraft::Cube();
-    red_light_visual->set_name("Red Light Visual");
-    red_light_visual->set_scale(glm::vec3(0.2f));
-    red_light_visual->set_position(red_light->get_position());
-    red_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
-    scene->add(red_light_visual);
+    // Create a visual indicator for the red light
+    auto* green_light_visual = new DCraft::Cube();
+    green_light_visual->set_name("Red Light Visual");
+    green_light_visual->set_scale(glm::vec3(0.2f));
+    green_light_visual->set_position(green_light->get_position());
+    green_light_visual->set_material(materials["PLASTIC_GREEN_MATERIAL"]);
+    scene->add(green_light_visual);
 
     // Main camera
     DCraft::PerspectiveCamera *main_camera = scene->create_camera<DCraft::PerspectiveCamera>(
@@ -127,10 +127,9 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     drone_camera->set_target(0.0f, 0.0f, 0.0f);
     scene->add(drone_camera);
     
-    // This is your existing cool cube
     auto *cube = new DCraft::Cube();
     cube->set_name("Cool cube");
-    // cube->set_rotation(90, glm::vec3(1.0f, 0.0f, 0.0f));
+    cube->set_rotation(90, glm::vec3(1.0f, 0.0f, 0.0f));
     cube->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     cube->set_position(0.0f, 1.0f, 0.0f);
     cube->set_material(materials["MOSSY_MATERIAL"]);

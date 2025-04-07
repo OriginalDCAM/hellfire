@@ -1,6 +1,18 @@
 #include "DCraft/Structs/Object3D.h"
 
 namespace DCraft {
+    Object3D * Object3D::find_object_by_name(const std::string &name) {
+        if (get_name() == name) return this;
+
+        for (auto* child : children_) {
+            Object3D* found = child->find_object_by_name(name);
+            if (found) {
+                return found;
+            }
+        }
+        return nullptr;
+    }
+
     const glm::vec3 Object3D::get_world_position() const {
         glm::mat4 world_matrix = get_world_matrix();
 

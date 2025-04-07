@@ -44,9 +44,21 @@ void Game::init(DCraft::Application &app) {
 
 void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     scene_manager_ = &sm;
-    
+
     scenes_["Sandbox"] = load_scene(sm, window);
-    
+
+    if (scenes_["Sandbox"]) {
+        main_camera_ = dynamic_cast<DCraft::PerspectiveCamera *>(scenes_["Sandbox"]->
+            find_object_by_name("Main Camera"));
+        drone_camera_ = dynamic_cast<DCraft::PerspectiveCamera *>(scenes_["Sandbox"]->find_object_by_name(
+            "Drone Camera"));
+
+        main_camera_visual_ = scenes_["Sandbox"]->find_object_by_name(
+            "Main Camera Visual");
+        drone_camera_visual_ = scenes_["Sandbox"]->find_object_by_name(
+            "Drone Camera Visual");
+    }
+
     sm.set_active_scene(scenes_["Sandbox"]);
 }
 
@@ -80,15 +92,19 @@ void Game::handle_input(DCraft::Application &app, float delta_time) {
             const glm::vec3 hidden_scale(0.0f);
             if (drone_mode_active) {
                 scene_manager_->get_active_scene()->set_active_camera(drone_camera_);
-                std::clog << "Entering drone mode with the " << initial_scene->get_active_camera()->get_name() <<
+                std::clog << "Entering drone mode with the " << scene_manager_->get_active_camera()->get_name() <<
                         '\n';
             } else {
-                scene_manager_->get_active_scene()->set_active_camera(camera_);
-                std::clog << "Leaving drone mode to the " << initial_scene->get_active_camera()->get_name() << '\n';
+                scene_manager_->get_active_scene()->set_active_camera(main_camera_);
+                std::clog << "Leaving drone mode to the " << scene_manager_->get_active_camera()->get_name() << '\n';
             }
 
-            drone_camera_visual_->set_scale(drone_mode_active ? hidden_scale : visible_scale);
-            main_camera_visual_->set_scale(drone_mode_active ? visible_scale : hidden_scale);
+            if (drone_camera_visual_) {
+                drone_camera_visual_->set_scale(drone_mode_active ? hidden_scale : visible_scale);
+            }
+            if (main_camera_visual_) {
+                main_camera_visual_->set_scale(drone_mode_active ? visible_scale : hidden_scale);
+            }
 
             drone_toggle_timer = DRONE_TOGGLE_COOLDOWN;
             drone_key_processed = true;
@@ -100,10 +116,6 @@ void Game::handle_input(DCraft::Application &app, float delta_time) {
     if (app.is_special_key_pressed(GLUT_KEY_F11 + 256)) {
         app.toggle_fullscreen();
     }
-
-    if (app.is_key_pressed('1')) {
-        cube_->set_position(0.0f, 0.0f, 0.0f);
-    }
 }
 
 void Game::process_mouse_movement(float x_offset, float y_offset) {
@@ -111,36 +123,42 @@ void Game::process_mouse_movement(float x_offset, float y_offset) {
 }
 
 void Game::process_camera_movement() {
-    // Set the position to that of the camera
+    if (!main_camera_ || !drone_camera_ || !main_camera_visual_ || !drone_camera_visual_) return;
 
-    // Get the cameras vector's
-    glm::vec3 main_front = camera_->get_front_vector();
-    glm::vec3 main_right = camera_->get_right_vector();
-    glm::vec3 main_up = camera_->get_up_vector();
+    main_camera_visual_->set_position(main_camera_->get_position());
 
-    // extract the rotation from the vector's
+    // Get the camera's orientation vectors
+    glm::vec3 main_front = main_camera_->get_front_vector();
+    glm::vec3 main_right = main_camera_->get_right_vector();
+    glm::vec3 main_up = main_camera_->get_up_vector();
+
+    // Create rotation matrix from the camera orientation
     glm::mat4 main_rotation(1.0f);
     main_rotation[0] = glm::vec4(main_right, 0.0f);
     main_rotation[1] = glm::vec4(main_up, 0.0f);
     main_rotation[2] = glm::vec4(main_front, 0.0f);
-
-    // set the visuals rotation matrix to that of the camera to mimic the direction
+    
+    // Apply rotation to visual indicator
     main_camera_visual_->set_rotation_matrix(main_rotation);
-
-    glm::vec3 front = drone_camera_->get_front_vector();
-    glm::vec3 right = drone_camera_->get_right_vector();
-    glm::vec3 up = drone_camera_->get_up_vector();
-
+    
+    drone_camera_visual_->set_position(drone_camera_->get_position());
+    
+    glm::vec3 drone_front = drone_camera_->get_front_vector();
+    glm::vec3 drone_right = drone_camera_->get_right_vector();
+    glm::vec3 drone_up = drone_camera_->get_up_vector();
+    
     glm::mat4 drone_rotation(1.0f);
-    drone_rotation[0] = glm::vec4(right, 0.0f);
-    drone_rotation[1] = glm::vec4(up, 0.0f);
-    drone_rotation[2] = glm::vec4(front, 0.0f);
-
+    drone_rotation[0] = glm::vec4(drone_right, 0.0f);
+    drone_rotation[1] = glm::vec4(drone_up, 0.0f);
+    drone_rotation[2] = glm::vec4(drone_front, 0.0f);
+    
     drone_camera_visual_->set_rotation_matrix(drone_rotation);
+
 }
 
 void Game::update(float delta_time) {
-    for (auto& scene : scenes_) {
+    process_camera_movement();
+    for (auto &scene: scenes_) {
         scene.second->update(delta_time);
     }
 }
