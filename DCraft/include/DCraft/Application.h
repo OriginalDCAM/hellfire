@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <imgui_impl_glut.h>
 #include <string>
 
 #include "DCraft/Addons/SceneManager.h"
@@ -60,6 +61,8 @@ namespace DCraft {
         Application &operator=(const Application &) = delete;
 
         bool is_ready;
+        int ImGui_ImplGLUT_MouseButtonCallback;
+        bool is_running = true;
 
         void load_scene();
 
@@ -145,7 +148,9 @@ namespace DCraft {
         uint32_t shader_program_id_;
 
         // Keys stuff
+        bool game_mode_ = true;
         bool keys_[512] = {false};
+        bool prev_keys_[512] = {false};
         // Window stuff
         bool is_fullscreen_ = false;
         bool warping_ = false;
@@ -179,38 +184,47 @@ namespace DCraft {
         }
 
         static void window_resize_callback(int width, int height) {
+            ImGui_ImplGLUT_ReshapeFunc(width, height); 
             if (instance_) instance_->on_window_resize(width, height);
         }
 
         static void key_down_callback(unsigned char key, int x, int y) {
+            ImGui_ImplGLUT_KeyboardFunc(key, x, y);
             if (instance_) instance_->on_key_down(key);
         }
 
         static void key_up_callback(unsigned char key, int x, int y) {
+            ImGui_ImplGLUT_KeyboardUpFunc(key, x, y);
             if (instance_) instance_->on_key_up(key);
         }
 
         static void special_key_down_callback(int key, int x, int y) {
+            ImGui_ImplGLUT_SpecialFunc(key, x, y);
             if (instance_) instance_->on_special_key_down(key);
         }
 
         static void special_key_up_callback(int key, int x, int y) {
+            ImGui_ImplGLUT_SpecialUpFunc(key, x, y);
             if (instance_) instance_->on_special_key_up(key);
         }
 
         static void mouse_button_callback(int button, int state, int x, int y) {
+            ImGui_ImplGLUT_MouseFunc(button, state, x, y);
             if (instance_) instance_->on_mouse_button(button, state, x, y);
         }
 
         static void mouse_motion_callback(int x, int y) {
+            ImGui_ImplGLUT_MotionFunc(x, y);
             if (instance_) instance_->on_mouse_motion(x, y);
         }
 
         static void mouse_passive_motion_callback(int x, int y) {
+            ImGui_ImplGLUT_MotionFunc(x, y);  // ImGui uses the same handler for both motion types
             if (instance_) instance_->on_mouse_passive_motion(x, y);
         }
 
         static void mouse_wheel_callback(int wheel, int direction, int x, int y) {
+            ImGui_ImplGLUT_MouseWheelFunc(wheel, direction, x, y);
             if (instance_) instance_->on_mouse_wheel(wheel, direction, x, y);
         }
     };

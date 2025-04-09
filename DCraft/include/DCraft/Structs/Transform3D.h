@@ -2,6 +2,7 @@
 #include <glm/detail/type_vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+
 namespace DCraft
 {
     class Transform3D
@@ -45,6 +46,11 @@ namespace DCraft
             update_local_matrix();
         }
 
+        
+        void look_at(const glm::vec3& target, const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f));
+
+        void match_orientation(const Transform3D &other);
+
         glm::vec3 get_scale() const { return scale_; }
 
         // Rotation methods
@@ -64,6 +70,10 @@ namespace DCraft
             rotation_matrix_ = rotation_matrix;
             use_rotation_matrix_ = true;
             update_local_matrix();
+        }
+
+        glm::mat4 get_rotation_matrix() const {
+            return rotation_matrix_;
         }
 
         void set_translation_matrix(const glm::mat4& translation_matrix)

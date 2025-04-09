@@ -30,9 +30,9 @@ namespace DCraft
 
         // uvs
         const std::vector<float> uvs = {
-            1.0, 1.0,  // top-right
-            0.0, 1.0,  // top-left
-            1.0, 0.0,  // bottom-right
+            50.0, 50.0,  // top-right
+            0.0, 50.0,  // top-left
+            50.0, 0.0,  // bottom-right
             0.0, 0.0   // bottom-left
         };
 

@@ -20,6 +20,7 @@ namespace DCraft {
             }
         }
     }
+    
 
     Material *Shape3D::get_material() {
         return get_mesh()->get_material();

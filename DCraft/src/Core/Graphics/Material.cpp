@@ -32,6 +32,10 @@ namespace DCraft {
         texture_repeat_y = repeat_y;
     }
 
+    std::tuple<float, float> Material::get_texture_repeat() {
+        return {texture_repeat_x, texture_repeat_y };
+    }
+
     void Material::set_shader(uint32_t shader_id) {
         shader_handle = shader_id;
     }

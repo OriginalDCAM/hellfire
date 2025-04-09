@@ -36,6 +36,8 @@ namespace DCraft {
 
         void set_texture_repeat(float repeat_x, float repeat_y);
 
+        std::tuple<float, float> get_texture_repeat();
+
         void set_shader(uint32_t shader_id);
 
         uint32_t get_shader() const;

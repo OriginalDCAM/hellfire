@@ -1,27 +1,30 @@
 #pragma once
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 #include <utility>
 
-#include "Transform3D.h"
+#include "DCraft/Structs/Transform3D.h"
 #include "DCraft/Graphics/Mesh.h"
 
 namespace DCraft {
+    
     class alignas(16) Object3D {
     public:
         virtual ~Object3D() {
             for (auto *child: children_) {
+                std::clog << "Deleting child named: " << child->get_name() << ", from the parent: " << get_name() << '\n';
                 delete child;
             }
             children_.clear();
         }
 
-        Object3D() : transform_() {
+        Object3D() : transform_(Transform3D()) {
         }
 
-        Object3D(const std::string name) {
+        Object3D(const std::string name) : transform_(Transform3D()) {
             set_name(name);
         }
 
@@ -34,7 +37,7 @@ namespace DCraft {
         }
 
         // Find objects
-        Object3D* find_object_by_name(const std::string& name);
+        Object3D *find_object_by_name(const std::string &name);
 
         // Mesh handling
         void add_mesh(const Mesh &mesh) {
@@ -44,6 +47,14 @@ namespace DCraft {
                 *mesh_ = mesh;
             }
         }
+
+        void match_orientation(const Object3D &other);
+
+        glm::mat4 get_rotation_matrix() const { return transform_.get_rotation_matrix(); }
+
+        void look_at(const glm::vec3& target, const glm::vec3& up);
+
+        glm::vec3 get_default_front() const;
 
         Mesh *get_mesh() {
             if (!mesh_) {
@@ -129,10 +140,12 @@ namespace DCraft {
         virtual void update(float delta_time) {
         }
 
-        virtual void draw_self(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program, void* renderer_context = nullptr) {
+        virtual void draw_self(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program,
+                               void *renderer_context = nullptr) {
         }
 
-        virtual void draw(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program, void* renderer_context = nullptr) {
+        virtual void draw(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program,
+                          void *renderer_context = nullptr) {
             draw_self(view, projection, shader_program, renderer_context);
             for (auto *child: children_) {
                 child->draw(view, projection, shader_program, renderer_context);
@@ -165,8 +178,7 @@ namespace DCraft {
         }
 
         // Access to transform for advanced operations
-        Transform3D &get_transform() { return transform_; }
-        const Transform3D &get_transform() const { return transform_; }
+        const Transform3D& get_transform() const { return transform_; }
 
     private:
         std::vector<Object3D *> children_;
