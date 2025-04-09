@@ -9,8 +9,10 @@
 #include "Dcraft/Graphics/OGL/glsl.h"
 #include <iostream>
 
+#include "DCraft/Editor/SceneHierarchyPanel.h"
+
 namespace DCraft {
-    Application::Application(int width, int height, const std::string &title) : title_(title) {
+    Application::Application(int width, int height, const std::string &title) : title_(title), scene_hierarchy_panel_(scene_manager_, selected_node_) {
         if (instance_ != nullptr) {
             throw std::runtime_error("Singleton Application already created");
         }
@@ -136,7 +138,7 @@ namespace DCraft {
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
         (void) io;
-        // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; 
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 
         io.DisplaySize.x = static_cast<float>(window_info_.width);
@@ -148,7 +150,7 @@ namespace DCraft {
         // Setup Platform/Renderer backends
         ImGui_ImplGLUT_Init();
         ImGui_ImplOpenGL3_Init("#version 330"); // Specify GLSL version
-        
+
         glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_CONTINUE_EXECUTION);
 
         // Setup OpenGL state
@@ -179,11 +181,10 @@ namespace DCraft {
         glutMotionFunc(mouse_motion_callback);
         glutPassiveMotionFunc(mouse_passive_motion_callback);
         glutMouseWheelFunc(mouse_wheel_callback);
-        
     }
 
     void Application::run() {
-            glutMainLoop();
+        glutMainLoop();
     }
 
     void Application::update() {
@@ -203,17 +204,17 @@ namespace DCraft {
         glutPostRedisplay();
     }
 
-    void Application::render_frame() const {
+    void Application::render_frame() {
         // Start the ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGLUT_NewFrame();
         ImGui::NewFrame();
 
         if (!game_mode_) {
-            ImGui::ShowDemoWindow(nullptr); // Pass nullptr to not allow closing
+            scene_hierarchy_panel_.render();
         }
 
-        // Clear the screen
+        // Application render
         renderer_->begin_frame();
 
         renderer_->render(*scene_manager_.get_root_node(), *scene_manager_.get_active_camera());
@@ -222,6 +223,7 @@ namespace DCraft {
 
         // Render ImGui
         ImGui::Render();
+
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glutSwapBuffers();
@@ -291,7 +293,7 @@ namespace DCraft {
         if (io.WantCaptureMouse) {
             return;
         }
-        
+
         on_mouse_passive_motion(x, y);
     }
 

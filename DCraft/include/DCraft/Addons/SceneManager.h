@@ -4,6 +4,8 @@
 #include "DCraft/Structs/Camera.h"
 #include "DCraft/Structs/Scene.h"
 
+#include <vector>
+
 namespace DCraft
 {
     class Scene;

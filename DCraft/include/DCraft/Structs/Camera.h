@@ -31,7 +31,7 @@ namespace DCraft
         glm::vec3 up_;
         glm::vec3 right_;
         glm::vec3 world_up_;
-        glm::vec3 target_;
+        glm::vec3 target_ = glm::vec3(0.0f);
 
         // euler Angles
         float yaw_;

@@ -36,7 +36,7 @@ namespace DCraft
     {
         // Get the current rotation angle in degrees (convert from radians)
         float current_degrees = get_rotation_angle() * 180.0f / glm::pi<float>();
-        glm::vec3 current_scale = get_current_scale();
+        glm::vec3 current_scale = get_scale();
 
         // Increment by 1 degree
         current_degrees += 1.0f;
