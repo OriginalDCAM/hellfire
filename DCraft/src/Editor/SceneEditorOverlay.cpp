@@ -42,6 +42,16 @@ namespace DCraft::Editor {
             object->set_scale(scale);
         }
 
+        glm::vec3 rotation = object->get_rotation();
+        if (ImGui::DragFloat3("Rotation", &rotation[0], 1.0f, -180.0f, 180.0f)) {
+            // Normalize angles to -180 to 180 range for better user experience
+            for (int i = 0; i < 3; i++) {
+                while (rotation[i] > 180.0f) rotation[i] -= 360.0f;
+                while (rotation[i] < -180.0f) rotation[i] += 360.0f;
+            }
+            object->set_rotation(rotation);
+        }
+        
         if (auto *light = dynamic_cast<Light *>(object)) {
             render_light_properties(light);
         } else if (auto *camera = dynamic_cast<Camera *>(object)) {

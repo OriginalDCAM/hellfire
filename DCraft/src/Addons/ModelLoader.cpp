@@ -189,43 +189,43 @@ namespace DCraft::Addons {
         if (mesh->mMaterialIndex >= 0) {
             aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-            PhongMaterial *phong_material = new PhongMaterial(material->GetName().C_Str());
+            LambertMaterial *lambert_material = new LambertMaterial(material->GetName().C_Str());
 
             // Setup material properties
             aiColor3D diffuse(1.0f, 1.0f, 1.0f);
             if (material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse) == AI_SUCCESS) {
-                phong_material->set_diffuse_color(glm::vec3(diffuse.r, diffuse.g, diffuse.b));
+                lambert_material->set_diffuse_color(glm::vec3(diffuse.r, diffuse.g, diffuse.b));
             }
 
             aiColor3D ambient(0.2, 0.2, 0.2);
             if (material->Get(AI_MATKEY_COLOR_AMBIENT, ambient) == AI_SUCCESS) {
-                phong_material->set_ambient_color(glm::vec3(ambient.r, ambient.g, ambient.b));
+                lambert_material->set_ambient_color(glm::vec3(ambient.r, ambient.g, ambient.b));
             }
 
-            aiColor3D specular(0.5f, 0.5f, 0.5f);
-            if (material->Get(AI_MATKEY_COLOR_SPECULAR, specular) == AI_SUCCESS) {
-                phong_material->set_specular_color(glm::vec3(specular.r, specular.g, specular.b));
-            }
+            // aiColor3D specular(0.5f, 0.5f, 0.5f);
+            // if (material->Get(AI_MATKEY_COLOR_SPECULAR, specular) == AI_SUCCESS) {
+            //     lambert_material->set_specular_color(glm::vec3(specular.r, specular.g, specular.b));
+            // }
 
-            float shininess = 32.0f;
-            if (material->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS) {
-                phong_material->set_shininess(shininess);
-            }
+            // float shininess = 32.0f;
+            // if (material->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS) {
+            //     lambert_material->set_shininess(shininess);
+            // }
 
             // Load textures if exist
             std::vector<MaterialMap> diffuseMaps = load_material_textures(
                 material, aiTextureType_DIFFUSE, "texture_diffuse");
             if (!diffuseMaps.empty()) {
-                phong_material->set_texture(diffuseMaps[0].path, TextureType::DIFFUSE);
+                lambert_material->set_texture(diffuseMaps[0].path, TextureType::DIFFUSE);
             }
 
             std::vector<MaterialMap> specularMaps = load_material_textures(
                 material, aiTextureType_SPECULAR, "texture_specular");
             if (!specularMaps.empty()) {
-                phong_material->set_texture(specularMaps[0].path, TextureType::SPECULAR);
+                lambert_material->set_texture(specularMaps[0].path, TextureType::SPECULAR);
             }
 
-            myMesh->set_material(phong_material);
+            myMesh->set_material(lambert_material);
         }
 
         // Cache the mesh
@@ -255,13 +255,11 @@ namespace DCraft::Addons {
                 MaterialMap texture;
                 texture.type = typeName;
 
-                // Extract the texture path
                 std::string path = str.C_Str();
-                // Make the path relative to your assets directory
                 texture.path = "assets/models/" + path;
 
                 textures.push_back(texture);
-                textures_loaded.push_back(texture); // Add to loaded textures
+                textures_loaded.push_back(texture);
             }
         }
 

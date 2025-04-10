@@ -106,6 +106,10 @@ namespace DCraft {
             transform_.set_rotation(degrees, new_axis);
         }
 
+        void set_rotation(glm::vec3 eulers);
+
+        glm::vec3 get_rotation();
+
         float get_rotation_angle() const { return transform_.get_rotation_angle(); }
 
         const glm::mat4 &get_local_matrix() const { return transform_.get_local_matrix(); }

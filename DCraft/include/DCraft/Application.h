@@ -91,27 +91,34 @@ namespace DCraft {
         /// @param key ASCII table keycode
         void on_special_key_up(int key);
 
-        // TODO: write JavaDOC comments
+        /// public method function: on_mouse_button
+        /// handles mouse button presses
+        /// @param button Which mouse button
+        /// @param state Pressed or Released
         void on_mouse_button(int button, int state, int x, int y);
 
-        // TODO: write JavaDOC comments
+        /// public method function: on_mouse_motion
+        /// handles mouse motion
+        /// @param x offset
+        /// @param y offset
         void on_mouse_motion(int x, int y);
 
-        // TODO: write JavaDOC comments
+        
+        /// public method function: on_mouse_passive_motion
+        /// handles passive mouse motion, just regular mouse motion without a holding mouse button
+        /// @param x offset
+        /// @param y offset
         void on_mouse_passive_motion(int x, int y);
 
         // TODO: write JavaDOC comments
         void on_mouse_wheel(int wheel, int direction, int x, int y);
 
-        // TODO: write JavaDOC comments
         void on_window_resize(int width, int height);
 
         // Game state methods
         bool game_mode_changed = false;
-        // void load_scene();
 
         void process_input();
-
         void toggle_fullscreen();
 
         // Accessor methods
@@ -124,12 +131,10 @@ namespace DCraft {
         void set_shader_program(uint32_t shader_program_id) { shader_program_id_ = shader_program_id; }
         [[nodiscard]] uint32_t get_shader_program() const { return shader_program_id_; }
         static Application &get_instance() { return *instance_; }
-
     protected:
         SceneManager scene_manager_;
         PerspectiveCamera *camera_ = nullptr;
         Renderer *renderer_ = nullptr;
-
     private:
         static Application *instance_;
         ApplicationCallbacks callbacks_;

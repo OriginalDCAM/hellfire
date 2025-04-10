@@ -89,7 +89,6 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
 
-    // Specular shading (if Phong or PBR)
     float spec = 0.0;
     if (materialType > 0) {
         vec3 reflectDir = reflect(-lightDir, normal);
@@ -160,6 +159,4 @@ void main() {
     }
     
     fragColor = vec4(result, baseColor.a);
-
-
 }
