@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.inl>
 
 namespace DCraft {
-    Cube::Cube() {
+    Cube::Cube(const std::string& name) : Shape3D(name) {
         std::vector<Vertex> vertices_data;
         std::vector<unsigned int> indices_data;
         std::vector<Texture *> texture_data = {};
@@ -51,8 +51,8 @@ namespace DCraft {
         }
 
         // Create mesh and add to the model
-        Mesh cubeMesh(vertices_data, indices_data);
-        add_mesh(cubeMesh);
+        Mesh* cubeMesh = new Mesh(vertices_data, indices_data);
+        set_mesh(cubeMesh);
 
         // Initialize transformations
         update_world_matrix();

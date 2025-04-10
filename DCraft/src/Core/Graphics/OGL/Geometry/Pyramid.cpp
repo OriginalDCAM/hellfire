@@ -4,7 +4,7 @@
 
 namespace DCraft
 {
-    Pyramid::Pyramid()
+    Pyramid::Pyramid(const std::string& name) : Shape3D(name)
     {
         std::vector<Vertex> vertices_data;
         std::vector<unsigned int> indices_data;
@@ -26,8 +26,8 @@ namespace DCraft
             indices_data.push_back(static_cast<unsigned int>(pyramid_elements[i]));
         }
 
-        Mesh pyramidMesh(vertices_data, indices_data);
-        add_mesh(pyramidMesh);
+        Mesh* pyramidMesh = new Mesh(vertices_data, indices_data);
+        set_mesh(pyramidMesh);
 
         update_world_matrix();
     }

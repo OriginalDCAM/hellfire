@@ -34,6 +34,7 @@ namespace DCraft
 
     public:
         Pyramid();
+        Pyramid(const std::string& name);
 
         void update(float dt) override;
         void set_vertices() override;

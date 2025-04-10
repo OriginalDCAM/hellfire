@@ -4,7 +4,7 @@
 
 namespace DCraft 
 {
-Plane::Plane()
+Plane::Plane(const std::string& name) : Shape3D(name)
 {
     std::vector<Vertex> vertices_data;
     std::vector<unsigned int> indices_data;
@@ -35,8 +35,8 @@ Plane::Plane()
         indices_data.push_back(static_cast<unsigned int>(plane_elements[i]));
     }
 
-    Mesh planeMesh(vertices_data, indices_data);
-    add_mesh(planeMesh);
+    Mesh* planeMesh = new Mesh(vertices_data, indices_data);
+    set_mesh(planeMesh);
 	
     update_world_matrix();
 }

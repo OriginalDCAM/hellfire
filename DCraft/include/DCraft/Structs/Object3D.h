@@ -39,15 +39,8 @@ namespace DCraft {
         // Find objects
         Object3D *find_object_by_name(const std::string &name);
 
-        // Mesh handling
-        void add_mesh(const Mesh &mesh) {
-            if (!mesh_) {
-                mesh_ = std::make_unique<Mesh>(mesh);
-            } else {
-                *mesh_ = mesh;
-            }
-        }
-
+ 
+        
         void match_orientation(const Object3D &other);
 
         glm::mat4 get_rotation_matrix() const { return transform_.get_rotation_matrix(); }
@@ -56,9 +49,26 @@ namespace DCraft {
 
         glm::vec3 get_default_front() const;
 
+        Mesh* create_mesh() {
+            mesh_ = std::make_shared<Mesh>();
+            return mesh_.get();
+        }
+
+        void set_mesh(Mesh* mesh) {
+            if (mesh) {
+                mesh_ = std::shared_ptr<Mesh>(mesh);
+            } else {
+                mesh_.reset();
+            }
+        }
+
+        void set_mesh(const std::shared_ptr<Mesh>& mesh) {
+            mesh_ = mesh;
+        }
+
         Mesh *get_mesh() {
             if (!mesh_) {
-                mesh_ = std::make_unique<Mesh>();
+                mesh_ = std::make_shared<Mesh>();
             }
             return mesh_.get();
         }
@@ -189,6 +199,6 @@ namespace DCraft {
         Transform3D transform_;
 
         // Mesh is optional
-        std::unique_ptr<Mesh> mesh_;
+        std::shared_ptr<Mesh> mesh_;
     };
 }

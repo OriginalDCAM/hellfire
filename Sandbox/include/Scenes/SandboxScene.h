@@ -73,7 +73,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(sun);
 
     // Visual for sunlight
-    auto* sun_light_visual = new DCraft::Cube();
+    auto* sun_light_visual = new DCraft::Cube("Cube");
     sun_light_visual->set_name("Sun Light Visual");
     sun_light_visual->set_scale(glm::vec3(1.0f));
     sun_light_visual->set_position(sun->get_position());
@@ -99,7 +99,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(green_light);
     
     // Visual indicator for blue light
-    auto* blue_light_visual = new DCraft::Cube();
+    auto* blue_light_visual = new DCraft::Cube("Blue cube");
     blue_light_visual->set_name("Blue Light Visual");
     blue_light_visual->set_scale(glm::vec3(0.2f));
     blue_light_visual->set_position(blue_light->get_position());
@@ -107,7 +107,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(blue_light_visual);
     
     // Visual indicator for green light
-    auto* green_light_visual = new DCraft::Cube();
+    auto* green_light_visual = new DCraft::Cube("Red cube");
     green_light_visual->set_name("Red Light Visual");
     green_light_visual->set_scale(glm::vec3(0.2f));
     green_light_visual->set_position(green_light->get_position());
@@ -128,7 +128,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     drone_camera->set_target(0.0f, 0.0f, 0.0f);
     scene->add(drone_camera);
     
-    auto *cube = new DCraft::Cube();
+    auto *cube = new DCraft::Cube("Cool cube");
     cube->set_name("Cool cube");
     cube->set_rotation(90, glm::vec3(1.0f, 0.0f, 0.0f));
     cube->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
@@ -137,7 +137,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(cube);
 
     // Plane primitive object
-    auto *floor = new DCraft::Plane();
+    auto *floor = new DCraft::Plane("Ground Plane");
     floor->set_name("Ground");
     floor->set_position(0, 0, 0);
     floor->set_scale(glm::vec3(100.0f, 100.0f, 100.0f));
@@ -145,7 +145,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     floor->set_material(materials["PAVEMENT_MATERIAL"]);
     scene->add(floor);
 
-    auto *main_camera_visual = new DCraft::Cube();
+    auto *main_camera_visual = new DCraft::Cube("Main Camera Visual");
     main_camera_visual->set_name("Main Camera Visual");
     main_camera_visual->set_scale(glm::vec3(0.0f));
     main_camera_visual->set_position(main_camera->get_position());
@@ -153,13 +153,13 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(main_camera_visual);
 
     // Visual indicator for drone camera position
-    auto *drone_camera_visual = new DCraft::Cube();
+    auto *drone_camera_visual = new DCraft::Cube("Drone Camera Visual");
     drone_camera_visual->set_name("Drone Camera Visual");
     drone_camera_visual->set_scale(glm::vec3(0.3f));
     drone_camera_visual->set_position(drone_camera->get_position());
     drone_camera_visual->set_material(materials["DENZEL_MATERIAL"]);
 
-    auto *main_camera_direction = new DCraft::Cube();
+    auto *main_camera_direction = new DCraft::Cube("Main Camera Direction");
     main_camera_direction->set_name("Main Camera Direction");
     main_camera_direction->set_scale(glm::vec3(0.05f, 0.05f, 0.5f));
     main_camera_direction->set_position(0.0f, 0.0f, 1.0f);
@@ -167,7 +167,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     main_camera_visual->add(main_camera_direction);
 
     // Direction indicator for drone camera
-    auto *drone_camera_direction = new DCraft::Cube();
+    auto *drone_camera_direction = new DCraft::Cube("Drone Camera Direction");
     drone_camera_direction->set_name("Drone Camera Direction");
     drone_camera_direction->set_scale(glm::vec3(0.05f, 0.05f, 0.5f));
     drone_camera_direction->set_position(0.0f, 0.0f, 1.0f);

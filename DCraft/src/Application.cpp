@@ -9,10 +9,10 @@
 #include "Dcraft/Graphics/OGL/glsl.h"
 #include <iostream>
 
-#include "DCraft/Editor/SceneHierarchyPanel.h"
+#include "DCraft/Editor/SceneEditorOverlay.h"
 
 namespace DCraft {
-    Application::Application(int width, int height, const std::string &title) : title_(title), scene_hierarchy_panel_(scene_manager_, selected_node_) {
+    Application::Application(int width, int height, const std::string &title) : title_(title), scene_editor_overlay_(scene_manager_, selected_node_) {
         if (instance_ != nullptr) {
             throw std::runtime_error("Singleton Application already created");
         }
@@ -211,7 +211,7 @@ namespace DCraft {
         ImGui::NewFrame();
 
         if (!game_mode_) {
-            scene_hierarchy_panel_.render();
+            scene_editor_overlay_.render();
         }
 
         // Application render
@@ -394,6 +394,7 @@ namespace DCraft {
         for (int i = 0; i < 512; i++) {
             prev_keys_[i] = keys_[i];
         }
+
     }
 
     void Application::toggle_fullscreen() {
