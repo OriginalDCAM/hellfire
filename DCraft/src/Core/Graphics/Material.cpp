@@ -12,6 +12,15 @@ namespace DCraft {
         Texture *texture = new Texture(path, type);
         textures_.push_back(texture);
         textures_map_[type].push_back(texture);
+
+        switch (type) {
+            case TextureType::DIFFUSE:
+                on_diffuse_texture_set(texture);
+                break;
+            case TextureType::SPECULAR:
+                on_specular_texture_set(texture);
+                break;
+        }
     }
 
     void Material::set_texture(Texture *texture) {
@@ -25,6 +34,10 @@ namespace DCraft {
 
     const std::string &Material::get_name() const {
         return name;
+    }
+
+    bool Material::has_texture() const {
+        return !textures_.empty();
     }
 
     void Material::set_texture_repeat(float repeat_x, float repeat_y) {

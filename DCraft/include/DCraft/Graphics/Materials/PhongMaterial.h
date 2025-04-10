@@ -18,6 +18,15 @@ namespace DCraft {
         void set_shininess(float value) { shininess_ = value; }
 
         void bind(void* renderer_context) override;
+
+        glm::vec3 get_specular_color() const { return specular_color_; }
+
+        float get_shininess() const { return shininess_; };
+
+        glm::vec3 get_diffuse_color() const { return diffuse_color_;}
+
+        glm::vec3 get_ambient_color() const { return  ambient_color_; }
+
     private:
         glm::vec3 ambient_color_ = glm::vec3(0.1f);
         glm::vec3 diffuse_color_ = glm::vec3(1.0f);

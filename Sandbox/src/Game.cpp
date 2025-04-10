@@ -62,6 +62,7 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
 }
 
 void Game::handle_input(DCraft::Application &app, float delta_time) {
+
     if (drone_toggle_timer > 0.0f) {
         drone_toggle_timer -= delta_time;
     }

@@ -44,11 +44,13 @@ target_link_libraries(${LIBRARY_NAME}
         stb_image
 )
 
-# If on Windows, link against opengl32
+# If on Windows, link against opengl32 and comdlg32 for OpenGL and common dialogs
 if(WIN32)
     target_link_libraries(${LIBRARY_NAME}
             PUBLIC
             opengl32
+            PRIVATE
+            comdlg32
     )
 endif()
 

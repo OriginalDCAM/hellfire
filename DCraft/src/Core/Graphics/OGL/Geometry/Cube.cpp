@@ -13,7 +13,7 @@ namespace DCraft {
         for (size_t i = 0; i < 24; ++i) {
             Vertex v;
             v.position = glm::vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
-            v.color = glm::vec3(colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2]);
+            v.color = glm::vec3(color_);
 
             // Determine which face this vertex belongs to
             int face = i / 4;

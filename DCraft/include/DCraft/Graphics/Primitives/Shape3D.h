@@ -24,6 +24,8 @@ namespace DCraft
         const std::vector<float>& get_colors() const;
         const std::vector<float>& get_indices() const;
 
+        void set_color(glm::vec3 value) { color_ = value; }
+
         // Utility methods
         void set_wireframe_mode(bool enable);
         bool is_wireframe_mode() const;
@@ -36,12 +38,15 @@ namespace DCraft
         void rebuild();
 
         void draw_self(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program, void* renderer_context) override;
-    
+
+
     protected:
         virtual void set_vertices();
         virtual void set_colors();
         virtual void set_uvs();
 
+        
+        glm::vec3 color_ = glm::vec3(1.0f);
         bool owns_texture_ = false;
 
         std::vector<float >vertices_;

@@ -61,6 +61,10 @@ namespace DCraft
             update_local_matrix();
         }
 
+        void set_rotation(glm::vec3& angles);
+
+        void set_rotation_quaternion(const glm::quat &q);
+
         float get_rotation_angle() const { return rotation_angle_; }
         const glm::vec3& get_rotation_axis() const { return rotation_axis_; }
 
@@ -105,7 +109,18 @@ namespace DCraft
             
             if (use_rotation_matrix_) {
                 local_matrix_ = local_matrix_ * rotation_matrix_;
-            } else if (glm::length(rotation_axis_) > 0.0001f) {
+            } else if (use_euler_angles_) {
+                glm::mat4 rot_x = glm::rotate(glm::mat4(1.0f), rotation_x_, glm::vec3(1, 0, 0));
+                glm::mat4 rot_y = glm::rotate(glm::mat4(1.0f), rotation_y_, glm::vec3(0, 1, 0));
+                glm::mat4 rot_z = glm::rotate(glm::mat4(1.0f), rotation_z_, glm::vec3(0, 0, 1));
+        
+                // Combine rotations
+                glm::mat4 rotation_matrix = rot_z * rot_y * rot_x;
+        
+                // Apply to local matrix
+                local_matrix_ = local_matrix_ * rotation_matrix;
+            }
+            else if (glm::length(rotation_axis_) > 0.0001f) {
                 glm::vec3 normalized_axis = glm::normalize(rotation_axis_);
                 local_matrix_ = glm::rotate(local_matrix_, rotation_angle_, normalized_axis);
             }
@@ -164,5 +179,9 @@ namespace DCraft
         bool use_rotation_matrix_;
         bool use_translation_matrix_;
         bool use_scale_matrix_;
+        float rotation_x_ = 0.0f;
+        float rotation_y_ = 0.0f;
+        float rotation_z_ = 0.0f;
+        bool use_euler_angles_ = false;
     };
 }

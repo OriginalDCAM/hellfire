@@ -47,41 +47,41 @@ namespace DCraft
 
         // Colors for each vertex
         const std::vector<float> colors = {
-            // Front face (red)
-            1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            
-            // Back face (green)
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            
-            // Top face (blue)
-            0.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 1.0f,
-            
-            // Bottom face (yellow)
-            1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            
-            // Right face (magenta)
-            1.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 1.0f,
-            
-            // Left face (cyan)
-            0.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 1.0f
+            // // Front face (red)
+            // 1.0f, 0.0f, 0.0f,
+            // 1.0f, 0.0f, 0.0f,
+            // 1.0f, 0.0f, 0.0f,
+            // 1.0f, 0.0f, 0.0f,
+            //
+            // // Back face (green)
+            // 0.0f, 1.0f, 0.0f,
+            // 0.0f, 1.0f, 0.0f,
+            // 0.0f, 1.0f, 0.0f,
+            // 0.0f, 1.0f, 0.0f,
+            //
+            // // Top face (blue)
+            // 0.0f, 0.0f, 1.0f,
+            // 0.0f, 0.0f, 1.0f,
+            // 0.0f, 0.0f, 1.0f,
+            // 0.0f, 0.0f, 1.0f,
+            //
+            // // Bottom face (yellow)
+            // 1.0f, 1.0f, 0.0f,
+            // 1.0f, 1.0f, 0.0f,
+            // 1.0f, 1.0f, 0.0f,
+            // 1.0f, 1.0f, 0.0f,
+            //
+            // // Right face (magenta)
+            // 1.0f, 0.0f, 1.0f,
+            // 1.0f, 0.0f, 1.0f,
+            // 1.0f, 0.0f, 1.0f,
+            // 1.0f, 0.0f, 1.0f,
+            //
+            // // Left face (cyan)
+            // 0.0f, 1.0f, 1.0f,
+            // 0.0f, 1.0f, 1.0f,
+            // 0.0f, 1.0f, 1.0f,
+            // 0.0f, 1.0f, 1.0f
         };
 
         // UV coordinates for each vertex
@@ -149,6 +149,7 @@ namespace DCraft
             20, 21, 22,
             22, 23, 20
         };
+        
 
     public:
         Cube();

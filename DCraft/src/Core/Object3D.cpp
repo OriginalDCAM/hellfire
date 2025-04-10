@@ -1,5 +1,7 @@
 #include "DCraft/Structs/Object3D.h"
 
+#include <glm/gtc/quaternion.hpp>
+
 namespace DCraft {
     Object3D * Object3D::find_object_by_name(const std::string &name) {
         if (get_name() == name) return this;
@@ -37,6 +39,11 @@ namespace DCraft {
 
     void Object3D::set_rotation_matrix(const glm::mat4 &rotation_matrix) {
         transform_.set_rotation_matrix(rotation_matrix);
+    }
+
+    void Object3D::set_rotation_quaternion(glm::quat quat) {
+        transform_.set_rotation_quaternion(quat);
+        
     }
 
     void Object3D::set_translation_matrix(const glm::mat4 &translation_matrix) {
