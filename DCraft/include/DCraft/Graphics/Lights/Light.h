@@ -19,6 +19,8 @@ namespace DCraft {
         void set_intensity(float value) { intensity = value; }
         float get_intensity() const { return intensity; }
 
+        json to_json() override;
+
         virtual void upload_to_shader(uint32_t shader_program, int light_index) = 0;
     };
 }

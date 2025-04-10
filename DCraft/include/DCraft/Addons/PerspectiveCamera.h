@@ -51,6 +51,8 @@ namespace DCraft
 
         glm::vec3 get_target();
 
+        json to_json() override;
+
     private:
         void update_projection_matrix() {
             if (near_ <= 0.0f) {

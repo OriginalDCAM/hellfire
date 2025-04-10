@@ -6,7 +6,7 @@
 #include "Light.h"
 
 namespace DCraft {
-    class DirectionalLight : public DCraft::Light {
+    class DirectionalLight : public Light {
     public:
         DirectionalLight(const std::string &name = "DirectionalLight");
 
@@ -17,6 +17,8 @@ namespace DCraft {
         void look_at(const glm::vec3 &target);
 
         void upload_to_shader(uint32_t shader_program, int light_index) override;
+
+        json to_json() override;
 
     private:
         glm::vec3 direction_ = glm::vec3(0.0f, -1.0f, 0.0f);

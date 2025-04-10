@@ -61,4 +61,14 @@ namespace DCraft
     glm::vec3 PerspectiveCamera::get_target() {
         return target_;
     }
+
+    json PerspectiveCamera::to_json() {
+        json j = Camera::to_json();
+        j["camera_type"] = "perspective";
+        j["fov"] = fov_;
+        j["aspect_ratio"] = aspect_;
+        j["near_plane"] = near_;
+        j["far_plane"] = far_;
+        return j;
+    }
 }

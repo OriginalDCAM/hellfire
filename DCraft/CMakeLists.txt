@@ -42,6 +42,7 @@ target_link_libraries(${LIBRARY_NAME}
         assimp
         PRIVATE
         stb_image
+        json
 )
 
 # If on Windows, link against opengl32 and comdlg32 for OpenGL and common dialogs

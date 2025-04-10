@@ -8,6 +8,7 @@
 #include "DCraft/Structs/Object3D.h"
 
 namespace DCraft {
+    class ImportedModel3D;
     class Shape3D;
     class Scene;
 }
@@ -15,9 +16,9 @@ namespace DCraft {
 namespace DCraft::Addons {
     class ModelLoader {
     public:
-        static Shape3D* load(const std::string& filepath, Scene* target_scene);
+        static ImportedModel3D* load(const std::string& filepath, Scene* target_scene);
     private:
-        static Shape3D* process_node(aiNode* node, const aiScene* scene, Material* default_material);
+        static ImportedModel3D* process_node(aiNode* node, const aiScene* scene, Material* default_material);
         static Mesh* process_mesh(aiMesh* mesh, const aiScene* scene, Material* default_material);
         
         struct MaterialMap {

@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 #include "DCraft/Graphics/Textures/Texture.h"
 
@@ -65,6 +66,5 @@ namespace DCraft {
         virtual void bind(void *renderer_context) = 0;
 
         void set_name(const std::string& value) { name = value; }
-
     };
 }

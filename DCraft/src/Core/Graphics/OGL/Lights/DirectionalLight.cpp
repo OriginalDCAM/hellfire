@@ -29,4 +29,11 @@ namespace DCraft {
                      glm::value_ptr(get_color()));
         glUniform1f(glGetUniformLocation(shader_program, (base + ".intensity").c_str()), get_intensity());
     }
+
+    json DirectionalLight::to_json() {
+        json j = Light::to_json();
+        j["light_type"] = "DirectionalLight";
+        j["direction"] = { direction_.x, direction_.y, direction_.z };
+        return j;
+    }
 }

@@ -67,13 +67,13 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     sun->set_position(glm::vec3(20.0f, 30.0f, 20.0f));
     sun->set_color(glm::vec3(1.0f, 0.95f, 0.9f)); // Slightly warm sunlight
     sun->set_intensity(3.0f);
-    scene->add(sun);
 
     // Visual for sunlight
     auto* sun_light_visual = new DCraft::Cube("Cube");
     sun_light_visual->set_name("Sun Light Visual");
     sun_light_visual->set_position(sun->get_position());
     sun_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
+    sun_light_visual->add(sun);
     sun->add(sun_light_visual);
     
     // Blue point light
@@ -83,7 +83,6 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     blue_light->set_intensity(5.0f);
     blue_light->set_range(20.0f);
     blue_light->set_attenuation(1.0f);
-    scene->add(blue_light);
     
     // Green point light
     auto* green_light = new DCraft::PointLight("Red Light");
@@ -92,19 +91,20 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     green_light->set_intensity(1.5f);
     green_light->set_range(15.0f);
     green_light->set_attenuation(1.0f);
-    scene->add(green_light);
     
     // Visual indicator for blue light
     auto* blue_light_visual = new DCraft::Cube("Blue cube");
     blue_light_visual->set_scale(glm::vec3(0.2f));
     blue_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
-    blue_light->add(blue_light_visual);
+    blue_light_visual->add(blue_light);
+    scene->add(blue_light_visual);
     
     // Visual indicator for green light
     auto* green_light_visual = new DCraft::Cube("Green cube");
     green_light_visual->set_scale(glm::vec3(0.2f));
     green_light_visual->set_material(materials["PLASTIC_GREEN_MATERIAL"]);
-    green_light->add(green_light_visual);
+    green_light_visual->add(green_light);
+    scene->add(green_light_visual);
 
     // Main camera
     DCraft::PerspectiveCamera *main_camera = scene->create_camera<DCraft::PerspectiveCamera>(

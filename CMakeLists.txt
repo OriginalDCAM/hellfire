@@ -69,6 +69,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 add_library(stb_image INTERFACE)
 target_include_directories(stb_image INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb)
 
+# Add the json library
+add_library(json INTERFACE)
+target_include_directories(json INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/nlohmann)
+
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
 add_library(imgui STATIC
         ${IMGUI_DIR}/imgui.cpp

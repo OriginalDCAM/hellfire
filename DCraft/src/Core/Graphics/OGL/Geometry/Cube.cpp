@@ -58,6 +58,12 @@ namespace DCraft {
         update_world_matrix();
     }
 
+    json Cube::to_json() {
+        json j = Object3D::to_json();
+        j["geometry"] = "cube";
+        return j;
+    }
+
     void Cube::update(float dt) {
         // Get the current rotation angle in degrees (convert from radians)
         // float current_degrees = get_rotation_angle() * 180.0f / glm::pi<float>();

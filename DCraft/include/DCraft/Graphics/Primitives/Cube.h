@@ -155,6 +155,8 @@ namespace DCraft
         Cube();
         Cube(const std::string& name);
 
+        json to_json() override;
+
         void update(float dt) override;
     };
 }

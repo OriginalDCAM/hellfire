@@ -24,4 +24,12 @@ namespace DCraft {
         glUniform1f(glGetUniformLocation(shader_program, (base + ".range").c_str()), range);
         glUniform1f(glGetUniformLocation(shader_program, (base + ".attenuation").c_str()), attenuation);
     }
+
+    json PointLight::to_json() {
+        json j = Light::to_json();
+        j["light_type"] = "PointLight";
+        j["range"] = range;
+        j["attenuation"] = attenuation;
+        return j;
+    }
 }

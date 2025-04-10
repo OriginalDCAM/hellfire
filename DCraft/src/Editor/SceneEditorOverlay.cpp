@@ -17,6 +17,7 @@
 #include "DCraft/Graphics/Materials/LambertMaterial.h"
 #include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
+#include "DCraft/Addons/ImportedModel3D.h"
 
 namespace DCraft::Editor {
     void SceneEditorOverlay::render_object_properties(Object3D *object) const {
@@ -51,7 +52,7 @@ namespace DCraft::Editor {
             }
             object->set_rotation(rotation);
         }
-        
+
         if (auto *light = dynamic_cast<Light *>(object)) {
             render_light_properties(light);
         } else if (auto *camera = dynamic_cast<Camera *>(object)) {
@@ -227,6 +228,73 @@ namespace DCraft::Editor {
         ImGui::End();
     }
 
+    std::string SceneEditorOverlay::save_file_dialog(const std::string &defaultFilename) {
+        std::string filepath;
+
+#ifdef _WIN32
+        OPENFILENAMEA ofn;
+        CHAR szFile[260] = {0};
+
+        // Pre-populate with default filename if provided
+        if (!defaultFilename.empty()) {
+            strncpy(szFile, defaultFilename.c_str(), sizeof(szFile) - 1);
+        }
+
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = GetActiveWindow();
+        ofn.lpstrFile = szFile;
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = "Scene Files\0*.json\0All Files\0*.*\0";
+        ofn.nFilterIndex = 1;
+        ofn.lpstrFileTitle = NULL;
+        ofn.nMaxFileTitle = 0;
+        ofn.lpstrInitialDir = NULL;
+        ofn.Flags = OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
+        ofn.lpstrDefExt = "json"; // Default extension
+
+        if (GetSaveFileNameA(&ofn) == TRUE) {
+            filepath = ofn.lpstrFile;
+        }
+#else
+        // ImGui fallback
+        ImGui::OpenPopup("Save Scene");
+    
+        if (ImGui::BeginPopupModal("Save Scene", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            static char buf[512] = "";
+        
+            // Initialize with default filename if empty
+            if (buf[0] == '\0' && !defaultFilename.empty()) {
+                strncpy(buf, defaultFilename.c_str(), sizeof(buf) - 1);
+            }
+        
+            ImGui::Text("Enter file path to save scene:");
+            ImGui::InputText("##filepath", buf, 512);
+        
+            if (ImGui::Button("Save", ImVec2(120, 0))) {
+                filepath = buf;
+            
+                // Add .json extension if none
+                if (filepath.find('.') == std::string::npos) {
+                    filepath += ".json";
+                }
+            
+                ImGui::CloseCurrentPopup();
+            }
+        
+            ImGui::SameLine();
+        
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                ImGui::CloseCurrentPopup();
+            }
+        
+            ImGui::EndPopup();
+        }
+#endif
+
+        return filepath;
+    }
+
     void SceneEditorOverlay::render_menu_bar() {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
@@ -238,6 +306,31 @@ namespace DCraft::Editor {
                 }
                 ImGui::Separator();
                 ImGui::EndMenu();
+
+                if (ImGui::MenuItem("Save Scene...")) {
+                    std::string sceneName = scene_manager_.get_active_scene()->get_name();
+                    std::string defaultFilename = sceneName + ".json";
+
+                    std::string filepath = save_file_dialog(sceneName);
+                    if (!filepath.empty()) {
+                        if (scene_manager_.save_scene(filepath, nullptr)) {
+                            std::cout << "Saved scene: " << sceneName << std::endl;
+                        } else {
+                            std::cerr << "FAILED TO SAVE SCENE" << std::endl;
+                        }
+                    }
+                }
+
+                if (ImGui::MenuItem("Load Scene...")) {
+                    std::string filepath = open_file_dialog();
+                    if (!filepath.empty()) {
+                        if (scene_manager_.load_scene(filepath)) {
+                            // Success notification
+                        } else {
+                            // Error handling
+                        }
+                    }
+                }
             }
             if (ImGui::BeginMenu("Edit")) {
                 if (ImGui::MenuItem("Undo", "Ctrl+Z", false, current_command_index_ >= 0)) {
@@ -255,11 +348,11 @@ namespace DCraft::Editor {
 
 
     void SceneEditorOverlay::import_model(const std::string &filepath) {
-        Object3D *model = Addons::ModelLoader::load(filepath, scene_manager_.get_active_scene());
+        auto model = Addons::ModelLoader::load(filepath, scene_manager_.get_active_scene());
 
         if (model) {
             // Position the model at a visible location
-            model->set_position(glm::vec3(0.0f, 2.0f, 0.0f));
+            model->set_position(glm::vec3(0.0f, 1.0f, 5.0f));
 
             scene_manager_.get_active_scene()->add(model);
         }
@@ -379,7 +472,6 @@ namespace DCraft::Editor {
             ImGui::Text("Phong Material Properties");
 
 
-
             // Ambient color
             glm::vec3 ambient = phong->get_ambient_color();
             float ambient_color[3] = {ambient.r, ambient.g, ambient.b};
@@ -446,7 +538,7 @@ namespace DCraft::Editor {
 
     std::string SceneEditorOverlay::open_file_dialog() const {
         std::string filepath;
-    
+
 #ifdef _WIN32
         OPENFILENAMEA ofn;
         CHAR szFile[260] = {0};
@@ -461,13 +553,11 @@ namespace DCraft::Editor {
         ofn.nMaxFileTitle = 0;
         ofn.lpstrInitialDir = NULL;
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-    
+
         if (GetOpenFileNameA(&ofn) == TRUE) {
             filepath = ofn.lpstrFile;
         }
 #else
-        // For non-Windows platforms, you could use a simple dialog box
-        // or implement platform-specific dialogs for macOS/Linux
         ImGui::OpenPopup("File path input");
 
         if (ImGui::BeginPopupModal("File path input", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {

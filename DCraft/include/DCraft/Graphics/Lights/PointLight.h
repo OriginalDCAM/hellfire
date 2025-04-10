@@ -17,7 +17,8 @@ namespace DCraft {
         float get_attenuation() const { return attenuation; }
 
         void upload_to_shader(uint32_t shader_program, int light_index) override;
-        
+
+        json to_json() override;
     private:
         float range = 10.0f;
         float attenuation = 1.0f;
