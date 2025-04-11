@@ -20,7 +20,6 @@ MaterialMap load_material_map() {
     pavement_material->set_ambient_color(glm::vec3(0.4f, 0.4f, 0.4f));
     pavement_material->set_diffuse_color(glm::vec3(0.7f, 0.7f, 0.7f));
     
-    // Create basic photo materials
     auto* miquel_material = new DCraft::LambertMaterial("Miquel");
     miquel_material->set_texture("assets/textures/miquel.jpg", DCraft::TextureType::DIFFUSE);
     

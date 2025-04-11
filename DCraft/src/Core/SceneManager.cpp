@@ -236,6 +236,14 @@ namespace DCraft {
                         }
                     }
 
+                    if (node_data.contains("material")) {
+                    Material* material = deserialize_material(node_data["material"]);
+                        if (auto* model = dynamic_cast<ImportedModel3D*>(obj)) {
+                            model->set_material(material);
+                        }
+                    }
+
+
                     // Important: Return here to skip processing children for loaded models
                     return obj;
                 }
@@ -642,8 +650,7 @@ namespace DCraft {
         if (std::find(objects_.begin(), objects_.end(), scene) != objects_.end()) {
             active_scene_ = scene;
             scene->set_active(true);
-            // TODO: Change this to a debug macro 
-#if 1
+#if 0
             std::cout << "Debugging the active scene: " << active_scene_->get_name() << '\n';
 
             for (auto *obj: active_scene_->get_children()) {
