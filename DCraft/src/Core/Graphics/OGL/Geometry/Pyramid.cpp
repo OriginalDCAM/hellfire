@@ -34,17 +34,7 @@ namespace DCraft
 
     void Pyramid::update(float dt)
     {
-        // Get the current rotation angle in degrees (convert from radians)
-        float current_degrees = get_rotation_angle() * 180.0f / glm::pi<float>();
-        glm::vec3 current_scale = get_scale();
 
-        // Increment by 1 degree
-        current_degrees += 1.0f;
-        current_scale += 0.0005f;
-
-        // Set the new rotation (this will convert back to radians internally)
-        //set_position(get_position() + glm::vec3(0.05, 0.0,0.0));
-        set_rotation(current_degrees, glm::vec3(1.0, 1.0, 0.0));
     }
 
     void Pyramid::set_vertices()

@@ -52,7 +52,7 @@ namespace DCraft {
 
     json Camera::to_json() {
         json j = Object3D::to_json();
-        j["type"] = "camera";
+        j["type"] = "Camera";
         j["movement_speed"] = movement_speed_;
         j["mouse_sensitivity"] = mouse_sensitivity_;
         j["yaw"] = yaw_;
@@ -61,7 +61,6 @@ namespace DCraft {
         j["front"] = {front_.x, front_.y, front_.z};
         j["up"] = { up_.x, up_.y, up_.z};
         j["world_up"] = { world_up_.x, world_up_.y, world_up_.z};
-        
         return j;
     }
 

@@ -152,7 +152,7 @@ namespace DCraft
         
 
     public:
-        Cube();
+        Cube() = default;
         Cube(const std::string& name);
 
         json to_json() override;

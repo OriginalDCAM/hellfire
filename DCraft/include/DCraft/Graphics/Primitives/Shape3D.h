@@ -8,6 +8,7 @@ namespace DCraft
     class Shape3D : public Object3D
     {
     public:
+        Shape3D() = default;
         Shape3D(const std::string& name) : Object3D(name) {}
         // Texture Management
         void set_texture(const std::string& path, TextureType type);
@@ -38,6 +39,8 @@ namespace DCraft
         void rebuild();
 
         void draw_self(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program, void* renderer_context) override;
+
+        json to_json() override;
 
 
     protected:

@@ -106,10 +106,6 @@ namespace DCraft {
 
         glm::vec3 get_scale() { return transform_.get_scale(); }
 
-        void set_rotation(const float degrees, const glm::vec3 &new_axis) {
-            transform_.set_rotation(degrees, new_axis);
-        }
-
         void set_rotation(glm::vec3 eulers);
 
         glm::vec3 get_rotation();
@@ -202,6 +198,7 @@ namespace DCraft {
 
         virtual json to_json() {
             json j;
+            j["type"] = "Object3D";
             j["name"] = get_name();
             j["transform"] = transform_.to_json();
             return j;

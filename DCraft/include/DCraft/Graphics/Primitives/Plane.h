@@ -37,7 +37,7 @@ namespace DCraft
         };
 
     public:
-        Plane();
+        Plane() = default;
         Plane(const std::string& name);
 
         void update(float dt) override;

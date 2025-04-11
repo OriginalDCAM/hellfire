@@ -74,7 +74,6 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     sun_light_visual->set_position(sun->get_position());
     sun_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
     sun_light_visual->add(sun);
-    sun->add(sun_light_visual);
     
     // Blue point light
     auto* blue_light = new DCraft::PointLight("Blue Light");
@@ -121,7 +120,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(drone_camera);
     
     auto *cube = new DCraft::Cube("Cool cube");
-    cube->set_rotation(90, glm::vec3(1.0f, 0.0f, 0.0f));
+    cube->set_rotation(glm::vec3(90.0f, 0.0f, 0.0f));
     cube->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     cube->set_position(0.0f, 4.0f, 0.0f);
     cube->set_material(materials["MOSSY_MATERIAL"]);
@@ -131,7 +130,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     auto *floor = new DCraft::Plane("Guard Plane");
     floor->set_position(0, 0, 0);
     floor->set_scale(glm::vec3(100.0f, 100.0f, 100.0f));
-    floor->set_rotation(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    floor->set_rotation(glm::vec3(90.0f, 0.0f, 0.0f));
     floor->set_material(materials["PAVEMENT_MATERIAL"]);
     scene->add(floor);
 

@@ -2,11 +2,8 @@
 #include "DCraft/Structs/Camera.h"
 #include <iostream>
 
-namespace DCraft
-{
-
-    class PerspectiveCamera : public Camera
-    {
+namespace DCraft {
+    class PerspectiveCamera : public Camera {
     private:
         float fov_;
         float aspect_;
@@ -15,8 +12,16 @@ namespace DCraft
         glm::mat4 projection_matrix_;
 
     public:
+        PerspectiveCamera() : Camera("Default Camera"),
+                              fov_(ZOOM),
+                              aspect_(1.0f),
+                              near_(0.1f),
+                              far_(100.0f) {
+            update_projection_matrix();
+        }
+
         PerspectiveCamera(
-            const std::string& name,
+            const std::string &name,
             float fov = ZOOM,
             float aspect = 1.0f,
             float near_plane = 0.1f,
@@ -24,22 +29,25 @@ namespace DCraft
             glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
             float yaw = YAW,
-            float pitch = PITCH) :
-            Camera(name, position, up, yaw, pitch),
-            fov_(fov),
-            aspect_(aspect),
-            near_(near_plane),
-            far_(far_plane)
-        {
+            float pitch = PITCH) : Camera(name, position, up, yaw, pitch),
+                                   fov_(fov),
+                                   aspect_(aspect),
+                                   near_(near_plane),
+                                   far_(far_plane) {
             update_projection_matrix();
         }
 
         glm::mat4 get_projection_matrix() override;
+
         void update(float delta_time) override;
+
         // Setters with update
         void set_fov(float fov);
+
         void set_aspect_ratio(float aspect);
+
         void set_clip_planes(float near_plane, float far_plane);
+
         void process_mouse_scroll(float y_offset) override;
 
         // Getters
@@ -48,6 +56,9 @@ namespace DCraft
         void update_view_matrix();
 
         void set_target(float x, float y, float z);
+
+        void set_near_plane(float value) { near_ = value; }
+        void set_far_plane(float value) { far_ = value; };
 
         glm::vec3 get_target();
 
@@ -61,7 +72,8 @@ namespace DCraft
             }
 
             if (far_ <= near_) {
-                std::cout << "ERROR: Far plane must be greater than near_plane plane. Setting to near_plane + 100." << std::endl;
+                std::cout << "ERROR: Far plane must be greater than near_plane plane. Setting to near_plane + 100." <<
+                        std::endl;
                 far_ = near_ + 100.0f;
             }
 

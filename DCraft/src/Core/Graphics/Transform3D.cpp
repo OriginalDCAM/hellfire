@@ -52,6 +52,25 @@ namespace DCraft {
 );
     }
 
+    void Transform3D::extract_euler_angles_(const glm::mat4 &rotation_matrix, float &x, float &y,
+        float &z) {
+        // Extract rotation part (3x3 upper-left submatrix)
+        glm::mat3 rot3(rotation_matrix);
+    
+        // Handle gimbal lock case
+        if (std::abs(rot3[0][2]) > 0.998f) {
+            // Gimbal lock - singularity at pitch = +/-90 degrees
+            y = atan2f(-rot3[2][0], rot3[0][0]) * (rot3[0][2] > 0 ? -1.0f : 1.0f);
+            x = (rot3[0][2] > 0 ? -1.0f : 1.0f) * glm::half_pi<float>();
+            z = 0.0f;
+        } else {
+            // Standard case
+            y = atan2f(rot3[0][2], rot3[2][2]);
+            x = -asinf(rot3[1][2]);
+            z = atan2f(rot3[1][0], rot3[1][1]);
+        }
+    }
+
     void Transform3D::match_orientation(const Transform3D &other) {
         rotation_matrix_ = other.get_rotation_matrix();
         use_rotation_matrix_ = true;

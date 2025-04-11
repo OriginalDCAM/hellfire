@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
 
 #include "DCraft/Graphics/Textures/Texture.h"
@@ -21,8 +22,9 @@ namespace DCraft {
         ShaderHandle shader_handle = INVALID_SHADER;
         bool has_diffuse_texture_ = false;
 
-
-
+        glm::vec3 ambient_color_ = glm::vec3(0.1f);
+        glm::vec3 diffuse_color_ = glm::vec3(1.0f);
+        
         virtual void on_diffuse_texture_set(Texture* texture) {}
         virtual void on_specular_texture_set(Texture* texture) {}
 
@@ -30,6 +32,12 @@ namespace DCraft {
         Material(const std::string &name);
 
         virtual ~Material() = default;
+
+        glm::vec3 get_ambient_color() const { return  ambient_color_; };
+        glm::vec3 get_diffuse_color() const { return  diffuse_color_; };
+
+        void set_ambient_color(const glm::vec3& color) { ambient_color_ = color; }
+        void set_diffuse_color(const glm::vec3& color) { diffuse_color_ = color; }
 
         void set_diffuse_texture(std::string& path) { set_texture(path, TextureType::DIFFUSE); }
         void set_diffuse_texture(Texture* texture) {
@@ -40,6 +48,7 @@ namespace DCraft {
             auto& diffuseTextures = textures_map_[TextureType::DIFFUSE];
             return diffuseTextures.empty() ? nullptr : diffuseTextures[0];
         }
+
 
         void set_texture(const std::string &path, TextureType type);
 

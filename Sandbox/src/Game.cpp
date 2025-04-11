@@ -46,23 +46,20 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
 
     scenes_["Sandbox"] = load_scene(sm, window);
 
-    if (scenes_["Sandbox"]) {
-        main_camera_ = dynamic_cast<DCraft::PerspectiveCamera *>(scenes_["Sandbox"]->
-            find_object_by_name("Main Camera"));
-        drone_camera_ = dynamic_cast<DCraft::PerspectiveCamera *>(scenes_["Sandbox"]->find_object_by_name(
-            "Drone Camera"));
+    main_camera_ = dynamic_cast<DCraft::PerspectiveCamera *>(scenes_["Sandbox"]->
+        find_object_by_name("Main Camera"));
+    drone_camera_ = dynamic_cast<DCraft::PerspectiveCamera *>(scenes_["Sandbox"]->find_object_by_name(
+        "Drone Camera"));
 
-        main_camera_visual_ = scenes_["Sandbox"]->find_object_by_name(
-            "Main Camera Visual");
-        drone_camera_visual_ = scenes_["Sandbox"]->find_object_by_name(
-            "Drone Camera Visual");
-    }
+    main_camera_visual_ = scenes_["Sandbox"]->find_object_by_name(
+        "Main Camera Visual");
+    drone_camera_visual_ = scenes_["Sandbox"]->find_object_by_name(
+        "Drone Camera Visual");
 
     sm.set_active_scene(scenes_["Sandbox"]);
 }
 
 void Game::handle_input(DCraft::Application &app, float delta_time) {
-
     if (drone_toggle_timer > 0.0f) {
         drone_toggle_timer -= delta_time;
     }
@@ -134,7 +131,7 @@ void Game::process_camera_movement() {
 
     main_camera_visual_->match_orientation(*main_camera_);
 
-    
+
     drone_camera_visual_->set_position(drone_camera_->get_position());
 
     glm::vec3 drone_pos = drone_camera_->get_position();
@@ -142,8 +139,6 @@ void Game::process_camera_movement() {
     drone_camera_visual_->look_at(drone_target, drone_camera_->get_up_vector());
 
     drone_camera_visual_->match_orientation(*drone_camera_);
-
-
 }
 
 void Game::update(float delta_time) {

@@ -44,6 +44,7 @@ namespace DCraft
 
     public:
         // Constructor
+        Camera() = default;
         Camera(const std::string& name = "UnnamedCamera", glm::vec3 position = glm::vec3(0.0f, 0.0f, -5.0f),
             glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
             float yaw = YAW,
@@ -61,6 +62,9 @@ namespace DCraft
             update_camera_vectors();
         }
 
+        float get_mouse_sensitivity() { return  mouse_sensitivity_; }
+        void set_mouse_sensitivity(float value) { mouse_sensitivity_ = value; }
+
         void set_movement_speed(float value) { movement_speed_ = value; }
         float get_movement_speed() { return movement_speed_; }
 
@@ -74,13 +78,20 @@ namespace DCraft
         float get_zoom() const { return zoom_; }
 
         float get_pitch() const { return pitch_; }
+        void set_pitch(float value) { pitch_ = value; }
         float get_yaw() const { return yaw_; }
-
+        void set_yaw(float value) { yaw_ = value; }
+        
         glm::vec3 get_front_vector() const { return front_; }
+        void set_front(const glm::vec3 &front) { front_ = front; }
         glm::vec3 get_up_vector() const { return up_; }
+        void set_up(const glm::vec3 &up) { up_ = up; }
         glm::vec3 get_right_vector() const { return right_; }
+        void set_right(const glm::vec3 &right) { right_ = right; }
         glm::vec3 get_world_up_vector() const { return world_up_; }
+        void set_world_up(const glm::vec3& world_up) { world_up_ = world_up; }
         glm::vec3 get_camera_target() const { return target_; }
+        
 
         // Override from Object3D
         void update(float dt) override {}
@@ -90,7 +101,7 @@ namespace DCraft
         virtual void set_aspect_ratio(float aspect_ratio) = 0;
         virtual float get_aspect_ratio() const = 0;
 
-        virtual json to_json() override;
+        json to_json() override;
 
     protected:
         // Update camera vectors based on Euler angles
