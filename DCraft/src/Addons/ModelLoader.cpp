@@ -11,7 +11,6 @@
 #include "assimp/postprocess.h"
 #include "DCraft/Addons/ImportedModel3D.h"
 #include "DCraft/Graphics/Materials/LambertMaterial.h"
-#include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 #include "DCraft/Structs/Scene.h"
 

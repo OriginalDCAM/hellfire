@@ -18,6 +18,9 @@
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 #include "DCraft/Editor/Components/MenuBarComponent.h"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 namespace DCraft::Editor {
     void SceneEditorOverlay::render_object_properties(Object3D *object) const {
         if (!object) return;
@@ -272,10 +275,21 @@ namespace DCraft::Editor {
                         {"Texture Files", "*.png;*.jpg;*.jpeg"},
                         {"All Files", "*.*"}
                     };
-                    
+
                     std::string filepath = Utility::FileDialog::open_file(scene_filters);
-                    // TODO: Make this support multiple textures and not only diffuse
-                    lambert->set_texture(filepath, TextureType::DIFFUSE);
+                    fs::path absolute_path = filepath;
+                    fs::path assets_dir = "assets";
+
+                    // Check if assets_dir is part of the path
+                    std::string path_str = absolute_path.string();
+                    size_t pos = path_str.find(assets_dir.string());
+
+                    if (pos != std::string::npos) {
+                        std::string relative_path = path_str.substr(pos);
+                        lambert->set_texture(relative_path, TextureType::DIFFUSE);
+                    } else {
+                        lambert->set_texture(filepath, TextureType::DIFFUSE);
+                    }
                 }
             }
         } else if (auto phong = dynamic_cast<PhongMaterial *>(material)) {

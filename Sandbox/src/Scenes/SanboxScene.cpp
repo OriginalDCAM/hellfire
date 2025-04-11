@@ -74,10 +74,10 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     sun_light_visual->set_position(sun->get_position());
     sun_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
     sun_light_visual->add(sun);
+    scene->add(sun_light_visual);
     
     // Blue point light
     auto* blue_light = new DCraft::PointLight("Blue Light");
-    blue_light->set_position(5.0f, 2.0f, 5.0f);
     blue_light->set_color(glm::vec3(0.2f, 0.4f, 1.0f)); // Blue light
     blue_light->set_intensity(5.0f);
     blue_light->set_range(20.0f);
@@ -85,7 +85,6 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     
     // Green point light
     auto* green_light = new DCraft::PointLight("Red Light");
-    green_light->set_position(-5.0f, 1.0f, -5.0f);
     green_light->set_color(glm::vec3(0.2f, 1.0f, 0.1f)); // Red light
     green_light->set_intensity(1.5f);
     green_light->set_range(15.0f);
@@ -93,6 +92,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     
     // Visual indicator for blue light
     auto* blue_light_visual = new DCraft::Cube("Blue cube");
+    blue_light_visual->set_position(-5.0f, 1.0f, -5.0f);
     blue_light_visual->set_scale(glm::vec3(0.2f));
     blue_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
     blue_light_visual->add(blue_light);
@@ -100,6 +100,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     
     // Visual indicator for green light
     auto* green_light_visual = new DCraft::Cube("Green cube");
+    green_light_visual->set_position(5.0f, 2.0f, 5.0f);
     green_light_visual->set_scale(glm::vec3(0.2f));
     green_light_visual->set_material(materials["PLASTIC_GREEN_MATERIAL"]);
     green_light_visual->add(green_light);
