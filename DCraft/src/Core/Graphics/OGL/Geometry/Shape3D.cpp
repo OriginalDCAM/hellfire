@@ -22,7 +22,7 @@ namespace DCraft {
     }
     
 
-    Material *Shape3D::get_material() {
+    Material *Shape3D::get_material() const {
         return get_mesh()->get_material();
     }
 

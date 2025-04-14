@@ -45,6 +45,8 @@ namespace DCraft
         bool is_active() const { return is_active_; }
         void set_active(const bool active) { is_active_ = active; }
 
+        json to_json() override;
+
     private:
         std::vector<Object3D*> registered_objects_;
         std::vector<Camera*> cameras_;

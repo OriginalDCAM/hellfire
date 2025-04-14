@@ -11,6 +11,9 @@ namespace DCraft {
         glGenTextures(1, &texture_id_);
         glBindTexture(GL_TEXTURE_2D, texture_id_);
 
+        // Set unpack alignment to 1
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
         stbi_set_flip_vertically_on_load(true);
         unsigned char *data = stbi_load(path.c_str(), &width, &height, &nr_channels, 0);
 
@@ -34,14 +37,10 @@ namespace DCraft {
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
 
-            // Set texture parameters
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            stbi_image_free(data);
-            
         } else {
             std::cerr << "Failed to load texture: " << path << std::endl;
         }

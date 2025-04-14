@@ -143,13 +143,9 @@ namespace DCraft::Editor {
                         if (is_active && new_active_scene) {
                             scene_manager_.set_active_scene(new_active_scene);
                         }
-
-                        // Close the popup since we've removed the scene
                         ImGui::CloseCurrentPopup();
-
-                        // Skip the rest of the popup rendering
                         ImGui::EndPopup();
-                        continue; // Skip to the next scene in the loop
+                        continue; 
                     }
                     ImGui::EndPopup();
                 }
@@ -300,9 +296,7 @@ namespace DCraft::Editor {
         }
 
         ImGui::Separator();
-
-        // Display material type
-        ImGui::Text("Material Type: %s", typeid(*material).name());
+ImGui::Text("Material Type: %s", typeid(*material).name());
 
         // Specific material properties based on type
         if (auto lambert = dynamic_cast<LambertMaterial *>(material)) {
@@ -315,43 +309,6 @@ namespace DCraft::Editor {
 
             // Texture section
             ImGui::Separator();
-            ImGui::Text("Diffuse Texture");
-
-            // Show current texture if it exists
-            if (lambert->has_diffuse_texture()) {
-                Texture *tex = lambert->get_diffuse_texture();
-                if (tex && tex->get_id() > 0) {
-                    // Show texture preview
-                    ImGui::Image(reinterpret_cast<ImTextureID>((void *) (uintptr_t) tex->get_id()), ImVec2(150, 150));
-
-                    if (ImGui::Button("Remove Texture")) {
-                        // lambert->remove_diffuse_texture();
-                    }
-                }
-            } else {
-                ImGui::Text("No texture");
-                if (ImGui::Button("Add Texture...")) {
-                    std::vector<Utility::FileFilter> scene_filters = {
-                        {"Texture Files", "*.png;*.jpg;*.jpeg"},
-                        {"All Files", "*.*"}
-                    };
-
-                    std::string filepath = Utility::FileDialog::open_file(scene_filters);
-                    fs::path absolute_path = filepath;
-                    fs::path assets_dir = "assets";
-
-                    // Check if assets_dir is part of the path
-                    std::string path_str = absolute_path.string();
-                    size_t pos = path_str.find(assets_dir.string());
-
-                    if (pos != std::string::npos) {
-                        std::string relative_path = path_str.substr(pos);
-                        lambert->set_texture(relative_path, TextureType::DIFFUSE);
-                    } else {
-                        lambert->set_texture(filepath, TextureType::DIFFUSE);
-                    }
-                }
-            }
         } else if (auto phong = dynamic_cast<PhongMaterial *>(material)) {
             // Phong Material Properties
             ImGui::Text("Phong Material Properties");
@@ -381,43 +338,121 @@ namespace DCraft::Editor {
             if (ImGui::SliderFloat("Shininess", &shininess, 1.0f, 128.0f, "%.1f")) {
                 phong->set_shininess(shininess);
             }
+        }
+        // Base Material Properties or unknown material type
+        ImGui::Text("Basic Material Properties");
+
+        ImGui::Text("Diffuse Texture");
+        if (material->has_diffuse_texture()) {
+            Texture *tex = material->get_diffuse_texture();
+            if (tex && tex->get_id() > 0) {
+                // Show texture preview - Cast properly to avoid ImGui errors
+                ImTextureID tex_id = (ImTextureID)(intptr_t)tex->get_id();
+                ImGui::Image(tex_id, ImVec2(150, 150));
+
+                if (ImGui::Button("Remove Texture")) {
+                    material->remove_diffuse_texture();
+                }
+            } else {
+                ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "Texture loaded but invalid ID");
+            }
         } else {
-            // Base Material Properties or unknown material type
-            ImGui::Text("Basic Material Properties");
-            // Add any properties common to all materials
+            if (ImGui::Button("Add Texture...")) {
+                std::vector<Utility::FileFilter> scene_filters = {
+                    {"Texture Files", "*.png;*.jpg;*.jpeg"},
+                    {"All Files", "*.*"}
+                };
+
+                std::string filepath = Utility::FileDialog::open_file(scene_filters);
+                fs::path absolute_path = filepath;
+                fs::path assets_dir = "assets";
+
+                // Check if assets_dir is part of the path
+                std::string path_str = absolute_path.string();
+                size_t pos = path_str.find(assets_dir.string());
+
+                if (pos != std::string::npos) {
+                    std::string relative_path = path_str.substr(pos);
+                    material->set_texture(relative_path, TextureType::DIFFUSE);
+                } else {
+                    material->set_texture(filepath, TextureType::DIFFUSE);
+                }
+            }
         }
 
         ImGui::Separator();
-
         // Material change section
         if (ImGui::CollapsingHeader("Change Material Type")) {
             if (ImGui::Button("Lambert Material")) {
+                // Store current texture path before changing material
+                std::string texture_path = "";
+                bool has_texture = false;
+                
+                if (material->has_diffuse_texture()) {
+                    Texture* old_texture = material->get_diffuse_texture();
+                    if (old_texture) {
+                        texture_path = old_texture->get_path();
+                        has_texture = true;
+                    }
+                }
+                
                 // Create new Lambert material
                 auto new_material = new LambertMaterial(material->get_name());
-                // Copy any common properties from old material
-                // ...
-
-                // Replace material
+                
+                // Copy diffuse color if possible
+                if (auto phong = dynamic_cast<PhongMaterial*>(material)) {
+                    new_material->set_diffuse_color(phong->get_diffuse_color());
+                }
+                
+                // Set the new material before removing textures from old one
                 shape->set_material(new_material);
-                // Handle memory cleanup for old material if needed
+                
+                // Apply texture to new material if it existed
+                if (has_texture && !texture_path.empty()) {
+                    new_material->set_texture(texture_path, TextureType::DIFFUSE);
+                }
+                
+                // Clean up old material
+                material->remove_all_textures();
             }
 
             if (ImGui::Button("Phong Material")) {
+                // Store current texture path before changing material
+                std::string texture_path = "";
+                bool has_texture = false;
+                
+                if (material->has_diffuse_texture()) {
+                    Texture* old_texture = material->get_diffuse_texture();
+                    if (old_texture) {
+                        texture_path = old_texture->get_path();
+                        has_texture = true;
+                    }
+                }
+                
                 // Create new Phong material
                 auto new_material = new PhongMaterial(material->get_name());
-                // Copy any common properties from old material
-                // ...
-
-                // Replace material
+                
+                // Copy diffuse color if possible
+                if (auto lambert = dynamic_cast<LambertMaterial*>(material)) {
+                    new_material->set_diffuse_color(lambert->get_diffuse_color());
+                }
+                
+                // Set the new material before removing textures from old one
                 shape->set_material(new_material);
-                // Handle memory cleanup for old material if needed
+                
+                // Apply texture to new material if it existed
+                if (has_texture && !texture_path.empty()) {
+                    new_material->set_texture(texture_path, TextureType::DIFFUSE);
+                }
+                
+                // Clean up old material
+                material->remove_all_textures();
             }
-
-            // Add buttons for other material types as needed
         }
-
         ImGui::End();
     }
+
+
 
 
     void SceneEditorOverlay::render_mesh_properties(Mesh *mesh) const {

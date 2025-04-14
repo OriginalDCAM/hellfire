@@ -11,6 +11,7 @@ set(GLUT_ROOT_DIR "C:/Libraries/freeglut-MSVC-3.0.0-2.mp/freeglut" CACHE PATH "G
 # For GLM, set to the parent directory of the first glm folder
 set(GLM_ROOT_DIR "C:/Libraries/glm-0.9.6.3/glm" CACHE PATH "GLM root directory")
 
+# If we have multiple cores, use them for building
 include(ProcessorCount)
 ProcessorCount(N)
 if (NOT N EQUAL 0)
@@ -21,7 +22,7 @@ endif ()
 list(APPEND CMAKE_PREFIX_PATH ${GLEW_ROOT_DIR} ${GLUT_ROOT_DIR} ${GLM_ROOT_DIR})
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Create GLM target manually - note the root directory is one level up from where glm is
+# Create GLM target 
 if (NOT TARGET GLM::GLM AND EXISTS "${GLM_ROOT_DIR}")
     add_library(GLM::GLM INTERFACE IMPORTED)
     set_target_properties(GLM::GLM PROPERTIES
@@ -50,9 +51,9 @@ endif ()
 if (NOT TARGET GLUT::GLUT AND EXISTS "${GLUT_ROOT_DIR}")
     set(GLUT_INCLUDE_DIR "${GLUT_ROOT_DIR}/include")
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)  # 64-bit
-        set(GLUT_LIBRARY "${GLUT_ROOT_DIR}/lib/x64/freeglut.lib") # Adjust this path as needed
+        set(GLUT_LIBRARY "${GLUT_ROOT_DIR}/lib/x64/freeglut.lib") 
     else ()  # 32-bit
-        set(GLUT_LIBRARY "${GLUT_ROOT_DIR}/lib/freeglut.lib") # Adjust this path as needed
+        set(GLUT_LIBRARY "${GLUT_ROOT_DIR}/lib/freeglut.lib")
     endif ()
 
     add_library(GLUT::GLUT UNKNOWN IMPORTED)
@@ -73,6 +74,7 @@ target_include_directories(stb_image INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/vendo
 add_library(json INTERFACE)
 target_include_directories(json INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/nlohmann)
 
+# Add the imgui library
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
 add_library(imgui STATIC
         ${IMGUI_DIR}/imgui.cpp
@@ -91,21 +93,22 @@ target_include_directories(imgui PUBLIC
         ${GLUT_INCLUDE_DIR}
 )
 
+# link against OpenGL, GLEW, and GLUT
 target_link_libraries(imgui PUBLIC
         opengl32
         GLEW::GLEW
         GLUT::GLUT
 )
 
+# Assimp build options
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)  # Build zlib with Assimp
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)  # Only build needed importers
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)  
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)  
 
-# Select only the importers you need to reduce build time
 set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
@@ -128,3 +131,7 @@ add_subdirectory(vendor/assimp)
 
 add_subdirectory(DCraft)
 add_subdirectory(Sandbox)
+
+if (MSVC)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Sandbox)
+endif ()

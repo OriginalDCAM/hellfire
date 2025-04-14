@@ -6,26 +6,26 @@ file(GLOB_RECURSE APP_HEADERS "include/*.h" "include/*.hpp")
 add_executable(${APP_NAME} ${APP_SOURCES} ${APP_HEADERS})
 
 target_include_directories(${APP_NAME}
-    PRIVATE
+        PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# Link against your DCraft library
+# Link against DCraft Engine library
 target_link_libraries(${APP_NAME}
-    PRIVATE
+        PRIVATE
         DCraft
 )
 
-if(WIN32)
+if (WIN32)
     # Determine which DLLs to copy based on architecture
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)  # 64-bit
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)  # 64-bit
         set(GLEW_DLL_PATH "${GLEW_ROOT_DIR}/bin/Release/x64/glew32.dll")
         set(GLUT_DLL_PATH "${GLUT_ROOT_DIR}/bin/x64/freeglut.dll")
-    else()  # 32-bit
+    else ()  # 32-bit
         set(GLEW_DLL_PATH "${GLEW_ROOT_DIR}/bin/Release/Win32/glew32.dll")
         set(GLUT_DLL_PATH "${GLUT_ROOT_DIR}/bin/freeglut.dll")
-    endif()
+    endif ()
 
     # Copy the DLLs
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
@@ -34,20 +34,28 @@ if(WIN32)
             "${GLUT_DLL_PATH}"
             $<TARGET_FILE_DIR:${APP_NAME}>
     )
-endif()
+endif ()
 
-# Post-build command to copy assets folder
+# Copy the assets directory
 add_custom_command(TARGET ${APP_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Copying assets from ${CMAKE_CURRENT_SOURCE_DIR}/assets to $<TARGET_FILE_DIR:${APP_NAME}>/assets"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/assets
-        $<TARGET_FILE_DIR:${APP_NAME}>/assets
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
 )
 
-# Set Visual Studio specific properties
-if(MSVC)
-    set_property(TARGET ${APP_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${APP_SOURCES})
-    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${APP_HEADERS})
-endif()
+if (MSVC)
+    # Set this project as the startup project
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${APP_NAME})
 
+    # Set the working directory for the debugger
+    set_target_properties(${APP_NAME} PROPERTIES
+            VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${APP_NAME}>"
+    )
 
+    # Add source grouping
+    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${SOURCES})
+    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${HEADERS})
+
+endif ()

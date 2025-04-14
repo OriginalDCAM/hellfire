@@ -70,7 +70,7 @@ namespace DCraft {
             mesh_ = mesh;
         }
 
-        Mesh *get_mesh() {
+        Mesh *get_mesh() const {
             if (!mesh_) {
                 mesh_ = std::make_shared<Mesh>();
             }
@@ -213,6 +213,6 @@ namespace DCraft {
         Transform3D transform_;
 
         // Mesh is optional
-        std::shared_ptr<Mesh> mesh_;
+        mutable std::shared_ptr<Mesh> mesh_;
     };
 }

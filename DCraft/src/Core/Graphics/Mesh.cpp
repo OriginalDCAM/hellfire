@@ -18,9 +18,6 @@ namespace DCraft {
     }
 
     Mesh::~Mesh() {
-        // delete VAO;
-        // delete VBO;
-        // delete IBO;
     }
 
     void Mesh::create_mesh() {
