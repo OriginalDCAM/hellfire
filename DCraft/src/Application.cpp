@@ -6,7 +6,11 @@
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "imgui/imgui.h"
 
-#include "Dcraft/Graphics/OGL/glsl.h"
+#include "DCraft/Graphics/OGL/glsl.h"
+#include "DCraft/Graphics/Renderer.h"
+#include "DCraft/Addons/SceneManager.h"
+#include "DCraft/Structs/Scene.h"
+
 #include <iostream>
 #include <utility>
 

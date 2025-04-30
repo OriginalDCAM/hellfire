@@ -1,0 +1,633 @@
+{
+    "name": "Other Scene",
+    "objects": [
+        {
+            "children": [
+                {
+                    "color": [
+                        1.0,
+                        0.949999988079071,
+                        0.8999999761581421
+                    ],
+                    "direction": [
+                        -0.5002697110176086,
+                        0.7067251205444336,
+                        -0.5002697110176086
+                    ],
+                    "intensity": 1.0,
+                    "light_type": "DirectionalLight",
+                    "name": "Sun",
+                    "transform": {
+                        "position": [
+                            20.0,
+                            30.0,
+                            20.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Light"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "diffuse": [
+                    0.0,
+                    0.0,
+                    0.800000011920929
+                ],
+                "name": "PlasticBlue",
+                "shininess": 128.0,
+                "specular": [
+                    0.8999999761581421,
+                    0.8999999761581421,
+                    0.8999999761581421
+                ],
+                "textures": [
+                    {
+                        "path": "assets/textures/plastic_blue.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "phong"
+            },
+            "name": "Sun Light Visual",
+            "transform": {
+                "position": [
+                    20.0,
+                    30.0,
+                    20.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "children": [
+                {
+                    "attenuation": 1.0,
+                    "color": [
+                        0.20000000298023224,
+                        0.4000000059604645,
+                        1.0
+                    ],
+                    "intensity": 5.0,
+                    "light_type": "PointLight",
+                    "name": "Blue Light",
+                    "range": 20.0,
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Light"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "diffuse": [
+                    0.0,
+                    0.0,
+                    0.800000011920929
+                ],
+                "name": "PlasticBlue",
+                "shininess": 128.0,
+                "specular": [
+                    0.8999999761581421,
+                    0.8999999761581421,
+                    0.8999999761581421
+                ],
+                "textures": [
+                    {
+                        "path": "assets/textures/plastic_blue.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "phong"
+            },
+            "name": "Blue cube",
+            "transform": {
+                "position": [
+                    -5.0,
+                    1.0,
+                    -5.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    0.20000000298023224
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "children": [
+                {
+                    "attenuation": 1.0,
+                    "color": [
+                        0.20000000298023224,
+                        1.0,
+                        0.10000000149011612
+                    ],
+                    "intensity": 1.5,
+                    "light_type": "PointLight",
+                    "name": "Red Light",
+                    "range": 15.0,
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Light"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.0,
+                    0.10000000149011612,
+                    0.0
+                ],
+                "diffuse": [
+                    0.0,
+                    0.800000011920929,
+                    0.0
+                ],
+                "name": "PlasticGreen",
+                "shininess": 64.0,
+                "specular": [
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929
+                ],
+                "textures": [
+                    {
+                        "path": "assets/textures/plastic_green.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "phong"
+            },
+            "name": "Green cube",
+            "transform": {
+                "position": [
+                    5.0,
+                    2.0,
+                    5.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    0.20000000298023224
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "aspect_ratio": 1.7777777910232544,
+            "camera_type": "perspective",
+            "far_plane": 400.0,
+            "fov": 70.0,
+            "front": [
+                -0.6028155088424683,
+                -0.4446364641189575,
+                0.662504255771637
+            ],
+            "mouse_sensitivity": 0.10000000149011612,
+            "movement_speed": 5.0,
+            "name": "Main Camera",
+            "near_plane": 0.10000000149011612,
+            "pitch": -26.400081634521484,
+            "right": [
+                -0.7396405339241028,
+                0.0,
+                -0.6730021238327026
+            ],
+            "target": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "transform": {
+                "position": [
+                    9.284156799316406,
+                    5.114995956420898,
+                    -2.469304323196411
+                ],
+                "rotation": [
+                    -19.200273513793945,
+                    -45.45037078857422,
+                    -18.47356414794922
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "type": "Camera",
+            "up": [
+                -0.2992412745952606,
+                0.8957111239433289,
+                0.3288711607456207
+            ],
+            "world_up": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "yaw": -227.7008056640625
+        },
+        {
+            "aspect_ratio": 1.7777777910232544,
+            "camera_type": "perspective",
+            "far_plane": 400.0,
+            "fov": 70.0,
+            "front": [
+                -0.34815531969070435,
+                -0.8703882694244385,
+                -0.34815531969070435
+            ],
+            "mouse_sensitivity": 0.10000000149011612,
+            "movement_speed": 5.0,
+            "name": "Drone Camera",
+            "near_plane": 0.10000000149011612,
+            "pitch": -60.50379180908203,
+            "right": [
+                0.7071067690849304,
+                0.0,
+                -0.7071067690849304
+            ],
+            "target": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "transform": {
+                "position": [
+                    10.0,
+                    25.0,
+                    10.0
+                ],
+                "rotation": [
+                    37.98516845703125,
+                    -116.21407318115234,
+                    -51.34019088745117
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "type": "Camera",
+            "up": [
+                -0.6154574751853943,
+                0.4923660159111023,
+                -0.6154574751853943
+            ],
+            "world_up": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "yaw": -135.0
+        },
+        {
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ],
+                "diffuse": [
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929
+                ],
+                "name": "Mossy",
+                "textures": [
+                    {
+                        "path": "assets/textures/mossy_brick.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "lambert"
+            },
+            "name": "Cool cube",
+            "transform": {
+                "position": [
+                    0.0,
+                    4.0,
+                    0.0
+                ],
+                "rotation": [
+                    90.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "geometry": "plane",
+            "material": {
+                "ambient": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ],
+                "diffuse": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "name": "Pavement",
+                "shininess": 32.0,
+                "specular": [
+                    0.5,
+                    0.5,
+                    0.5
+                ],
+                "textures": [
+                    {
+                        "path": "assets\\textures\\brick_pavement.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "phong"
+            },
+            "name": "Guard Plane",
+            "transform": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    90.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    100.0,
+                    100.0,
+                    100.0
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "children": [
+                {
+                    "geometry": "cube",
+                    "material": {
+                        "ambient": [
+                            0.0,
+                            0.10000000149011612,
+                            0.0
+                        ],
+                        "diffuse": [
+                            0.0,
+                            0.800000011920929,
+                            0.0
+                        ],
+                        "name": "PlasticGreen",
+                        "shininess": 64.0,
+                        "specular": [
+                            0.800000011920929,
+                            0.800000011920929,
+                            0.800000011920929
+                        ],
+                        "textures": [
+                            {
+                                "path": "assets/textures/plastic_green.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "phong"
+                    },
+                    "name": "Main Camera Direction",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.05000000074505806,
+                            0.05000000074505806,
+                            0.5
+                        ]
+                    },
+                    "type": "Shape3D"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ],
+                "diffuse": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "name": "Miquel",
+                "textures": [
+                    {
+                        "path": "assets/textures/miquel.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "lambert"
+            },
+            "name": "Main Camera Visual",
+            "transform": {
+                "position": [
+                    9.284156799316406,
+                    5.114995956420898,
+                    -2.469304323196411
+                ],
+                "rotation": [
+                    -19.200273513793945,
+                    -45.45037078857422,
+                    -18.47356414794922
+                ],
+                "scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "children": [
+                {
+                    "geometry": "cube",
+                    "material": {
+                        "ambient": [
+                            0.0,
+                            0.10000000149011612,
+                            0.0
+                        ],
+                        "diffuse": [
+                            0.0,
+                            0.800000011920929,
+                            0.0
+                        ],
+                        "name": "PlasticGreen",
+                        "shininess": 64.0,
+                        "specular": [
+                            0.800000011920929,
+                            0.800000011920929,
+                            0.800000011920929
+                        ],
+                        "textures": [
+                            {
+                                "path": "assets/textures/plastic_green.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "phong"
+                    },
+                    "name": "Drone Camera Direction",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.05000000074505806,
+                            0.05000000074505806,
+                            0.5
+                        ]
+                    },
+                    "type": "Shape3D"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ],
+                "diffuse": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "name": "Eljto",
+                "textures": [
+                    {
+                        "path": "assets/textures/eltjo.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "lambert"
+            },
+            "name": "Drone Camera Visual",
+            "transform": {
+                "position": [
+                    10.0,
+                    25.0,
+                    10.0
+                ],
+                "rotation": [
+                    37.98516845703125,
+                    -116.21407318115234,
+                    -51.34019088745117
+                ],
+                "scale": [
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    0.30000001192092896
+                ]
+            },
+            "type": "Shape3D"
+        }
+    ],
+    "version": "1.0"
+}

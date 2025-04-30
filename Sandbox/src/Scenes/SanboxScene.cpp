@@ -2,6 +2,8 @@
 // Created by denzel on 07/04/2025.
 //
 
+#include "DCraft/Graphics/Lights/DirectionalLight.h"
+#include "DCraft/Graphics/Lights/PointLight.h"
 #include "DCraft/Graphics/Materials/LambertMaterial.h"
 #include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Graphics/Primitives/Cube.h"
@@ -17,8 +19,8 @@ MaterialMap load_material_map() {
     
     auto* pavement_material = new DCraft::LambertMaterial("Pavement");
     pavement_material->set_texture("assets/textures/brick_pavement.jpg", DCraft::TextureType::DIFFUSE);
-    pavement_material->set_ambient_color(glm::vec3(0.4f, 0.4f, 0.4f));
-    pavement_material->set_diffuse_color(glm::vec3(0.7f, 0.7f, 0.7f));
+    pavement_material->set_ambient_color(glm::vec3(0.1f, 0.1f, 0.1f));
+    pavement_material->set_diffuse_color(glm::vec3(0.8f, 0.8f, 0.8f));
     
     auto* miquel_material = new DCraft::LambertMaterial("Miquel");
     miquel_material->set_texture("assets/textures/miquel.jpg", DCraft::TextureType::DIFFUSE);
@@ -127,10 +129,10 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(cube);
 
     // Plane primitive object
-    auto *floor = new DCraft::Plane("Guard Plane");
+    auto *floor = new DCraft::Plane("Floor Quad");
     floor->set_position(0, 0, 0);
     floor->set_scale(glm::vec3(100.0f, 100.0f, 100.0f));
-    floor->set_rotation(glm::vec3(90.0f, 0.0f, 0.0f));
+    floor->set_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
     floor->set_material(materials["PAVEMENT_MATERIAL"]);
     scene->add(floor);
 

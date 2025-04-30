@@ -77,7 +77,8 @@ namespace DCraft::Editor {
 
         ImGui::Begin("Scene Hierarchy");
         // Get scenes from scene manager
-        auto &scenes = scene_manager_.get_objects(); // These are the Scene objects
+        
+        auto &scenes = scene_manager_.get_objects(); 
         ImGui::Text("Number of scenes: %d", scenes.size());
 
         if (ImGui::BeginTable("ScenesTable", 1)) {

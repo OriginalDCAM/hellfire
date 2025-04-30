@@ -1,24 +1,29 @@
 #pragma once
 
-#include "DCraft/Structs/Object3D.h"
-#include "DCraft/Structs/Camera.h"
-#include "DCraft/Structs/Scene.h"
-
+#include <functional>
+#include <memory>
+#include <string>
 #include <vector>
 
-#include "DCraft/Utility/ObjectDeserializer.h"
-#include "DCraft/Utility/ObjectSerializer.h"
-
+// Forward declarations
 namespace DCraft {
     class Scene;
+    class Object3D;
+    class Camera;
+    class ObjectDeserializer;
+    class ObjectSerializer;
+}
 
+namespace DCraft {
     class SceneManager {
     public:
         SceneManager();
+
         ~SceneManager();
 
         // Setup callback for when a scene is activated
-        using SceneActivatedCallback = std::function<void(Scene*)>;
+        using SceneActivatedCallback = std::function<void(Scene *)>;
+
         void set_scene_activated_callback(SceneActivatedCallback callback) {
             scene_activated_callback_ = callback;
         }
@@ -26,7 +31,7 @@ namespace DCraft {
         // Scene creation and loading
         void create_default_scene();
 
-        Scene* load_scene(const std::string &filename);
+        Scene *load_scene(const std::string &filename);
 
         bool save_scene(const std::string &filename, Scene *scene);
 
@@ -50,18 +55,12 @@ namespace DCraft {
         Object3D *get_root_node() const { return root_node_; }
         const std::vector<Object3D *> &get_objects() const { return objects_; }
 
-        std::vector<Camera *> get_cameras() { return active_scene_->get_cameras(); }
+        std::vector<Camera *> get_cameras();
 
 
-        void set_active_camera(Camera *camera) {
-            active_scene_->set_active_camera(camera);
-        }
+        void set_active_camera(Camera *camera) const;
 
-        Camera *get_active_camera() const {
-            if (!active_scene_->get_active_camera()) return nullptr;
-
-            return active_scene_->get_active_camera();
-        }
+        Camera *get_active_camera() const;
 
         void set_active_scene(Scene *scene);
 
@@ -83,8 +82,11 @@ namespace DCraft {
 
         // Helper methods
         void register_object(Object3D *object);
+
         void unregister_object(Object3D *object);
+
         SceneActivatedCallback scene_activated_callback_;
+
         bool objects_contains_camera_component(Object3D *object, Camera *target_camera);
     };
 }
