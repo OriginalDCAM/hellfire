@@ -37,13 +37,13 @@ if (WIN32)
 endif ()
 
 # Copy the assets directory
-add_custom_command(TARGET ${APP_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Copying assets from ${CMAKE_CURRENT_SOURCE_DIR}/assets to $<TARGET_FILE_DIR:${APP_NAME}>/assets"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
-        "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
-)
+#add_custom_command(TARGET ${APP_NAME} POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E echo "Copying assets from ${CMAKE_CURRENT_SOURCE_DIR}/assets to $<TARGET_FILE_DIR:${APP_NAME}>/assets"
+#        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
+#        COMMAND ${CMAKE_COMMAND} -E copy_directory
+#        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+#        "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
+#)
 
 if (MSVC)
     # Set this project as the startup project
@@ -51,7 +51,7 @@ if (MSVC)
 
     # Set the working directory for the debugger
     set_target_properties(${APP_NAME} PROPERTIES
-            VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${APP_NAME}>"
+            VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
     # Add source grouping

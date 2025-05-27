@@ -3,7 +3,7 @@
 //
 
 #include <Dcraft/Graphics/Primitives/Cube.h>
-#include <DCraft/Graphics/Primitives/Plane.h>
+#include <DCraft/Graphics/Primitives/Quad.h>
 
 #include "Game.h"
 
@@ -166,17 +166,17 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     // Scene loading with code behind
     scenes_["Sandbox"] = load_scene(sm, window);
     // Scene loading from file path
-    scenes_["Terrain"] = sm.load_scene("assets/scenes/Test Scene.json");
+    // scenes_["Terrain"] = sm.load_scene("assets/scenes/Test Scene.json");
 
     setup_cameras_for_scene("Sandbox");
-    setup_cameras_for_scene("Terrain");
+    // setup_cameras_for_scene("Terrain");
 
     // Set the initial active scene
     sm.set_active_scene(scenes_["Sandbox"]);
     active_scene_name_ = "Sandbox";
 
     // Set up the animations
-    setup_animations();
+    // setup_animations();
 
     // Register scene activation callback with the scene manager
     sm.set_scene_activated_callback([this](DCraft::Scene *scene) {

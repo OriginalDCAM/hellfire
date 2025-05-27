@@ -45,6 +45,10 @@ namespace DCraft
         bool is_active() const { return is_active_; }
         void set_active(const bool active) { is_active_ = active; }
 
+        void set_source_filename(const std::string& filename) { source_filename = filename; }
+        const std::string& get_source_filename() const { return source_filename; }
+        bool was_loaded_from_file() const { return !source_filename.empty(); }
+
         json to_json() override;
 
     private:
@@ -52,6 +56,7 @@ namespace DCraft
         std::vector<Camera*> cameras_;
         Camera* active_camera_;
         bool is_active_;
+        std::string source_filename;
 
         void register_object(Object3D* obj);
         void unregister_object(Object3D* obj);

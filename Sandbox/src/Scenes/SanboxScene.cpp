@@ -7,7 +7,7 @@
 #include "DCraft/Graphics/Materials/LambertMaterial.h"
 #include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Graphics/Primitives/Cube.h"
-#include "DCraft/Graphics/Primitives/Plane.h"
+#include "DCraft/Graphics/Primitives/Quad.h"
 #include "Scenes/SandboxScene.h"
 
 MaterialMap load_material_map() {
@@ -129,7 +129,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(cube);
 
     // Plane primitive object
-    auto *floor = new DCraft::Plane("Floor Quad");
+    auto *floor = new DCraft::Quad("Floor Quad");
     floor->set_position(0, 0, 0);
     floor->set_scale(glm::vec3(100.0f, 100.0f, 100.0f));
     floor->set_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
