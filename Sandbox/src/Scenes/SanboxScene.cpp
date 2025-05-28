@@ -4,39 +4,37 @@
 
 #include "DCraft/Graphics/Lights/DirectionalLight.h"
 #include "DCraft/Graphics/Lights/PointLight.h"
-#include "DCraft/Graphics/Materials/LambertMaterial.h"
-#include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Graphics/Primitives/Cube.h"
 #include "DCraft/Graphics/Primitives/Quad.h"
 #include "Scenes/SandboxScene.h"
 
 MaterialMap load_material_map() {
     // Create Lambert materials (diffuse only)
-    auto* mossy_material = new DCraft::LambertMaterial("Mossy");
-    mossy_material->set_texture("assets/textures/mossy_brick.jpg", DCraft::TextureType::DIFFUSE);
+    auto* mossy_material = new DCraft::Material("Mossy");
+    mossy_material->set_diffuse_texture(&DCraft::Texture("assets/textures/mossy_brick.jpg", DCraft::TextureType::DIFFUSE));
     mossy_material->set_ambient_color(glm::vec3(0.1f, 0.1f, 0.1f));
     mossy_material->set_diffuse_color(glm::vec3(0.8f, 0.8f, 0.8f));
     
-    auto* pavement_material = new DCraft::LambertMaterial("Pavement");
+    auto* pavement_material = new DCraft::Material("Pavement");
     pavement_material->set_texture("assets/textures/brick_pavement.jpg", DCraft::TextureType::DIFFUSE);
     pavement_material->set_ambient_color(glm::vec3(0.1f, 0.1f, 0.1f));
     pavement_material->set_diffuse_color(glm::vec3(0.8f, 0.8f, 0.8f));
     
-    auto* miquel_material = new DCraft::LambertMaterial("Miquel");
+    auto* miquel_material = new DCraft::Material("Miquel");
     miquel_material->set_texture("assets/textures/miquel.jpg", DCraft::TextureType::DIFFUSE);
     
-    auto* denzel_material = new DCraft::LambertMaterial("Eljto");
+    auto* denzel_material = new DCraft::Material("Eljto");
     denzel_material->set_texture("assets/textures/eltjo.jpg", DCraft::TextureType::DIFFUSE);
     
     // Create Phong materials (diffuse + specular)
-    auto* plastic_green_material = new DCraft::PhongMaterial("PlasticGreen");
+    auto* plastic_green_material = new DCraft::Material("PlasticGreen");
     plastic_green_material->set_texture("assets/textures/plastic_green.jpg", DCraft::TextureType::DIFFUSE);
     plastic_green_material->set_ambient_color(glm::vec3(0.0f, 0.1f, 0.0f));
     plastic_green_material->set_diffuse_color(glm::vec3(0.0f, 0.8f, 0.0f));
     plastic_green_material->set_specular_color(glm::vec3(0.8f));
     plastic_green_material->set_shininess(64.0f);
     
-    auto* plastic_blue_material = new DCraft::PhongMaterial("PlasticBlue");
+    auto* plastic_blue_material = new DCraft::Material("PlasticBlue");
     plastic_blue_material->set_texture("assets/textures/plastic_blue.jpg", DCraft::TextureType::DIFFUSE);
     plastic_blue_material->set_ambient_color(glm::vec3(0.0f, 0.0f, 1.0f));
     plastic_blue_material->set_diffuse_color(glm::vec3(0.0f, 0.0f, 0.8f));

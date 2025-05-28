@@ -6,6 +6,7 @@
 
 #include "Addons/SceneManager.h"
 #include "Editor/SceneEditorOverlay.h"
+#include "Graphics/Managers/ShaderManager.hpp"
 
 
 namespace DCraft {
@@ -47,13 +48,12 @@ namespace DCraft {
     public:
         explicit Application(int width = 800, int height = 600, std::string title = "OpenGL Application");
 
+
         ~Application();
 
 
         [[nodiscard]] int get_window_width() const { return window_info_.width; }
         [[nodiscard]] int get_window_height() const { return window_info_.height; }
-
-        uint32_t create_shader_program(const std::string &vertex_path, const std::string &fragment_path);
 
         Application(const Application &) = delete;
 
@@ -128,8 +128,12 @@ namespace DCraft {
         [[nodiscard]] bool is_special_key_pressed(unsigned char key) const { return keys_[key + 256]; }
         [[nodiscard]] float get_delta_time() const { return delta_time_; }
         void set_callbacks(const ApplicationCallbacks &callbacks) { callbacks_ = callbacks; }
-        void set_shader_program(uint32_t shader_program_id) { shader_program_id_ = shader_program_id; }
-        [[nodiscard]] uint32_t get_shader_program() const { return shader_program_id_; }
+        
+        ShaderManager& get_shader_manager() { return shader_manager_; }
+        uint32_t create_shader_program(const std::string &vertex_path, const std::string &fragment_path) {
+            return shader_manager_.load_shader_from_files(vertex_path, fragment_path);
+        }
+        
         static Application &get_instance() { return *instance_; }
     protected:
         SceneManager scene_manager_;
@@ -140,7 +144,7 @@ namespace DCraft {
         ApplicationCallbacks callbacks_;
         WindowInfo window_info_;
         std::string title_;
-        uint32_t shader_program_id_;
+        ShaderManager shader_manager_;
 
         std::array<bool, 512> active_keys_before_mode_change_; 
         Object3D* selected_node_ = nullptr;
@@ -156,7 +160,6 @@ namespace DCraft {
 
         // Programs
         std::vector<Camera *> cameras_;
-        std::vector<uint32_t> shader_programs_;
 
         // Mouse things
         int last_mouse_x_ = window_info_.width / 2;
