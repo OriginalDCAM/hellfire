@@ -1,16 +1,14 @@
 #include "DCraft/Graphics/Renderer.h"
 #include "GL/glew.h"
-
-#include <glm/gtc/type_ptr.inl>
+#include <glm/gtc/type_ptr.hpp>  // Fixed: was .inl
+#include <unordered_set>
 
 namespace DCraft {
     class PointLight;
 
-    Renderer::Renderer(uint32_t program_id_) : program_id_(program_id_) {
-        uniform_mvp_ = glGetUniformLocation(program_id_, "MVP");
-
+    Renderer::Renderer(uint32_t fallback_program_id) : fallback_program_id_(fallback_program_id) {
         OGLRendererContext *ogl_context = new OGLRendererContext();
-        ogl_context->default_shader_program = program_id_;
+        ogl_context->default_shader_program = fallback_program_id;
         context_ = static_cast<void *>(ogl_context);
     }
 
@@ -21,7 +19,6 @@ namespace DCraft {
             context_ = nullptr;
         }
     }
-
 
     void Renderer::collect_lights(Object3D *object_3d, std::vector<DirectionalLight *> &dir_lights,
                                   std::vector<PointLight *> &point_lights) {
@@ -38,20 +35,65 @@ namespace DCraft {
         }
     }
 
-    void Renderer::upload_lights(uint32_t shader_program, const std::vector<DirectionalLight *> &dir_lights,
-                                 const std::vector<PointLight *> &point_lights) {
-        glUniform1i(glGetUniformLocation(shader_program, "numDirectionalLights"), static_cast<int>(dir_lights.size()));
-        glUniform1i(glGetUniformLocation(shader_program, "numPointLights"), static_cast<int>(point_lights.size()));
+    void Renderer::collect_unique_shaders(Object3D* object, std::unordered_set<uint32_t>& shaders) {
+        // Check if this object has a material with a shader
+        if (object->has_mesh()) {
+            Mesh* mesh = object->get_mesh();
+            if (mesh && mesh->get_material()) {
+                uint32_t shader_id = mesh->get_material()->get_compiled_shader_id();
+                if (shader_id != 0) {
+                    shaders.insert(shader_id);
+                }
+            }
+        }
+
+        // Check children
+        for (auto* child : object->get_children()) {
+            collect_unique_shaders(child, shaders);
+        }
+    }
+
+    void Renderer::upload_lights_to_shader(uint32_t shader_program, 
+                                          const std::vector<DirectionalLight *> &dir_lights,
+                                          const std::vector<PointLight *> &point_lights) {
+        glUseProgram(shader_program);
+
+        // Upload light counts
+        GLint dir_count_loc = glGetUniformLocation(shader_program, "numDirectionalLights");
+        if (dir_count_loc != -1) {
+            glUniform1i(dir_count_loc, static_cast<int>(std::min(dir_lights.size(), size_t(4)))); // MAX_DIRECTIONAL_LIGHTS = 4
+        }
+
+        GLint point_count_loc = glGetUniformLocation(shader_program, "numPointLights");
+        if (point_count_loc != -1) {
+            glUniform1i(point_count_loc, static_cast<int>(std::min(point_lights.size(), size_t(8)))); // MAX_POINT_LIGHTS = 8
+        }
 
         // Upload each directional light to shader
-        for (size_t i = 0; i < dir_lights.size(); i++) {
+        for (size_t i = 0; i < std::min(dir_lights.size(), size_t(4)); i++) {
             dir_lights[i]->upload_to_shader(shader_program, i);
         }
 
         // Upload each point light to shader
-        for (size_t i = 0; i < point_lights.size(); i++) {
+        for (size_t i = 0; i < std::min(point_lights.size(), size_t(8)); i++) {
             point_lights[i]->upload_to_shader(shader_program, i);
         }
+    }
+
+    void Renderer::upload_global_uniforms_to_shader(uint32_t shader_program, Camera& camera) {
+        glUseProgram(shader_program);
+
+        // Pass camera position for specular calculation
+        GLint view_pos_loc = glGetUniformLocation(shader_program, "viewPos");
+        if (view_pos_loc != -1) {
+            glUniform3fv(view_pos_loc, 1, glm::value_ptr(camera.get_position()));
+        }
+
+        // You can add other global uniforms here like:
+        // - Time
+        // - Screen resolution
+        // - Global fog settings
+        // etc.
     }
 
     void Renderer::render(Object3D &scene, Camera &camera) {
@@ -60,25 +102,33 @@ namespace DCraft {
         std::vector<PointLight *> point_lights;
         collect_lights(&scene, dir_lights, point_lights);
 
-        // Activate shader
-        glUseProgram(program_id_);
+        // Collect all unique shaders used in the scene
+        std::unordered_set<uint32_t> unique_shaders;
+        collect_unique_shaders(&scene, unique_shaders);
 
-        // Set view/projection matrices
+        // Add fallback shader if no materials have shaders
+        if (unique_shaders.empty()) {
+            unique_shaders.insert(fallback_program_id_);
+        }
+
+        // Upload lights and global uniforms to all shaders that will be used
+        for (uint32_t shader_id : unique_shaders) {
+            if (shader_id != 0) {
+                upload_lights_to_shader(shader_id, dir_lights, point_lights);
+                upload_global_uniforms_to_shader(shader_id, camera);
+            }
+        }
+
+        // Set view/projection matrices (these will be set per-object in draw calls)
         glm::mat4 view = camera.get_view_matrix();
         glm::mat4 projection = camera.get_projection_matrix();
 
-        // Pass camera position for specular calculation
-        glUniform3fv(glGetUniformLocation(program_id_, "viewPos"), 1, glm::value_ptr(camera.get_position()));
-
-        // Upload all the lights to the shader
-        upload_lights(program_id_, dir_lights, point_lights);
-
-        // Draw the scene
-        scene.draw(view, projection, program_id_, context_);
+        // Draw the scene - each object will use its material's shader
+        scene.draw(view, projection, fallback_program_id_, context_);
     }
 
     uint32_t Renderer::get_default_shader() const {
-        return program_id_;
+        return fallback_program_id_;
     }
 
     void *Renderer::get_context() const {
@@ -87,12 +137,12 @@ namespace DCraft {
 
     void Renderer::begin_frame() {
         // Setup frame
-        glClearColor(0.1f, 0.2f, 0.3f, 1.0);
+        glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
-        
     }
 
     void Renderer::end_frame() {
+        // End frame cleanup if needed
     }
 }

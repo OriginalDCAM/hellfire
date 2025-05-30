@@ -13,17 +13,19 @@ namespace DCraft {
     class Material {
     public:
         enum class PropertyType {
-            FLOAT, VEC3, VEC4, TEXTURE, BOOL, INT, MAT3, MAT4
+            FLOAT, VEC2, VEC3, VEC4, TEXTURE, BOOL, INT, MAT3, MAT4
         };
 
         struct Property {
             PropertyType type;
             std::string name;
-            std::variant<float, glm::vec3, glm::vec4, Texture*, bool, int, glm::mat3, glm::mat4> value;
+            std::variant<float, glm::vec2, glm::vec3, glm::vec4, Texture*, bool, int, glm::mat3, glm::mat4> value;
 
             std::string uniform_name;
 
+            Property() {}
             Property(const std::string& name, float value, const std::string& uniform = "") : type(PropertyType::FLOAT), name(name), value(value), uniform_name(uniform.empty() ? name : uniform) {}
+            Property(const std::string& name, const glm::vec2& value, const std::string& uniform = "") : type(PropertyType::VEC2), value(value), uniform_name(uniform.empty() ? name : uniform), name(name) {}
             Property(const std::string& name, const glm::vec3& value, const std::string& uniform = "") : type(PropertyType::VEC3), value(value), uniform_name(uniform.empty() ? name : uniform), name(name) {}
             Property(const std::string& name, const glm::vec4& value, const std::string& uniform = "") : name(name), type(PropertyType::VEC4), value(value), uniform_name(uniform.empty() ? name : uniform){}
             Property(const std::string& name, Texture* value, const std::string& uniform = "") : name(name), type(PropertyType::TEXTURE), value(value), uniform_name(uniform.empty() ? name : uniform){}
@@ -61,6 +63,10 @@ namespace DCraft {
 
         // ===Generic property setters===
         void set_property(const std::string& name, const float value, const std::string& uniform_name = "") {
+            properties_[name] = Property(name, value, uniform_name);
+        }
+
+        void set_property(const std::string& name, const glm::vec2& value, const std::string& uniform_name = "") {
             properties_[name] = Property(name, value, uniform_name);
         }
 
@@ -144,6 +150,27 @@ namespace DCraft {
         void set_specular_color(const glm::vec3& color) { set_property("specularColor", color); }
         void set_shininess(const float shininess) { set_property("shininess", shininess); }
         void set_diffuse_texture(const Texture* texture) { set_property("diffuseTexture", texture); }
+
+        void set_uv_tiling(const glm::vec2& tiling) { 
+            set_property("uvTiling", tiling); 
+        }
+    
+        void set_uv_tiling(float x, float y) { 
+            set_uv_tiling(glm::vec2(x, y)); 
+        }
+    
+        void set_uv_offset(const glm::vec2& offset) { 
+            set_property("uvOffset", offset); 
+        }
+    
+        void set_uv_rotation(float rotation) { 
+            set_property("uvRotation", rotation); 
+        }
+    
+        // Quick presets for common tiling patterns
+        void set_brick_tiling() { set_uv_tiling(4.0f, 2.0f); }
+        void set_tile_pattern() { set_uv_tiling(8.0f, 8.0f); }
+        void set_wood_planks() { set_uv_tiling(1.0f, 4.0f); }
 
         void set_diffuse_texture(Texture* texture) { 
             set_property("diffuseTexture", texture); 

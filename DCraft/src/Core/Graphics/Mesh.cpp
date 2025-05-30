@@ -68,8 +68,6 @@ namespace DCraft {
 
     void Mesh::draw() const {
         if (!material) return;
-        uint32_t shader_program = material->get_shader();
-        glUseProgram(shader_program);
         
         VAO->bind();
 

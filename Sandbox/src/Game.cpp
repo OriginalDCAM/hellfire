@@ -3,7 +3,6 @@
 //
 
 #include <Dcraft/Graphics/Primitives/Cube.h>
-#include <DCraft/Graphics/Primitives/Quad.h>
 
 #include "Game.h"
 
@@ -14,8 +13,8 @@ void Game::setup_callbacks(DCraft::Application &app) {
     DCraft::ApplicationCallbacks application_callbacks;
 
     application_callbacks.init = [this](DCraft::Application &app) { init(app); };
-    application_callbacks.setup = [this](DCraft::SceneManager &sm, const DCraft::WindowInfo &info) {
-        setup(sm, info);
+    application_callbacks.setup = [this](DCraft::SceneManager &sm, const DCraft::WindowInfo &info, DCraft::ShaderManager &shader_manager) {
+        setup(sm, info, shader_manager);
     };
     application_callbacks.update = [this](float dt) { update(dt); };
     application_callbacks.process_input = [this](DCraft::Application &app, float dt) {
@@ -33,11 +32,7 @@ void Game::init(DCraft::Application &app) {
     glutSetCursor(GLUT_CURSOR_NONE);
     glutWarpPointer(app.get_window_width() / 2, app.get_window_height() / 2);
 
-    uint32_t shader_program = app.create_shader_program("assets/shaders/vertexshader.vert",
-                                                        "assets/shaders/fragmentshader.frag");
-
     app.toggle_fullscreen();
-    app.set_shader_program(shader_program);
 }
 
 // Animation setup 
@@ -160,11 +155,11 @@ void Game::setup_cameras_for_scene(const std::string &scene_name) {
 }
 
 
-void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
+void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window, DCraft::ShaderManager &shader_manager) {
     scene_manager_ = &sm;
 
     // Scene loading with code behind
-    scenes_["Sandbox"] = load_scene(sm, window);
+    scenes_["Sandbox"] = load_scene(sm, window, shader_manager);
     // Scene loading from file path
     // scenes_["Terrain"] = sm.load_scene("assets/scenes/Test Scene.json");
 

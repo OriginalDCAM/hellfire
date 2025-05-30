@@ -45,10 +45,6 @@ namespace DCraft {
             delete camera;
         }
 
-        // Cleanup the shader programs
-        for (uint32_t sp: shader_programs_) {
-            glDeleteProgram(sp);
-        }
 
         // Cleanup application
         if (instance_ == this) {
@@ -56,65 +52,6 @@ namespace DCraft {
         }
 
         std::clog << "Application destroyed" << std::endl;
-    }
-
-    uint32_t Application::create_shader_program(const std::string &vertex_path, const std::string &fragment_path) {
-        std::string base_path;
-
-#ifdef _WIN32
-        char exePath[MAX_PATH];
-        GetModuleFileNameA(nullptr, exePath, MAX_PATH);
-        base_path = std::string(exePath);
-        base_path = base_path.substr(0, base_path.find_last_of("\\/")) + "/";
-#endif
-
-        std::string abs_vertex_path = base_path + vertex_path;
-        std::string abs_fragment_path = base_path + fragment_path;
-
-        std::cout << "Loading vertex shader from: " << abs_vertex_path << std::endl;
-        std::cout << "Loading fragment shader from: " << abs_fragment_path << std::endl;
-
-        // Read shader files
-        char *vertex_source = glsl::readFile(abs_vertex_path.c_str());
-        if (!vertex_source) {
-            std::cerr << "Failed to read vertex shader" << std::endl;
-            return 0;
-        }
-
-        GLuint vertex_shader = glsl::makeVertexShader(vertex_source);
-        delete[] vertex_source; // Free the memory
-
-        if (vertex_shader == 0) {
-            return 0;
-        }
-
-        char *fragment_source = glsl::readFile(abs_fragment_path.c_str());
-        if (!fragment_source) {
-            std::cerr << "Failed to read fragment shader" << std::endl;
-            glDeleteShader(vertex_shader);
-            return 0;
-        }
-
-        GLuint fragment_shader = glsl::makeFragmentShader(fragment_source);
-        delete[] fragment_source; // Free the memory
-
-        if (fragment_shader == 0) {
-            glDeleteShader(vertex_shader);
-            return 0;
-        }
-
-        uint32_t program_id = glsl::makeShaderProgram(vertex_shader, fragment_shader);
-
-        // Shaders are no longer needed after the program is linked
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
-
-        if (program_id != 0) {
-            // Store for cleanup later
-            shader_programs_.push_back(program_id);
-        }
-
-        return program_id;
     }
 
     void Application::initialize(int argc, char **argv) {
@@ -167,7 +104,8 @@ namespace DCraft {
             callbacks_.init(*this);
         }
 
-        renderer_ = new Renderer(shader_program_id_);
+        uint32_t fallback_shader = ensure_fallback_shader();
+        renderer_ = new Renderer(fallback_shader);
         std::clog << "Renderer setup succeeded" << '\n';
 
         load_scene();
@@ -368,7 +306,7 @@ namespace DCraft {
 
     void Application::load_scene() {
         if (callbacks_.setup) {
-            callbacks_.setup(scene_manager_, window_info_);
+            callbacks_.setup(scene_manager_, window_info_, shader_manager_);
         } else {
             scene_manager_.create_default_scene();
         }
@@ -432,6 +370,22 @@ namespace DCraft {
         glutTimerFunc(200, [](int value) {
             if (value == 1) is_transitioning = false;
         }, 1);
+    }
+
+    uint32_t Application::ensure_fallback_shader() {
+        // Try to load a default shader, create basic one if needed
+        try {
+            return shader_manager_.load_shader_from_files(
+                "assets/shaders/standard.vert",
+                "assets/shaders/lambert.frag"
+            );
+        } catch (const std::exception& e) {
+            std::cerr << "Warning: Could not load default shaders: " << e.what() << std::endl;
+            std::cerr << "Using minimal fallback shader" << std::endl;
+        
+            // Create a very basic shader programmatically or return 0
+            return 0;
+        }
     }
 
     Application *Application::instance_ = nullptr;

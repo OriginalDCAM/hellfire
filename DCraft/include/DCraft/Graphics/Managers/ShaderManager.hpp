@@ -11,7 +11,6 @@
 #include <stack>
 #include <iostream>
 
-#include "DCraft/Application.h"
 #include "DCraft/Graphics/Materials/Material.h"
 #include "DCraft/Graphics/OGL/glsl.h"
 #include <GL/glew.h>
@@ -125,7 +124,7 @@ namespace DCraft {
             base_path = base_path.substr(0, base_path.find_last_of("\\/")) + "/";
 #endif
             
-            std::string abs_path = base_path + path;
+            std::string abs_path = path; //  base_path + path 
             std::cout << "Loading shader from: " << abs_path << std::endl;
             
             // Use your existing glsl::readFile function
@@ -206,20 +205,20 @@ namespace DCraft {
                 
                 switch (material_type) {
                     case 0: // Lambert
-                        variant.vertex_path = "assets/shaders/standard.vert";
-                        variant.fragment_path = "assets/shaders/lambert.frag";
+                        variant.vertex_path = "./assets/shaders/standard.vert";
+                        variant.fragment_path = "./assets/shaders/lambert.frag";
                         break;
                     case 1: // Phong
-                        variant.vertex_path = "assets/shaders/standard.vert";
-                        variant.fragment_path = "assets/shaders/phong.frag";
+                        variant.vertex_path = "./assets/shaders/standard.vert";
+                        variant.fragment_path = "./assets/shaders/phong.frag";
                         break;
                     case 2: // PBR
-                        variant.vertex_path = "assets/shaders/standard.vert";
-                        variant.fragment_path = "assets/shaders/pbr.frag";
+                        variant.vertex_path = "./assets/shaders/standard.vert";
+                        variant.fragment_path = "./assets/shaders/pbr.frag";
                         break;
                     default:
-                        variant.vertex_path = "assets/shaders/standard.vert";
-                        variant.fragment_path = "assets/shaders/lambert.frag";
+                        variant.vertex_path = "./assets/shaders/standard.vert";
+                        variant.fragment_path = "./assets/shaders/lambert.frag";
                         break;
                 }
                 

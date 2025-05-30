@@ -9,13 +9,14 @@
 
 class Game {
 public:
-    Game() {}
+    Game() {
+    }
 
     ~Game() {
         // Scenemanager handles deletion of objects for us
     }
 
-    void setup_callbacks(DCraft::Application &app );
+    void setup_callbacks(DCraft::Application &app);
 
     bool drone_key_processed = false;
     bool drone_mode_active = false;
@@ -27,7 +28,7 @@ public:
 
     void setup_animations();
 
-    void setup(DCraft::SceneManager &sm, DCraft::WindowInfo window);
+    void setup(DCraft::SceneManager &sm, DCraft::WindowInfo window, DCraft::ShaderManager &shader_manager);
 
 
     // Input handler
@@ -41,26 +42,26 @@ public:
 
 private:
     DCraft::SceneManager *scene_manager_;
-    std::unordered_map<std::string, DCraft::Scene*> scenes_;
+    std::unordered_map<std::string, DCraft::Scene *> scenes_;
     std::string active_scene_name_ = "Sandbox";
-    
-    void on_scene_activated(DCraft::Scene* scene);
 
-    void setup_cameras_for_scene(const std::string& scene_name);
+    void on_scene_activated(DCraft::Scene *scene);
+
+    void setup_cameras_for_scene(const std::string &scene_name);
 
     struct SceneCameras {
-        DCraft::PerspectiveCamera* main_camera = nullptr;
-        DCraft::PerspectiveCamera* drone_camera = nullptr;
-        DCraft::Object3D* main_camera_visual = nullptr;
-        DCraft::Object3D* drone_camera_visual = nullptr;
+        DCraft::PerspectiveCamera *main_camera = nullptr;
+        DCraft::PerspectiveCamera *drone_camera = nullptr;
+        DCraft::Object3D *main_camera_visual = nullptr;
+        DCraft::Object3D *drone_camera_visual = nullptr;
     };
 
     DCraft::AnimationSystem animation_system_;
+
     SceneCameras &get_active_scene_cameras();
+
     std::unordered_map<std::string, SceneCameras> scene_cameras_;
 };
-
-
 
 
 #endif //GAME_H
