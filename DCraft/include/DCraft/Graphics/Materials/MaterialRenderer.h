@@ -80,8 +80,8 @@ namespace DCraft {
                         }
                         
                         // Also set usage flag (for backwards compatibility with your existing shaders)
-                        std::string use_flag = "use" + capitalize_first(uniform_name);
-                        GLint flag_location = glGetUniformLocation(shader_program, use_flag.c_str());
+                        std::string_view use_flag = "use" + capitalize_first(uniform_name);
+                        GLint flag_location = glGetUniformLocation(shader_program, use_flag.data());
                         if (flag_location != -1) {
                             glUniform1i(flag_location, 1);
                         }
@@ -89,8 +89,8 @@ namespace DCraft {
                         texture_unit++;
                     } else {
                         // Set usage flag to false if no texture
-                        std::string use_flag = "use" + capitalize_first(uniform_name);
-                        GLint flag_location = glGetUniformLocation(shader_program, use_flag.c_str());
+                        std::string_view use_flag = "use" + capitalize_first(uniform_name);
+                        GLint flag_location = glGetUniformLocation(shader_program, use_flag.data());
                         if (flag_location != -1) {
                             glUniform1i(flag_location, 0);
                         }

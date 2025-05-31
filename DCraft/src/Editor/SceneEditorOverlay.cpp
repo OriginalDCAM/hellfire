@@ -13,7 +13,7 @@
 #include "DCraft/Graphics/Lights/DirectionalLight.h"
 #include "DCraft/Graphics/Lights/Light.h"
 #include "DCraft/Graphics/Lights/PointLight.h"
-#include "DCraft/Graphics/Primitives/Shape3D.h"
+#include "DCraft/Graphics/Primitives/MeshRenderer.h"
 #include "DCraft/Editor/Components/MenuBarComponent.h"
 
 #include <filesystem>
@@ -57,7 +57,7 @@ namespace DCraft::Editor {
             render_light_properties(light);
         } else if (auto *camera = dynamic_cast<Camera *>(object)) {
             render_camera_properties(camera);
-        } else if (auto *shape = dynamic_cast<Shape3D *>(object)) {
+        } else if (auto *shape = dynamic_cast<MeshRenderer *>(object)) {
             render_shape_properties(shape);
         }
 
@@ -69,111 +69,113 @@ namespace DCraft::Editor {
     }
 
     void SceneEditorOverlay::render() {
-        MenuBarComponent menu_bar_component;
-        menu_bar_component.init(scene_manager_, command_history_, current_command_index_);
-        menu_bar_component.render();
-
-        ImGui::Begin("Scene Hierarchy");
-        // Get scenes from scene manager
-        
-        auto &scenes = scene_manager_.get_objects(); 
-        ImGui::Text("Number of scenes: %d", scenes.size());
-
-        if (ImGui::BeginTable("ScenesTable", 1)) {
-            ImGui::TableSetupColumn("Scenes and Objects");
-            ImGui::TableHeadersRow();
-
-            // Render each scene
-            for (auto *scene: scenes) {
-                if (!scene) continue;
-
-                ImGui::TableNextRow();
-                ImGui::TableNextColumn();
-
-                // Render the scene as a tree node
-                bool node_open = ImGui::TreeNode(scene->get_name().c_str());
-
-                if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-                    ImGui::OpenPopup(("SceneContextMenu_" + scene->get_name()).c_str());
-                }
-
-                // Create context menu
-                if (ImGui::BeginPopup(("SceneContextMenu_" + scene->get_name()).c_str())) {
-                    if (scene_manager_.get_active_scene() != scene) {
-                        if (ImGui::MenuItem("Activate Scene")) {
-                            // Call method to set this as the active scene
-                            scene_manager_.set_active_scene(static_cast<Scene *>(scene));
-                        }
-                    }
-                    if (ImGui::MenuItem("Remove Scene")) {
-                        // Check if the scene to be removed is the active scene
-                        bool is_active = scene_manager_.get_active_scene() == scene;
-
-                        // Find another scene to activate if this is the active scene
-                        Scene *new_active_scene = nullptr;
-                        if (is_active) {
-                            // Get all scenes and find one that's not this one
-                            auto &all_scenes = scene_manager_.get_objects();
-                            for (auto *potential_scene: all_scenes) {
-                                if (potential_scene && potential_scene != scene) {
-                                    new_active_scene = static_cast<Scene *>(potential_scene);
-                                    break;
-                                }
-                            }
-                        }
-
-                        // Truncate any redoable commands
-                        if (current_command_index_ < command_history_.size() - 1) {
-                            command_history_.resize(current_command_index_ + 1);
-                        }
-
-                        // Store removal command
-                        command_history_.push_back(std::make_unique<RemoveObjectCommand>(
-                            scene_manager_, scene->get_parent(), scene));
-
-                        // Execute the removal command
-                        command_history_.back()->execute();
-
-                        // Update index to point to the new command
-                        current_command_index_ = command_history_.size() - 1;
-
-                        // If we found another scene to activate and the removed scene was active,
-                        // set the new active scene
-                        if (is_active && new_active_scene) {
-                            scene_manager_.set_active_scene(new_active_scene);
-                        }
-                        ImGui::CloseCurrentPopup();
-                        ImGui::EndPopup();
-                        continue; 
-                    }
-                    ImGui::EndPopup();
-                }
-
-                if (node_open) {
-                    // Now render the objects in this scene
-                    auto &sceneObjects = scene->get_children(); // Objects in the scene
-
-                    for (auto *obj: sceneObjects) {
-                        if (!obj) continue;
-
-                        // Render each object in the scene
-                        ImGui::Indent();
-                        render_object_node(obj);
-                        ImGui::Unindent();
-                    }
-
-                    ImGui::TreePop();
-                }
-            }
-            ImGui::EndTable();
-        }
-
-        ImGui::End();
-
-
-        if (selected_node_) {
-            render_object_properties(selected_node_);
-        }
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+        ImGui::ShowDemoWindow();
+        // MenuBarComponent menu_bar_component;
+        // menu_bar_component.init(scene_manager_, command_history_, current_command_index_);
+        // menu_bar_component.render();
+        //
+        // ImGui::Begin("Scene Hierarchy");
+        // // Get scenes from scene manager
+        //
+        // auto &scenes = scene_manager_.get_objects(); 
+        // ImGui::Text("Number of scenes: %d", scenes.size());
+        //
+        // if (ImGui::BeginTable("ScenesTable", 1)) {
+        //     ImGui::TableSetupColumn("Scenes and Objects");
+        //     ImGui::TableHeadersRow();
+        //
+        //     // Render each scene
+        //     for (auto *scene: scenes) {
+        //         if (!scene) continue;
+        //
+        //         ImGui::TableNextRow();
+        //         ImGui::TableNextColumn();
+        //
+        //         // Render the scene as a tree node
+        //         bool node_open = ImGui::TreeNode(scene->get_name().c_str());
+        //
+        //         if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+        //             ImGui::OpenPopup(("SceneContextMenu_" + scene->get_name()).c_str());
+        //         }
+        //
+        //         // Create context menu
+        //         if (ImGui::BeginPopup(("SceneContextMenu_" + scene->get_name()).c_str())) {
+        //             if (scene_manager_.get_active_scene() != scene) {
+        //                 if (ImGui::MenuItem("Activate Scene")) {
+        //                     // Call method to set this as the active scene
+        //                     scene_manager_.set_active_scene(static_cast<Scene *>(scene));
+        //                 }
+        //             }
+        //             if (ImGui::MenuItem("Remove Scene")) {
+        //                 // Check if the scene to be removed is the active scene
+        //                 bool is_active = scene_manager_.get_active_scene() == scene;
+        //
+        //                 // Find another scene to activate if this is the active scene
+        //                 Scene *new_active_scene = nullptr;
+        //                 if (is_active) {
+        //                     // Get all scenes and find one that's not this one
+        //                     auto &all_scenes = scene_manager_.get_objects();
+        //                     for (auto *potential_scene: all_scenes) {
+        //                         if (potential_scene && potential_scene != scene) {
+        //                             new_active_scene = static_cast<Scene *>(potential_scene);
+        //                             break;
+        //                         }
+        //                     }
+        //                 }
+        //
+        //                 // Truncate any redoable commands
+        //                 if (current_command_index_ < command_history_.size() - 1) {
+        //                     command_history_.resize(current_command_index_ + 1);
+        //                 }
+        //
+        //                 // Store removal command
+        //                 command_history_.push_back(std::make_unique<RemoveObjectCommand>(
+        //                     scene_manager_, scene->get_parent(), scene));
+        //
+        //                 // Execute the removal command
+        //                 command_history_.back()->execute();
+        //
+        //                 // Update index to point to the new command
+        //                 current_command_index_ = command_history_.size() - 1;
+        //
+        //                 // If we found another scene to activate and the removed scene was active,
+        //                 // set the new active scene
+        //                 if (is_active && new_active_scene) {
+        //                     scene_manager_.set_active_scene(new_active_scene);
+        //                 }
+        //                 ImGui::CloseCurrentPopup();
+        //                 ImGui::EndPopup();
+        //                 continue; 
+        //             }
+        //             ImGui::EndPopup();
+        //         }
+        //
+        //         if (node_open) {
+        //             // Now render the objects in this scene
+        //             auto &sceneObjects = scene->get_children(); // Objects in the scene
+        //
+        //             for (auto *obj: sceneObjects) {
+        //                 if (!obj) continue;
+        //
+        //                 // Render each object in the scene
+        //                 ImGui::Indent();
+        //                 render_object_node(obj);
+        //                 ImGui::Unindent();
+        //             }
+        //
+        //             ImGui::TreePop();
+        //         }
+        //     }
+        //     ImGui::EndTable();
+        // }
+        //
+        // ImGui::End();
+        //
+        //
+        // if (selected_node_) {
+        //     render_object_properties(selected_node_);
+        // }
     }
 
     void SceneEditorOverlay::render_object_node(Object3D *object) {
@@ -270,7 +272,7 @@ namespace DCraft::Editor {
         }
     }
 
-    void SceneEditorOverlay::render_shape_properties(Shape3D *shape) const {
+    void SceneEditorOverlay::render_shape_properties(MeshRenderer *shape) const {
         ImGui::Begin("Material Editor");
 
         if (!shape) {

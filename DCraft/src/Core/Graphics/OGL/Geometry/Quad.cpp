@@ -3,7 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace DCraft {
-    Quad::Quad(const std::string &name) : Shape3D(name) {
+    Quad::Quad(const std::string &name) : MeshRenderer(name) {
         std::vector<Vertex> vertices_data;
         std::vector<unsigned int> indices_data;
         std::vector<Texture *> texture_data = {};
@@ -50,7 +50,7 @@ namespace DCraft {
     }
 
     json Quad::to_json() {
-        json j = Shape3D::to_json();
+        json j = MeshRenderer::to_json();
         j["geometry"] = "plane";
         return j;
     }

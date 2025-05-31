@@ -52,6 +52,11 @@ uniform float uvRotation = 0.0;
 // Texture filtering mode
 uniform int textureWrapMode = 0; // 0=repeat, 1=clamp, 2=mirror
 
+// Transparency uniforms
+uniform float alpha = 1.0;
+uniform float transparency = 1.0;
+uniform bool useTransparency = false;
+
 vec2 transformUV(vec2 uv) {
     // Apply offset first
     uv += uvOffset;
@@ -123,6 +128,15 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse) {
     return diffuseResult;
 }
 
+float near = 0.1;
+float far  = 100.0;
+
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));
+}
+
 void main() {
     vec4 diffuseValue;
     if (useDiffuseTexture) {
@@ -155,5 +169,11 @@ void main() {
         result += calcPointLight(pointLights[i], normal, vFragPos, baseColor.rgb);
     }
 
-    fragColor = vec4(result, baseColor.a);
+    // Calculate final alpha
+    float finalAlpha = baseColor.a;
+    if (useTransparency) {
+        finalAlpha *= alpha * transparency;
+    }
+
+    fragColor = vec4(result, finalAlpha);
 }

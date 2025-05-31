@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.inl>
 
 namespace DCraft {
-    Cube::Cube(const std::string& name) : Shape3D(name) {
+    Cube::Cube(const std::string& name) : MeshRenderer(name) {
         std::vector<Vertex> vertices_data;
         std::vector<unsigned int> indices_data;
         std::vector<Texture *> texture_data = {};
@@ -38,10 +38,8 @@ namespace DCraft {
             vertices_data.push_back(v);
         }
 
-        // Make sure to have enough memory to avoid having reallocations of memory 
         indices_data.reserve(std::size(cube_elements));
 
-        // Convert element array to vector
         for (size_t i = 0; i < std::size(cube_elements); ++i) {
             indices_data.push_back(static_cast<unsigned int>(cube_elements[i]));
         }
@@ -59,7 +57,7 @@ namespace DCraft {
     }
 
     json Cube::to_json() {
-        json j = Shape3D::to_json();
+        json j = MeshRenderer::to_json();
         j["geometry"] = "cube";
         return j;
     }

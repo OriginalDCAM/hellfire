@@ -15,20 +15,30 @@ MaterialMap load_material_map(DCraft::ShaderManager& shader_manager) {
     
     // Create Lambert materials using MaterialBuilder
     auto mossy_material = DCraft::MaterialBuilder::create_lambert("Mossy");
-    mossy_material->set_texture("assets/textures/mossy_brick.jpg", DCraft::TextureType::DIFFUSE);
+    mossy_material->set_texture("assets/textures/transparent/blending_transparent_window.png", DCraft::TextureType::DIFFUSE);
     mossy_material->set_uv_tiling(1.0f, 1.0f);
     mossy_material->set_ambient_color(glm::vec3(0.5, 0.5, 0.5));
+    mossy_material->set_transparency(0.99f);
     
     uint32_t mossy_shader = shader_manager.get_shader_for_material(*mossy_material);
     mossy_material->set_compiled_shader_id(mossy_shader);
     materials["MOSSY_MATERIAL"] = std::move(mossy_material);
     
     auto pavement_material = DCraft::MaterialBuilder::create_lambert("Pavement");
-    pavement_material->set_texture("assets/textures/brick_pavement.jpg", DCraft::TextureType::DIFFUSE);
+    pavement_material->set_texture("assets/textures/rocky_terrain.jpg", DCraft::TextureType::DIFFUSE);
     pavement_material->set_uv_tiling(50.0f, 50.0f);
     uint32_t pavement_shader = shader_manager.get_shader_for_material(*pavement_material);
     pavement_material->set_compiled_shader_id(pavement_shader);
     materials["PAVEMENT_MATERIAL"] = std::move(pavement_material);
+
+    
+    auto grass_trans_material = DCraft::MaterialBuilder::create_lambert("Pavement");
+    grass_trans_material->set_texture("assets/textures/transparent/grass.png", DCraft::TextureType::DIFFUSE);
+    grass_trans_material->set_transparency(0.99f);
+    uint32_t grass_shader = shader_manager.get_shader_for_material(*grass_trans_material);
+    grass_trans_material->set_compiled_shader_id(grass_shader);
+    materials["GRASS_MATERIAL"] = std::move(grass_trans_material);
+
     
     auto miquel_material = DCraft::MaterialBuilder::create_lambert("Miquel");
     miquel_material->set_texture("assets/textures/miquel.jpg", DCraft::TextureType::DIFFUSE);
@@ -61,12 +71,12 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     // Materials with proper shader assignment
     MaterialMap materials = load_material_map(shader_manager);
 
-    // Setup lighting (unchanged)
+    // Setup lighting
     auto* sun = new DCraft::DirectionalLight("Sun");
     sun->set_direction(glm::vec3(-0.2f, -0.3f, -0.2f));
     sun->set_position(glm::vec3(20.0f, 30.0f, 20.0f));
     sun->set_color(glm::vec3(1.0f, 0.95f, 0.9f));
-    sun->set_intensity(3.0f);
+    sun->set_intensity(2.5f);
     scene->add(sun);
     
     // auto* blue_light = new DCraft::PointLight("Blue Light");
@@ -95,7 +105,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     // green_light_visual->add(green_light);
     // scene->add(green_light_visual);
 
-    // Cameras (unchanged)
+    // Cameras 
     auto *main_camera = scene->create_camera<DCraft::PerspectiveCamera>(
         "Main Camera", 70.0f, window.aspect_ratio, 0.1f, 400.0f);
     main_camera->set_position(0.0f, 1.0f, 12.0f);
@@ -108,39 +118,43 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     drone_camera->set_target(0.0f, 0.0f, 0.0f);
     scene->add(drone_camera);
     
-    // Objects with corrected material assignments
     auto *cube = new DCraft::Cube("Cool cube");
     cube->set_rotation(glm::vec3(90.0f, 0.0f, 0.0f));
     cube->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     cube->set_position(0.0f, 4.0f, 0.0f);
-    cube->set_material(materials["MOSSY_MATERIAL"].release()); // Should show mossy texture
+    cube->set_material(materials["MOSSY_MATERIAL"].release()); 
     scene->add(cube);
 
     auto *floor = new DCraft::Quad("Floor Quad");
     floor->set_position(0, 0, 0);
     floor->set_scale(glm::vec3(100.0f, 100.0f, 100.0f));
     floor->set_rotation(glm::vec3(-90.0f, 0.0f, 0.0f));
-    floor->set_material(materials["PAVEMENT_MATERIAL"].release()); // Should show pavement texture
+    floor->set_material(materials["PAVEMENT_MATERIAL"].release()); 
     scene->add(floor);
+
+    // auto *grass = new DCraft::Quad("Grass Vegetation");
+    // grass->set_position(0.0f, 1.0f, 5.0f);
+    // grass->set_material(materials["MOSSY_MATERIAL"].release());
+    // scene->add(grass);
 
     auto *main_camera_visual = new DCraft::Cube("Main Camera Visual");
     main_camera_visual->set_name("Main Camera Visual");
     main_camera_visual->set_scale(glm::vec3(0.0f));
     main_camera_visual->set_position(main_camera->get_position());
-    main_camera_visual->set_material(materials["MIQUEL_MATERIAL"].release()); // Should show miquel texture
+    main_camera_visual->set_material(materials["MIQUEL_MATERIAL"].release()); 
     scene->add(main_camera_visual);
 
     auto *drone_camera_visual = new DCraft::Cube("Drone Camera Visual");
     drone_camera_visual->set_name("Drone Camera Visual");
     drone_camera_visual->set_scale(glm::vec3(0.3f));
     drone_camera_visual->set_position(drone_camera->get_position());
-    drone_camera_visual->set_material(materials["ELTJO_MATERIAL"].release()); // Should show eltjo texture
+    drone_camera_visual->set_material(materials["ELTJO_MATERIAL"].release()); 
 
     auto *main_camera_direction = new DCraft::Cube("Main Camera Direction");
     main_camera_direction->set_name("Main Camera Direction");
     main_camera_direction->set_scale(glm::vec3(0.05f, 0.05f, 0.5f));
     main_camera_direction->set_position(0.0f, 0.0f, 1.0f);
-    main_camera_direction->set_material(materials["PLASTIC_GREEN_MATERIAL"].release()); // Should show green
+    main_camera_direction->set_material(materials["PLASTIC_GREEN_MATERIAL"].release()); 
     main_camera_visual->add(main_camera_direction);
 
     auto *drone_camera_direction = new DCraft::Cube("Drone Camera Direction");
@@ -148,7 +162,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     drone_camera_direction->set_scale(glm::vec3(0.05f, 0.05f, 0.5f));
     drone_camera_direction->set_position(0.0f, 0.0f, 1.0f);
     drone_camera_visual->add(drone_camera_direction);
-    drone_camera_direction->set_material(materials["PLASTIC_GREEN_MATERIAL"].release()); // Should show green
+    drone_camera_direction->set_material(materials["PLASTIC_GREEN_MATERIAL"].release());
     scene->add(drone_camera_visual);
 
     return scene;

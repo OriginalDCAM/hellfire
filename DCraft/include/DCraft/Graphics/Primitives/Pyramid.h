@@ -1,10 +1,10 @@
 #pragma once
-#include "Shape3D.h"
+#include "MeshRenderer.h"
 #include "DCraft/Structs/Object3D.h"
 
 namespace DCraft
 {
-    class Pyramid : public Shape3D
+    class Pyramid : public MeshRenderer
     {
         const std::vector<float> vertices = {
             // Plane vertices

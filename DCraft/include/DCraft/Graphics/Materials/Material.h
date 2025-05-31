@@ -166,6 +166,24 @@ namespace DCraft {
         void set_uv_rotation(float rotation) { 
             set_property("uvRotation", rotation); 
         }
+
+        //== Transparency convenience methods===
+        void set_transparency(float alpha) {
+            set_property("alpha", alpha);
+            set_property("useTransparency", alpha < 1.0f);
+        }
+    
+        void set_transparent(bool transparent) {
+            set_property("useTransparency", transparent);
+        }
+    
+        bool is_transparent() const {
+            float alpha = get_property<float>("alpha", 1.0f);
+            float transparency = get_property<float>("transparency", 1.0f);
+            bool use_transparency = get_property<bool>("useTransparency", false);
+        
+            return (alpha < 1.0f) || (transparency < 1.0f) || use_transparency;
+        }
     
         // Quick presets for common tiling patterns
         void set_brick_tiling() { set_uv_tiling(4.0f, 2.0f); }

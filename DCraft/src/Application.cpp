@@ -96,9 +96,6 @@ namespace DCraft {
 
         glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_CONTINUE_EXECUTION);
 
-        // Setup OpenGL state
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
 
         if (callbacks_.init) {
             callbacks_.init(*this);
@@ -106,6 +103,7 @@ namespace DCraft {
 
         uint32_t fallback_shader = ensure_fallback_shader();
         renderer_ = new Renderer(fallback_shader);
+        renderer_->init();
         std::clog << "Renderer setup succeeded" << '\n';
 
         load_scene();
