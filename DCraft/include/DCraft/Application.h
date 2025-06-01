@@ -6,6 +6,7 @@
 
 #include "Addons/SceneManager.h"
 #include "Editor/SceneEditorOverlay.h"
+#include "Graphics/Renderer.h"
 #include "Graphics/Managers/ShaderManager.hpp"
 
 
@@ -131,15 +132,16 @@ namespace DCraft {
         void set_callbacks(const ApplicationCallbacks &callbacks) { callbacks_ = callbacks; }
         
         ShaderManager& get_shader_manager() { return shader_manager_; }
-        uint32_t create_shader_program(const std::string &vertex_path, const std::string &fragment_path) {
-            return shader_manager_.load_shader_from_files(vertex_path, fragment_path);
-        }
+
+        void toggle_editor_mode();
+        bool is_game_mode() const { return game_mode_; }
+        bool is_editor_mode() const { return !game_mode_; }
         
         static Application &get_instance() { return *instance_; }
     protected:
         SceneManager scene_manager_;
         PerspectiveCamera *camera_ = nullptr;
-        Renderer *renderer_ = nullptr;
+        Renderer renderer_;
     private:
         static Application *instance_;
         ApplicationCallbacks callbacks_;
@@ -149,10 +151,11 @@ namespace DCraft {
 
         std::array<bool, 512> active_keys_before_mode_change_; 
         Object3D* selected_node_ = nullptr;
-        Editor::SceneEditorOverlay scene_editor_overlay_;
+        Editor::SceneEditorOverlay editor_overlay_;
 
         // Keys stuff
-        bool game_mode_ = true;
+        bool editor_mode_;
+        bool game_mode_;
         bool keys_[512] = {false};
         bool prev_keys_[512] = {false};
         // Window stuff

@@ -15,42 +15,386 @@
 #include "DCraft/Graphics/Lights/PointLight.h"
 #include "DCraft/Graphics/Primitives/MeshRenderer.h"
 #include "DCraft/Editor/Components/MenuBarComponent.h"
+#include "DCraft/Graphics/Renderer.h"
+#include "DCraft/Structs/Camera.h" // ✅ Add this include for Camera_Movement enum
 
 #include <filesystem>
+#include <iostream> // ✅ Add this for std::cout
+
 namespace fs = std::filesystem;
 
 namespace DCraft::Editor {
+    
+    void SceneEditorOverlay::render() {
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+        render_viewport();
+        render_scene_hierarchy();
+
+        if (selected_node_) {
+            render_object_properties(selected_node_);
+        }
+    }
+
+    void SceneEditorOverlay::render_viewport() {
+        ImGui::Begin("Scene Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+        viewport_focused_ = ImGui::IsWindowFocused();
+
+        ImVec2 viewport_panel_size = ImGui::GetContentRegionAvail();
+
+        if (viewport_panel_size.x < 50.0f) viewport_panel_size.x = 50.0f;
+        if (viewport_panel_size.y < 50.0f) viewport_panel_size.y = 50.0f;
+
+        bool size_changed = (viewport_size_.x != viewport_panel_size.x || viewport_size_.y != viewport_panel_size.y);
+
+        viewport_size_ = viewport_panel_size;
+
+        if (size_changed) {
+            std::cout << "Viewport resized to " << viewport_size_.x << "x" << viewport_size_.y << std::endl;
+            viewport_needs_update_ = true;
+
+            if (renderer_) {
+                renderer_->resize_scene_framebuffer(
+                    static_cast<uint32_t>(viewport_size_.x),
+                    static_cast<uint32_t>(viewport_size_.y)
+                );
+            }
+        }
+
+        if (!active_scene_) {
+            active_scene_ = scene_manager_.get_active_scene();
+        }
+
+        bool needs_render = check_if_render_needed();
+
+        // ✅ FIX: Only render when needed, not every frame
+        if (active_scene_ && active_camera_ && renderer_ && needs_render) {
+            renderer_->render_to_texture(*active_scene_, *active_camera_, 
+                                       static_cast<uint32_t>(viewport_size_.x), 
+                                       static_cast<uint32_t>(viewport_size_.y));
+            
+            cached_scene_texture_ = renderer_->get_scene_texture();
+            viewport_needs_update_ = false;
+            scene_changed_ = false;
+
+            last_camera_position_ = active_camera_->get_position();
+            last_camera_rotation_ = active_camera_->get_rotation();
+        }
+
+        // ✅ Always display the cached texture (whether we just rendered or not)
+        if (cached_scene_texture_ > 0) {
+            ImTextureID tex_id = (ImTextureID)(intptr_t)cached_scene_texture_;
+            ImGui::Image(tex_id, viewport_size_, ImVec2(0, 1), ImVec2(1, 0));
+        
+            if (ImGui::IsItemHovered()) {
+                handle_viewport_input();
+            }
+        } else {
+            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "No scene texture available");
+        }
+    
+        // Display FPS and render info
+        ImGui::SetCursorPos(ImVec2(10, ImGui::GetWindowHeight() - 50));
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%.0fx%.0f", viewport_size_.x, viewport_size_.y);
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%.1f FPS", ImGui::GetIO().Framerate);
+    
+        ImGui::End();
+    }
+
+    // ✅ FIX: Make this a member function
+    bool SceneEditorOverlay::check_if_render_needed() {
+        if (!active_camera_) return false;
+        
+        // Always render if explicitly marked dirty
+        if (viewport_needs_update_ || scene_changed_) {
+            return true;
+        }
+        
+        // Check if camera moved
+        glm::vec3 current_pos = active_camera_->get_position();
+        if (glm::distance(current_pos, last_camera_position_) > 0.001f) {
+            return true;
+        }
+        
+        // Check camera rotation
+        glm::vec3 current_rot = active_camera_->get_rotation();
+        if (glm::distance(current_rot, last_camera_rotation_) > 0.001f) {
+            return true;
+        }
+        
+        // Check if mouse is being used for look controls
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Right) && viewport_focused_) {
+            return true;
+        }
+        
+        // Check if any movement keys are pressed
+        if (viewport_focused_) {
+            if (ImGui::IsKeyDown(ImGuiKey_W) || ImGui::IsKeyDown(ImGuiKey_A) || 
+                ImGui::IsKeyDown(ImGuiKey_S) || ImGui::IsKeyDown(ImGuiKey_D) ||
+                ImGui::IsKeyDown(ImGuiKey_Q) || ImGui::IsKeyDown(ImGuiKey_E)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    // ✅ FIX: Make these member functions
+    void SceneEditorOverlay::mark_scene_dirty() {
+        scene_changed_ = true;
+    }
+
+    void SceneEditorOverlay::mark_viewport_dirty() {
+        viewport_needs_update_ = true;
+    }
+
+    void SceneEditorOverlay::render_scene_hierarchy() {
+        ImGui::Begin("Scene Hierarchy");
+
+        auto &scenes = scene_manager_.get_objects();
+        ImGui::Text("Number of scenes: %d", static_cast<int>(scenes.size()));
+
+        if (ImGui::BeginTable("ScenesTable", 1)) {
+            ImGui::TableSetupColumn("Scenes and Objects");
+            ImGui::TableHeadersRow();
+
+            for (auto *scene: scenes) {
+                if (!scene) continue;
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+
+                // Render the scene as a tree node
+                bool node_open = ImGui::TreeNode(scene->get_name().c_str());
+
+                if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+                    ImGui::OpenPopup(("SceneContextMenu_" + scene->get_name()).c_str());
+                }
+
+                // Create context menu
+                if (ImGui::BeginPopup(("SceneContextMenu_" + scene->get_name()).c_str())) {
+                    if (scene_manager_.get_active_scene() != scene) {
+                        if (ImGui::MenuItem("Activate Scene")) {
+                            scene_manager_.set_active_scene(static_cast<Scene *>(scene));
+                            active_scene_ = scene;
+                            mark_viewport_dirty(); // ✅ Mark for re-render when scene changes
+                        }
+                    }
+                    if (ImGui::MenuItem("Remove Scene")) {
+                        bool is_active = scene_manager_.get_active_scene() == scene;
+
+                        Scene *new_active_scene = nullptr;
+                        if (is_active) {
+                            auto &all_scenes = scene_manager_.get_objects();
+                            for (auto *potential_scene: all_scenes) {
+                                if (potential_scene && potential_scene != scene) {
+                                    new_active_scene = static_cast<Scene *>(potential_scene);
+                                    break;
+                                }
+                            }
+                        }
+
+                        auto remove_command = std::make_unique<RemoveObjectCommand>(
+                            scene_manager_, scene->get_parent(), scene);
+                        execute_command(std::move(remove_command));
+
+                        if (is_active && new_active_scene) {
+                            scene_manager_.set_active_scene(new_active_scene);
+                            active_scene_ = new_active_scene;
+                        } else if (is_active) {
+                            active_scene_ = nullptr;
+                        }
+
+                        mark_scene_dirty(); // ✅ Mark for re-render when scene is removed
+
+                        ImGui::CloseCurrentPopup();
+                        ImGui::EndPopup();
+                        continue;
+                    }
+                    ImGui::EndPopup();
+                }
+                if (node_open) {
+                    auto &scene_objects = scene->get_children();
+
+                    for (auto *obj: scene_objects) {
+                        if (!obj) continue;
+
+                        ImGui::Indent();
+                        render_object_node(obj);
+                        ImGui::Unindent();
+                    }
+
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::EndTable();
+        }
+        ImGui::End();
+    }
+
+    void SceneEditorOverlay::render_object_node(Object3D *object) {
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
+
+        if (object == selected_node_)
+            flags |= ImGuiTreeNodeFlags_Selected;
+
+        if (object->get_children().empty())
+            flags |= ImGuiTreeNodeFlags_Leaf;
+
+        bool open = ImGui::TreeNodeEx(object->get_name().c_str(), flags);
+
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Remove Object")) {
+                auto remove_command = std::make_unique<RemoveObjectCommand>(
+                    scene_manager_, object->get_parent(), object);
+                execute_command(std::move(remove_command));
+                mark_scene_dirty(); // ✅ Mark for re-render when object is removed
+            }
+            ImGui::EndPopup();
+        }
+
+        if (ImGui::IsItemClicked())
+            selected_node_ = object;
+
+        if (open) {
+            auto &children = object->get_children();
+            for (auto *child: children) {
+                render_object_node(child);
+            }
+            ImGui::TreePop();
+        }
+    }
+
+    void SceneEditorOverlay::handle_viewport_input() {
+        if (!active_camera_) return;
+
+        ImGuiIO &io = ImGui::GetIO();
+        bool camera_changed = false;
+
+        // Handle camera rotation with right mouse
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+            ImVec2 mouse_delta = io.MouseDelta;
+        
+            if (std::abs(mouse_delta.x) > 0.1f || std::abs(mouse_delta.y) > 0.1f) {
+                active_camera_->process_mouse_movement(mouse_delta.x, -mouse_delta.y, true);
+                camera_changed = true;
+            }
+        
+            ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+        }
+        
+        // ✅ Handle keyboard movement with speed modifiers
+        if (viewport_focused_) {
+            float original_speed = active_camera_->get_movement_speed();
+            float speed_multiplier = 1.0f;
+            
+            if (ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift)) {
+                speed_multiplier = 3.0f;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || ImGui::IsKeyDown(ImGuiKey_RightCtrl)) {
+                speed_multiplier = 0.3f;
+            }
+            
+            active_camera_->set_movement_speed(original_speed * speed_multiplier);
+
+            if (ImGui::IsKeyDown(ImGuiKey_W)) {
+                active_camera_->process_keyboard(FORWARD, io.DeltaTime);
+                camera_changed = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_S)) {
+                active_camera_->process_keyboard(BACKWARD, io.DeltaTime);
+                camera_changed = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_A)) {
+                active_camera_->process_keyboard(LEFT, io.DeltaTime);
+                camera_changed = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_D)) {
+                active_camera_->process_keyboard(RIGHT, io.DeltaTime);
+                camera_changed = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_Q)) {
+                active_camera_->process_keyboard(DOWN, io.DeltaTime);
+                camera_changed = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_E)) {
+                active_camera_->process_keyboard(UP, io.DeltaTime);
+                camera_changed = true;
+            }
+            
+            active_camera_->set_movement_speed(original_speed);
+        }
+
+        if (io.MouseWheel != 0.0f) {
+            active_camera_->process_mouse_scroll(io.MouseWheel);
+            camera_changed = true;
+        }
+
+        // ✅ Only mark viewport dirty when camera actually changed
+        if (camera_changed) {
+            mark_viewport_dirty();
+        }
+    }
+
+    void SceneEditorOverlay::execute_command(std::unique_ptr<EditorCommand> command) {
+        if (current_command_index_ < static_cast<int>(command_history_.size()) - 1) {
+            command_history_.resize(current_command_index_ + 1);
+        }
+
+        command->execute();
+        command_history_.push_back(std::move(command));
+        current_command_index_ = static_cast<int>(command_history_.size()) - 1;
+    }
+
+    void SceneEditorOverlay::undo_last_command() {
+        if (current_command_index_ >= 0 && current_command_index_ < static_cast<int>(command_history_.size())) {
+            command_history_[current_command_index_]->undo();
+            current_command_index_--;
+            mark_scene_dirty(); // ✅ Mark for re-render after undo
+        }
+    }
+
+    void SceneEditorOverlay::redo_next_command() {
+        if (current_command_index_ + 1 < static_cast<int>(command_history_.size())) {
+            current_command_index_++;
+            command_history_[current_command_index_]->execute();
+            mark_scene_dirty(); // ✅ Mark for re-render after redo
+        }
+    }
+
     void SceneEditorOverlay::render_object_properties(Object3D *object) const {
         if (!object) return;
         ImGui::Begin("Properties");
 
-        // Common properties for all Object3D types
         std::string name = object->get_name();
         char buffer[256];
         strcpy(buffer, name.c_str());
         if (ImGui::InputText("Name", buffer, sizeof(buffer))) {
             object->set_name(buffer);
+            // ✅ You might want to mark scene dirty here if name changes affect rendering
         }
 
-        // Position, rotation, scale
         glm::vec3 position = object->get_position();
-        if (ImGui::DragFloat3("Position", &position[0], 0.1)) {
+        if (ImGui::DragFloat3("Position", &position[0], 0.1f)) {
             object->set_position(position);
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when transform changes
         }
 
         glm::vec3 scale = object->get_scale();
-        if (ImGui::DragFloat3("Scale", &scale[0], 0.1)) {
+        if (ImGui::DragFloat3("Scale", &scale[0], 0.1f)) {
             object->set_scale(scale);
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when transform changes
         }
 
         glm::vec3 rotation = object->get_rotation();
         if (ImGui::DragFloat3("Rotation", &rotation[0], 1.0f, -180.0f, 180.0f)) {
-            // Normalize angles to -180 to 180 range for better user experience
             for (int i = 0; i < 3; i++) {
                 while (rotation[i] > 180.0f) rotation[i] -= 360.0f;
                 while (rotation[i] < -180.0f) rotation[i] += 360.0f;
             }
             object->set_rotation(rotation);
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when transform changes
         }
 
         if (auto *light = dynamic_cast<Light *>(object)) {
@@ -68,190 +412,39 @@ namespace DCraft::Editor {
         ImGui::End();
     }
 
-    void SceneEditorOverlay::render() {
-    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
-        ImGui::ShowDemoWindow();
-        // MenuBarComponent menu_bar_component;
-        // menu_bar_component.init(scene_manager_, command_history_, current_command_index_);
-        // menu_bar_component.render();
-        //
-        // ImGui::Begin("Scene Hierarchy");
-        // // Get scenes from scene manager
-        //
-        // auto &scenes = scene_manager_.get_objects(); 
-        // ImGui::Text("Number of scenes: %d", scenes.size());
-        //
-        // if (ImGui::BeginTable("ScenesTable", 1)) {
-        //     ImGui::TableSetupColumn("Scenes and Objects");
-        //     ImGui::TableHeadersRow();
-        //
-        //     // Render each scene
-        //     for (auto *scene: scenes) {
-        //         if (!scene) continue;
-        //
-        //         ImGui::TableNextRow();
-        //         ImGui::TableNextColumn();
-        //
-        //         // Render the scene as a tree node
-        //         bool node_open = ImGui::TreeNode(scene->get_name().c_str());
-        //
-        //         if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-        //             ImGui::OpenPopup(("SceneContextMenu_" + scene->get_name()).c_str());
-        //         }
-        //
-        //         // Create context menu
-        //         if (ImGui::BeginPopup(("SceneContextMenu_" + scene->get_name()).c_str())) {
-        //             if (scene_manager_.get_active_scene() != scene) {
-        //                 if (ImGui::MenuItem("Activate Scene")) {
-        //                     // Call method to set this as the active scene
-        //                     scene_manager_.set_active_scene(static_cast<Scene *>(scene));
-        //                 }
-        //             }
-        //             if (ImGui::MenuItem("Remove Scene")) {
-        //                 // Check if the scene to be removed is the active scene
-        //                 bool is_active = scene_manager_.get_active_scene() == scene;
-        //
-        //                 // Find another scene to activate if this is the active scene
-        //                 Scene *new_active_scene = nullptr;
-        //                 if (is_active) {
-        //                     // Get all scenes and find one that's not this one
-        //                     auto &all_scenes = scene_manager_.get_objects();
-        //                     for (auto *potential_scene: all_scenes) {
-        //                         if (potential_scene && potential_scene != scene) {
-        //                             new_active_scene = static_cast<Scene *>(potential_scene);
-        //                             break;
-        //                         }
-        //                     }
-        //                 }
-        //
-        //                 // Truncate any redoable commands
-        //                 if (current_command_index_ < command_history_.size() - 1) {
-        //                     command_history_.resize(current_command_index_ + 1);
-        //                 }
-        //
-        //                 // Store removal command
-        //                 command_history_.push_back(std::make_unique<RemoveObjectCommand>(
-        //                     scene_manager_, scene->get_parent(), scene));
-        //
-        //                 // Execute the removal command
-        //                 command_history_.back()->execute();
-        //
-        //                 // Update index to point to the new command
-        //                 current_command_index_ = command_history_.size() - 1;
-        //
-        //                 // If we found another scene to activate and the removed scene was active,
-        //                 // set the new active scene
-        //                 if (is_active && new_active_scene) {
-        //                     scene_manager_.set_active_scene(new_active_scene);
-        //                 }
-        //                 ImGui::CloseCurrentPopup();
-        //                 ImGui::EndPopup();
-        //                 continue; 
-        //             }
-        //             ImGui::EndPopup();
-        //         }
-        //
-        //         if (node_open) {
-        //             // Now render the objects in this scene
-        //             auto &sceneObjects = scene->get_children(); // Objects in the scene
-        //
-        //             for (auto *obj: sceneObjects) {
-        //                 if (!obj) continue;
-        //
-        //                 // Render each object in the scene
-        //                 ImGui::Indent();
-        //                 render_object_node(obj);
-        //                 ImGui::Unindent();
-        //             }
-        //
-        //             ImGui::TreePop();
-        //         }
-        //     }
-        //     ImGui::EndTable();
-        // }
-        //
-        // ImGui::End();
-        //
-        //
-        // if (selected_node_) {
-        //     render_object_properties(selected_node_);
-        // }
-    }
-
-    void SceneEditorOverlay::render_object_node(Object3D *object) {
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
-
-        if (object == selected_node_)
-            flags |= ImGuiTreeNodeFlags_Selected;
-
-        if (object->get_children().empty())
-            flags |= ImGuiTreeNodeFlags_Leaf;
-
-        bool open = ImGui::TreeNodeEx(object->get_name().c_str(), flags);
-
-        if (ImGui::BeginPopupContextItem()) {
-            if (ImGui::MenuItem("Remove")) {
-                // Truncate any re doable commands
-                if (current_command_index_ < command_history_.size() - 1) {
-                    command_history_.resize(current_command_index_ + 1);
-                }
-
-                // Store removal command
-                command_history_.push_back(std::make_unique<RemoveObjectCommand>(
-                    scene_manager_, object->get_parent(), object));
-
-                // Execute the command
-                command_history_.back()->execute();
-
-                // Update index to point to the new command
-                current_command_index_ = command_history_.size() - 1;
-            }
-            ImGui::EndPopup();
-        }
-
-        // Handle selection
-        if (ImGui::IsItemClicked())
-            selected_node_ = object;
-
-        if (open) {
-            // Render children
-            auto &children = object->get_children();
-            for (auto *child: children) {
-                render_object_node(child);
-            }
-
-            ImGui::TreePop();
-        }
-    }
-
     void SceneEditorOverlay::render_light_properties(Light *light) const {
         ImGui::SeparatorText("Light Properties");
         glm::vec3 color = light->get_color();
         if (ImGui::ColorPicker3("Light", &color[0], ImGuiColorEditFlags_Float)) {
             light->set_color(color);
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when light changes
         }
 
         float intensity = light->get_intensity();
         if (ImGui::DragFloat("Intensity", &intensity)) {
             light->set_intensity(intensity);
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when light changes
         }
 
         if (auto *dir_light = dynamic_cast<DirectionalLight *>(light)) {
             ImGui::SeparatorText("Directional Light Properties");
             glm::vec3 direction = dir_light->get_direction();
-            if (ImGui::DragFloat3("Direction", &direction[0], 0.1, -1, 1)) {
+            if (ImGui::DragFloat3("Direction", &direction[0], 0.1f, -1.0f, 1.0f)) {
                 dir_light->set_direction(direction);
+                const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
             }
         } else if (auto *point_light = dynamic_cast<PointLight *>(light)) {
             ImGui::SeparatorText("Point Light Properties");
             float range = point_light->get_range();
-            if (ImGui::DragFloat("Range", &range, 0.1)) {
+            if (ImGui::DragFloat("Range", &range, 0.1f)) {
                 point_light->set_range(range);
+                const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
             }
 
-            float attentuation = point_light->get_attenuation();
-            if (ImGui::DragFloat("Attentuation", &attentuation, 0.5)) {
-                point_light->set_attenuation(attentuation);
+            float attenuation = point_light->get_attenuation();
+            if (ImGui::DragFloat("Attenuation", &attenuation, 0.01f)) {
+                point_light->set_attenuation(attenuation);
+                const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
             }
         }
     }
@@ -260,14 +453,16 @@ namespace DCraft::Editor {
         ImGui::SeparatorText("Camera Properties");
 
         float movement_speed = camera->get_movement_speed();
-        if (ImGui::DragFloat("Movement speed", &movement_speed, 0.25)) {
+        if (ImGui::DragFloat("Movement speed", &movement_speed, 0.25f)) {
             camera->set_movement_speed(movement_speed);
+            // Camera speed doesn't affect rendering, so no need to mark dirty
         }
 
         if (auto *perspective_cam = dynamic_cast<PerspectiveCamera *>(camera)) {
             glm::vec3 target = perspective_cam->get_target();
-            if (ImGui::DragFloat3("Target", &target[0], 0.1)) {
+            if (ImGui::DragFloat3("Target", &target[0], 0.1f)) {
                 perspective_cam->set_target(target.x, target.y, target.z);
+                const_cast<SceneEditorOverlay*>(this)->mark_viewport_dirty(); // ✅ Mark dirty when camera changes
             }
         }
     }
@@ -288,7 +483,6 @@ namespace DCraft::Editor {
             return;
         }
 
-        // Material name
         std::string name = material->get_name();
         char buffer[256];
         strcpy(buffer, name.c_str());
@@ -297,165 +491,14 @@ namespace DCraft::Editor {
         }
 
         ImGui::Separator();
-ImGui::Text("Material Type: %s", typeid(*material).name());
-
-        // Specific material properties based on type
-        // if (auto lambert = dynamic_cast<LambertMaterial *>(material)) {
-        //     // Diffuse color editing
-        //     glm::vec3 diffuse = lambert->get_diffuse_color();
-        //     float diffuse_color[3] = {diffuse.r, diffuse.g, diffuse.b};
-        //     if (ImGui::ColorEdit3("Diffuse Color", diffuse_color)) {
-        //         lambert->set_diffuse_color(glm::vec3(diffuse_color[0], diffuse_color[1], diffuse_color[2]));
-        //     }
-        //
-        //     // Texture section
-        //     ImGui::Separator();
-        // } else if (auto phong = dynamic_cast<PhongMaterial *>(material)) {
-        //     // Phong Material Properties
-        //     ImGui::Text("Phong Material Properties");
-        //     // Ambient color
-        //     glm::vec3 ambient = phong->get_ambient_color();
-        //     float ambient_color[3] = {ambient.r, ambient.g, ambient.b};
-        //     if (ImGui::ColorEdit3("Ambient Color", ambient_color)) {
-        //         phong->set_ambient_color(glm::vec3(ambient_color[0], ambient_color[1], ambient_color[2]));
-        //     }
-        //
-        //     // Diffuse color
-        //     glm::vec3 diffuse = phong->get_diffuse_color();
-        //     float diffuse_color[3] = {diffuse.r, diffuse.g, diffuse.b};
-        //     if (ImGui::ColorEdit3("Diffuse Color", diffuse_color)) {
-        //         phong->set_diffuse_color(glm::vec3(diffuse_color[0], diffuse_color[1], diffuse_color[2]));
-        //     }
-        //
-        //     // Specular color
-        //     glm::vec3 specular = phong->get_specular_color();
-        //     float specular_color[3] = {specular.r, specular.g, specular.b};
-        //     if (ImGui::ColorEdit3("Specular Color", specular_color)) {
-        //         phong->set_specular_color(glm::vec3(specular_color[0], specular_color[1], specular_color[2]));
-        //     }
-        //
-        //     // Shininess
-        //     float shininess = phong->get_shininess();
-        //     if (ImGui::SliderFloat("Shininess", &shininess, 1.0f, 128.0f, "%.1f")) {
-        //         phong->set_shininess(shininess);
-        //     }
-        // }
-        // Base Material Properties or unknown material type
+        ImGui::Text("Material Type: %s", typeid(*material).name());
         ImGui::Text("Basic Material Properties");
-
         ImGui::Text("Diffuse Texture");
-        // if (material->has_diffuse_texture()) {
-        //     Texture *tex = material->get_diffuse_texture();
-        //     if (tex && tex->get_id() > 0) {
-        //         // Show texture preview - Cast properly to avoid ImGui errors
-        //         ImTextureID tex_id = (ImTextureID)(intptr_t)tex->get_id();
-        //         ImGui::Image(tex_id, ImVec2(150, 150));
-        //
-        //         if (ImGui::Button("Remove Texture")) {
-        //             material->remove_diffuse_texture();
-        //         }
-        //     } else {
-        //         ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "Texture loaded but invalid ID");
-        //     }
-        // } else {
-        //     if (ImGui::Button("Add Texture...")) {
-        //         std::vector<Utility::FileFilter> scene_filters = {
-        //             {"Texture Files", "*.png;*.jpg;*.jpeg"},
-        //             {"All Files", "*.*"}
-        //         };
-        //
-        //         std::string filepath = Utility::FileDialog::open_file(scene_filters);
-        //         fs::path absolute_path = filepath;
-        //         fs::path assets_dir = "assets";
-        //
-        //         // Check if assets_dir is part of the path
-        //         std::string path_str = absolute_path.string();
-        //         size_t pos = path_str.find(assets_dir.string());
-        //
-        //         if (pos != std::string::npos) {
-        //             std::string relative_path = path_str.substr(pos);
-        //             material->set_texture(relative_path, TextureType::DIFFUSE);
-        //         } else {
-        //             material->set_texture(filepath, TextureType::DIFFUSE);
-        //         }
-        //     }
-        // }
 
-        ImGui::Separator();
-        // Material change section
-        // if (ImGui::CollapsingHeader("Change Material Type")) {
-        //     if (ImGui::Button("Lambert Material")) {
-        //         // Store current texture path before changing material
-        //         std::string texture_path = "";
-        //         bool has_texture = false;
-        //         
-        //         if (material->has_diffuse_texture()) {
-        //             Texture* old_texture = material->get_diffuse_texture();
-        //             if (old_texture) {
-        //                 texture_path = old_texture->get_path();
-        //                 has_texture = true;
-        //             }
-        //         }
-        //         
-        //         // Create new Lambert material
-        //         auto new_material = new LambertMaterial(material->get_name());
-        //         
-        //         // Copy diffuse color if possible
-        //         if (auto phong = dynamic_cast<PhongMaterial*>(material)) {
-        //             new_material->set_diffuse_color(phong->get_diffuse_color());
-        //         }
-        //         
-        //         // Set the new material before removing textures from old one
-        //         shape->set_material(new_material);
-        //         
-        //         // Apply texture to new material if it existed
-        //         if (has_texture && !texture_path.empty()) {
-        //             new_material->set_texture(texture_path, TextureType::DIFFUSE);
-        //         }
-        //         
-        //         // Clean up old material
-        //         material->remove_all_textures();
-        //     }
-        //
-        //     if (ImGui::Button("Phong Material")) {
-        //         // Store current texture path before changing material
-        //         std::string texture_path = "";
-        //         bool has_texture = false;
-        //         
-        //         if (material->has_diffuse_texture()) {
-        //             Texture* old_texture = material->get_diffuse_texture();
-        //             if (old_texture) {
-        //                 texture_path = old_texture->get_path();
-        //                 has_texture = true;
-        //             }
-        //         }
-        //         
-        //         // Create new Phong material
-        //         auto new_material = new PhongMaterial(material->get_name());
-        //         
-        //         // Copy diffuse color if possible
-        //         if (auto lambert = dynamic_cast<LambertMaterial*>(material)) {
-        //             new_material->set_diffuse_color(lambert->get_diffuse_color());
-        //         }
-        //         
-        //         // Set the new material before removing textures from old one
-        //         shape->set_material(new_material);
-        //         
-        //         // Apply texture to new material if it existed
-        //         if (has_texture && !texture_path.empty()) {
-        //             new_material->set_texture(texture_path, TextureType::DIFFUSE);
-        //         }
-        //         
-        //         // Clean up old material
-        //         material->remove_all_textures();
-        //     }
-        // }
         ImGui::End();
     }
 
-
-
-
     void SceneEditorOverlay::render_mesh_properties(Mesh *mesh) const {
+        // Implementation for mesh-specific properties
     }
 }
