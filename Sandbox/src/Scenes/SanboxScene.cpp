@@ -15,10 +15,10 @@ MaterialMap load_material_map(DCraft::ShaderManager& shader_manager) {
     
     // Create Lambert materials using MaterialBuilder
     auto mossy_material = DCraft::MaterialBuilder::create_lambert("Mossy");
-    mossy_material->set_texture("assets/textures/transparent/blending_transparent_window.png", DCraft::TextureType::DIFFUSE);
+    mossy_material->set_texture("assets/textures/transparent/glass.jpg", DCraft::TextureType::DIFFUSE);
     mossy_material->set_uv_tiling(1.0f, 1.0f);
     mossy_material->set_ambient_color(glm::vec3(0.5, 0.5, 0.5));
-    mossy_material->set_transparency(0.99f);
+    mossy_material->set_transparency(0.50f);
     
     uint32_t mossy_shader = shader_manager.get_shader_for_material(*mossy_material);
     mossy_material->set_compiled_shader_id(mossy_shader);
