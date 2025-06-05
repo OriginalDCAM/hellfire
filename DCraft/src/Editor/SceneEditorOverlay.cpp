@@ -5,10 +5,6 @@
 
 #include <imgui.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #include "DCraft/Addons/ModelLoader.h"
 #include "DCraft/Graphics/Lights/DirectionalLight.h"
 #include "DCraft/Graphics/Lights/Light.h"
@@ -16,7 +12,7 @@
 #include "DCraft/Graphics/Primitives/MeshRenderer.h"
 #include "DCraft/Editor/Components/MenuBarComponent.h"
 #include "DCraft/Graphics/Renderer.h"
-#include "DCraft/Structs/Camera.h" // 
+#include "DCraft/Structs/Camera.h"  
 
 #include <filesystem>
 #include <iostream>  
@@ -174,7 +170,7 @@ namespace DCraft::Editor {
                         if (ImGui::MenuItem("Activate Scene")) {
                             scene_manager_.set_active_scene(static_cast<Scene *>(scene));
                             active_scene_ = scene;
-                            mark_viewport_dirty(); // ✅ Mark for re-render when scene changes
+                            mark_viewport_dirty();
                         }
                     }
                     if (ImGui::MenuItem("Remove Scene")) {
@@ -245,7 +241,7 @@ namespace DCraft::Editor {
                 auto remove_command = std::make_unique<RemoveObjectCommand>(
                     scene_manager_, object->get_parent(), object);
                 execute_command(std::move(remove_command));
-                mark_scene_dirty(); // ✅ Mark for re-render when object is removed
+                mark_scene_dirty(); 
             }
             ImGui::EndPopup();
         }
@@ -492,6 +488,6 @@ namespace DCraft::Editor {
     }
 
     void SceneEditorOverlay::render_mesh_properties(Mesh *mesh) const {
-        // Implementation for mesh-specific properties
     }
+    
 }

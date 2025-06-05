@@ -8,6 +8,7 @@
 #include "DCraft/Graphics/Lights/PointLight.h"
 #include "DCraft/Graphics/Primitives/Cube.h"
 #include "DCraft/Graphics/Primitives/Quad.h"
+#include "Objects/DisplayCase.hpp"
 #include "Scenes/SandboxScene.h"
 
 MaterialMap load_material_map(DCraft::ShaderManager& shader_manager) {
@@ -78,32 +79,6 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     sun->set_color(glm::vec3(1.0f, 0.95f, 0.9f));
     sun->set_intensity(2.5f);
     scene->add(sun);
-    
-    // auto* blue_light = new DCraft::PointLight("Blue Light");
-    // blue_light->set_color(glm::vec3(0.2f, 0.4f, 1.0f));
-    // blue_light->set_intensity(5.0f);
-    // blue_light->set_range(20.0f);
-    // blue_light->set_attenuation(1.0f);
-    //
-    // auto* green_light = new DCraft::PointLight("Red Light");
-    // green_light->set_color(glm::vec3(0.2f, 1.0f, 0.1f));
-    // green_light->set_intensity(1.5f);
-    // green_light->set_range(15.0f);
-    // green_light->set_attenuation(1.0f);
-    
-    // auto* blue_light_visual = new DCraft::Cube("Blue cube");
-    // blue_light_visual->set_position(-5.0f, 1.0f, -5.0f);
-    // blue_light_visual->set_scale(glm::vec3(0.2f));
-    // blue_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"].release());
-    // blue_light_visual->add(blue_light);
-    // scene->add(blue_light_visual);
-    //
-    // auto* green_light_visual = new DCraft::Cube("Green cube");
-    // green_light_visual->set_position(5.0f, 2.0f, 5.0f);
-    // green_light_visual->set_scale(glm::vec3(0.2f));
-    // green_light_visual->set_material(materials["PLASTIC_GREEN_MATERIAL"].release());
-    // green_light_visual->add(green_light);
-    // scene->add(green_light_visual);
 
     // Cameras 
     auto *main_camera = scene->create_camera<DCraft::PerspectiveCamera>(
@@ -117,13 +92,10 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     drone_camera->set_position(10.0f, 25.0f, 10.0f);
     drone_camera->set_target(0.0f, 0.0f, 0.0f);
     scene->add(drone_camera);
-    
-    auto *cube = new DCraft::Cube("Cool cube");
-    cube->set_rotation(glm::vec3(90.0f, 0.0f, 0.0f));
-    cube->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
-    cube->set_position(0.0f, 4.0f, 0.0f);
-    cube->set_material(materials["MOSSY_MATERIAL"].release()); 
-    scene->add(cube);
+
+    auto *displayCase = new DisplayCase();
+    displayCase->init();
+    scene->add(displayCase);
 
     auto *floor = new DCraft::Quad("Floor Quad");
     floor->set_position(0, 0, 0);
@@ -132,10 +104,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     floor->set_material(materials["PAVEMENT_MATERIAL"].release()); 
     scene->add(floor);
 
-    // auto *grass = new DCraft::Quad("Grass Vegetation");
-    // grass->set_position(0.0f, 1.0f, 5.0f);
-    // grass->set_material(materials["MOSSY_MATERIAL"].release());
-    // scene->add(grass);
+
 
     auto *main_camera_visual = new DCraft::Cube("Main Camera Visual");
     main_camera_visual->set_name("Main Camera Visual");
