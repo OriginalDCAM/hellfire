@@ -12,15 +12,14 @@
 #include "DCraft/Graphics/Primitives/MeshRenderer.h"
 #include "DCraft/Editor/Components/MenuBarComponent.h"
 #include "DCraft/Graphics/Renderer.h"
-#include "DCraft/Structs/Camera.h"  
+#include "DCraft/Structs/Camera.h"
 
 #include <filesystem>
-#include <iostream>  
+#include <iostream>
 
 namespace fs = std::filesystem;
 
 namespace DCraft::Editor {
-    
     void SceneEditorOverlay::render() {
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
@@ -65,10 +64,10 @@ namespace DCraft::Editor {
         bool needs_render = check_if_render_needed();
 
         if (active_scene_ && active_camera_ && renderer_ && needs_render) {
-            renderer_->render_to_texture(*active_scene_, *active_camera_, 
-                                       static_cast<uint32_t>(viewport_size_.x), 
-                                       static_cast<uint32_t>(viewport_size_.y));
-            
+            renderer_->render_to_texture(*active_scene_, *active_camera_,
+                                         static_cast<uint32_t>(viewport_size_.x),
+                                         static_cast<uint32_t>(viewport_size_.y));
+
             cached_scene_texture_ = renderer_->get_scene_texture();
             viewport_needs_update_ = false;
             scene_changed_ = false;
@@ -78,58 +77,60 @@ namespace DCraft::Editor {
         }
 
         if (cached_scene_texture_ > 0) {
-            ImTextureID tex_id = (ImTextureID)(intptr_t)cached_scene_texture_;
+            ImTextureID tex_id = (ImTextureID) (intptr_t) cached_scene_texture_;
             ImGui::Image(tex_id, viewport_size_, ImVec2(0, 1), ImVec2(1, 0));
-        
+
             if (ImGui::IsItemHovered()) {
                 handle_viewport_input();
             }
         } else {
             ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "No scene texture available");
         }
-    
+
         // Display FPS and render info
         ImGui::SetCursorPos(ImVec2(10, ImGui::GetWindowHeight() - 50));
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%.0fx%.0f", viewport_size_.x, viewport_size_.y);
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%.1f FPS", ImGui::GetIO().Framerate);
-    
+
         ImGui::End();
     }
 
     bool SceneEditorOverlay::check_if_render_needed() {
+        // TODO: Make a settings whether to always refresh the editor
+        return true;
         if (!active_camera_) return false;
-        
+
         // Always render if explicitly marked dirty
         if (viewport_needs_update_ || scene_changed_) {
             return true;
         }
-        
+
         // Check if camera moved
         glm::vec3 current_pos = active_camera_->get_position();
         if (glm::distance(current_pos, last_camera_position_) > 0.001f) {
             return true;
         }
-        
+
         // Check camera rotation
         glm::vec3 current_rot = active_camera_->get_rotation();
         if (glm::distance(current_rot, last_camera_rotation_) > 0.001f) {
             return true;
         }
-        
+
         // Check if mouse is being used for look controls
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right) && viewport_focused_) {
             return true;
         }
-        
+
         // Check if any movement keys are pressed
         if (viewport_focused_) {
-            if (ImGui::IsKeyDown(ImGuiKey_W) || ImGui::IsKeyDown(ImGuiKey_A) || 
+            if (ImGui::IsKeyDown(ImGuiKey_W) || ImGui::IsKeyDown(ImGuiKey_A) ||
                 ImGui::IsKeyDown(ImGuiKey_S) || ImGui::IsKeyDown(ImGuiKey_D) ||
                 ImGui::IsKeyDown(ImGuiKey_Q) || ImGui::IsKeyDown(ImGuiKey_E)) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -198,7 +199,7 @@ namespace DCraft::Editor {
                             active_scene_ = nullptr;
                         }
 
-                        mark_scene_dirty(); 
+                        mark_scene_dirty();
 
                         ImGui::CloseCurrentPopup();
                         ImGui::EndPopup();
@@ -241,7 +242,7 @@ namespace DCraft::Editor {
                 auto remove_command = std::make_unique<RemoveObjectCommand>(
                     scene_manager_, object->get_parent(), object);
                 execute_command(std::move(remove_command));
-                mark_scene_dirty(); 
+                mark_scene_dirty();
             }
             ImGui::EndPopup();
         }
@@ -267,26 +268,26 @@ namespace DCraft::Editor {
         // Handle camera rotation with right mouse
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
             ImVec2 mouse_delta = io.MouseDelta;
-        
+
             if (std::abs(mouse_delta.x) > 0.1f || std::abs(mouse_delta.y) > 0.1f) {
                 active_camera_->process_mouse_movement(mouse_delta.x, -mouse_delta.y, true);
                 camera_changed = true;
             }
-        
+
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         }
-        
+
         if (viewport_focused_) {
             float original_speed = active_camera_->get_movement_speed();
             float speed_multiplier = 1.0f;
-            
+
             if (ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift)) {
                 speed_multiplier = 3.0f;
             }
             if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || ImGui::IsKeyDown(ImGuiKey_RightCtrl)) {
                 speed_multiplier = 0.3f;
             }
-            
+
             active_camera_->set_movement_speed(original_speed * speed_multiplier);
 
             if (ImGui::IsKeyDown(ImGuiKey_W)) {
@@ -313,7 +314,7 @@ namespace DCraft::Editor {
                 active_camera_->process_keyboard(UP, io.DeltaTime);
                 camera_changed = true;
             }
-            
+
             active_camera_->set_movement_speed(original_speed);
         }
 
@@ -341,7 +342,7 @@ namespace DCraft::Editor {
         if (current_command_index_ >= 0 && current_command_index_ < static_cast<int>(command_history_.size())) {
             command_history_[current_command_index_]->undo();
             current_command_index_--;
-            mark_scene_dirty();  
+            mark_scene_dirty();
         }
     }
 
@@ -367,13 +368,13 @@ namespace DCraft::Editor {
         glm::vec3 position = object->get_position();
         if (ImGui::DragFloat3("Position", &position[0], 0.1f)) {
             object->set_position(position);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); 
+            const_cast<SceneEditorOverlay *>(this)->mark_scene_dirty();
         }
 
         glm::vec3 scale = object->get_scale();
         if (ImGui::DragFloat3("Scale", &scale[0], 0.1f)) {
             object->set_scale(scale);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
+            const_cast<SceneEditorOverlay *>(this)->mark_scene_dirty();
         }
 
         glm::vec3 rotation = object->get_rotation();
@@ -383,7 +384,7 @@ namespace DCraft::Editor {
                 while (rotation[i] < -180.0f) rotation[i] += 360.0f;
             }
             object->set_rotation(rotation);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
+            const_cast<SceneEditorOverlay *>(this)->mark_scene_dirty();
         }
 
         if (auto *light = dynamic_cast<Light *>(object)) {
@@ -391,7 +392,7 @@ namespace DCraft::Editor {
         } else if (auto *camera = dynamic_cast<Camera *>(object)) {
             render_camera_properties(camera);
         } else if (auto *shape = dynamic_cast<MeshRenderer *>(object)) {
-            render_shape_properties(shape);
+            render_material_properties(shape);
         }
 
         if (auto *mesh = object->get_mesh()) {
@@ -406,13 +407,13 @@ namespace DCraft::Editor {
         glm::vec3 color = light->get_color();
         if (ImGui::ColorPicker3("Light", &color[0], ImGuiColorEditFlags_Float)) {
             light->set_color(color);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); 
+            const_cast<SceneEditorOverlay *>(this)->mark_scene_dirty();
         }
 
         float intensity = light->get_intensity();
         if (ImGui::DragFloat("Intensity", &intensity)) {
             light->set_intensity(intensity);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); 
+            const_cast<SceneEditorOverlay *>(this)->mark_scene_dirty();
         }
 
         if (auto *dir_light = dynamic_cast<DirectionalLight *>(light)) {
@@ -420,20 +421,20 @@ namespace DCraft::Editor {
             glm::vec3 direction = dir_light->get_direction();
             if (ImGui::DragFloat3("Direction", &direction[0], 0.1f, -1.0f, 1.0f)) {
                 dir_light->set_direction(direction);
-                const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
+                const_cast<SceneEditorOverlay *>(this)->mark_scene_dirty();
             }
         } else if (auto *point_light = dynamic_cast<PointLight *>(light)) {
             ImGui::SeparatorText("Point Light Properties");
             float range = point_light->get_range();
             if (ImGui::DragFloat("Range", &range, 0.1f)) {
                 point_light->set_range(range);
-                const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
+                const_cast<SceneEditorOverlay *>(this)->mark_scene_dirty();
             }
 
             float attenuation = point_light->get_attenuation();
             if (ImGui::DragFloat("Attenuation", &attenuation, 0.01f)) {
                 point_light->set_attenuation(attenuation);
-                const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
+                const_cast<SceneEditorOverlay *>(this)->mark_scene_dirty();
             }
         }
     }
@@ -451,12 +452,12 @@ namespace DCraft::Editor {
             glm::vec3 target = perspective_cam->get_target();
             if (ImGui::DragFloat3("Target", &target[0], 0.1f)) {
                 perspective_cam->set_target(target.x, target.y, target.z);
-                const_cast<SceneEditorOverlay*>(this)->mark_viewport_dirty(); 
+                const_cast<SceneEditorOverlay *>(this)->mark_viewport_dirty();
             }
         }
     }
 
-    void SceneEditorOverlay::render_shape_properties(MeshRenderer *shape) const {
+    void SceneEditorOverlay::render_material_properties(MeshRenderer *shape) const {
         ImGui::Begin("Material Editor");
 
         if (!shape) {
@@ -472,22 +473,214 @@ namespace DCraft::Editor {
             return;
         }
 
+        // Material name editor
         std::string name = material->get_name();
         char buffer[256];
         strcpy(buffer, name.c_str());
         if (ImGui::InputText("Name", buffer, sizeof(buffer))) {
-            // material->set_name(buffer);
+            material->set_name(buffer);
         }
 
         ImGui::Separator();
-        ImGui::Text("Material Type: %s", typeid(*material).name());
-        ImGui::Text("Basic Material Properties");
-        ImGui::Text("Diffuse Texture");
+
+        // Get properties and render inputs for each
+        const auto &properties = material->get_properties();
+
+        if (!properties.empty()) {
+            ImGui::Text("Material Properties");
+            ImGui::Separator();
+
+            for (const auto &[prop_name, property]: properties) {
+                ImGui::PushID(prop_name.c_str()); // Ensure unique IDs for ImGui
+
+                switch (property.type) {
+                    case Material::PropertyType::FLOAT: {
+                        float value = std::get<float>(property.value);
+                        if (ImGui::DragFloat(prop_name.c_str(), &value, 0.01f, 0.0f, 0.0f, "%.3f")) {
+                            material->set_property(prop_name, value, property.uniform_name);
+                        }
+                        break;
+                    }
+
+                    case Material::PropertyType::VEC2: {
+                        glm::vec2 value = std::get<glm::vec2>(property.value);
+                        if (ImGui::DragFloat2(prop_name.c_str(), &value.x, 0.01f)) {
+                            material->set_property(prop_name, value, property.uniform_name);
+                        }
+                        break;
+                    }
+
+                    case Material::PropertyType::VEC3: {
+                        glm::vec3 value = std::get<glm::vec3>(property.value);
+                        // Use ColorEdit3 for color properties, DragFloat3 for others
+                        if (prop_name.find("Color") != std::string::npos ||
+                            prop_name.find("color") != std::string::npos) {
+                            if (ImGui::ColorEdit3(prop_name.c_str(), &value.x)) {
+                                material->set_property(prop_name, value, property.uniform_name);
+                            }
+                        } else {
+                            if (ImGui::DragFloat3(prop_name.c_str(), &value.x, 0.01f)) {
+                                material->set_property(prop_name, value, property.uniform_name);
+                            }
+                        }
+                        break;
+                    }
+
+                    case Material::PropertyType::VEC4: {
+                        glm::vec4 value = std::get<glm::vec4>(property.value);
+                        // Use ColorEdit4 for color properties, DragFloat4 for others
+                        if (prop_name.find("Color") != std::string::npos ||
+                            prop_name.find("color") != std::string::npos) {
+                            if (ImGui::ColorEdit4(prop_name.c_str(), &value.x)) {
+                                material->set_property(prop_name, value, property.uniform_name);
+                            }
+                        } else {
+                            if (ImGui::DragFloat4(prop_name.c_str(), &value.x, 0.01f)) {
+                                material->set_property(prop_name, value, property.uniform_name);
+                            }
+                        }
+                        break;
+                    }
+
+                    case Material::PropertyType::BOOL: {
+                        bool value = std::get<bool>(property.value);
+                        if (ImGui::Checkbox(prop_name.c_str(), &value)) {
+                            material->set_property(prop_name, value, property.uniform_name);
+                        }
+                        break;
+                    }
+
+                    case Material::PropertyType::INT: {
+                        int value = std::get<int>(property.value);
+                        if (ImGui::DragInt(prop_name.c_str(), &value)) {
+                            material->set_property(prop_name, value, property.uniform_name);
+                        }
+                        break;
+                    }
+
+                    case Material::PropertyType::TEXTURE: {
+                        Texture *texture = std::get<Texture *>(property.value);
+                        ImGui::Text("%s:", prop_name.c_str());
+                        ImGui::SameLine();
+
+                        if (texture) {
+                            ImGui::Text("Loaded: %s", texture->get_path().c_str()); // Assuming Texture has get_path()
+                            ImGui::SameLine();
+                            if (ImGui::Button(("Remove##" + prop_name).c_str())) {
+                                material->set_property(prop_name, static_cast<Texture *>(nullptr),
+                                                       property.uniform_name);
+                            }
+
+                            // Optional: Show texture preview if you have the texture ID
+                            if (texture->get_id() != 0) {
+                                // Assuming Texture has get_id()
+                                ImGui::Image(texture->get_id(), ImVec2(64, 64));
+                            }
+                        } else {
+                            ImGui::Text("None");
+                            ImGui::SameLine();
+                            if (ImGui::Button(("Load##" + prop_name).c_str())) {
+                                std::vector<Utility::FileFilter> filters = {
+                                    {"Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.tga"},
+                                    {"All Files", "*.*"}
+                                };
+                                std::string file_path = Utility::FileDialog::open_file(filters);
+                                if (!file_path.empty()) {
+                                    Texture *new_texture = new Texture(file_path, TextureType::DIFFUSE);
+                                    material->set_property(prop_name, new_texture, property.uniform_name);
+                                }
+                                ImGui::Text("File dialog not implemented");
+                            }
+                        }
+                        break;
+                    }
+
+                    case Material::PropertyType::MAT3: {
+                        glm::mat3 value = std::get<glm::mat3>(property.value);
+                        ImGui::Text("%s (Matrix 3x3):", prop_name.c_str());
+                        bool changed = false;
+                        for (int i = 0; i < 3; i++) {
+                            ImGui::PushID(i);
+                            if (ImGui::DragFloat3("", &value[i].x, 0.01f)) {
+                                changed = true;
+                            }
+                            ImGui::PopID();
+                        }
+                        if (changed) {
+                            material->set_property(prop_name, value, property.uniform_name);
+                        }
+                        break;
+                    }
+
+                    case Material::PropertyType::MAT4: {
+                        glm::mat4 value = std::get<glm::mat4>(property.value);
+                        ImGui::Text("%s (Matrix 4x4):", prop_name.c_str());
+                        bool changed = false;
+                        for (int i = 0; i < 4; i++) {
+                            ImGui::PushID(i);
+                            if (ImGui::DragFloat4("", &value[i].x, 0.01f)) {
+                                changed = true;
+                            }
+                            ImGui::PopID();
+                        }
+                        if (changed) {
+                            material->set_property(prop_name, value, property.uniform_name);
+                        }
+                        break;
+                    }
+                }
+
+                // Show uniform name if different from property name
+                if (!property.uniform_name.empty() && property.uniform_name != prop_name) {
+                    ImGui::SameLine();
+                    ImGui::TextDisabled("-> %s", property.uniform_name.c_str());
+                }
+
+                ImGui::PopID();
+            }
+        } else {
+            ImGui::Text("No properties available");
+        }
+
+        ImGui::Separator();
+
+        // Material type and shader info
+        ImGui::Text("Material Info");
+        if (material->has_custom_shader()) {
+            ImGui::Text("Custom Shader: Yes");
+            if (const auto *shader_info = material->get_shader_info()) {
+                ImGui::Text("Vertex: %s", shader_info->vertex_path.c_str());
+                ImGui::Text("Fragment: %s", shader_info->fragment_path.c_str());
+                if (shader_info->geometry_path) {
+                    ImGui::Text("Geometry: %s", shader_info->geometry_path->c_str());
+                }
+            }
+        } else {
+            const char *builtin_types[] = {"Lambert", "Phong", "PBR"};
+            int type = material->get_builtin_material_type();
+            if (type >= 0 && type < 3) {
+                ImGui::Text("Built-in Type: %s", builtin_types[type]);
+            }
+        }
+
+        // Quick preset buttons
+        ImGui::Separator();
+        ImGui::Text("Quick Presets");
+        if (ImGui::Button("Brick Tiling")) {
+            material->set_brick_tiling();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Tile Pattern")) {
+            material->set_tile_pattern();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Wood Planks")) {
+            material->set_wood_planks();
+        }
 
         ImGui::End();
     }
 
     void SceneEditorOverlay::render_mesh_properties(Mesh *mesh) const {
     }
-    
 }

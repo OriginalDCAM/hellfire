@@ -6,7 +6,8 @@
 #pragma once
 class DisplayCase : public DCraft::Object3D {
 public:
-    void init();
+    DisplayCase() : Object3D("Display Case") {}
+    void setup() override;
     void update(float delta_time) override;
     
 };

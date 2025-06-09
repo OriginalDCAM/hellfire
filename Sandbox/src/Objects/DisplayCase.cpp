@@ -5,20 +5,17 @@
 
 #include "Dcraft/Graphics/Primitives/Cube.h"
 
-void DisplayCase::init() {
-    // Override the default name
-    set_name("Glass Box");
-
+void DisplayCase::setup() {
     // Create the material
-    auto GlassMaterialComponent = DCraft::MaterialBuilder::create_lambert("Glass Material");
+    auto GlassMaterialComponent = DCraft::MaterialBuilder::create_phong("Glass Material");
     GlassMaterialComponent->set_texture("assets/textures/transparent/glass.jpg", DCraft::TextureType::DIFFUSE);
     GlassMaterialComponent->set_uv_tiling(1.0f, 1.0f);
     GlassMaterialComponent->set_ambient_color(glm::vec3(0.5, 0.5, 0.5));
-    GlassMaterialComponent->set_transparency(0.50f);
+    GlassMaterialComponent->set_transparency(0.5f); 
 
     uint32_t transparent_shader = DCraft::Application::get_instance().get_shader_manager().get_shader_for_material(*GlassMaterialComponent);
-    uint32_t custom_test_shader = DCraft::Application::get_instance().get_shader_manager().load_shader_from_files("assets/shaders/standard.vert", "assets/shaders/test.frag");
-    GlassMaterialComponent->set_compiled_shader_id(custom_test_shader);
+    // uint32_t custom_test_shader = DCraft::Application::get_instance().get_shader_manager().load_shader_from_files("assets/shaders/standard.vert", "assets/shaders/test.frag");
+    GlassMaterialComponent->set_compiled_shader_id(transparent_shader);
 
     // Create the mesh
     DCraft::Cube* MeshComponent = new DCraft::Cube("Glass Cube Mesh");
