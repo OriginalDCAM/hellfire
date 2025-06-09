@@ -34,46 +34,80 @@ uniform int numPointLights;
 uniform DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
-// Camera position for specular
-uniform vec3 viewPos;
-
 // Material uniforms
-uniform sampler2D diffuse1;
-uniform sampler2D diffuse2;
-uniform sampler2D specular1;
-uniform sampler2D normal1;
-uniform sampler2D roughness1;
-uniform sampler2D metalness1;
-uniform sampler2D ao1;
+uniform sampler2D diffuseTexture;
 
 // Texture usage flags
-uniform bool useDiffuse1;
-uniform bool useDiffuse2;
-uniform bool useSpecular1;
-uniform bool useNormalMap;
-uniform float diffuseBlend;
+uniform bool useDiffuseTexture;
 
 // Material properties
 uniform vec3 ambientColor;
 uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 uniform float shininess;
-uniform int materialType; // 0 = Lambert, 1 = Phong, 2 = PBR
 
-// Calculate lighting contribution from a directional light
-vec3 calcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 diffuse, vec3 specular) {
+// Camera position for specular calculations
+uniform vec3 viewPos;
+
+// UV controls
+uniform vec2 uvTiling = vec2(1.0);
+uniform vec2 uvOffset = vec2(0.0);
+uniform float uvRotation = 0.0;
+
+// Texture filtering mode
+uniform int textureWrapMode = 0; // 0=repeat, 1=clamp, 2=mirror
+
+// Transparency uniforms
+uniform float alpha = 1.0;
+uniform float transparency = 1.0;
+uniform bool useTransparency = false;
+
+vec2 transformUV(vec2 uv) {
+    // Apply offset first
+    uv += uvOffset;
+
+    // Apply tiling
+    uv *= uvTiling;
+
+    // Apply rotation if needed
+    if (uvRotation != 0.0) {
+        float cos_r = cos(uvRotation);
+        float sin_r = sin(uvRotation);
+        mat2 rotation = mat2(cos_r, -sin_r, sin_r, cos_r);
+        uv = rotation * (uv - 0.5) + 0.5; // Rotate around center
+    }
+
+    return uv;
+}
+
+// Texture sampling with wrapping modes
+vec4 sampleTexture(sampler2D tex, vec2 uv) {
+    vec2 transformedUV = transformUV(uv);
+
+    // Apply different wrapping modes if needed
+    if (textureWrapMode == 1) {
+        // Clamp to edge
+        transformedUV = clamp(transformedUV, 0.0, 1.0);
+    } else if (textureWrapMode == 2) {
+        // Mirror repeat
+        transformedUV = abs(mod(transformedUV, 2.0) - 1.0);
+    }
+    // textureWrapMode == 0 uses default repeat behavior
+
+    return texture(tex, transformedUV);
+}
+
+// Calculate lighting contribution from a directional light (Blinn-Phong)
+vec3 calcDirectionalLight(DirectionalLight light, vec3 normal, vec3 fragPos, vec3 diffuse, vec3 specular) {
     vec3 lightDir = normalize(-light.direction);
+    vec3 viewDir = normalize(viewPos - fragPos);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
 
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
 
-    // Specular shading
-    float spec = 0.0;
-    // Phong and PBR shading
-    if (materialType > 0 && materialType < 3) {
-        vec3 reflectDir = reflect(-lightDir, normal);
-        spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-    }
+    // Specular shading (Blinn-Phong)
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
 
     // Combine results
     vec3 diffuseResult = light.color * light.intensity * diff * diffuse;
@@ -82,18 +116,17 @@ vec3 calcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec
     return diffuseResult + specularResult;
 }
 
-// Calculate lighting contribution from a point light
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 diffuse, vec3 specular) {
+// Calculate lighting contribution from a point light (Blinn-Phong)
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse, vec3 specular) {
     vec3 lightDir = normalize(light.position - fragPos);
+    vec3 viewDir = normalize(viewPos - fragPos);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
 
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
 
-    float spec = 0.0;
-    if (materialType > 0) {
-        vec3 reflectDir = reflect(-lightDir, normal);
-        spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-    }
+    // Specular shading (Blinn-Phong)
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
 
     // Attenuation
     float distance = length(light.position - fragPos);
@@ -111,19 +144,24 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
     return diffuseResult + specularResult;
 }
 
+float near = 0.1;
+float far  = 100.0;
+
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));
+}
+
 void main() {
-    fragColor = vec4(vNormal, 1.0);
     vec4 diffuseValue;
-    if (useDiffuse1 && useDiffuse2) {
-        vec4 diff1 = texture(diffuse1, vTexCoords);
-        vec4 diff2 = texture(diffuse2, vTexCoords);
-        diffuseValue = mix(diff1, diff2, diffuseBlend);
-    } else if (useDiffuse1) {
-        diffuseValue = texture(diffuse1, vTexCoords);
+    if (useDiffuseTexture) {
+        diffuseValue = sampleTexture(diffuseTexture, vTexCoords);
     } else {
         diffuseValue = vec4(diffuseColor, 1.0);
     }
 
+    // Apply vertex colors if present
     vec4 baseColor;
     if (vColor.r != 0.0 || vColor.g != 0.0 || vColor.b != 0.0) {
         baseColor = diffuseValue * vec4(vColor, 1.0);
@@ -131,32 +169,27 @@ void main() {
         baseColor = diffuseValue;
     }
 
-    // Get specular value
-    vec3 specularValue;
-    if (useSpecular1) {
-        specularValue = texture(specular1, vTexCoords).rgb;
-    } else {
-        specularValue = specularColor;
-    }
-
-
     // Normalize the normal
     vec3 normal = normalize(vNormal);
-    // Get view direction
-    vec3 viewDir = normalize(viewPos - vFragPos);
 
-    // Calculate lighting
+    // Calculate lighting - Blinn-Phong model (ambient + diffuse + specular)
     vec3 result = ambientColor * baseColor.rgb; // Ambient light
 
     // Add all directional lights
     for (int i = 0; i < numDirectionalLights; i++) {
-        result += calcDirectionalLight(directionalLights[i], normal, viewDir, baseColor.rgb, specularValue);
+        result += calcDirectionalLight(directionalLights[i], normal, vFragPos, baseColor.rgb, specularColor);
     }
 
     // Add all point lights
     for (int i = 0; i < numPointLights; i++) {
-        result += calcPointLight(pointLights[i], normal, vFragPos, viewDir, baseColor.rgb, specularValue);
+        result += calcPointLight(pointLights[i], normal, vFragPos, baseColor.rgb, specularColor);
     }
 
-    fragColor = vec4(result, baseColor.a);
+    // Calculate final alpha
+    float finalAlpha = baseColor.a;
+    if (useTransparency) {
+        finalAlpha *= alpha * transparency;
+    }
+
+    fragColor = vec4(result, finalAlpha);
 }
