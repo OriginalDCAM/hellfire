@@ -5,6 +5,8 @@
 
 namespace DCraft
 {
+    class Skybox;
+
     class Scene : public Object3D
     {
     public:
@@ -18,7 +20,7 @@ namespace DCraft
         // Object management
         Object3D* create_object(const std::string& name);
 
-        virtual void draw(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program, void* renderer_context) override;
+        void draw(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program, void* renderer_context) override;
 
         template<typename CameraType, typename... Args>
         CameraType* create_camera(const std::string& name, Args&& ... args)
@@ -42,6 +44,10 @@ namespace DCraft
         void destroy_camera(Camera* camera);
         std::vector<Camera*> get_cameras() {return cameras_; }
 
+        void set_skybox(Skybox* skybox) { skybox_ = skybox; }
+        Skybox* get_skybox() const { return skybox_; }
+        bool has_skybox() const { return skybox_ != nullptr; }
+
         bool is_active() const { return is_active_; }
         void set_active(const bool active) { is_active_ = active; }
 
@@ -57,6 +63,7 @@ namespace DCraft
         Camera* active_camera_;
         bool is_active_;
         std::string source_filename;
+        Skybox* skybox_ = nullptr;
 
         void register_object(Object3D* obj);
         void unregister_object(Object3D* obj);

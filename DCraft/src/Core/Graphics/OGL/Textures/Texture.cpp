@@ -44,6 +44,8 @@ namespace DCraft {
         } else {
             std::cerr << "Failed to load texture: " << path << std::endl;
         }
+
+        stbi_set_flip_vertically_on_load(false);
     }
 
     void Texture::bind(unsigned int slot) {
