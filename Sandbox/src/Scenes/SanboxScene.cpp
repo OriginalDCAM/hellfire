@@ -74,7 +74,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
 
     // Setup lighting
     auto* sun = new DCraft::DirectionalLight("Sun");
-    sun->set_direction(glm::vec3(-0.2f, -0.3f, -0.2f));
+    sun->set_direction(glm::normalize(glm::vec3(0.2f, -0.8f, 0.1f)));
     sun->set_position(glm::vec3(20.0f, 30.0f, 20.0f));
     sun->set_color(glm::vec3(1.0f, 0.95f, 0.9f));
     sun->set_intensity(2.5f);
@@ -87,13 +87,22 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(main_camera);
     scene->set_active_camera(main_camera);
 
+    auto* skybox = new DCraft::Skybox();
+    skybox->set_cubemap_faces({
+        "assets/skybox/east.png",   // +X
+        "assets/skybox/west.png",    // -X
+        "assets/skybox/up.png",     // +Y
+        "assets/skybox/down.png",  // -Y
+        "assets/skybox/north.png",   // +Z
+        "assets/skybox/south.png"     // -Z
+    });
+    scene->set_skybox(skybox);
+
     auto *drone_camera = scene->create_camera<DCraft::PerspectiveCamera>(
         "Drone Camera", 70.0f, window.aspect_ratio, 0.1f, 400.0f);
     drone_camera->set_position(10.0f, 25.0f, 10.0f);
     drone_camera->set_target(0.0f, 0.0f, 0.0f);
     scene->add(drone_camera);
-
-
 
     auto *floor = new DCraft::Quad("Floor Quad");
     floor->set_position(0, 0, 0);

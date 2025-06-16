@@ -445,7 +445,6 @@ namespace DCraft::Editor {
         float movement_speed = camera->get_movement_speed();
         if (ImGui::DragFloat("Movement speed", &movement_speed, 0.25f)) {
             camera->set_movement_speed(movement_speed);
-            // Camera speed doesn't affect rendering, so no need to mark dirty
         }
 
         if (auto *perspective_cam = dynamic_cast<PerspectiveCamera *>(camera)) {
@@ -512,6 +511,7 @@ namespace DCraft::Editor {
 
                     case Material::PropertyType::VEC3: {
                         glm::vec3 value = std::get<glm::vec3>(property.value);
+                        
                         // Use ColorEdit3 for color properties, DragFloat3 for others
                         if (prop_name.find("Color") != std::string::npos ||
                             prop_name.find("color") != std::string::npos) {
@@ -564,16 +564,15 @@ namespace DCraft::Editor {
                         ImGui::SameLine();
 
                         if (texture) {
-                            ImGui::Text("Loaded: %s", texture->get_path().c_str()); // Assuming Texture has get_path()
+                            ImGui::Text("Loaded: %s", texture->get_path().c_str()); 
                             ImGui::SameLine();
                             if (ImGui::Button(("Remove##" + prop_name).c_str())) {
-                                material->set_property(prop_name, static_cast<Texture *>(nullptr),
+                                material->set_property(prop_name, nullptr,
                                                        property.uniform_name);
                             }
 
-                            // Optional: Show texture preview if you have the texture ID
+                            // Show texture preview if you have the texture ID
                             if (texture->get_id() != 0) {
-                                // Assuming Texture has get_id()
                                 ImGui::Image(texture->get_id(), ImVec2(64, 64));
                             }
                         } else {

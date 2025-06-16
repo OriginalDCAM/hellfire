@@ -11,7 +11,9 @@ void DisplayCase::setup() {
     GlassMaterialComponent->set_texture("assets/textures/transparent/glass.jpg", DCraft::TextureType::DIFFUSE);
     GlassMaterialComponent->set_uv_tiling(1.0f, 1.0f);
     GlassMaterialComponent->set_ambient_color(glm::vec3(0.5, 0.5, 0.5));
-    GlassMaterialComponent->set_transparency(0.5f); 
+    GlassMaterialComponent->set_specular_color(glm::vec3(0.5, 0.5, 0.5));
+    GlassMaterialComponent->set_shininess(64.0f);
+    GlassMaterialComponent->set_transparency(0.6f); 
 
     uint32_t transparent_shader = DCraft::Application::get_instance().get_shader_manager().get_shader_for_material(*GlassMaterialComponent);
     // uint32_t custom_test_shader = DCraft::Application::get_instance().get_shader_manager().load_shader_from_files("assets/shaders/standard.vert", "assets/shaders/test.frag");

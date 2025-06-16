@@ -6,6 +6,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
 
+
+#include "DCraft/Graphics/Renderers/SkyboxRenderer.h"
+#include "DCraft/Structs/Scene.h"
+
 namespace DCraft {
     Renderer::Renderer(uint32_t fallback_program_id) : fallback_program_id_(fallback_program_id),
                                                        render_to_framebuffer_(false), framebuffer_width_(800),
@@ -37,6 +41,8 @@ namespace DCraft {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthFunc(GL_LESS);
         glDisable(GL_CULL_FACE);
+
+        skybox_renderer_.initialize();
     }
 
     void Renderer::render(Object3D &scene, Camera &camera) {
@@ -95,7 +101,7 @@ namespace DCraft {
     void Renderer::render_internal(Object3D &scene, Camera &camera) {
         opaque_objects_.clear();
         transparent_objects_.clear();
-        
+
         // 1. Collect light data and store in render context
         std::vector<DirectionalLight *> dir_lights;
         std::vector<PointLight *> point_lights;
@@ -105,11 +111,16 @@ namespace DCraft {
         // 2. Collect render commands
         collect_render_commands(&scene, camera.get_position());
 
-        // 3. Render in two passes
+        // 3. Render in proper order
         glm::mat4 view = camera.get_view_matrix();
         glm::mat4 projection = camera.get_projection_matrix();
 
+        // Cast scene to Scene* to access skybox
+        Scene *scene_ptr = dynamic_cast<Scene *>(&scene);
+
+
         render_opaque_pass(view, projection);
+        render_skybox_pass(scene_ptr, view, projection);
         render_transparent_pass(view, projection);
     }
 
@@ -189,6 +200,12 @@ namespace DCraft {
         }
 
         glDepthMask(GL_TRUE);
+    }
+
+    void Renderer::render_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection) const {
+        if (!scene || !scene->has_skybox()) return;
+
+        skybox_renderer_.render(scene->get_skybox(), scene->get_active_camera());
     }
 
     void Renderer::create_scene_framebuffer(uint32_t width, uint32_t height) {

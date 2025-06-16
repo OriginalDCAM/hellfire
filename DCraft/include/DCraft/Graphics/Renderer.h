@@ -5,10 +5,13 @@
 #include "Lights/DirectionalLight.h"
 #include "Lights/PointLight.h"
 #include "OGL/Framebuffer.h"
+#include "Renderers/SkyboxRenderer.h"
 
 
 namespace DCraft
 {
+    class Scene;
+
     struct RenderCommand {
         Object3D* object;
         Material* material;
@@ -55,7 +58,8 @@ namespace DCraft
         // Render command lists
         std::vector<RenderCommand> opaque_objects_;
         std::vector<RenderCommand> transparent_objects_;
-        
+
+        SkyboxRenderer skybox_renderer_;
     public:
         Renderer(uint32_t fallback_program_id);
         Renderer();
@@ -96,6 +100,7 @@ namespace DCraft
         void render_shadow_pass(const glm::mat4& light_view, const glm::mat4& light_projection);
         void render_opaque_pass(const glm::mat4& view, const glm::mat4& projection);
         void render_transparent_pass(const glm::mat4& view, const glm::mat4& projection);
+        void render_skybox_pass(Scene* scene, const glm::mat4& view, const glm::mat4& projection) const;
 
         // Utility methods
         bool is_material_transparent(Material *material);
