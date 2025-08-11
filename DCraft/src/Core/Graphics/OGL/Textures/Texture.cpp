@@ -14,7 +14,7 @@ namespace DCraft {
         // Set unpack alignment to 1
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        stbi_set_flip_vertically_on_load(true);
+        // stbi_set_flip_vertically_on_load(true);
         unsigned char *data = stbi_load(path.c_str(), &width, &height, &nr_channels, 0);
 
         if (data) {

@@ -17,6 +17,7 @@ namespace DCraft {
         TransformComponent() = default;
         const glm::vec3& get_position() const { return transform_.get_position(); }
         void set_position(float x, float y, float z) { transform_.set_position(x, y, z); }
+        void set_position(const glm::vec3& position) { transform_.set_position(position); }
 
         const glm::vec3& get_rotation() { return transform_.get_rotation(); }
         void set_rotation(const glm::vec3& eulers) { transform_.set_rotation(eulers); }
