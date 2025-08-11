@@ -1,22 +1,23 @@
 ﻿#pragma once
 
-#include <DCraft/Structs/Object3D.h>
 #include <functional>
 #include <vector>
 #include <string>
+#include <glm/detail/type_vec.hpp>
 
-#include "DCraft/Graphics/Lights/Light.h"
+#include "DCraft/Components/LightComponent.h"
+#include "DCraft/Structs/Entity.h"
 
 namespace DCraft {
     class AnimationSystem {
     public:
         // Animation callback type
-        using AnimationCallback = std::function<void(Object3D *, float, float)>;
+        using AnimationCallback = std::function<void(Entity*, float, float)>;
 
         // Animation data structure
         struct Animation {
             std::string name; // Name for identification
-            Object3D *target; // Target object
+            Entity*target; // Target object
             float duration; // Duration in seconds
             float elapsed_time = 0.0f; // Current elapsed time
             bool loop; // Whether to loop
@@ -25,7 +26,7 @@ namespace DCraft {
         };
 
         // Add an animation
-        void add_animation(const std::string &name, Object3D *target, float duration,
+        void add_animation(const std::string &name, Entity*target, float duration,
                            AnimationCallback callback, bool loop = false) {
             animations_.push_back({name, target, duration, 0.0f, loop, true, callback});
         }
@@ -79,7 +80,7 @@ namespace DCraft {
         }
 
         // Stop all animations for a specific object
-        void remove_animations_for_object(Object3D *target) {
+        void remove_animations_for_object(Entity*target) {
             animations_.erase(
                 std::remove_if(animations_.begin(), animations_.end(),
                                [target](const Animation &anim) { return anim.target == target; }),
@@ -88,11 +89,11 @@ namespace DCraft {
 
         // Helper methods for common animations
 
-        void create_rotation(const std::string &name, Object3D *target,
+        void create_rotation(const std::string &name, Entity*target,
                              float x_speed, float y_speed, float z_speed) {
             add_animation(name, target, 1.0f,
-                          [x_speed, y_speed, z_speed](Object3D *obj, float progress, float dt) {
-                              glm::vec3 current_rotation = obj->get_rotation();
+                          [x_speed, y_speed, z_speed](Entity* entity, float progress, float dt) {
+                              glm::vec3 current_rotation = entity->transform()->get_rotation();
 
                               // Apply rotation based on speeds and delta time
                               current_rotation.x += x_speed * dt;
@@ -104,31 +105,31 @@ namespace DCraft {
                               current_rotation.y = fmodf(current_rotation.y, 360.0f);
                               current_rotation.z = fmodf(current_rotation.z, 360.0f);
 
-                              obj->set_rotation(current_rotation);
+                              entity->transform()->set_rotation(current_rotation);
                           }, true);
         }
 
         // Pulsing scale animation
-        void create_pulsing_scale(const std::string &name, Object3D *target,
+        void create_pulsing_scale(const std::string &name, Entity*target,
                                   float duration, float min_scale, float max_scale) {
             add_animation(name, target, duration,
-                          [min_scale, max_scale](Object3D *obj, float progress, float dt) {
+                          [min_scale, max_scale](Entity*entity, float progress, float dt) {
                               // Sine wave pulsing
                               float scale = min_scale + (max_scale - min_scale) *
                                             (0.5f + 0.5f * sinf(progress * 6.28318f));
 
-                              obj->set_scale(glm::vec3(scale));
+                              entity->transform()->set_scale(scale);
                           }, true);
         }
 
         // Moving in a circular path
-        void create_circular_path(const std::string &name, Object3D *target,
+        void create_circular_path(const std::string &name, Entity*target,
                                   float duration, float radius, bool face_direction = true) {
             // Store the original position
-            glm::vec3 center = target->get_position();
+            glm::vec3 center = target->transform()->get_position();
 
             add_animation(name, target, duration,
-                          [center, radius, face_direction](Object3D *obj, float progress, float dt) {
+                          [center, radius, face_direction](Entity*entity, float progress, float dt) {
                               // Calculate angle based on progress
                               float angle = progress * 6.28318f; // 2*PI
 
@@ -139,47 +140,46 @@ namespace DCraft {
                                                       radius * sinf(angle)
                                                   );
 
-                              obj->set_position(new_pos);
+                              entity->transform()->set_position(new_pos.x, new_pos.y, new_pos.z);
 
                               // Make object face movement direction
                               if (face_direction) {
                                   // Direction tangent to circle
                                   glm::vec3 direction = glm::vec3(-sinf(angle), 0.0f, cosf(angle));
                                   glm::vec3 target_pos = new_pos + direction;
-                                  obj->look_at(target_pos, glm::vec3(0.0f, 1.0f, 0.0f));
+                                  entity->transform()->look_at(target_pos, glm::vec3(0.0f, 1.0f, 0.0f));
                               }
                           }, true);
         }
 
         // Oscillating movement (up and down, or side to side)
-        void create_oscillating_movement(const std::string &name, Object3D *target,
+        void create_oscillating_movement(const std::string &name, Entity* target,
                                          float duration, const glm::vec3 &axis, float amplitude) {
             // Store the original position
-            glm::vec3 start_pos = target->get_position();
+            glm::vec3 start_pos = target->transform()->get_position();
 
             add_animation(name, target, duration,
-                          [start_pos, axis, amplitude](Object3D *obj, float progress, float dt) {
+                          [start_pos, axis, amplitude](Entity* obj, float progress, float dt) {
                               // Sine wave oscillation
                               float offset = amplitude * sinf(progress * 6.28318f);
 
                               // Calculate new position
                               glm::vec3 new_pos = start_pos + (axis * offset);
-                              obj->set_position(new_pos);
+                              obj->transform()->set_position(new_pos.x, new_pos.y, new_pos.z);
                           }, true);
         }
 
-        void create_intensity_pulse(const std::string &name, Light *target,
+        void create_intensity_pulse(const std::string &name, Entity* target,
                                     float duration, float min_intensity, float max_intensity) {
             add_animation(name, target, duration,
-                          [min_intensity, max_intensity](Object3D *obj, float progress, float dt) {
+                          [min_intensity, max_intensity](Entity*entity, float progress, float dt) {
                               // Cast back to Light* since we know this is a light
-                              DCraft::Light *light = static_cast<Light *>(obj);
 
                               // Sine wave pulsing
                               float intensity = min_intensity + (max_intensity - min_intensity) *
                                                 (0.5f + 0.5f * sinf(progress * 6.28318f));
 
-                              light->set_intensity(intensity);
+                              entity->get_component<LightComponent>()->set_intensity(intensity);
                           }, true);
         }
 

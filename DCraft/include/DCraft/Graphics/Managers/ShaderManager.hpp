@@ -26,7 +26,7 @@ namespace DCraft {
         std::unordered_map<std::string, uint32_t> compiled_shaders_;
         
         // Recursively process #include directives
-        std::string process_includes(const std::string& source, const std::string& base_path = "shaders/") {
+        std::string process_includes(const std::string& source, const std::string& base_path = "Shaders/") {
             std::string processed = source;
             std::regex include_regex("#include\\s+\"([^\"]+)\"");
             std::smatch match;
@@ -190,7 +190,7 @@ namespace DCraft {
         uint32_t get_shader_for_material(Material& material) {
             ShaderVariant variant;
             
-            // Check if material has custom shader
+            // Check if material has Custom shader
             if (material.has_custom_shader()) {
                 const auto* shader_info = material.get_shader_info();
                 variant.vertex_path = shader_info->vertex_path;
@@ -205,24 +205,24 @@ namespace DCraft {
                 
                 switch (material_type) {
                     case 0: // Lambert
-                        variant.vertex_path = "./assets/shaders/standard.vert";
-                        variant.fragment_path = "./assets/shaders/lambert.frag";
+                        variant.vertex_path = "./assets/Shaders/standard.vert";
+                        variant.fragment_path = "./assets/Shaders/lambert.frag";
                         break;
                     case 1: // Phong
-                        variant.vertex_path = "./assets/shaders/standard.vert";
-                        variant.fragment_path = "./assets/shaders/phong.frag";
+                        variant.vertex_path = "./assets/Shaders/standard.vert";
+                        variant.fragment_path = "./assets/Shaders/phong.frag";
                         break;
                     case 2: // PBR
-                        variant.vertex_path = "./assets/shaders/standard.vert";
-                        variant.fragment_path = "./assets/shaders/pbr.frag";
+                        variant.vertex_path = "./assets/Shaders/standard.vert";
+                        variant.fragment_path = "./assets/Shaders/pbr.frag";
                         break;
                     default:
-                        variant.vertex_path = "./assets/shaders/standard.vert";
-                        variant.fragment_path = "./assets/shaders/lambert.frag";
+                        variant.vertex_path = "./assets/Shaders/standard.vert";
+                        variant.fragment_path = "./assets/Shaders/lambert.frag";
                         break;
                 }
                 
-                // Add automatic defines for built-in shaders
+                // Add automatic defines for built-in Shaders
                 add_automatic_defines(material, variant.defines);
             }
             
@@ -253,7 +253,7 @@ namespace DCraft {
             }
         }
         
-        // Backwards compatibility method - loads shaders from file paths directly
+        // Backwards compatibility method - loads Shaders from file paths directly
         uint32_t load_shader_from_files(const std::string& vertex_path, const std::string& fragment_path) {
             try {
                 std::string vertex_source = load_shader_file(vertex_path);
@@ -269,7 +269,7 @@ namespace DCraft {
                 
                 return program_id;
             } catch (const std::exception& e) {
-                std::cerr << "Error loading shaders: " << e.what() << std::endl;
+                std::cerr << "Error loading Shaders: " << e.what() << std::endl;
                 return 0;
             }
         }
@@ -277,7 +277,7 @@ namespace DCraft {
         void clear_cache() {
             include_cache_.clear();
             
-            // Clean up compiled shaders
+            // Clean up compiled Shaders
             for (const auto& [key, shader_id] : compiled_shaders_) {
                 glDeleteProgram(shader_id);
             }
@@ -318,7 +318,7 @@ namespace DCraft {
 
             uint32_t program_id = glsl::makeShaderProgram(vertex_shader, fragment_shader);
 
-            // Clean up individual shaders after linking
+            // Clean up individual Shaders after linking
             glDeleteShader(vertex_shader);
             glDeleteShader(fragment_shader);
 

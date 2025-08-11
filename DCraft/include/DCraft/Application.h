@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Addons/SceneManager.h"
-#include "Editor/SceneEditorOverlay.h"
+// #include "Editor/SceneEditorOverlay.h"
 #include "Graphics/Renderer.h"
 #include "Graphics/Managers/ShaderManager.hpp"
 
@@ -147,8 +147,8 @@ namespace DCraft {
         ShaderManager shader_manager_;
 
         std::array<bool, 512> active_keys_before_mode_change_; 
-        Object3D* selected_node_ = nullptr;
-        Editor::SceneEditorOverlay editor_overlay_;
+        Entity* selected_node_ = nullptr;
+        // Editor::SceneEditorOverlay editor_overlay_;
 
         // Keys stuff
         bool editor_mode_;
@@ -165,6 +165,8 @@ namespace DCraft {
         // Mouse things
         int last_mouse_x_ = window_info_.width / 2;
         int last_mouse_y_ = window_info_.height / 2;
+        int mouse_delta_x_;
+        int mouse_delta_y_;
         bool first_mouse_ = true;
 
         // Timing

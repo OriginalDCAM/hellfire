@@ -1,22 +1,25 @@
 #pragma once
 #include <cstdint>
-#include "DCraft/Structs/Object3D.h"
-#include "DCraft/Structs/Camera.h"
-#include "Lights/DirectionalLight.h"
-#include "Lights/PointLight.h"
-#include "OGL/Framebuffer.h"
-#include "Renderers/SkyboxRenderer.h"
+#include <vector>
+#include <memory>
 
+#include "DCraft/Structs/Entity.h"
+#include "DCraft/Components/CameraComponent.h"
+#include "DCraft/Components/RenderableComponent.h"
+#include "DCraft/Graphics/RendererContext.h"  // Include the separate context header
+#include "DCraft/Graphics/Materials/Material.h"
+#include "DCraft/Graphics/OGL/Framebuffer.h"
+#include "DCraft/Graphics/Renderers/SkyboxRenderer.h"
 
-namespace DCraft
-{
+namespace DCraft {
     class Scene;
 
     struct RenderCommand {
-        Object3D* object;
-        Material* material;
-        float distance_to_camera;
-        bool is_transparent;
+        Entity* entity;                    // The entity being rendered
+        RenderableComponent* renderable;   // Direct reference to renderable component
+        Material* material;                // Material for sorting and rendering
+        float distance_to_camera;          // Distance for sorting
+        bool is_transparent;               // Transparency flag for render pass
 
         bool operator<(const RenderCommand& other) const {
             if (is_transparent && other.is_transparent) {
@@ -25,27 +28,8 @@ namespace DCraft
             return !is_transparent && other.is_transparent;
         }
     };
-    class OGLRendererContext {
-    public:
-        uint32_t default_shader_program;
-    
-        // Fixed arrays matching shader limits
-        DirectionalLight* directional_lights[4];  // MAX_DIRECTIONAL_LIGHTS = 4
-        PointLight* point_lights[8];              // MAX_POINT_LIGHTS = 8
-        int num_directional_lights = 0;
-        int num_point_lights = 0;
-    
-        Camera* camera = nullptr;
-    
-        // Constructor to initialize arrays
-        OGLRendererContext() : default_shader_program(0) {
-            for (int i = 0; i < 4; i++) directional_lights[i] = nullptr;
-            for (int i = 0; i < 8; i++) point_lights[i] = nullptr;
-        }
-    };
 
-    class Renderer
-    {
+    class Renderer {
     private:
         uint32_t fallback_program_id_;
         void* context_;
@@ -60,19 +44,22 @@ namespace DCraft
         std::vector<RenderCommand> transparent_objects_;
 
         SkyboxRenderer skybox_renderer_;
+
     public:
         Renderer(uint32_t fallback_program_id);
         Renderer();
- 
         ~Renderer();
         
         void init();
-        void render(Object3D &scene, Camera &camera);
+        
+        // Main render method - now takes Scene instead of Object3D
+        void render(Scene& scene);
+
         void begin_frame();
         void end_frame();
         
         uint32_t get_default_shader() const;
-        void *get_context() const;
+        void* get_context() const;
 
         // Framebuffer management
         void create_scene_framebuffer(uint32_t width, uint32_t height);
@@ -80,30 +67,28 @@ namespace DCraft
         uint32_t get_scene_texture() const;
         void resize_scene_framebuffer(uint32_t width, uint32_t height);
 
-        void render_to_texture(Object3D &scene, Camera &camera, uint32_t width, uint32_t height);
-        void render_scene_to_framebuffer(Object3D &scene, Camera &camera);
+        // Updated to use Scene and CameraComponent
+        void render_to_texture(Scene& scene, CameraComponent& camera, uint32_t width, uint32_t height);
+        void render_scene_to_framebuffer(Scene& scene, CameraComponent& camera);
 
         void set_fallback_shader(uint32_t shader_program_id);
 
     private:
-        // Collection methods
-        void collect_render_commands(Object3D *object, const glm::vec3& camera_pos);
-        void collect_lights(Object3D *object_3d, std::vector<DirectionalLight *> &dir_lights,
-                           std::vector<PointLight *> &point_lights);
+        // Updated collection methods for Entity-Component system
+        void collect_render_commands_recursive(Entity* entity, const glm::vec3& camera_pos);
+        
+        // Updated light storage for Entity-based lights
+        void store_lights_in_context(const std::vector<Entity*>& light_entities, CameraComponent& camera);
 
-        // Data storage methods
-        void store_lights_in_context(const std::vector<DirectionalLight *> &dir_lights,
-                                     const std::vector<PointLight *> &point_lights, Camera &camera);
-
-        void render_internal(Object3D& scene, Camera &camera);
+        // Updated to use Scene and CameraComponent
+        void render_internal(Scene& scene, CameraComponent& camera);
+        
         // Rendering passes
-        void render_shadow_pass(const glm::mat4& light_view, const glm::mat4& light_projection);
         void render_opaque_pass(const glm::mat4& view, const glm::mat4& projection);
         void render_transparent_pass(const glm::mat4& view, const glm::mat4& projection);
         void render_skybox_pass(Scene* scene, const glm::mat4& view, const glm::mat4& projection) const;
 
         // Utility methods
-        bool is_material_transparent(Material *material);
+        bool is_material_transparent(Material* material);
     };
 }
-

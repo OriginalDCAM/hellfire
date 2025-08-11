@@ -8,9 +8,7 @@
 // Meant for the application that uses the framework
 
 #include "DCraft/Application.h"
-#include "DCraft/Structs/Camera.h"
 #include "DCraft/Structs/Scene.h"
-#include "DCraft/Structs/Object3D.h"
 #include "DCraft/Graphics/Mesh.h"
 #include "DCraft/Addons/AnimationSystem.h"
 #include "DCraft/Structs/Skybox.h"

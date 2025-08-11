@@ -7,8 +7,6 @@ using json = nlohmann::json;
 
 
 namespace DCraft {
-    class Object3D;
-
     class Transform3D {
     public:
         Transform3D()
@@ -52,7 +50,7 @@ namespace DCraft {
 
         glm::vec3 get_scale() const { return scale_; }
 
-        void set_rotation(glm::vec3 &angles);
+        void set_rotation(const glm::vec3 &angles);
 
         void set_rotation_quaternion(const glm::quat &q);
 
@@ -138,7 +136,7 @@ namespace DCraft {
             scale_ = glm::vec3(1.0f);
             rotation_axis_ = glm::vec3(0.0f);
             rotation_angle_ = 0.0f;
-            // Reset custom matrices
+            // Reset Custom matrices
             rotation_matrix_ = glm::mat4(1.0f);
             translation_matrix_ = glm::mat4(1.0f);
             scale_matrix_ = glm::mat4(1.0f);
