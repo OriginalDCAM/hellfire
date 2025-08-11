@@ -13,7 +13,8 @@ public:
     }
 
     ~Game() {
-        // Scenemanager handles deletion of objects for us
+        // Scenemanager handle deletion of Scenes
+        // Scenes handle deletion of objects
     }
 
     void setup_callbacks(DCraft::Application &app);
@@ -36,10 +37,7 @@ public:
 
     void process_mouse_movement(float x_offset, float y_offset);
 
-    void process_camera_movement();
-
     void update(float delta_time);
-
 private:
     DCraft::SceneManager *scene_manager_;
     std::unordered_map<std::string, DCraft::Scene *> scenes_;
@@ -50,10 +48,10 @@ private:
     void setup_cameras_for_scene(const std::string &scene_name);
 
     struct SceneCameras {
-        DCraft::PerspectiveCamera *main_camera = nullptr;
-        DCraft::PerspectiveCamera *drone_camera = nullptr;
-        DCraft::Object3D *main_camera_visual = nullptr;
-        DCraft::Object3D *drone_camera_visual = nullptr;
+        DCraft::Entity *main_camera = nullptr;
+        DCraft::Entity *drone_camera = nullptr;
+        DCraft::Entity *main_camera_visual = nullptr;
+        DCraft::Entity *drone_camera_visual = nullptr;
     };
 
     DCraft::AnimationSystem animation_system_;

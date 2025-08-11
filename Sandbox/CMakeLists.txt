@@ -33,7 +33,7 @@ if (WIN32)
             $<TARGET_FILE_DIR:${APP_NAME}>
     )
     
-    # Create a directory junction (doesn't require admin privileges on Windows)
+    # Create a directory junction
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove -f "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
         COMMAND cmd /c "mklink /J \"$<TARGET_FILE_DIR:${APP_NAME}>\\assets\" \"${CMAKE_CURRENT_SOURCE_DIR}\\assets\""

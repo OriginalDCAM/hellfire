@@ -6,7 +6,6 @@
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "imgui/imgui.h"
 
-#include "DCraft/Graphics/OGL/glsl.h"
 #include "DCraft/Graphics/Renderer.h"
 #include "DCraft/Addons/SceneManager.h"
 #include "DCraft/Structs/Scene.h"
@@ -14,11 +13,10 @@
 #include <iostream>
 #include <utility>
 
-#include "DCraft/Editor/SceneEditorOverlay.h"
+#include "DCraft/Components/CameraComponent.h"
 
 namespace DCraft {
     Application::Application(int width, int height, std::string title) : renderer_(), title_(std::move(title)),
-                                                                         editor_overlay_(&renderer_, scene_manager_),
                                                                          editor_mode_(false), game_mode_(true) {
         if (instance_ != nullptr) {
             throw std::runtime_error("Singleton Application already created");
@@ -38,10 +36,6 @@ namespace DCraft {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGLUT_Shutdown();
         ImGui::DestroyContext();
-
-        for (auto *camera: cameras_) {
-            delete camera;
-        }
 
         // Cleanup application
         if (instance_ == this) {
@@ -113,7 +107,7 @@ namespace DCraft {
 
     void Application::setup_callbacks() {
         glutDisplayFunc(display_callback);
-        glutTimerFunc(16, timer_callback, 0);
+        glutTimerFunc(8, timer_callback, 0);
         glutReshapeFunc(window_resize_callback);
         glutKeyboardFunc(key_down_callback);
         glutKeyboardUpFunc(key_up_callback);
@@ -158,29 +152,22 @@ namespace DCraft {
             return;
         }
 
-        Camera *active_camera = active_scene->get_active_camera();
-        if (!active_camera) {
-            std::cerr << "No active camera in scene!" << std::endl;
-            return;
-        }
-
-        if (!game_mode_) {
-            // Editor mode - render scene to framebuffer and show UI
-            editor_overlay_.set_active_scene(active_scene);
-            editor_overlay_.set_active_camera(active_camera);
-
-            renderer_.set_render_to_framebuffer(true);
-
-            editor_overlay_.render();
-        } else {
+        // if (!game_mode_) {
+        //     // Editor mode - render scene to framebuffer and show UI
+        //     editor_overlay_.set_active_scene(active_scene);
+        //
+        //     renderer_.set_render_to_framebuffer(true);
+        //
+        //     editor_overlay_.render();
+        // } else {
             renderer_.set_render_to_framebuffer(false);
 
             renderer_.begin_frame();
 
-            renderer_.render(*active_scene, *active_camera);
+            renderer_.render(*active_scene);
 
             renderer_.end_frame();
-        }
+        // }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -194,44 +181,35 @@ namespace DCraft {
             return;
         }
 
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard) {
+        if (game_mode_) {
+            keys_[key] = true;
             return;
         }
 
-        keys_[key] = true;
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard) {
+            keys_[key] = true;
+        }
     }
 
     void Application::on_key_up(unsigned char key) {
-        if (key == '`') {
-            keys_['`'] = false;
-            return;
-        }
-
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard) {
-            return;
-        }
         keys_[key] = false;
     }
 
     void Application::on_special_key_down(int key) {
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard && key != '`') {
+
+        if (game_mode_) {
+            keys_[key + 256] = true;
             return;
         }
-        keys_[key + 256] = true;
+        
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard && key != '`') {
+            keys_[key + 256] = true;
+        }
     }
 
     void Application::on_special_key_up(int key) {
-        if (key == '`') {
-            keys_['`'] = false;
-            return;
-        }
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard) {
-            return;
-        }
         keys_[key + 256] = false;
     }
 
@@ -309,8 +287,8 @@ namespace DCraft {
 
         glViewport(0, 0, width, height);
 
-        for (auto &camera: scene_manager_.get_cameras()) {
-            camera->set_aspect_ratio(window_info_.aspect_ratio);
+        for (auto &camera: scene_manager_.get_camera_entities()) {
+            camera->get_component<CameraComponent>()->set_aspect_ratio(window_info_.aspect_ratio);
         }
     }
 
@@ -387,11 +365,11 @@ namespace DCraft {
         // Try to load a default shader, create basic one if needed
         try {
             return shader_manager_.load_shader_from_files(
-                "assets/shaders/standard.vert",
-                "assets/shaders/lambert.frag"
+                "assets/Shaders/standard.vert",
+                "assets/Shaders/lambert.frag"
             );
         } catch (const std::exception &e) {
-            std::cerr << "Warning: Could not load default shaders: " << e.what() << std::endl;
+            std::cerr << "Warning: Could not load default Shaders: " << e.what() << std::endl;
             std::cerr << "Using minimal fallback shader" << std::endl;
 
             // Create a very basic shader programmatically or return 0

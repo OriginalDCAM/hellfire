@@ -55,7 +55,7 @@ namespace DCraft {
         std::optional<ShaderInfo> custom_shader_info_;
         uint32_t compiled_shader_id_ = 0;
         
-        // ===Built-in material type (fallback if no custom shader)===
+        // ===Built-in material type (fallback if no Custom shader)===
         int builtin_material_type_ = 0; // 0=Lambert, 1=Phong, 2=PBR
 
     public:
@@ -268,7 +268,7 @@ namespace DCraft {
             return material;
         }
         
-        // Create material with custom shader
+        // Create material with Custom shader
         static std::unique_ptr<Material> create_custom(const std::string& name, 
                                                       const std::string& vertex_path,
                                                       const std::string& fragment_path) {
@@ -284,18 +284,18 @@ namespace DCraft {
             
             // Built-in templates
             if (template_name == "toon") {
-                material->set_custom_shader("assets/shaders/toon.vert", "assets/shaders/toon.frag");
+                material->set_custom_shader("assets/Shaders/toon.vert", "assets/Shaders/toon.frag");
                 material->set_property("toonSteps", 4.0f);
                 material->set_property("outlineWidth", 0.02f);
             }
             else if (template_name == "water") {
-                material->set_custom_shader("assets/shaders/water.vert", "assets/shaders/water.frag");
+                material->set_custom_shader("assets/Shaders/water.vert", "assets/Shaders/water.frag");
                 material->set_property("waveSpeed", 1.0f);
                 material->set_property("waveAmplitude", 0.1f);
                 material->add_shader_define("ANIMATED_WAVES");
             }
             else if (template_name == "hologram") {
-                material->set_custom_shader("assets/shaders/hologram.vert", "assets/shaders/hologram.frag");
+                material->set_custom_shader("assets/Shaders/hologram.vert", "assets/Shaders/hologram.frag");
                 material->set_property("scanlineSpeed", 2.0f);
                 material->set_property("glitchIntensity", 0.1f);
                 material->set_property("hologramColor", glm::vec3(0.0f, 1.0f, 1.0f));

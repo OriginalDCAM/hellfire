@@ -5,6 +5,8 @@
 #pragma once
 #include <cstdint>
 
+#include "DCraft/Components/CameraComponent.h"
+
 namespace DCraft {
     class Skybox;
     class Camera;
@@ -17,7 +19,7 @@ namespace DCraft {
         ~SkyboxRenderer();
 
         void initialize();
-        void render(Skybox *skybox, Camera *camera) const;
+        void render(Skybox *skybox, CameraComponent *camera) const;
 
     private:
         void setup_skybox_geometry();

@@ -28,7 +28,7 @@ namespace DCraft {
         
     private:
         static void bind_property(const Material::Property& property, uint32_t shader_program, int& texture_unit) {
-            // Use custom uniform name if specified, otherwise use property name
+            // Use Custom uniform name if specified, otherwise use property name
             const std::string& uniform_name = property.uniform_name;
             
             switch (property.type) {
@@ -79,7 +79,7 @@ namespace DCraft {
                             glUniform1i(location, texture_unit);
                         }
                         
-                        // Also set usage flag (for backwards compatibility with your existing shaders)
+                        // Also set usage flag (for backwards compatibility with your existing Shaders)
                         std::string_view use_flag = "use" + capitalize_first(uniform_name);
                         GLint flag_location = glGetUniformLocation(shader_program, use_flag.data());
                         if (flag_location != -1) {

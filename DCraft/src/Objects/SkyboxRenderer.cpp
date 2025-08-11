@@ -90,10 +90,10 @@ namespace DCraft {
     void SkyboxRenderer::load_skybox_shader() {
         // TODO: Make this more scalable
         skybox_shader_ = Application::get_instance().get_shader_manager().load_shader_from_files(
-            "assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
+            "assets/Shaders/Skybox.vert", "assets/Shaders/Skybox.frag");
     }
 
-    void SkyboxRenderer::render(Skybox *skybox, Camera *camera) const {
+    void SkyboxRenderer::render(Skybox *skybox, CameraComponent *camera) const {
         if (!skybox || !skybox->is_loaded()) return;
 
         // Save current depth state
@@ -115,9 +115,9 @@ namespace DCraft {
         // Bind cubemap
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->get_cubemap());
-        glUniform1i(glGetUniformLocation(skybox_shader_, "skybox"), 0);
+        glUniform1i(glGetUniformLocation(skybox_shader_, "Skybox"), 0);
 
-        // Draw skybox cube
+        // Draw Skybox cube
         glBindVertexArray(skybox_vao_);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
