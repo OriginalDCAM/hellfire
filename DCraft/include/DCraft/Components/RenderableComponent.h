@@ -46,7 +46,6 @@ namespace DCraft {
         // Main rendering method
         void draw(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program,
                   void* renderer_context = nullptr) {
-            // Fixed: Changed != to == in the condition
             if (!has_mesh() || !get_owner()) return;
 
             Mesh* mesh = get_mesh();
