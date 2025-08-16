@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "TransformComponent.h"
+#include "DCraft/Graphics/Shader/Shader.h"
 #include "DCraft/Structs/Component.h"
 #include "DCraft/Structs/Entity.h"
 #include "GL/glew.h"
@@ -93,16 +94,16 @@ namespace DCraft {
         float get_outer_cone_angle() const { return outer_cone_angle_; }
 
         // Shader upload method
-        void upload_to_shader(uint32_t shader_program, int light_index) const {
+        void upload_to_shader(Shader& shader, int light_index) const {
             switch (type_) {
                 case DIRECTIONAL:
-                    upload_directional_to_shader(shader_program, light_index);
+                    upload_directional_to_shader(shader, light_index);
                     break;
                 case POINT:
-                    upload_point_to_shader(shader_program, light_index);
+                    upload_point_to_shader(shader, light_index);
                     break;
                 case SPOT:
-                    upload_spot_to_shader(shader_program, light_index);
+                    upload_spot_to_shader(shader, light_index);
                     break;
             }
         }
@@ -129,18 +130,11 @@ namespace DCraft {
         }
 
     private:
-        void upload_directional_to_shader(uint32_t shader_program, int light_index) const {
-            std::string base = "directionalLights[" + std::to_string(light_index) + "]";
-
-            glUniform3fv(glGetUniformLocation(shader_program, (base + ".direction").c_str()), 1,
-                         glm::value_ptr(direction_));
-            glUniform3fv(glGetUniformLocation(shader_program, (base + ".color").c_str()), 1,
-                         glm::value_ptr(color_));
-            glUniform1f(glGetUniformLocation(shader_program, (base + ".intensity").c_str()), intensity_);
+        void upload_directional_to_shader(Shader& shader, int light_index) const {
+            shader.set_directional_light(light_index, direction_, color_, intensity_);
         }
 
-        void upload_point_to_shader(uint32_t shader_program, int light_index) const {
-            std::string base = "pointLights[" + std::to_string(light_index) + "]";
+        void upload_point_to_shader(Shader& shader, int light_index) const {
 
             // Get world position from transform
             glm::vec3 position(0.0f);
@@ -151,44 +145,38 @@ namespace DCraft {
                 }
             }
 
-            glUniform3fv(glGetUniformLocation(shader_program, (base + ".position").c_str()), 1,
-                         glm::value_ptr(position));
-            glUniform3fv(glGetUniformLocation(shader_program, (base + ".color").c_str()), 1,
-                         glm::value_ptr(color_));
-            glUniform1f(glGetUniformLocation(shader_program, (base + ".intensity").c_str()), intensity_);
-            glUniform1f(glGetUniformLocation(shader_program, (base + ".range").c_str()), range_);
-            glUniform1f(glGetUniformLocation(shader_program, (base + ".attenuation").c_str()), attenuation_);
+            shader.set_point_light(light_index, position, color_, intensity_, range_, attenuation_);
         }
 
-        void upload_spot_to_shader(uint32_t shader_program, int light_index) const {
-            std::string base = "spotLights[" + std::to_string(light_index) + "]";
+        void upload_spot_to_shader(Shader& shader, int light_index) const {
+            // TODO: Actually support spotlights in shader
+            // std::string base = "spotLights[" + std::to_string(light_index) + "]";
 
             // Get world position and direction from transform
-            glm::vec3 position(0.0f);
-            glm::vec3 world_direction = direction_;
+            // glm::vec3 position(0.0f);
+            // glm::vec3 world_direction = direction_;
 
-            if (get_owner()) {
-                auto *transform = get_owner()->get_component<TransformComponent>();
-                if (transform) {
-                    position = transform->get_position();
-                    // Transform direction by entity's rotation
-                    glm::mat4 rotation = transform->get_rotation_matrix();
-                    world_direction = glm::mat3(rotation) * direction_;
-                }
-            }
-
-            glUniform3fv(glGetUniformLocation(shader_program, (base + ".position").c_str()), 1,
-                         glm::value_ptr(position));
-            glUniform3fv(glGetUniformLocation(shader_program, (base + ".direction").c_str()), 1,
-                         glm::value_ptr(world_direction));
-            glUniform3fv(glGetUniformLocation(shader_program, (base + ".color").c_str()), 1,
-                         glm::value_ptr(color_));
-            glUniform1f(glGetUniformLocation(shader_program, (base + ".intensity").c_str()), intensity_);
-            glUniform1f(glGetUniformLocation(shader_program, (base + ".range").c_str()), range_);
-            glUniform1f(glGetUniformLocation(shader_program, (base + ".innerConeAngle").c_str()),
-                        glm::cos(glm::radians(inner_cone_angle_)));
-            glUniform1f(glGetUniformLocation(shader_program, (base + ".outerConeAngle").c_str()),
-                        glm::cos(glm::radians(outer_cone_angle_)));
+            // if (get_owner()) {
+            //     auto *transform = get_owner()->get_component<TransformComponent>();
+            //     if (transform) {
+            //         position = transform->get_position();
+            //         // Transform direction by entity's rotation
+            //         glm::mat4 rotation = transform->get_rotation_matrix();
+            //         world_direction = glm::mat3(rotation) * direction_;
+            //     }
+            // }
+            // glUniform3fv(glGetUniformLocation(shader_program, (base + ".position").c_str()), 1,
+            //              glm::value_ptr(position));
+            // glUniform3fv(glGetUniformLocation(shader_program, (base + ".direction").c_str()), 1,
+            //              glm::value_ptr(world_direction));
+            // glUniform3fv(glGetUniformLocation(shader_program, (base + ".color").c_str()), 1,
+            //              glm::value_ptr(color_));
+            // glUniform1f(glGetUniformLocation(shader_program, (base + ".intensity").c_str()), intensity_);
+            // glUniform1f(glGetUniformLocation(shader_program, (base + ".range").c_str()), range_);
+            // glUniform1f(glGetUniformLocation(shader_program, (base + ".innerConeAngle").c_str()),
+            //             glm::cos(glm::radians(inner_cone_angle_)));
+            // glUniform1f(glGetUniformLocation(shader_program, (base + ".outerConeAngle").c_str()),
+            //             glm::cos(glm::radians(outer_cone_angle_)));
         }
     };
 }

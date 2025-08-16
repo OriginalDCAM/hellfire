@@ -111,6 +111,10 @@ namespace DCraft {
         TextureType get_type() const { return type_; }
         uint32_t get_id() { return texture_id_; }
         const std::string &get_path() { return path_; }
+        
+        int get_slot() { return slot_ ; }
+        void set_slot(int slot) { slot_ = slot; }
+        
         bool is_valid() const { return texture_id_ != 0; }
 
         // Texture parameters
@@ -128,6 +132,7 @@ namespace DCraft {
         std::string path_;
         uint32_t texture_id_;
         TextureSettings settings_;
+        int slot_ = 0;
 
         void load_texture_data();
 

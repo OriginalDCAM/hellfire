@@ -8,6 +8,7 @@ int main(int argc, char **argv) {
     DCraft::Application app(800, 600, "Final assignment :)");
     Game game;
 
+    // Hook up the application callbacks into the game class
     game.setup_callbacks(app);
 
     // Initialize and run

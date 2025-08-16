@@ -9,8 +9,10 @@ uniform float exposure = 1.0;
 
 void main() {
     vec3 flipped_coords = TexCoords;
-//    flipped_coords.y = -flipped_coords.y;
+    
     vec3 color = texture(skybox, flipped_coords).rgb;
+    // Apply tint and exposure
     color *= tint * exposure;
+    
     FragColor = vec4(color, 1.0);
 }
