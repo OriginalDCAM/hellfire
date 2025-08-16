@@ -25,6 +25,9 @@ namespace DCraft {
         auto* texture = new Texture(path);
         
         if (texture_slot >= 0) {
+            // Store the texture slot
+            texture->set_slot(texture_slot);
+            
             set_property(uniform_name, texture, uniform_name);
             set_property(uniform_name + "Slot", texture_slot);
         } else {

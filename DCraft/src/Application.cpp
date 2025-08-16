@@ -16,7 +16,7 @@
 #include "DCraft/Components/CameraComponent.h"
 
 namespace DCraft {
-    Application::Application(int width, int height, std::string title) : renderer_(), title_(std::move(title)),
+    Application::Application(int width, int height, std::string title) : title_(std::move(title)), shader_registry_(&shader_manager_),
                                                                          editor_mode_(false), game_mode_(true) {
         if (instance_ != nullptr) {
             throw std::runtime_error("Singleton Application already created");
@@ -92,8 +92,8 @@ namespace DCraft {
             callbacks_.init(*this);
         }
 
-        uint32_t fallback_shader = ensure_fallback_shader();
-        renderer_.set_fallback_shader(fallback_shader);
+        Shader* fallback_shader = ensure_fallback_shader();
+        renderer_.set_fallback_shader(*fallback_shader);
         renderer_.init();
         std::clog << "Renderer setup succeeded" << '\n';
 
@@ -141,25 +141,12 @@ namespace DCraft {
     }
 
     void Application::render_frame() {
-        // Start the ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGLUT_NewFrame();
-        ImGui::NewFrame();
-
         Scene *active_scene = scene_manager_.get_active_scene();
         if (!active_scene) {
             std::cerr << "No active scene to render!" << std::endl;
             return;
         }
 
-        // if (!game_mode_) {
-        //     // Editor mode - render scene to framebuffer and show UI
-        //     editor_overlay_.set_active_scene(active_scene);
-        //
-        //     renderer_.set_render_to_framebuffer(true);
-        //
-        //     editor_overlay_.render();
-        // } else {
             renderer_.set_render_to_framebuffer(false);
 
             renderer_.begin_frame();
@@ -167,10 +154,6 @@ namespace DCraft {
             renderer_.render(*active_scene);
 
             renderer_.end_frame();
-        // }
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glutSwapBuffers();
     }
@@ -361,18 +344,54 @@ namespace DCraft {
         }, 1);
     }
 
-    uint32_t Application::ensure_fallback_shader() {
-        // Try to load a default shader, create basic one if needed
+    Shader *Application::ensure_fallback_shader() {
+        // Try to load a default shader
         try {
-            return shader_manager_.load_shader_from_files(
+            Shader* shader = shader_registry_.load_and_get_shader(
                 "assets/Shaders/standard.vert",
                 "assets/Shaders/lambert.frag"
             );
+        
+            if (shader && shader->is_valid()) {
+                return shader;
+            }
         } catch (const std::exception &e) {
             std::cerr << "Warning: Could not load default Shaders: " << e.what() << std::endl;
-            std::cerr << "Using minimal fallback shader" << std::endl;
+        }
+    
+        std::cerr << "Using minimal fallback shader" << std::endl;
+    
+        // Try to create a basic hardcoded shader as fallback
+        uint32_t fallback_id = create_minimal_fallback_shader();
+        if (fallback_id != 0) {
+            return shader_registry_.get_shader_from_id(fallback_id);
+        }
+    
+        return nullptr;
+    }
 
-            // Create a very basic shader programmatically or return 0
+    uint32_t Application::create_minimal_fallback_shader() {
+        const char* vertex_source = R"(
+        #version 330 core
+        layout (location = 0) in vec3 aPos;
+        uniform mat4 MVP;
+        void main() {
+            gl_Position = MVP * vec4(aPos, 1.0);
+        }
+    )";
+    
+        const char* fragment_source = R"(
+        #version 330 core
+        out vec4 FragColor;
+        void main() {
+            FragColor = vec4(1.0, 0.0, 1.0, 1.0); // Magenta to indicate fallback
+        }
+    )";
+    
+        try {
+            return shader_manager_.compile_shader_program(vertex_source, fragment_source);
+        } catch (const std::exception& e) {
+            std::cerr << "Failed to create minimal fallback shader: " << e.what() << std::endl;
             return 0;
         }
     }

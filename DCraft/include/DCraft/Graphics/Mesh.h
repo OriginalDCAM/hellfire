@@ -15,6 +15,10 @@ namespace DCraft {
 
         void cleanup();
 
+        void bind();
+
+        void unbind();
+
         // mesh data
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -22,16 +26,22 @@ namespace DCraft {
         Material *material = nullptr;
 
         void set_material(Material *mat) { material = mat; }
-        Material *get_material() const { return material ? material : nullptr; }
+        [[nodiscard]] Material *get_material() const { return material ? material : nullptr; }
 
         bool is_wireframe = false;
 
         void draw() const;
 
+        void draw_instanced(size_t amount);
+
+        int get_index_count();
+
     private:
-        VA *VAO;
-        VB *VBO;
-        IB *IBO;
+        VA *vao_;
+        VB *vbo_;
+        IB *ibo_;
+
+        int index_count_;
 
         void create_mesh();
     };
