@@ -133,4 +133,15 @@ add_subdirectory(Sandbox)
 
 if (MSVC)
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Sandbox)
-endif ()
+
+    # Create directories and dummy exe at configure time
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Sandbox/Debug")
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Sandbox/Release")
+    
+    # Create dummy exe to prevent VS errors
+    set(DUMMY_EXE "${CMAKE_BINARY_DIR}/Sandbox/Debug/${APP_NAME}.exe")
+    if(NOT EXISTS ${DUMMY_EXE})
+        file(WRITE "${DUMMY_EXE}.temp" "")
+        file(RENAME "${DUMMY_EXE}.temp" "${DUMMY_EXE}")
+    endif()
+endif()
