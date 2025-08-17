@@ -297,7 +297,7 @@ DCraft::Entity *create_asteroid_belt() {
     };
     
     auto *asteroid_belt = new DCraft::Entity("Asteroid Belt");
-    constexpr size_t total_asteroids = 10000;
+        constexpr size_t total_asteroids = 25000;
     size_t asteroids_per_type = total_asteroids / asteroid_meshes.size();
     
     // Create separate child entity for each asteroid type

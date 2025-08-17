@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <GL/freeglut_std.h>
 #include "imgui/backends/imgui_impl_glut.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "imgui/imgui.h"
@@ -16,8 +17,8 @@
 #include "DCraft/Components/CameraComponent.h"
 
 namespace DCraft {
-    Application::Application(int width, int height, std::string title) : title_(std::move(title)), shader_registry_(&shader_manager_),
-                                                                         editor_mode_(false), game_mode_(true) {
+    Application::Application(int width, int height, std::string title) : title_(std::move(title)),
+                                                                         shader_registry_(&shader_manager_) {
         if (instance_ != nullptr) {
             throw std::runtime_error("Singleton Application already created");
         }
@@ -45,29 +46,15 @@ namespace DCraft {
         std::clog << "Application destroyed" << std::endl;
     }
 
-    void Application::initialize(int argc, char **argv) {
-        std::clog << "Initializing application..." << '\n';
-
-        // Initialize GLUT
+    void Application::initialize_glut(int argc, char **argv) {
         glutInit(&argc, argv);
         glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
         glutInitWindowSize(window_info_.width, window_info_.height);
         glutCreateWindow(title_.c_str());
         std::clog << "GLUT initialization succeeded" << '\n';
+    }
 
-        // Initialize GLEW
-        GLenum err = glewInit();
-        if (err != GLEW_OK) {
-            std::cerr << "GLEW initialization failed: " << glewGetErrorString(err) << '\n';
-            exit(1);
-        }
-        std::clog << "GLEW initialization succeeded" << '\n';
-
-        // Setup GLUT callbacks
-        setup_callbacks();
-        std::clog << "GLUT callbacks setup succeeded" << '\n';
-
-        // Initialize ImGui
+    void Application::initialize_imgui() {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
@@ -85,6 +72,28 @@ namespace DCraft {
         // Setup Platform/Renderer backends
         ImGui_ImplGLUT_Init();
         ImGui_ImplOpenGL3_Init("#version 330");
+    }
+
+    void Application::initialize(int argc, char **argv) {
+        std::clog << "Initializing application..." << '\n';
+
+        // Initialize GLUT
+        initialize_glut(argc, argv);
+
+        // Initialize GLEW
+        GLenum err = glewInit();
+        if (err != GLEW_OK) {
+            std::cerr << "GLEW initialization failed: " << glewGetErrorString(err) << '\n';
+            exit(1);
+        }
+        std::clog << "GLEW initialization succeeded" << '\n';
+
+        // Setup GLUT callbacks
+        setup_callbacks();
+        std::clog << "GLUT callbacks setup succeeded" << '\n';
+
+        // Initialize ImGui
+        initialize_imgui();
 
         glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_CONTINUE_EXECUTION);
 
@@ -92,7 +101,7 @@ namespace DCraft {
             callbacks_.init(*this);
         }
 
-        Shader* fallback_shader = ensure_fallback_shader();
+        Shader *fallback_shader = ensure_fallback_shader();
         renderer_.set_fallback_shader(*fallback_shader);
         renderer_.init();
         std::clog << "Renderer setup succeeded" << '\n';
@@ -137,6 +146,8 @@ namespace DCraft {
             callbacks_.update(delta_time_);
         }
 
+        clear_frame_input_flags();
+
         glutPostRedisplay();
     }
 
@@ -147,76 +158,182 @@ namespace DCraft {
             return;
         }
 
-            renderer_.set_render_to_framebuffer(false);
+        renderer_.set_render_to_framebuffer(false);
 
-            renderer_.begin_frame();
+        renderer_.begin_frame();
 
-            renderer_.render(*active_scene);
+        renderer_.render(*active_scene);
 
-            renderer_.end_frame();
+        renderer_.end_frame();
 
         glutSwapBuffers();
     }
 
+    void Application::check_key_timeouts() {
+        static const float KEY_TIMEOUT = 0.1f;
+
+        for (int i = 0; i < 512; i++) {
+            if (keys_[i]) {
+                key_timers_[i] += delta_time_;
+
+                if (key_timers_[i] > KEY_TIMEOUT) {
+                    bool is_modifier = false;
+
+                    if (i >= 256) {
+                        int special_key = i - 256;
+                        is_modifier = (special_key >= GLUT_KEY_SHIFT_L && special_key <= GLUT_KEY_SHIFT_R) ||
+                                      (special_key >= GLUT_KEY_CTRL_L && special_key <= GLUT_KEY_CTRL_R) ||
+                                      (special_key >= GLUT_KEY_ALT_L && special_key <= GLUT_KEY_ALT_R);
+                    } else {
+                        is_modifier = (i < 32 && i != 27);
+                    }
+
+                    if (is_modifier) {
+                        std::cout << "Warning: Forcing release of stuck modifier key " << i << std::endl;
+                        keys_just_released_[i] = true;
+                        keys_[i] = false;
+                        key_timers_[i] = 0.0f;
+                    }
+                }
+            } else {
+                key_timers_[i] = 0.0f;
+            }
+        }
+    }
+
+
     void Application::on_key_down(unsigned char key) {
-        if (key == '`') {
-            keys_['`'] = true;
-            return;
-        }
+        int modifiers = glutGetModifiers();
+        shift_pressed_ = (modifiers & GLUT_ACTIVE_SHIFT) != 0;
+        ctrl_pressed_ = (modifiers & GLUT_ACTIVE_CTRL) != 0;
+        alt_pressed_ = (modifiers & GLUT_ACTIVE_ALT) != 0;
+        // Handle case-sensitive keys properly
+        if (key >= 'A' && key <= 'Z') {
+            unsigned char lower_key = key + ('a' - 'A'); // Convert to lowercase
 
-        if (game_mode_) {
-            keys_[key] = true;
-            return;
-        }
+            if (!keys_[key]) {
+                keys_just_pressed_[key] = true;
+            }
+            if (!keys_[lower_key]) {
+                keys_just_pressed_[lower_key] = true;
+            }
 
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard) {
             keys_[key] = true;
+            keys_[lower_key] = true;
+
+            key_timers_[key] = 0.0f;
+            key_timers_[lower_key] = 0.0f;
+        } else if (key >= 'a' && key <= 'z') {
+            unsigned char upper_key = key - ('a' - 'A'); // Convert to uppercase
+
+            if (!keys_[key]) {
+                keys_just_pressed_[key] = true;
+            }
+            if (!keys_[upper_key]) {
+                keys_just_pressed_[upper_key] = true;
+            }
+
+            keys_[key] = true;
+            keys_[upper_key] = true;
+
+            key_timers_[key] = 0.0f;
+            key_timers_[upper_key] = 0.0f;
+        } else {
+            // Non-letter keys - handle normally
+            if (!keys_[key]) {
+                keys_just_pressed_[key] = true;
+            }
+            keys_[key] = true;
+            key_timers_[key] = 0.0f;
         }
     }
 
     void Application::on_key_up(unsigned char key) {
-        keys_[key] = false;
+        int modifiers = glutGetModifiers();
+        shift_pressed_ = (modifiers & GLUT_ACTIVE_SHIFT) != 0;
+        ctrl_pressed_ = (modifiers & GLUT_ACTIVE_CTRL) != 0;
+        alt_pressed_ = (modifiers & GLUT_ACTIVE_ALT) != 0;
+
+        // Handle case-sensitive keys properly
+        if (key >= 'A' && key <= 'Z') {
+            unsigned char lower_key = key + ('a' - 'A');
+
+            if (keys_[key]) {
+                keys_just_released_[key] = true;
+            }
+            if (keys_[lower_key]) {
+                keys_just_released_[lower_key] = true;
+            }
+
+            keys_[key] = false;
+            keys_[lower_key] = false;
+
+            key_timers_[key] = 0.0f;
+            key_timers_[lower_key] = 0.0f;
+        } else if (key >= 'a' && key <= 'z') {
+            unsigned char upper_key = key - ('a' - 'A');
+
+            if (keys_[key]) {
+                keys_just_released_[key] = true;
+            }
+            if (keys_[upper_key]) {
+                keys_just_released_[upper_key] = true;
+            }
+
+            keys_[key] = false;
+            keys_[upper_key] = false;
+
+            key_timers_[key] = 0.0f;
+            key_timers_[upper_key] = 0.0f;
+        } else {
+            if (keys_[key]) {
+                keys_just_released_[key] = true;
+            }
+            keys_[key] = false;
+            key_timers_[key] = 0.0f;
+        }
     }
 
     void Application::on_special_key_down(int key) {
+        int modifiers = glutGetModifiers();
+        shift_pressed_ = (modifiers & GLUT_ACTIVE_SHIFT) != 0;
+        ctrl_pressed_ = (modifiers & GLUT_ACTIVE_CTRL) != 0;
+        alt_pressed_ = (modifiers & GLUT_ACTIVE_ALT) != 0;
 
-        if (game_mode_) {
-            keys_[key + 256] = true;
-            return;
+        int key_index = key + 256;
+
+        if (!keys_[key_index]) {
+            keys_just_pressed_[key_index] = true;
         }
-        
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard && key != '`') {
-            keys_[key + 256] = true;
-        }
+        keys_[key_index] = true;
+
+        key_timers_[key_index] = 0.0f;
     }
 
     void Application::on_special_key_up(int key) {
-        keys_[key + 256] = false;
+        int modifiers = glutGetModifiers();
+        shift_pressed_ = (modifiers & GLUT_ACTIVE_SHIFT) != 0;
+        ctrl_pressed_ = (modifiers & GLUT_ACTIVE_CTRL) != 0;
+        alt_pressed_ = (modifiers & GLUT_ACTIVE_ALT) != 0;
+
+        int key_index = key + 256;
+
+        if (keys_[key_index]) {
+            keys_just_released_[key_index] = true;
+        }
+        keys_[key_index] = false;
+
+        key_timers_[key_index] = 0.0f;
     }
 
     void Application::on_mouse_button(int button, int state, int x, int y) {
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureMouse) {
-            return;
-        }
     }
 
     void Application::on_mouse_motion(int x, int y) {
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureMouse) {
-            return;
-        }
-
         on_mouse_passive_motion(x, y);
     }
 
     void Application::on_mouse_passive_motion(int x, int y) {
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureMouse || !game_mode_) {
-            return;
-        }
         // if first mouse store the last x and y position.
         if (first_mouse_) {
             last_mouse_x_ = x;
@@ -256,6 +373,31 @@ namespace DCraft {
         }
     }
 
+    void Application::clear_frame_input_flags() {
+        for (int i = 0; i < 512; i++) {
+            keys_just_pressed_[i] = false;
+            keys_just_released_[i] = false;
+        }
+    }
+
+    void Application::process_input() {
+        check_key_timeouts();
+
+        if (callbacks_.process_input) {
+            callbacks_.process_input(*this, delta_time_);
+        }
+
+        // Standard exit with ESC
+        if (keys_[27]) {
+            glutLeaveMainLoop();
+        }
+
+        // Only update previous key states
+        for (int i = 0; i < 512; i++) {
+            prev_keys_[i] = keys_[i];
+        }
+    }
+
     void Application::on_window_resize(int width, int height) {
         // Avoid unnecessary updates
         if (window_info_.width == width && window_info_.height == height) return;
@@ -280,33 +422,6 @@ namespace DCraft {
             callbacks_.setup(scene_manager_, window_info_, shader_manager_);
         } else {
             scene_manager_.create_default_scene();
-        }
-    }
-
-    void Application::process_input() {
-        if (callbacks_.process_input) {
-            callbacks_.process_input(*this, delta_time_);
-        }
-
-        // Handle switching to the Editor UI
-        if (keys_['`'] && !prev_keys_['`']) {
-            toggle_editor_mode();
-        }
-
-        if ((keys_[GLUT_KEY_F1 + 256] && !prev_keys_[GLUT_KEY_F1 + 256]) || // F1
-            (keys_['t'] && !prev_keys_['t']) || // T key
-            (keys_[9] && !prev_keys_[9])) {
-            // TAB key
-            toggle_editor_mode();
-        }
-
-        // Standard exit with ESC
-        if (keys_[27] && game_mode_) {
-            glutLeaveMainLoop();
-        }
-
-        for (int i = 0; i < 512; i++) {
-            prev_keys_[i] = keys_[i];
         }
     }
 
@@ -347,31 +462,31 @@ namespace DCraft {
     Shader *Application::ensure_fallback_shader() {
         // Try to load a default shader
         try {
-            Shader* shader = shader_registry_.load_and_get_shader(
+            Shader *shader = shader_registry_.load_and_get_shader(
                 "assets/shaders/standard.vert",
                 "assets/shaders/lambert.frag"
             );
-        
+
             if (shader && shader->is_valid()) {
                 return shader;
             }
         } catch (const std::exception &e) {
             std::cerr << "Warning: Could not load default shaders: " << e.what() << std::endl;
         }
-    
+
         std::cerr << "Using minimal fallback shader" << std::endl;
-    
+
         // Try to create a basic hardcoded shader as fallback
         uint32_t fallback_id = create_minimal_fallback_shader();
         if (fallback_id != 0) {
             return shader_registry_.get_shader_from_id(fallback_id);
         }
-    
+
         return nullptr;
     }
 
     uint32_t Application::create_minimal_fallback_shader() {
-        const char* vertex_source = R"(
+        const char *vertex_source = R"(
         #version 330 core
         layout (location = 0) in vec3 aPos;
         uniform mat4 MVP;
@@ -379,37 +494,20 @@ namespace DCraft {
             gl_Position = MVP * vec4(aPos, 1.0);
         }
     )";
-    
-        const char* fragment_source = R"(
+
+        const char *fragment_source = R"(
         #version 330 core
         out vec4 FragColor;
         void main() {
             FragColor = vec4(1.0, 0.0, 1.0, 1.0); // Magenta to indicate fallback
         }
     )";
-    
+
         try {
             return shader_manager_.compile_shader_program(vertex_source, fragment_source);
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Failed to create minimal fallback shader: " << e.what() << std::endl;
             return 0;
-        }
-    }
-
-    void Application::toggle_editor_mode() {
-        game_mode_ = !game_mode_;
-
-        if (game_mode_) {
-            glutSetCursor(GLUT_CURSOR_NONE);
-            glutWarpPointer(window_info_.width / 2, window_info_.height / 2);
-            first_mouse_ = true; // Reset mouse tracking
-
-            glViewport(0, 0, window_info_.width, window_info_.height);
-            std::clog << "Switched to Game Mode" << std::endl;
-        } else {
-            glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
-
-            std::clog << "Switched to Editor Mode" << std::endl;
         }
     }
 
