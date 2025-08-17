@@ -20,6 +20,7 @@
 namespace DCraft {
     struct Mesh;
 
+    /// Instanced Renderable Component used for instanced mesh rendering
     class InstancedRenderableComponent : public Component {
     public:
         struct InstanceData {
@@ -27,7 +28,7 @@ namespace DCraft {
             Color color;
             float scale;
 
-            InstanceData(const Transform &t = Transform(1.0f),
+            explicit InstanceData(const Transform &t = Transform(1.0f),
                          const Color &c = Color(1.0f), float s = 1.0f) : transform(t), color(c), scale(s) {
             }
         };
@@ -41,7 +42,7 @@ namespace DCraft {
             setup_instance_buffers();
         }
 
-        virtual ~InstancedRenderableComponent() {
+        ~InstancedRenderableComponent() override {
             cleanup_buffers();
         }
 
@@ -97,7 +98,7 @@ namespace DCraft {
         size_t get_instance_count() const { return instances_.size(); }
         size_t get_max_instances() const { return max_instances_; }
         const std::vector<InstanceData> &get_instances() const { return instances_; }
-        std::vector<InstanceData> &get_instances() { return instances_; } // Non-const for updates
+        std::vector<InstanceData> &get_instances() { return instances_; }
 
         // Bulk operations
         void set_instances(const std::vector<InstanceData> &instances) {
@@ -114,7 +115,7 @@ namespace DCraft {
             }
         }
 
-        /// Main rendering method (consistent with RenderableComponent interface)
+        /// Main rendering method
         void draw(const glm::mat4 &view, const glm::mat4 &projection,
                   Shader &shader, void *renderer_context = nullptr, float time = 0.0f) {
             if (!has_mesh() || instances_.empty()) return;
@@ -169,19 +170,19 @@ namespace DCraft {
             // Bind transform buffer and setup mat4 attribute (layouts 4-7)
             glBindBuffer(GL_ARRAY_BUFFER, transform_buffer_);
             for (int i = 0; i < 4; i++) {
-                glVertexAttribPointer(4 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), 
-                                    (void*)(sizeof(glm::vec4) * i));
+                glVertexAttribPointer(4 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
+                                      (void *) (sizeof(glm::vec4) * i));
                 glVertexAttribDivisor(4 + i, 1);
             }
-    
+
             // Bind color buffer (layout 8)
             glBindBuffer(GL_ARRAY_BUFFER, color_buffer_);
-            glVertexAttribPointer(8, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+            glVertexAttribPointer(8, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void *) 0);
             glVertexAttribDivisor(8, 1);
-    
+
             // Bind scale buffer (layout 9)
             glBindBuffer(GL_ARRAY_BUFFER, scale_buffer_);
-            glVertexAttribPointer(9, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)0);
+            glVertexAttribPointer(9, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void *) 0);
             glVertexAttribDivisor(9, 1);
 
             vertex_attributes_setup_ = true;

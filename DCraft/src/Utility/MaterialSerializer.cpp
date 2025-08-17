@@ -45,17 +45,17 @@ json MaterialSerializer::serialize_material(Material *material) {
 //         mat_data["shininess"] = phong->get_shininess();
 //     }
 //
-//     // Serialize Textures
-//     json Textures = json::array();
+//     // Serialize textures
+//     json textures = json::array();
 //     for (const auto &texture: material->get_textures()) {
 //         json tex_data;
 //         tex_data["path"] = texture->get_path();
 //         tex_data["type"] = texture->get_type();
-//         Textures.push_back(tex_data);
+//         textures.push_back(tex_data);
 //     }
 //
-//     if (!Textures.empty()) {
-//         mat_data["Textures"] = Textures;
+//     if (!textures.empty()) {
+//         mat_data["textures"] = textures;
 //     }
 //
 //     return mat_data;
@@ -121,9 +121,9 @@ Material *MaterialSerializer::deserialize_material(const json &data) {
 //         }
 //     }
 //
-//     // Load Textures
-//     if (data.contains("Textures") && data["Textures"].is_array()) {
-//         for (const auto &texture_data: data["Textures"]) {
+//     // Load textures
+//     if (data.contains("textures") && data["textures"].is_array()) {
+//         for (const auto &texture_data: data["textures"]) {
 //             if (texture_data.contains("path") && texture_data.contains("type")) {
 //                 std::string path = texture_data["path"];
 //                 int type = texture_data["type"];

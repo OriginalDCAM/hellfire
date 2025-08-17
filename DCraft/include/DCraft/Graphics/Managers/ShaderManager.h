@@ -20,7 +20,7 @@ namespace DCraft {
         std::unordered_map<std::string, uint32_t> compiled_shaders_;
         
         // Recursively process #include directives
-        std::string process_includes(const std::string& source, const std::string& base_path = "Shaders/");
+        std::string process_includes(const std::string& source, const std::string& base_path = "shaders/");
         
         std::string load_include_file(const std::string& path);
         

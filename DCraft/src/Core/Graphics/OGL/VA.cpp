@@ -14,8 +14,7 @@ VA::~VA()
 	glDeleteVertexArrays(1, &m_renderer_id_);
 }
 
-void VA::bind()
-{
+void VA::bind() const {
 	glBindVertexArray(m_renderer_id_);
 }
 
@@ -24,8 +23,7 @@ void VA::unbind()
 	glBindVertexArray(0);
 }
 
-uint32_t VA::get_id()
-{
+uint32_t VA::get_id() const {
 	return m_renderer_id_;
 }
 

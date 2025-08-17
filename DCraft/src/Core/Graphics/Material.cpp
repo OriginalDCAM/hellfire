@@ -99,7 +99,7 @@ namespace DCraft {
             
         // Built-in templates
         if (template_name == "toon") {
-            material->set_custom_shader("assets/Shaders/toon.vert", "assets/Shaders/toon.frag");
+            material->set_custom_shader("assets/shaders/toon.vert", "assets/shaders/toon.frag");
             material->set_property("toonSteps", 4.0f);
             material->set_property("outlineWidth", 0.02f);
         }

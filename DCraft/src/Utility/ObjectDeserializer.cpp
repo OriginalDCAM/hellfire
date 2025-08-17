@@ -3,7 +3,6 @@
 //
 #include "DCraft/Utility/ObjectDeserializer.h"
 
-#include "DCraft/Addons/ImportedModel3D.h"
 
 namespace DCraft {
     

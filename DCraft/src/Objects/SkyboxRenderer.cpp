@@ -11,7 +11,7 @@
 #include "DCraft/Structs/Skybox.h"
 
 namespace DCraft {
-    // Skybox cube vertices
+    // skyboxes cube vertices
     float skyboxVertices[] = {
         // positions          
         -1.0f, 1.0f, -1.0f,
@@ -90,7 +90,7 @@ namespace DCraft {
     void SkyboxRenderer::load_skybox_shader() {
         // TODO: Make this more scalable
         skybox_shader_ = Application::get_instance().get_shader_manager().load_shader_from_files(
-            "assets/Shaders/Skybox.vert", "assets/Shaders/Skybox.frag");
+            "assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
     }
 
     void SkyboxRenderer::render(Skybox *skybox, CameraComponent *camera) const {
@@ -115,9 +115,9 @@ namespace DCraft {
         // Bind cubemap
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->get_cubemap());
-        glUniform1i(glGetUniformLocation(skybox_shader_, "Skybox"), 0);
+        glUniform1i(glGetUniformLocation(skybox_shader_, "skyboxes"), 0);
 
-        // Draw Skybox cube
+        // Draw skyboxes cube
         glBindVertexArray(skybox_vao_);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);

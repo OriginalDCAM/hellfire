@@ -111,7 +111,7 @@ GLuint glsl::makeShaderProgram(GLuint vertexShaderID, GLuint fragmentShaderID)
         return 0;
     }
     
-    // Detach Shaders after successful linking
+    // Detach shaders after successful linking
     glDetachShader(programID, vertexShaderID);
     glDetachShader(programID, fragmentShaderID);
 
