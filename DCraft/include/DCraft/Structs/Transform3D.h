@@ -136,7 +136,7 @@ namespace DCraft {
             scale_ = glm::vec3(1.0f);
             rotation_axis_ = glm::vec3(0.0f);
             rotation_angle_ = 0.0f;
-            // Reset Custom matrices
+            // Reset custom matrices
             rotation_matrix_ = glm::mat4(1.0f);
             translation_matrix_ = glm::mat4(1.0f);
             scale_matrix_ = glm::mat4(1.0f);

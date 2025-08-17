@@ -13,8 +13,8 @@ public:
     }
 
     ~Game() {
-        // Scenemanager handle deletion of Scenes
-        // Scenes handle deletion of objects
+        // Scenemanager handle deletion of scenes
+        // scenes handle deletion of objects
     }
 
     void setup_callbacks(DCraft::Application &app);

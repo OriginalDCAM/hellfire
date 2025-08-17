@@ -1,4 +1,4 @@
-# FindGLM.cmake - Custom find module for GLM
+# FindGLM.cmake - custom find module for GLM
 #
 # This module defines:
 #  GLM_INCLUDE_DIR - where to find glm/glm.hpp
