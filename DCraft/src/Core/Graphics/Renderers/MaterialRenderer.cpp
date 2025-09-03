@@ -93,11 +93,7 @@ namespace DCraft {
                     GLint location = glGetUniformLocation(shader_program, uniform_name.c_str());
                     if (location != -1) {
                         glUniform1i(location, texture_unit);
-                        std::cout << "Bound texture to slot " << texture_unit 
-                                  << " for uniform: " << uniform_name << std::endl; 
-                    } else {
-                        std::cout << "Warning: Uniform not found: " << uniform_name << std::endl;
-                    }
+                    } 
 
                     std::string use_flag = create_use_flag(uniform_name);
                     GLint flag_location = glGetUniformLocation(shader_program, use_flag.c_str());

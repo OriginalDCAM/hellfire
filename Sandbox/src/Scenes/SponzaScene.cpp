@@ -7,6 +7,7 @@
 #include "DCraft/Application.h"
 #include "DCraft/Addons/Asset.h"
 #include "DCraft/Addons/CameraFactory.h"
+#include "DCraft/Graphics/Lighting/DirectionalLight.h"
 #include "DCraft/Graphics/Lighting/PointLight.h"
 #include "DCraft/Structs/Scene.h"
 #include "Scripts/PlayerController.h"
@@ -18,7 +19,7 @@ DCraft::Scene * load_sponza_scene(DCraft::SceneManager &scene_manager, DCraft::W
     sponza_model->transform()->set_scale(0.01f);
     scene->add_entity(sponza_model);
     
-    auto *sunlight = DCraft::PointLight::create("Sol Light", glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(1.0f), 1.2f, 350.0f);
+    auto *sunlight = DCraft::DirectionalLight::create("Sol Light", glm::vec3(-0.22f, -1.0f, 0.0f), glm::vec3(1.0f), 1.2f);
     sunlight->get_component<DCraft::LightComponent>()->set_intensity(1.2f);
     scene->add_entity(sunlight);
 
