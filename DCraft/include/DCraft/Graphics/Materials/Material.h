@@ -10,11 +10,12 @@
 #include "DCraft/Graphics/Textures/Texture.h"
 
 namespace DCraft {
-    class ShaderManager;
     class Application;
+    class ShaderManager;
 }
 
 namespace DCraft {
+    
     class Material {
     public:
         enum class PropertyType {
@@ -43,8 +44,8 @@ namespace DCraft {
         struct ShaderInfo {
             std::string vertex_path;
             std::string fragment_path;
-            std::optional<std::string> geometry_path;  // Optional geometry shader
-            std::unordered_set<std::string> defines;   // Preprocessor defines
+            std::optional<std::string> geometry_path;  
+            std::unordered_set<std::string> defines;  
             std::unordered_map<std::string, std::string> uniform_mappings; // Property name -> uniform name
             
             bool is_valid() const {
@@ -185,13 +186,17 @@ namespace DCraft {
         bool is_transparent() const;
 
         void set_diffuse_texture(Texture* texture) { 
-            set_property("diffuseTexture", texture); 
-            set_property("useDiffuseTexture", texture != nullptr);
+            set_property("uDiffuseTexture", texture); 
+            set_property("useUDiffuseTexture", texture != nullptr);
         }
         
         void set_texture(const std::string& path, TextureType type);
 
+        void set_texture(const std::shared_ptr<Texture> &texture);
+
         Material& add_texture(const std::string& path, const std::string& uniform_name, int texture_slot = -1);
+
+        Material &add_texture(Texture &texture, const std::string &uniform_name, int texture_slot);
 
         // === Getters ===
         template<typename T>

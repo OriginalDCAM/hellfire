@@ -1,6 +1,7 @@
 ﻿//
 // Created by denzel on 04/04/2025.
 //
+#include "DCraft/Graphics/Managers/ShaderManager.h"
 #include "DCraft/Graphics/Materials/Material.h"
 
 #include "DCraft/Application.h"
@@ -21,6 +22,13 @@ namespace DCraft {
         }
     }
 
+    
+    void Material::set_texture(const std::shared_ptr<Texture> &texture) {
+        if (texture->get_type() == TextureType::DIFFUSE) {
+            set_diffuse_texture(texture.get());
+        }
+    }
+
     Material & Material::add_texture(const std::string &path, const std::string &uniform_name, int texture_slot) {
         auto* texture = new Texture(path);
         
@@ -37,6 +45,22 @@ namespace DCraft {
         return *this;
     }
 
+    
+    Material & Material::add_texture(Texture &texture, const std::string &uniform_name, int texture_slot) {
+        
+        if (texture_slot >= 0) {
+            // Store the texture slot
+            texture.set_slot(texture_slot);
+            
+            set_property(uniform_name, &texture, uniform_name);
+            set_property(uniform_name + "Slot", texture_slot);
+        } else {
+            set_property(uniform_name, &texture, uniform_name);
+        }
+        
+        return *this;
+    }
+
     std::unique_ptr<Material> MaterialBuilder::create_lambert(const std::string &name) {
         auto material = std::make_unique<Material>(name);
         material->set_builtin_material_type(0);
@@ -45,6 +69,25 @@ namespace DCraft {
         material->set_uv_tiling(1.0f, 1.0f);  
         material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
         material->set_uv_rotation(0.0f);
+
+        material->set_property("diffuseColor", glm::vec3(0.8f, 0.8f, 0.8f));
+        material->set_property("ambientColor", glm::vec3(0.1f, 0.1f, 0.1f));
+        material->set_property("specularColor", glm::vec3(0.0f, 0.0f, 0.0f));
+    
+        material->set_property("alpha", 1.0f);
+        material->set_property("transparency", 1.0f);
+        material->set_property("opacity", 1.0f);
+        material->set_property("useTransparency", false);
+    
+        // UV defaults
+        material->set_property("uvTiling", glm::vec2(1.0f));
+        material->set_property("uvOffset", glm::vec2(0.0f));
+        material->set_property("uvRotation", 0.0f);
+    
+        // Texture usage flags - all false initially
+        material->set_property("useDiffuseTexture", false);
+        material->set_property("useNormalTexture", false);
+        material->set_property("useSpecularTexture", false);
 
         compile_shader_from_material(*material);
 
@@ -120,7 +163,7 @@ namespace DCraft {
         return std::move(material_);
     }
 
-    MaterialChain lambert(const std::string &name, DCraft::ShaderManager &shader_manager) {
+    MaterialChain lambert(const std::string &name, ShaderManager &shader_manager) {
         auto material = std::make_unique<Material>(name);
         material->set_builtin_material_type(0);
         material->set_diffuse_color(glm::vec3(0.8f));
@@ -128,7 +171,7 @@ namespace DCraft {
         return MaterialChain(std::move(material), shader_manager);
     }
 
-    MaterialChain phong(const std::string &name, DCraft::ShaderManager &shader_manager) {
+    MaterialChain phong(const std::string &name, ShaderManager &shader_manager) {
         auto material = std::make_unique<Material>(name);
         material->set_builtin_material_type(1);
         material->set_diffuse_color(glm::vec3(0.8f));
@@ -139,7 +182,7 @@ namespace DCraft {
     }
 
     MaterialChain custom(const std::string &name, const std::string &vertex_path, const std::string &fragment_path,
-        DCraft::ShaderManager &shader_manager) {
+        ShaderManager &shader_manager) {
         auto material = std::make_unique<Material>(name);
         material->set_custom_shader(vertex_path, fragment_path);
         return MaterialChain(std::move(material), shader_manager);

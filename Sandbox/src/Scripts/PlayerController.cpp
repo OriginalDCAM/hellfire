@@ -114,7 +114,6 @@ void PlayerController::handle_keyboard_look(float delta_time) {
     update_camera_orientation();
 }
 
-// KEEP ONLY THIS handle_movement method (the 3D one):
 void PlayerController::handle_movement(float delta_time) const {
     auto &app = DCraft::Application::get_instance();
     auto *camera = get_component<DCraft::CameraComponent>();

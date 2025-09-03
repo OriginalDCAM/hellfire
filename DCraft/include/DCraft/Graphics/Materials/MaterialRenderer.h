@@ -17,6 +17,6 @@ namespace DCraft {
     private:
         static void bind_property(const Material::Property& property, uint32_t shader_program, int& texture_unit);
 
-        static std::string capitalize_first(const std::string& str);
+        static std::string create_use_flag(const std::string &uniform_name);
     };
 }

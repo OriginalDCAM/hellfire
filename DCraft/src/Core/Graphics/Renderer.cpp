@@ -45,8 +45,12 @@ namespace DCraft {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
         glDepthFunc(GL_LESS);
+
         glDisable(GL_CULL_FACE);
+        glCullFace(GL_NONE);
+        glFrontFace(GL_CCW);
 
         skybox_renderer_.initialize();
     }
@@ -70,7 +74,10 @@ namespace DCraft {
     void Renderer::begin_frame() {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
         glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
 
         opaque_objects_.clear();
         transparent_objects_.clear();
@@ -217,9 +224,14 @@ namespace DCraft {
     }
 
     void Renderer::render_opaque_pass(const glm::mat4 &view, const glm::mat4 &projection) {
+        // TODO: make this a render setting that could be passed via global method
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
         glDisable(GL_BLEND);
+
+        
+        glDisable(GL_CULL_FACE);
 
         std::sort(opaque_objects_.begin(), opaque_objects_.end(),
                   [](const RenderCommand &a, const RenderCommand &b) {
@@ -248,6 +260,8 @@ namespace DCraft {
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
 
+        glDisable(GL_CULL_FACE);
+
         std::sort(transparent_objects_.begin(), transparent_objects_.end(),
                   [](const RenderCommand &a, const RenderCommand &b) {
                       return a.distance_to_camera > b.distance_to_camera;
@@ -273,6 +287,8 @@ namespace DCraft {
 
     void Renderer::render_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection) const {
         if (!scene || !scene->has_skybox()) return;
+
+       glDisable(GL_CULL_FACE);
 
         CameraComponent *camera_comp = scene->get_active_camera();
         if (camera_comp) {

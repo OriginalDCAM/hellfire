@@ -2,9 +2,8 @@
 // Created by denzel on 10/08/2025.
 //
 #pragma once
-#include <glm/detail/type_vec3.hpp>
-
 #include "DCraft/Components/ScriptComponent.h"
+#include <glm/detail/type_vec3.hpp>
 
 class PlayerController final : public DCraft::ScriptComponent {
 public:

@@ -2,14 +2,9 @@
 // Created by denzel on 07/08/2025.
 //
 #pragma once
-#include "DCraft/Structs/Component.h"
-#include <glm/glm.hpp>
 
 #include "DCraft/Structs/Transform3D.h"
-
-namespace DCraft {
-    class Transform3D;
-}
+#include "DCraft/Structs/Component.h"
 
 namespace DCraft {
     class TransformComponent : public Component {

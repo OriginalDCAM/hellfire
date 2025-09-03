@@ -35,10 +35,22 @@ uniform DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
 // Material uniforms
-uniform sampler2D diffuseTexture; 
+uniform sampler2D uDiffuseTexture;
+uniform sampler2D uNormalTexture;
+uniform sampler2D uSpecularTexture;
+uniform sampler2D uRoughnessTexture;
+uniform sampler2D uMetallicTexture;
+uniform sampler2D uAOTexture;
+uniform sampler2D uEmissiveTexture;
 
 // Texture usage flags
-uniform bool useDiffuseTexture; 
+uniform bool useuDiffuseTexture;
+uniform bool useUNormalTexture;
+uniform bool useUSpecularTexture;
+uniform bool useURoughnessTexture;
+uniform bool useUMetallicTexture;
+uniform bool useUAOTexture;
+uniform bool useUEmissiveTexture;
 
 // Material properties
 uniform vec3 ambientColor;
@@ -47,7 +59,7 @@ uniform vec3 diffuseColor;
 // Uv controls
 uniform vec2 uvTiling = vec2(1.0);
 uniform vec2 uvOffset = vec2(0.0);
-uniform float uvRotation = 0.0; 
+uniform float uvRotation = 0.0;
 
 // Texture filtering mode
 uniform int textureWrapMode = 0; // 0=repeat, 1=clamp, 2=mirror
@@ -69,7 +81,7 @@ vec2 transformUV(vec2 uv) {
         float cos_r = cos(uvRotation);
         float sin_r = sin(uvRotation);
         mat2 rotation = mat2(cos_r, -sin_r, sin_r, cos_r);
-        uv = rotation * (uv - 0.5) + 0.5; // Rotate around center
+        uv = rotation * (uv - 0.5) + 0.5;
     }
 
     return uv;
@@ -87,12 +99,9 @@ vec4 sampleTexture(sampler2D tex, vec2 uv) {
         // Mirror repeat
         transformedUV = abs(mod(transformedUV, 2.0) - 1.0);
     }
-    // textureWrapMode == 0 uses default repeat behavior
 
     return texture(tex, transformedUV);
 }
-
-
 
 // Calculate lighting contribution from a directional light 
 vec3 calcDirectionalLight(DirectionalLight light, vec3 normal, vec3 diffuse) {
@@ -139,8 +148,8 @@ float LinearizeDepth(float depth)
 
 void main() {
     vec4 diffuseValue;
-    if (useDiffuseTexture) {
-        diffuseValue = sampleTexture(diffuseTexture, vTexCoords);
+    if (useuDiffuseTexture) {
+        diffuseValue = sampleTexture(uDiffuseTexture, vTexCoords);
     } else {
         diffuseValue = vec4(diffuseColor, 1.0);
     }
@@ -152,6 +161,7 @@ void main() {
     } else {
         baseColor = diffuseValue;
     }
+
 
     // Normalize the normal
     vec3 normal = normalize(vNormal);

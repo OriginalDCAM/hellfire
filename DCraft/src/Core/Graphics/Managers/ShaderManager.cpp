@@ -187,23 +187,22 @@ namespace DCraft {
                 
             switch (material_type) {
                 case 0: // Lambert
-                    variant.vertex_path = "./assets/shaders/standard.vert";
-                    variant.fragment_path = "./assets/shaders/lambert.frag";
+                    variant.vertex_path = "assets/shaders/standard.vert";
+                    variant.fragment_path = "assets/shaders/lambert.frag";
                     break;
                 case 1: // Phong
-                    variant.vertex_path = "./assets/shaders/standard.vert";
-                    variant.fragment_path = "./assets/shaders/phong.frag";
+                    variant.vertex_path = "assets/shaders/standard.vert";
+                    variant.fragment_path = "assets/shaders/phong.frag";
                     break;
                 case 2: // PBR
-                    variant.vertex_path = "./assets/shaders/standard.vert";
-                    variant.fragment_path = "./assets/shaders/pbr.frag";
+                    variant.vertex_path = "assets/shaders/standard.vert";
+                    variant.fragment_path = "assets/shaders/pbr.frag";
                     break;
                 default:
-                    variant.vertex_path = "./assets/shaders/standard.vert";
-                    variant.fragment_path = "./assets/shaders/lambert.frag";
+                    variant.vertex_path = "assets/shaders/standard.vert";
+                    variant.fragment_path = "assets/shaders/lambert.frag";
                     break;
             }
-                
             // Add automatic defines for built-in shaders
             add_automatic_defines(material, variant.defines);
         }

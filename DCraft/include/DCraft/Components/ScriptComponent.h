@@ -6,12 +6,11 @@
 #include <string>
 #include <unordered_map>
 
+#include "DCraft/Structs/Entity.h"
 #include "DCraft/Structs/Component.h"
 
 namespace DCraft {
-    // Forward declarations to avoid circular dependencies
     class TransformComponent;
-    class Entity;
 
     class ScriptComponent : public Component {
     public:
@@ -77,12 +76,12 @@ namespace DCraft {
         // Helper method to check if the owner has a specific component
         template<typename T>
         bool has_component() const {
-            return get_owner() ? get_owner()->has_component<T>() : false;
+            return get_owner() ? get_owner()->template has_component<T>() : false;
         }
 
         template<typename T>
         T *get_component() const {
-            return get_owner() ? get_owner()->get_component<T>() : nullptr;
+            return get_owner() ? get_owner()->template get_component<T>() : nullptr;
         }
 
     protected:
