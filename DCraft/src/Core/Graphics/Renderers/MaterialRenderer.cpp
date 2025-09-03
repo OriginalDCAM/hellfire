@@ -86,27 +86,36 @@ namespace DCraft {
                 
             case Material::PropertyType::TEXTURE: {
                 Texture* texture = std::get<Texture*>(property.value);
-    
-                if (texture) {
+
+                if (texture && texture->is_valid()) {
                     texture->bind(texture_unit);
-        
+
                     GLint location = glGetUniformLocation(shader_program, uniform_name.c_str());
                     if (location != -1) {
                         glUniform1i(location, texture_unit);
+                        std::cout << "Bound texture to slot " << texture_unit 
+                                  << " for uniform: " << uniform_name << std::endl; 
+                    } else {
+                        std::cout << "Warning: Uniform not found: " << uniform_name << std::endl;
                     }
-        
-                    std::string use_flag = create_use_flag(uniform_name);  // Use new method
+
+                    std::string use_flag = create_use_flag(uniform_name);
                     GLint flag_location = glGetUniformLocation(shader_program, use_flag.c_str());
                     if (flag_location != -1) {
                         glUniform1i(flag_location, 1);
                     }
-        
+
                     texture_unit++;
                 } else {
-                    std::string use_flag = create_use_flag(uniform_name);  // Use new method
+                    // Handle invalid/missing texture
+                    std::string use_flag = create_use_flag(uniform_name);
                     GLint flag_location = glGetUniformLocation(shader_program, use_flag.c_str());
                     if (flag_location != -1) {
                         glUniform1i(flag_location, 0);
+                    }
+        
+                    if (texture) {
+                        std::cout << "Warning: Invalid texture for " << uniform_name << std::endl;
                     }
                 }
                 break;

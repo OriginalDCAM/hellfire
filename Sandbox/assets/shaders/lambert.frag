@@ -36,21 +36,21 @@ uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
 // Material uniforms
 uniform sampler2D uDiffuseTexture;
-uniform sampler2D uNormalTexture;
-uniform sampler2D uSpecularTexture;
-uniform sampler2D uRoughnessTexture;
-uniform sampler2D uMetallicTexture;
-uniform sampler2D uAOTexture;
-uniform sampler2D uEmissiveTexture;
+//uniform sampler2D uNormalTexture;
+//uniform sampler2D uSpecularTexture;
+//uniform sampler2D uRoughnessTexture;
+//uniform sampler2D uMetallicTexture;
+//uniform sampler2D uAOTexture;
+//uniform sampler2D uEmissiveTexture;
 
 // Texture usage flags
 uniform bool useuDiffuseTexture;
-uniform bool useUNormalTexture;
-uniform bool useUSpecularTexture;
-uniform bool useURoughnessTexture;
-uniform bool useUMetallicTexture;
-uniform bool useUAOTexture;
-uniform bool useUEmissiveTexture;
+//uniform bool useUNormalTexture;
+//uniform bool useUSpecularTexture;
+//uniform bool useURoughnessTexture;
+//uniform bool useUMetallicTexture;
+//uniform bool useUAOTexture;
+//uniform bool useUEmissiveTexture;
 
 // Material properties
 uniform vec3 ambientColor;

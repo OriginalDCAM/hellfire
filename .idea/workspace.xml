@@ -33,43 +33,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="556e4ab8-241b-4e6b-b84d-6223cac85f81" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Entity.inl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DCraft/src/Addons/CameraFactory.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DCraft/src/Components/CameraComponent.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DCraft/src/Structs/Entity.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/models/teapot.glb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/include/Scenes/SponzaScene.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SponzaScene.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="556e4ab8-241b-4e6b-b84d-6223cac85f81" name="Changes" comment="- Added sponza as a test scene to the examples">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/Cameras.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/CameraFactory.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/ModelLoader.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/ModelLoader.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Components/CameraComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Components/CameraComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Components/ScriptComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Components/ScriptComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Components/TransformComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Components/TransformComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Managers/ShaderManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Managers/ShaderManager.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/Material.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/MaterialRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/MaterialRenderer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Renderers/SkyboxRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Renderers/SkyboxRenderer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Component.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Component.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Entity.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Entity.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Components/ScriptComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Components/ScriptComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Material.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Material.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/OGL/Textures/Texture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/OGL/Textures/Texture.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderers/MaterialRenderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderers/MaterialRenderer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/SceneManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/SceneManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Objects/SkyboxRenderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Objects/SkyboxRenderer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/include/Scripts/PlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Scripts/PlayerController.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Game.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scripts/PlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scripts/PlayerController.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vendor/imguizmo" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/imguizmo" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -249,8 +217,17 @@
       <workItem from="1755931109105" duration="3578000" />
       <workItem from="1756284726439" duration="1285000" />
       <workItem from="1756362729565" duration="13416000" />
-      <workItem from="1756922209871" duration="2951000" />
+      <workItem from="1756922209871" duration="4179000" />
     </task>
+    <task id="LOCAL-00001" summary="- Added sponza as a test scene to the examples">
+      <option name="closed" value="true" />
+      <created>1756925390534</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1756925390534</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -260,6 +237,10 @@
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
     <isAutomaticReloadCMake value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="- Added sponza as a test scene to the examples" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Added sponza as a test scene to the examples" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
