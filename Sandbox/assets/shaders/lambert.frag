@@ -36,21 +36,21 @@ uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
 // Material uniforms
 uniform sampler2D uDiffuseTexture;
-//uniform sampler2D uNormalTexture;
-//uniform sampler2D uSpecularTexture;
-//uniform sampler2D uRoughnessTexture;
-//uniform sampler2D uMetallicTexture;
-//uniform sampler2D uAOTexture;
-//uniform sampler2D uEmissiveTexture;
+uniform sampler2D uNormalTexture;
+uniform sampler2D uSpecularTexture;
+uniform sampler2D uRoughnessTexture;
+uniform sampler2D uMetallicTexture;
+uniform sampler2D uAOTexture;
+uniform sampler2D uEmissiveTexture;
 
 // Texture usage flags
-uniform bool useuDiffuseTexture;
-//uniform bool useUNormalTexture;
-//uniform bool useUSpecularTexture;
-//uniform bool useURoughnessTexture;
-//uniform bool useUMetallicTexture;
-//uniform bool useUAOTexture;
-//uniform bool useUEmissiveTexture;
+uniform bool useUDiffuseTexture; 
+uniform bool useUNormalTexture;
+uniform bool useUSpecularTexture;
+uniform bool useURoughnessTexture;
+uniform bool useUMetallicTexture;
+uniform bool useUAOTexture;
+uniform bool useUEmissiveTexture;
 
 // Material properties
 uniform vec3 ambientColor;
@@ -137,45 +137,37 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse) {
     return diffuseResult;
 }
 
-float near = 0.1;
-float far  = 100.0;
-
-float LinearizeDepth(float depth)
-{
-    float z = depth * 2.0 - 1.0; // back to NDC 
-    return (2.0 * near * far) / (far + near - z * (far - near));
-}
-
 void main() {
-    vec4 diffuseValue;
-    if (useuDiffuseTexture) {
-        diffuseValue = sampleTexture(uDiffuseTexture, vTexCoords);
-    } else {
-        diffuseValue = vec4(diffuseColor, 1.0);
-    }
+    vec4 diffuseValue = sampleTexture(uDiffuseTexture, vTexCoords);
+
 
     // Apply vertex colors if present
     vec4 baseColor;
-    if (vColor.r != 0.0 || vColor.g != 0.0 || vColor.b != 0.0) {
+    if (length(vColor) > 0.001) {
         baseColor = diffuseValue * vec4(vColor, 1.0);
     } else {
         baseColor = diffuseValue;
     }
 
-
+    vec3 normal;
     // Normalize the normal
-    vec3 normal = normalize(vNormal);
+    if (useUNormalTexture) {
+        normal = texture(uNormalTexture, vTexCoords).rgb;
+        normal = normalize(normal * 2.0 - 1.0);
+    } else {
+        normal = normalize(vNormal);
+    }
 
     // Calculate lighting - Lambert model (ambient + diffuse only)
     vec3 result = ambientColor * baseColor.rgb; // Ambient light
 
     // Add all directional lights
-    for (int i = 0; i < numDirectionalLights; i++) {
+    for (int i = 0; i < min(numDirectionalLights, MAX_DIRECTIONAL_LIGHTS); i++) {
         result += calcDirectionalLight(directionalLights[i], normal, baseColor.rgb);
     }
 
     // Add all point lights
-    for (int i = 0; i < numPointLights; i++) {
+    for (int i = 0; i < min(numDirectionalLights, MAX_DIRECTIONAL_LIGHTS); i++) {
         result += calcPointLight(pointLights[i], normal, vFragPos, baseColor.rgb);
     }
 
@@ -184,6 +176,9 @@ void main() {
     if (useTransparency) {
         finalAlpha *= alpha * transparency;
     }
+
+    // Gamma correction
+    result = pow(result, vec3(1.0/2.2));
 
     fragColor = vec4(result, finalAlpha);
 }

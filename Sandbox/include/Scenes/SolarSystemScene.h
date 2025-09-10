@@ -20,7 +20,7 @@ namespace DCraft {
 }
 
 // Typedef for readability
-typedef std::unordered_map<std::string, std::unique_ptr<DCraft::Material>> MaterialMap;
+typedef std::unordered_map<std::string, std::shared_ptr<DCraft::Material>> MaterialMap;
 
 // Function declarations only
 MaterialMap load_material_map();

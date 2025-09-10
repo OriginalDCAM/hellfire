@@ -32,6 +32,10 @@ public:
         return *this;
     }
 
+    static Shader from_id(uint32_t shader_id) {
+        return Shader{shader_id};
+    }
+
     // Usage
     void use() const {
         if (program_id_ != 0) {

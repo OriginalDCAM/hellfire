@@ -20,7 +20,7 @@ namespace DCraft {
     struct RenderCommand {
         Entity* entity;                    // The entity being rendered
         RenderableComponent* renderable;   // Direct reference to renderable component
-        Material* material;                // Material for sorting and rendering
+        std::shared_ptr<Material> material;                // Material for sorting and rendering
         float distance_to_camera;          // Distance for sorting
         bool is_transparent;               // Transparency flag for render pass
 
@@ -35,7 +35,7 @@ namespace DCraft {
     struct InstancedRenderCommand {
         Entity* entity;
         InstancedRenderableComponent* instanced_renderable;
-        Material* material;
+        std::shared_ptr<Material> material;
         float distance_to_camera;
         bool is_transparent;
 
@@ -76,9 +76,9 @@ namespace DCraft {
 
         void set_fallback_shader(Shader &fallback_shader);
 
-        Shader *get_shader_for_material(Material *material);
+        Shader *get_shader_for_material(std::shared_ptr<Material> material);
 
-        uint32_t compile_material_shader(Material *material);
+        uint32_t compile_material_shader(std::shared_ptr<Material> material);
 
         ShaderManager& get_shader_manager() { return shader_manager_; }
         ShaderRegistry& get_shader_registry() { return shader_registry_; }
@@ -116,7 +116,7 @@ namespace DCraft {
         void render_skybox_pass(Scene* scene, const glm::mat4& view, const glm::mat4& projection) const;
 
         // Utility methods
-        bool is_material_transparent(const Material* material);
+        bool is_material_transparent(const std::shared_ptr<Material> &material);
         
     };
 }

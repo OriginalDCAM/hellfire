@@ -42,7 +42,7 @@ namespace DCraft {
         TextureWrap wrap_s = TextureWrap::REPEAT;
         TextureWrap wrap_t = TextureWrap::REPEAT;
         bool generate_mipmaps = true;
-        bool flip_vertically = false;
+        bool flip_vertically = true;
 
         static TextureSettings for_type(TextureType type);
     };
@@ -95,7 +95,7 @@ namespace DCraft {
         Texture(const std::string &path, TextureType type, const TextureSettings &settings);
 
         Texture(const Texture &) = delete;
-
+    
         Texture &operator=(const Texture &) = delete;
 
         Texture(Texture &&other) noexcept;

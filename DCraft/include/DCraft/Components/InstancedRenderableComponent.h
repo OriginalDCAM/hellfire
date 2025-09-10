@@ -60,13 +60,13 @@ namespace DCraft {
         [[nodiscard]] Mesh *get_mesh() const { return mesh_.get(); }
         [[nodiscard]] bool has_mesh() const { return mesh_ != nullptr; }
 
-        void set_material(Material *material) const {
+        void set_material(const std::shared_ptr<Material> &material) const {
             if (material && has_mesh()) {
                 get_mesh()->set_material(material);
             }
         }
 
-        [[nodiscard]] Material *get_material() const {
+        [[nodiscard]] std::shared_ptr<Material> get_material() const {
             return has_mesh() ? get_mesh()->get_material() : nullptr;
         }
 

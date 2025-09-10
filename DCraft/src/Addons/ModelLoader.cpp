@@ -85,8 +85,8 @@ namespace DCraft::Addons {
             }
 
             // Create and cache material
-            auto material = create_material(ai_material, scene, filepath);
-            material_cache[cache_key] = std::shared_ptr<Material>(material.release());
+            const auto material = create_material(ai_material, scene, filepath);
+            material_cache[cache_key] = material;
         }
     }
 
@@ -186,6 +186,7 @@ namespace DCraft::Addons {
             if (mesh->HasTextureCoords(0)) {
                 const auto &tex = mesh->mTextureCoords[0][i];
                 v.texCoords = glm::vec2(tex.x, tex.y);
+                
             } else {
                 v.texCoords = glm::vec2(0.0f);
             }
@@ -233,11 +234,11 @@ namespace DCraft::Addons {
             auto cached_material = material_cache.find(material_key);
             if (cached_material != material_cache.end()) {
                 // Use cached material
-                processed_mesh->set_material(cached_material->second.get());
+                processed_mesh->set_material(cached_material->second);
             } else {
                 // Fallback to creating material 
                 auto material = create_material(ai_material, scene, filepath);
-                processed_mesh->set_material(material.release());
+                processed_mesh->set_material(material);
             }
         }
 
@@ -246,7 +247,8 @@ namespace DCraft::Addons {
     }
 
 
-    std::unique_ptr<Material> ModelLoader::create_material(const aiMaterial *ai_material, const aiScene *scene, const std::string &filepath
+    std::shared_ptr<Material> ModelLoader::create_material(const aiMaterial *ai_material, const aiScene *scene,
+                                                           const std::string &filepath
     ) {
         // Get material name
         aiString material_name;
@@ -357,11 +359,11 @@ namespace DCraft::Addons {
         // Load most common texture types
         load_texture_fast(aiTextureType_DIFFUSE, TextureType::DIFFUSE, "uDiffuseTexture");
         load_texture_fast(aiTextureType_NORMALS, TextureType::NORMAL, "uNormalTexture");
-        load_texture_fast(aiTextureType_SPECULAR, TextureType::SPECULAR, "uSpecularTexture");
-        load_texture_fast(aiTextureType_METALNESS, TextureType::METALNESS, "uMetallicTexture");
-        load_texture_fast(aiTextureType_DIFFUSE_ROUGHNESS, TextureType::ROUGHNESS, "uRoughnessTexture");
-        load_texture_fast(aiTextureType_AMBIENT_OCCLUSION, TextureType::AMBIENT_OCCLUSION, "uAoTexture");
-        load_texture_fast(aiTextureType_EMISSIVE, TextureType::EMISSIVE, "uEmissiveTexture");
+        // load_texture_fast(aiTextureType_SPECULAR, TextureType::SPECULAR, "uSpecularTexture");
+        // load_texture_fast(aiTextureType_METALNESS, TextureType::METALNESS, "uMetallicTexture");
+        // load_texture_fast(aiTextureType_DIFFUSE_ROUGHNESS, TextureType::ROUGHNESS, "uRoughnessTexture");
+        // load_texture_fast(aiTextureType_AMBIENT_OCCLUSION, TextureType::AMBIENT_OCCLUSION, "uAoTexture");
+        // load_texture_fast(aiTextureType_EMISSIVE, TextureType::EMISSIVE, "uEmissiveTexture");
     }
 
         bool ModelLoader::try_load_embedded_texture(const std::string& path_str, const aiScene* scene, TextureType dcr_type, Material& material, const std::string& property_name) {
