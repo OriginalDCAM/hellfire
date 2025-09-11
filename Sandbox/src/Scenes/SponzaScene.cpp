@@ -40,7 +40,7 @@ DCraft::Scene * load_sponza_scene(DCraft::SceneManager &scene_manager, DCraft::W
 
     main_camera->transform()->set_position(5.0f, 5.0f, 5.0f);
     main_camera->get_component<DCraft::CameraComponent>()->look_at(glm::vec3(0.0f, 0.0f, 0.0f));
-    main_camera->add_component<PlayerController>(6.0f);
+    main_camera->add_component<PlayerController>(3.0f);
     scene->add_entity(main_camera);
     scene->set_active_camera(main_camera);
 

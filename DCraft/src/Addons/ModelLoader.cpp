@@ -174,6 +174,16 @@ namespace DCraft::Addons {
                 v.normal = glm::vec3(0.0f, 1.0f, 0.0f); // Default up
             }
 
+            if (mesh->HasTangentsAndBitangents()) {
+                const auto &bitan = mesh->mBitangents[i];
+                const auto &tan = mesh->mTangents[i];
+                v.tangent = glm::vec3(tan.x, tan.y, tan.z);
+                v.bitangent = glm::vec3(bitan.x, bitan.y, bitan.z);
+            } else {
+                v.tangent = glm::vec3(1.0f, 0.0f, 0.0f);
+                v.bitangent = glm::vec3(0.0f, 1.0f, 0.0f);
+            }
+
             // Color
             if (mesh->HasVertexColors(0)) {
                 const auto &col = mesh->mColors[0][i];

@@ -17,7 +17,6 @@ if (NOT N EQUAL 0)
     set(CMAKE_BUILD_PARALLEL_LEVEL ${N})
 endif ()
 
-# Add these paths to CMAKE_PREFIX_PATH to help find_package find them
 list(APPEND CMAKE_PREFIX_PATH ${GLEW_ROOT_DIR} ${GLUT_ROOT_DIR} ${GLM_ROOT_DIR})
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
