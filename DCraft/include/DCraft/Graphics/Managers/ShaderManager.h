@@ -23,8 +23,10 @@ namespace DCraft {
         // Recursively process #include directives
         std::string process_includes(const std::string& source, const std::string& base_path = "shaders/");
         
-        std::string load_include_file(const std::string& path);
-        
+        std::string load_include_file(const std::string &path, const std::string &base_path);
+
+        std::string get_directory_from_path(const std::string &file_path);
+
         // Process #ifdef, #ifndef, #define directives
         std::string process_defines(const std::string& source, 
                                    const std::unordered_set<std::string>& defines);
@@ -41,7 +43,9 @@ namespace DCraft {
             
             std::string get_key() const;
         };
-        
+
+        std::string clean_shader_content(const std::string &content, const std::string &filepath);
+
         uint32_t load_shader(const ShaderVariant& variant);
 
         // Method for material-based shader loading

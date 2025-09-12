@@ -31,22 +31,22 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3347c90f-a906-48ef-b8b1-a8b9a2cf4ecb" name="Changes" comment="">
+    <list default="true" id="3347c90f-a906-48ef-b8b1-a8b9a2cf4ecb" name="Changes" comment="Updated the README">
+      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/light_uniforms.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/material_uniforms.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/texture_utils.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/vertex_inputs.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lighting/blinn_phong.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lighting/lambert.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/ModelLoader.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/ModelLoader.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Vertex.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Vertex.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Mesh.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Mesh.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/OGL/Textures/Texture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/OGL/Textures/Texture.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Managers/ShaderManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Managers/ShaderManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/standard.vert" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/standard.vert" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scenes/SponzaScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SponzaScene.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/assimp" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/assimp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/pbr.frag" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/phong.frag" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/vendor/imguizmo" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/imguizmo" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -58,11 +58,48 @@
     <option name="formatViaClangd" value="false" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="GLSL Shader" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -96,6 +133,7 @@
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.west.config.association.type.startup.service&quot;: &quot;true&quot;,
@@ -143,11 +181,11 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="CMake Application.imgui" />
       <item itemvalue="CMake Application.DCraft" />
       <item itemvalue="CMake Application.Sandbox" />
       <item itemvalue="CMake Application.UpdateAssimpLibsDebugSymbolsAndDLLs" />
       <item itemvalue="CMake Application.assimp" />
+      <item itemvalue="CMake Application.imgui" />
       <item itemvalue="CMake Application.zlibstatic" />
     </list>
   </component>
@@ -159,8 +197,26 @@
       <option name="presentableId" value="Default" />
       <updated>1757595877947</updated>
       <workItem from="1757595879074" duration="5443000" />
-      <workItem from="1757608763579" duration="1527000" />
+      <workItem from="1757608763579" duration="5222000" />
+      <workItem from="1757616198365" duration="1288000" />
     </task>
+    <task id="LOCAL-00001" summary="Implemented normal mapping into the framework.">
+      <option name="closed" value="true" />
+      <created>1757610418568</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1757610418568</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Updated the README">
+      <option name="closed" value="true" />
+      <created>1757610455079</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1757610455079</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -170,5 +226,21 @@
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
     <isAutomaticReloadCMake value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Implemented normal mapping into the framework." />
+    <MESSAGE value="Updated the README" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated the README" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp</url>
+          <line>194</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -24,18 +24,20 @@ namespace DCraft {
         std::smatch match;
 
         while (std::regex_search(processed, match, include_regex)) {
-            std::string include_path = base_path + match[1].str();
-            std::string include_content = load_include_file(include_path);
-
-            // Replace the #include line with the file content
+            std::string include_relative_path = match[1].str();
+            std::string include_full_path = base_path + include_relative_path;
+        
+            // Get the directory of the included file for nested includes
+            std::string include_dir = get_directory_from_path(include_full_path);
+        
+            std::string include_content = load_include_file(include_full_path, include_dir);
             processed = processed.replace(match.position(), match.length(), include_content);
         }
 
         return processed;
     }
 
-    std::string ShaderManager::load_include_file(const std::string &path) {
-        // Check cache first
+    std::string ShaderManager::load_include_file(const std::string &path,  const std::string &base_path) {
         if (include_cache_.find(path) != include_cache_.end()) {
             return include_cache_[path];
         }
@@ -45,15 +47,23 @@ namespace DCraft {
             throw std::runtime_error("Failed to open include file: " + path);
         }
 
-        std::string content((std::istreambuf_iterator<char>(file)),
+        std::string content((std::istreambuf_iterator(file)),
                             std::istreambuf_iterator<char>());
 
         // Process nested includes
-        content = process_includes(content);
+        content = process_includes(content, base_path);
 
         // Cache the processed content
         include_cache_[path] = content;
-        return content;
+        return clean_shader_content(content, base_path);
+    }
+    
+    std::string ShaderManager::get_directory_from_path(const std::string &file_path) {
+        size_t last_slash = file_path.find_last_of("/\\");
+        if (last_slash != std::string::npos) {
+            return file_path.substr(0, last_slash + 1);
+        }
+        return "./"; 
     }
 
     std::string ShaderManager::process_defines(const std::string &source,
@@ -137,6 +147,27 @@ namespace DCraft {
         return key;
     }
 
+    std::string ShaderManager::clean_shader_content(const std::string& content, const std::string& filepath) {
+        std::string cleaned = content;
+    
+        // UTF-8 BOM is EF BB BF (shows as ï»¿ in text)
+        std::string bom = "\xEF\xBB\xBF";
+    
+        // Remove ALL occurrences of BOM, not just at the beginning
+        size_t pos = 0;
+        int removedCount = 0;
+        while ((pos = cleaned.find(bom, pos)) != std::string::npos) {
+            cleaned.erase(pos, bom.length());
+            removedCount++;
+        }
+    
+        if (removedCount > 0) {
+            std::cout << "Removed " << removedCount << " BOM sequences from: " << filepath << std::endl;
+        }
+    
+        return cleaned;
+    }
+
     uint32_t ShaderManager::load_shader(const ShaderVariant &variant) {
         std::string cache_key = variant.get_key();
             
@@ -147,16 +178,20 @@ namespace DCraft {
             
         try {
             // Load and process vertex shader
+            std::string vertex_base_path = get_directory_from_path(variant.vertex_path);
+            std::string fragment_base_path = get_directory_from_path(variant.fragment_path);
+        
+            // Load and process vertex shader
             std::string vertex_source = load_shader_file(variant.vertex_path);
-            vertex_source = process_includes(vertex_source);
+            vertex_source = process_includes(vertex_source, vertex_base_path);
             vertex_source = process_defines(vertex_source, variant.defines);
-                
+            
             // Load and process fragment shader
             std::string fragment_source = load_shader_file(variant.fragment_path);
-            fragment_source = process_includes(fragment_source);
+            fragment_source = process_includes(fragment_source, fragment_base_path);
             fragment_source = process_defines(fragment_source, variant.defines);
                 
-            // Compile shader (you'll need to implement this using your existing shader compilation)
+            // Compile shader 
             uint32_t program = compile_shader_program(vertex_source, fragment_source);
                 
             // Cache compiled shader
