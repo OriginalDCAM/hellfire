@@ -92,19 +92,19 @@ void PlayerController::set_drone_overview_position() {
 void PlayerController::handle_keyboard_look(float delta_time) {
     auto& app = DCraft::Application::get_instance();
     
-    float look_speed = 45.0f; 
+    set_float("look_speed", 45.0f);
     
     if (app.is_key_pressed('j')) { // Look left
-        yaw_ -= look_speed * delta_time;
+        yaw_ -= get_float("look_speed") * delta_time;
     }
     if (app.is_key_pressed('l')) { // Look right
-        yaw_ += look_speed * delta_time;
+        yaw_ += get_float("look_speed") * delta_time;
     }
     if (app.is_key_pressed('i')) { // Look up
-        pitch_ += look_speed * delta_time;
+        pitch_ += get_float("look_speed") * delta_time;
     }
     if (app.is_key_pressed('k')) { // Look down
-        pitch_ -= look_speed * delta_time;
+        pitch_ -= get_float("look_speed") * delta_time;
     }
     
     // Constrain pitch

@@ -196,11 +196,11 @@ namespace DCraft {
         }
 
         // ===Convenience methods===
-        void set_diffuse_color(const glm::vec3 &color) { set_property("diffuseColor", color); }
-        void set_ambient_color(const glm::vec3 &color) { set_property("ambientColor", color); }
-        void set_specular_color(const glm::vec3 &color) { set_property("specularColor", color); }
-        void set_shininess(const float shininess) { set_property("shininess", shininess); }
-        void set_diffuse_texture(const Texture *texture) { set_property("diffuseTexture", texture); }
+        void set_diffuse_color(const glm::vec3 &color) { set_property("uDiffuseColor", color); }
+        void set_ambient_color(const glm::vec3 &color) { set_property("uAmbientColor", color); }
+        void set_specular_color(const glm::vec3 &color) { set_property("uSpecularColor", color); }
+        void set_shininess(const float shininess) { set_property("uShininess", shininess); }
+        void set_diffuse_texture(const Texture *texture) { set_property("uDiffuseTexture", texture); }
 
         void set_uv_tiling(const glm::vec2 &tiling) {
             set_property("uvTiling", tiling);
@@ -220,7 +220,7 @@ namespace DCraft {
 
         //== Transparency convenience methods===
         void set_transparency(float alpha) {
-            set_property("alpha", alpha);
+            set_property("uAlpha", alpha);
             set_property("useTransparency", alpha < 1.0f);
         }
 
@@ -232,7 +232,7 @@ namespace DCraft {
 
         void set_diffuse_texture(Texture *texture) {
             set_property("uDiffuseTexture", texture);
-            set_property("useuDiffuseTexture", texture != nullptr);
+            set_property("useUDiffuseTexture", texture != nullptr);
         }
 
         void set_texture(const std::string &path, TextureType type);
@@ -255,13 +255,6 @@ namespace DCraft {
         }
 
         const std::string &get_name() const { return name_; }
-
-        // Backwards compatibility
-        glm::vec3 get_ambient_color() const { return get_property<glm::vec3>("ambientColor", glm::vec3(0.1f)); }
-        glm::vec3 get_diffuse_color() const { return get_property<glm::vec3>("diffuseColor", glm::vec3(0.8f)); }
-        glm::vec3 get_specular_color() const { return get_property<glm::vec3>("specularColor", glm::vec3(0.5f)); }
-        float get_shininess() const { return get_property<float>("shininess", 32.0f); }
-
     private:
 
         void set_texture_usage_flag(const std::string& uniform_name, bool value);

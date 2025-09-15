@@ -19,16 +19,16 @@ void main() {
     float dayFactor = smoothstep(-0.1, 0.1, sunDot);
 
     // Sample textures
-    vec4 dayColor = texture(uDayTexture, TexCoord);
+    vec4 dayColor = texture(uDayTexture, vec2(TexCoord.x, -TexCoord.y));
         vec4 nightColor = texture(uNightTexture
-        , TexCoord);
+        , vec2(TexCoord.x, -TexCoord.y));
 
     // Simple blend
     vec4 result = mix(nightColor, dayColor, dayFactor);
 
     // Basic lighting
     result.rgb *= max(0.2, sunDot * 0.8 + 0.2);
-
+    
     FragColor = result;
 
 }

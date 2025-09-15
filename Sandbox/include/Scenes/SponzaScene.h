@@ -12,4 +12,4 @@ namespace DCraft {
     class SceneManager;
 }
 
-DCraft::Scene* load_sponza_scene(DCraft::SceneManager& scene_manager, DCraft::WindowInfo window, DCraft::ShaderManager& shader_manager);
+DCraft::Scene *load_sponza_scene(DCraft::WindowInfo window);

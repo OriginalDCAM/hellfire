@@ -10,7 +10,7 @@
 #include "Scripts/PlayerController.h"
 #include "Utils/AsteroidBeltFactory.h"
 
-MaterialMap load_material_map(DCraft::ShaderManager &shader_manager) {
+MaterialMap load_material_map() {
     MaterialMap materials;
 
     std::string planet_surface_dir = "assets/textures/planets/surfaces/";
@@ -43,7 +43,7 @@ MaterialMap load_material_map(DCraft::ShaderManager &shader_manager) {
 
     auto earth_cloud_material = DCraft::MaterialBuilder::create_lambert("Earth Cloud Material");
     earth_cloud_material->set_texture(planet_surface_dir + "earth_clouds.png", DCraft::TextureType::DIFFUSE);
-    earth_cloud_material->set_transparency(0.75f);
+    earth_cloud_material->set_transparency(0.50f);
     materials["EARTH_CLOUD_MATERIAL"] = earth_cloud_material;
 
     auto moon_material = DCraft::MaterialBuilder::create_lambert("Moon Material");
@@ -75,7 +75,8 @@ MaterialMap load_material_map(DCraft::ShaderManager &shader_manager) {
 }
 
 DCraft::Entity *create_planet(const std::string &name, float scale, const glm::vec3 &position,
-                              const std::shared_ptr<DCraft::Material> &material, float orbit_radius = 0.0f, float orbit_speed = 0.0f,
+                              const std::shared_ptr<DCraft::Material> &material, float orbit_radius = 0.0f,
+                              float orbit_speed = 0.0f,
                               const glm::vec3 &center = glm::vec3(0.0f)) {
     auto *planet = DCraft::Sphere::create(name, glm::vec3(1.0f), 64, 64);
     planet->transform()->set_position(position.x, position.y, position.z);
@@ -93,7 +94,8 @@ DCraft::Entity *create_planet(const std::string &name, float scale, const glm::v
 }
 
 DCraft::Entity *create_planet_with_rotation(const std::string &name, float scale, const glm::vec3 &position,
-                                            const std::shared_ptr<DCraft::Material> &material, float orbit_radius = 0.0f,
+                                            const std::shared_ptr<DCraft::Material> &material,
+                                            float orbit_radius = 0.0f,
                                             float orbit_speed = 0.0f, float rotation_speed = 1.0f) {
     auto *planet = DCraft::Sphere::create(name);
     planet->transform()->set_position(position.x, position.y, position.z);
@@ -104,17 +106,16 @@ DCraft::Entity *create_planet_with_rotation(const std::string &name, float scale
         auto *orbit_script = planet->add_component<OrbitController>();
         orbit_script->set_orbit_radius(orbit_radius);
         orbit_script->set_orbit_speed(orbit_speed);
-        orbit_script->set_rotation_speed(rotation_speed); 
+        orbit_script->set_rotation_speed(rotation_speed);
         orbit_script->set_center(glm::vec3(0.0f, 0.0f, 0.0f));
     }
 
     return planet;
 }
 
-DCraft::Scene *load_solar_system_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInfo window,
-                                       DCraft::ShaderManager &shader_manager) {
-    DCraft::Scene *scene = scene_manager.create_scene("Solar System Scene");
-    MaterialMap materials = load_material_map(shader_manager);
+DCraft::Scene *load_solar_system_scene(DCraft::WindowInfo window) {
+    const auto scene = new DCraft::Scene("Solar System Scene");
+    MaterialMap materials = load_material_map();
 
     auto *world = new DCraft::Entity("Solar System World");
     scene->add_entity(world);
@@ -142,7 +143,7 @@ DCraft::Scene *load_solar_system_scene(DCraft::SceneManager &scene_manager, DCra
                                        materials["DYNAMIC_EARTH_MATERIAL"], 85.0f, 0.028f);
     world->add(earth_visual);
 
-    auto *earth_clouds = create_planet_with_rotation("Earth Clouds", 1.005f, glm::vec3(0, 0, 0),
+    auto *earth_clouds = create_planet_with_rotation("Earth Clouds", 1.01f, glm::vec3(0, 0, 0),
                                                      materials["EARTH_CLOUD_MATERIAL"], 0.0f, 0.0f, 0.12f);
 
     auto *moon_visual = create_planet("Moon", 0.25f, glm::vec3(0, 0, 2), materials["MOON_MATERIAL"], 5.0f,

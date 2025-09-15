@@ -8,8 +8,8 @@
 
 namespace DCraft {
     bool Material::is_transparent() const {
-        float alpha = get_property<float>("alpha", 1.0f);
-        float transparency = get_property<float>("transparency", 1.0f);
+        float alpha = get_property<float>("uAlpha", 1.0f);
+        float transparency = get_property<float>("uTransparency", 1.0f);
         bool use_transparency = get_property<bool>("useTransparency", false);
         
         return (alpha < 1.0f) || (transparency < 1.0f) || use_transparency;
@@ -127,13 +127,13 @@ namespace DCraft {
         material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
         material->set_uv_rotation(0.0f);
 
-        material->set_property("diffuseColor", glm::vec3(0.8f, 0.8f, 0.8f));
-        material->set_property("ambientColor", glm::vec3(0.1f, 0.1f, 0.1f));
-        material->set_property("specularColor", glm::vec3(0.0f, 0.0f, 0.0f));
+        material->set_property("uDiffuseColor", glm::vec3(0.8f, 0.8f, 0.8f));
+        material->set_property("uAmbientColor", glm::vec3(0.1f, 0.1f, 0.1f));
+        material->set_property("uSpecularColor", glm::vec3(0.0f, 0.0f, 0.0f));
     
-        material->set_property("alpha", 1.0f);
-        material->set_property("transparency", 1.0f);
-        material->set_property("opacity", 1.0f);
+        material->set_property("uAlpha", 1.0f);
+        material->set_property("uTransparency", 1.0f);
+        material->set_property("uOpacity", 1.0f);
         material->set_property("useTransparency", false);
     
         // UV defaults
@@ -161,6 +161,20 @@ namespace DCraft {
         material->set_uv_tiling(1.0f, 1.0f);  
         material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
         material->set_uv_rotation(0.0f);
+        
+        material->set_property("uAlpha", 1.0f);
+        material->set_property("uTransparency", 1.0f);
+        material->set_property("uOpacity", 1.0f);
+        material->set_property("useTransparency", false);
+
+        material->set_property("uvTiling", glm::vec2(1.0f));
+        material->set_property("uvOffset", glm::vec2(0.0f));
+        material->set_property("uvRotation", 0.0f);
+
+        
+        material->set_property("useUDiffuseTexture", false);
+        material->set_property("useUNormalTexture", false);
+        material->set_property("useUSpecularTexture", false);
 
         compile_shader_from_material(*material);
         
@@ -171,9 +185,9 @@ namespace DCraft {
         auto material = std::make_shared<Material>(name);
         material->set_builtin_material_type(2);
         material->set_diffuse_color(glm::vec3(0.8f));
-        material->set_property("metallic", 0.0f);
-        material->set_property("roughness", 0.5f);
-        material->set_property("ao", 1.0f);
+        material->set_property("uMetallic", 0.0f);
+        material->set_property("uRoughness", 0.5f);
+        material->set_property("uAO", 1.0f);
         material->set_uv_tiling(1.0f, 1.0f);  
         material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
         material->set_uv_rotation(0.0f);

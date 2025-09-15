@@ -16,7 +16,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse) {
 }
 
 vec3 calculateLambertLighting(vec3 normal, vec3 baseColor, vec3 fragPos) {
-    vec3 result = ambientColor * baseColor;
+    vec3 result = uAmbientColor * baseColor;
 
     // Add directional lights
     for (int i = 0; i < min(numDirectionalLights, MAX_DIRECTIONAL_LIGHTS); i++) {

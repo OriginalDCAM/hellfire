@@ -5,6 +5,7 @@
   </component>
   <component name="BackendCodeEditorMiscSettings">
     <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="22" type="long" />
+    <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
   </component>
   <component name="CMakePresetLoader">{
   &quot;useNewFormat&quot;: true
@@ -31,22 +32,30 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3347c90f-a906-48ef-b8b1-a8b9a2cf4ecb" name="Changes" comment="Updated the README">
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/light_uniforms.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/material_uniforms.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/texture_utils.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/vertex_inputs.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lighting/blinn_phong.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lighting/lambert.glsl" afterDir="false" />
+    <list default="true" id="3347c90f-a906-48ef-b8b1-a8b9a2cf4ecb" name="Changes" comment="Turned the glsl uber shader into reusable modules">
       <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Managers/ShaderManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Managers/ShaderManager.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/pbr.frag" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/phong.frag" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/Material.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Textures/Texture.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Textures/Texture.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Scene.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Scene.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Material.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Material.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/OGL/Textures/Texture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/OGL/Textures/Texture.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/SceneManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/SceneManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/common/material_uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/material_uniforms.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/common/texture_utils.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/common/texture_utils.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/custom/earth_day_night.frag" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/custom/earth_day_night.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/lighting/blinn_phong.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lighting/blinn_phong.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/lighting/lambert.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lighting/lambert.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/include/Game.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Game.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/include/Scenes/SolarSystemScene.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Scenes/SolarSystemScene.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/include/Scenes/SponzaScene.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Scenes/SponzaScene.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/src/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Game.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scenes/SponzaScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SponzaScene.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scripts/PlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scripts/PlayerController.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vendor/imguizmo" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/imguizmo" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -92,26 +101,6 @@
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -129,7 +118,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
-    &quot;CMake Application.Sandbox.executor&quot;: &quot;Run&quot;,
+    &quot;CMake Application.Sandbox.executor&quot;: &quot;Debug&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
@@ -199,6 +188,9 @@
       <workItem from="1757595879074" duration="5443000" />
       <workItem from="1757608763579" duration="5222000" />
       <workItem from="1757616198365" duration="1288000" />
+      <workItem from="1757668449169" duration="13779000" />
+      <workItem from="1757917128825" duration="7164000" />
+      <workItem from="1757965944668" duration="7000" />
     </task>
     <task id="LOCAL-00001" summary="Implemented normal mapping into the framework.">
       <option name="closed" value="true" />
@@ -216,7 +208,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757610455079</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Turned the glsl uber shader into reusable modules">
+      <option name="closed" value="true" />
+      <created>1757668509162</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1757668509162</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -230,17 +230,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Implemented normal mapping into the framework." />
     <MESSAGE value="Updated the README" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated the README" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp</url>
-          <line>194</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Turned the glsl uber shader into reusable modules" />
+    <option name="LAST_COMMIT_MESSAGE" value="Turned the glsl uber shader into reusable modules" />
   </component>
 </project>

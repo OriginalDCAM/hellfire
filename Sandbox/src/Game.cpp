@@ -35,7 +35,7 @@ void Game::init(DCraft::Application &app) {
     app.toggle_fullscreen();
 }
 
-void Game::on_scene_activated(DCraft::Scene *scene) {
+void Game::on_scene_activated(DCraft::Scene *scene) const {
     // Find the scene name from the scene pointer
     std::string scene_name;
     for (const auto &pair: scenes_) {
@@ -50,8 +50,6 @@ void Game::on_scene_activated(DCraft::Scene *scene) {
         return;
     }
 
-    active_scene_name_ = scene_name;
-
     std::clog << "Activated scene: " << scene_name << "\n";
 }
 
@@ -59,12 +57,10 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window, DCraft::Sh
     scene_manager_ = &sm;
 
     // Scene loading with code behind
-    // scenes_["SolarSystem"] = load_solar_system_scene(sm, window, shader_manager);
-    scenes_["Sponza"] = load_sponza_scene(sm, window, shader_manager);
+    scenes_["BoatScene"] = load_sponza_scene(window);
 
     // Set the initial active scene
-    sm.set_active_scene(scenes_["Sponza"]);
-    active_scene_name_ = "Sponza";
+    sm.set_active_scene(scenes_["BoatScene"]);
 
     // Register scene activation callback with the scene manager
     sm.set_scene_activated_callback([this](DCraft::Scene *scene) {
@@ -74,7 +70,18 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window, DCraft::Sh
 
 void Game::handle_input(DCraft::Application &app, float delta_time) {
     if (app.is_special_key_pressed(static_cast<char>(GLUT_KEY_F11 + 256))) {
+        // F11
         app.toggle_fullscreen();
+    }
+
+    if (app.is_key_pressed(49)) {
+        scene_manager_->set_active_scene(scenes_["BoatScene"]);
+    }
+    if (app.is_key_pressed(50)) {
+        if (!scenes_["SolarSystem"]) // Lazy initialization
+            scenes_["SolarSystem"] = load_solar_system_scene(app.get_window_info());
+        
+        scene_manager_->set_active_scene(scenes_["SolarSystem"]);
     }
 
     AnimationInputHandler::get_instance().handle_input();
@@ -92,8 +99,8 @@ void Game::process_mouse_movement(float x_offset, float y_offset) const {
     }
 
     // Look for the "Main Camera" entity 
-    if (const auto* camera_entity = active_scene->find_entity_by_name("Main Camera")) {
-        if (auto* player_controller = camera_entity->get_component<PlayerController>()) {
+    if (const auto *camera_entity = active_scene->find_entity_by_name("Main Camera")) {
+        if (auto *player_controller = camera_entity->get_component<PlayerController>()) {
             player_controller->handle_mouse_movement(x_offset, y_offset);
         }
     }

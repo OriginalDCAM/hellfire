@@ -283,41 +283,41 @@ namespace DCraft::Addons {
 
         if (ai_material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
             material.set_diffuse_color(glm::vec3(color.r, color.g, color.b));
-            material.set_property("diffuse", glm::vec3(color.r, color.g, color.b));
-            material.set_property("albedo", glm::vec3(color.r, color.g, color.b));
+            material.set_property("uDiffuse", glm::vec3(color.r, color.g, color.b));
+            material.set_property("uAlbedo", glm::vec3(color.r, color.g, color.b));
         }
 
         if (ai_material->Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
             material.set_ambient_color(glm::vec3(color.r, color.g, color.b));
-            material.set_property("ambient", glm::vec3(color.r, color.g, color.b));
+            material.set_property("uAmbient", glm::vec3(color.r, color.g, color.b));
         }
 
         if (ai_material->Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS) {
             material.set_specular_color(glm::vec3(color.r, color.g, color.b));
-            material.set_property("specular", glm::vec3(color.r, color.g, color.b));
+            material.set_property("uSpecular", glm::vec3(color.r, color.g, color.b));
         }
 
         if (ai_material->Get(AI_MATKEY_COLOR_EMISSIVE, color) == AI_SUCCESS) {
-            material.set_property("emissive", glm::vec3(color.r, color.g, color.b));
+            material.set_property("uEmissive", glm::vec3(color.r, color.g, color.b));
         }
 
         if (ai_material->Get(AI_MATKEY_OPACITY, value) == AI_SUCCESS) {
             material.set_transparency(value);
-            material.set_property("opacity", value);
-            material.set_property("alpha", value);
+            material.set_property("uOpacity", value);
+            material.set_property("uAlpha", value);
         }
 
         if (ai_material->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS) {
             material.set_shininess(value);
-            material.set_property("shininess", value);
+            material.set_property("uShininess", value);
         }
 
         if (ai_material->Get(AI_MATKEY_METALLIC_FACTOR, value) == AI_SUCCESS) {
-            material.set_property("metallic", value);
+            material.set_property("uMetallic", value);
         }
 
         if (ai_material->Get(AI_MATKEY_ROUGHNESS_FACTOR, value) == AI_SUCCESS) {
-            material.set_property("roughness", value);
+            material.set_property("uRoughness", value);
         }
     }
 
@@ -495,8 +495,6 @@ namespace DCraft::Addons {
 
         return false;
     }
-
-
 
         std::string ModelLoader::capitalize_first(const std::string &str) {
         if (str.empty()) return str;
