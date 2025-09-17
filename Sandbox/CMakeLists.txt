@@ -1,4 +1,4 @@
-set(APP_NAME Sandbox)
+set(APP_NAME HellfireGame)
 file(GLOB_RECURSE APP_SOURCES "src/*.cpp")
 file(GLOB_RECURSE APP_HEADERS "include/*.h" "include/*.hpp")
 add_executable(${APP_NAME} ${APP_SOURCES} ${APP_HEADERS})
@@ -12,35 +12,18 @@ target_include_directories(${APP_NAME}
 # Link against DCraft Engine library
 target_link_libraries(${APP_NAME}
         PRIVATE
-        DCraft
+        HellfireEngine 
 )
 
 if (WIN32)
-    # Determine which DLLs to copy based on architecture
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)  # 64-bit
-        set(GLEW_DLL_PATH "${GLEW_ROOT_DIR}/bin/Release/x64/glew32.dll")
-        set(GLUT_DLL_PATH "${GLUT_ROOT_DIR}/bin/x64/freeglut.dll")
-    else ()  # 32-bit
-        set(GLEW_DLL_PATH "${GLEW_ROOT_DIR}/bin/Release/Win32/glew32.dll")
-        set(GLUT_DLL_PATH "${GLUT_ROOT_DIR}/bin/freeglut.dll")
-    endif ()
-    
-    # Copy the DLLs
-    add_custom_command(TARGET ${APP_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${GLEW_DLL_PATH}"
-            "${GLUT_DLL_PATH}"
-            $<TARGET_FILE_DIR:${APP_NAME}>
-    )
-    
-    # Create a directory junction
+    # Create a directory junction for assets
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove -f "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
         COMMAND cmd /c "mklink /J \"$<TARGET_FILE_DIR:${APP_NAME}>\\assets\" \"${CMAKE_CURRENT_SOURCE_DIR}\\assets\""
         COMMENT "Creating directory junction to assets directory"
     )
 else()
-    # Unix symlink
+    # Unix symlink for assets
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove -f "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
         COMMAND ${CMAKE_COMMAND} -E create_symlink
