@@ -10,11 +10,11 @@
 
 class InputHandler {
 public:
-    // InputHandler(DCraft::Application* application, CameraController* camera_controller);
+    // InputHandler(hellfire::Application* application, CameraController* camera_controller);
     void process(float delta_time);
 private:
     // CameraController* camera_controller_;
-    DCraft::Application* application_;
+    hellfire::Application* application_;
 };
 
 

@@ -5,7 +5,7 @@
 #include "DCraft/Components/ScriptComponent.h"
 #include <glm/detail/type_vec3.hpp>
 
-class PlayerController final : public DCraft::ScriptComponent {
+class PlayerController final : public hellfire::ScriptComponent {
 public:
     explicit PlayerController(float movement_speed = 5.0f, float mouse_sensitivity = 0.1f);
 
