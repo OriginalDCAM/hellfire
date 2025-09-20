@@ -64,25 +64,20 @@ if(NOT glew_POPULATED)
     )
 endif()
 
-# Fetch FreeGLUT
+# Fetch GLFW 
 FetchContent_Declare(
-        freeglut
-        GIT_REPOSITORY https://github.com/freeglut/freeglut.git
-        GIT_TAG v3.6.0
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG 3.4
 )
 
-# Configure FreeGLUT build options
-set(FREEGLUT_BUILD_DEMOS OFF CACHE BOOL "" FORCE)
-set(FREEGLUT_BUILD_STATIC_LIBS ON CACHE BOOL "" FORCE)
-set(FREEGLUT_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+# Configure GLFW build options
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
-# Suppress policy warnings from FreeGLUT
-set(CMAKE_WARN_DEPRECATED OFF)
-
-FetchContent_MakeAvailable(freeglut)
-
-# Re-enable warnings for your own code
-set(CMAKE_WARN_DEPRECATED ON)
+FetchContent_MakeAvailable(glfw)
 
 # Create GLM target from vendor directory
 add_library(GLM::GLM INTERFACE IMPORTED)
@@ -109,7 +104,7 @@ add_library(imgui STATIC
         ${IMGUI_DIR}/imgui_draw.cpp
         ${IMGUI_DIR}/imgui_tables.cpp
         ${IMGUI_DIR}/imgui_widgets.cpp
-        ${IMGUI_DIR}/backends/imgui_impl_glut.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
         ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 )
 
@@ -123,10 +118,18 @@ target_include_directories(imgui PUBLIC
 
 # Link against OpenGL, GLEW, and GLUT using the fetched libraries
 target_link_libraries(imgui PUBLIC
-        opengl32
         libglew_static  # GLEW static library from FetchContent
-        freeglut_static # FreeGLUT static library from FetchContent
+        glfw
+        ${CMAKE_DL_LIBS}
 )
+
+if(WIN32)
+    target_link_libraries(imgui PUBLIC opengl32)
+elseif(APPLE)
+    target_link_libraries(imgui PUBLIC "-framework OpenGL")
+else()
+    target_link_libraries(imgui PUBLIC GL)
+endif()
 
 # Assimp build options
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)

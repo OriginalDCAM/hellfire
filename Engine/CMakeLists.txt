@@ -22,7 +22,7 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(${LIBRARY_NAME}
         PUBLIC
         libglew_static
-        freeglut_static
+        glfw
         GLM::GLM
         OpenGL::GL
         imgui
