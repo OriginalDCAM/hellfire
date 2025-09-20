@@ -7,7 +7,7 @@
 
 #include "DCraft/Components/LightComponent.h"
 
-namespace DCraft {
+namespace hellfire {
     class PointLight {
     public:
         static Entity* create(const std::string& name = "PointLight",

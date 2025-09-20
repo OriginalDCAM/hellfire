@@ -5,7 +5,7 @@
 #include "DCraft/Components/RenderableComponent.h"
 #include "DCraft/Graphics/Mesh.h"
 
-namespace DCraft {
+namespace hellfire {
 // Static geometry data
     const std::vector<float> Cube::vertices_ = {
         // Front face (Z+)

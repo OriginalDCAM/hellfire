@@ -12,16 +12,16 @@
 #include "DCraft/Addons/ModelLoader.h"
 
 using json = nlohmann::json;
-using namespace DCraft;
+using namespace hellfire;
 
-namespace DCraft {
+namespace hellfire {
     class Light;
     class DirectionalLight;
     class Cameras;
     class SceneManager;
 
 }
-namespace DCraft {
+namespace hellfire {
     class ObjectDeserializer {
 
     };

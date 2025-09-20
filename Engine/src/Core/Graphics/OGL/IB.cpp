@@ -1,7 +1,6 @@
 #include "DCraft/Graphics/OGL/IB.h"
 
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 #include <cstdint>
 
 IB::IB()

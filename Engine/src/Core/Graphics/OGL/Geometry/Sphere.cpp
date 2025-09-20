@@ -6,7 +6,7 @@
 #include "DCraft/Components/RenderableComponent.h"
 #include "DCraft/Structs/Entity.h"
 
-namespace DCraft {
+namespace hellfire {
     Entity *Sphere::create(const std::string &name, const glm::vec3 &color, int rings, int sectors) {
         // Create the entity
         auto *entity = new Entity(name);

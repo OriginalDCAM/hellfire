@@ -6,7 +6,7 @@
 #include <iostream>
 #include <GL/glew.h>
 
-namespace DCraft {
+namespace hellfire {
     Framebuffer::Framebuffer(uint32_t width, uint32_t height, bool with_depth) : width_(width), height_(height),
         with_depth_(with_depth), framebuffer_id_(0), color_texture_(0), depth_texture_(0) {
         create_framebuffer();

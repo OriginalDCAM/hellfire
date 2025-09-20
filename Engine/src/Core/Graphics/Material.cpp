@@ -5,8 +5,9 @@
 #include "DCraft/Graphics/Materials/Material.h"
 
 #include "DCraft/Application.h"
+#include "DCraft/Utility/ServiceLocator.h"
 
-namespace DCraft {
+namespace hellfire {
     bool Material::is_transparent() const {
         float alpha = get_property<float>("uAlpha", 1.0f);
         float transparency = get_property<float>("uTransparency", 1.0f);
@@ -77,7 +78,7 @@ namespace DCraft {
             bind_base_properties(shader_program, texture_unit);
 
             for (const auto& [name, property] : overrides_) {
-                MaterialRenderer::bind_property_to_shader(property, shader_program, texture_unit);
+                MaterialManager::bind_property_to_shader(property, shader_program, texture_unit);
                 touched_uniforms_.insert(name);
             }
         } else {
@@ -96,7 +97,7 @@ namespace DCraft {
         for (const std::string& uniform_name : touched_uniforms_) {
             if (base_material_->has_property(uniform_name)) {
                 auto base_property = base_material_->get_property_object(uniform_name);
-                MaterialRenderer::bind_property_to_shader(base_property, shader_program, texture_unit);
+                MaterialManager::bind_property_to_shader(base_property, shader_program, texture_unit);
             }
         }
         touched_uniforms_.clear();
@@ -114,7 +115,7 @@ namespace DCraft {
 
     void Material::bind_all_properties(const uint32_t shader_program, int& texture_unit) const {
         for (const auto& [name, property] : properties_) {
-            MaterialRenderer::bind_property_to_shader(property, shader_program, texture_unit);
+            MaterialManager::bind_property_to_shader(property, shader_program, texture_unit);
         }
     }
 
@@ -224,7 +225,7 @@ namespace DCraft {
     }
 
     void MaterialBuilder::compile_shader_from_material(Material &material) {
-        auto shader_id = Application::get_instance().get_shader_manager().get_shader_for_material(material);
+        auto shader_id = ServiceLocator::get_service<ShaderManager>()->get_shader_for_material(material);
         material.set_compiled_shader_id(shader_id);
     }
 

@@ -6,7 +6,7 @@
 #include "DCraft/Structs/Component.h"
 #include "TransformComponent.h"
 
-namespace DCraft {
+namespace hellfire {
     enum class CameraType {
         PERSPECTIVE,
         ORTHOGRAPHIC

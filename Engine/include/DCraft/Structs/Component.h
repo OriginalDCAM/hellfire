@@ -3,7 +3,7 @@
 //
 
 #pragma once
-namespace DCraft {
+namespace hellfire {
     class Entity;
 
     class Component {
@@ -18,4 +18,4 @@ namespace DCraft {
     private:
         Entity* owner_ = nullptr;
     };
-} // namespace DCraft
+} // namespace hellfire

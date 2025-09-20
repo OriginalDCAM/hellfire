@@ -12,13 +12,13 @@
 #include "DCraft/Graphics/Materials/Material.h"
 
 
-namespace DCraft {
+namespace hellfire {
     class Entity;
     class Mesh;
     class Scene;
 }
 
-namespace DCraft::Addons {
+namespace hellfire::Addons {
     class ModelLoader {
     public:
         // Updated method signatures to include ShaderManager
@@ -89,6 +89,8 @@ namespace DCraft::Addons {
                                               TextureType dcr_type, Material &material,
                                               const std::string &property_name);
 
+        static std::shared_ptr<Texture> load_cached_texture(const std::string &path, TextureType type);
+
         // Utility methods
         static std::string create_mesh_key(aiMesh *mesh, const std::string &filepath);
 
@@ -106,5 +108,6 @@ namespace DCraft::Addons {
         // Caching
         static std::unordered_map<std::string, std::shared_ptr<Mesh> > mesh_cache;
         static std::unordered_map<std::string, std::shared_ptr<Material> > material_cache;
+        static std::unordered_map<std::string, std::shared_ptr<Texture> > texture_cache;
     };
 }

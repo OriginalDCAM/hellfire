@@ -6,12 +6,12 @@
 #include <cstdint>
 
 // Forward declarations
-namespace DCraft {
+namespace hellfire {
     class Entity;
     class CameraComponent;
 }
 
-namespace DCraft {
+namespace hellfire {
     class OGLRendererContext {
     public:
         uint32_t default_shader_program;

@@ -7,7 +7,7 @@
 
 
 // Forward declarations
-namespace DCraft {
+namespace hellfire {
     class CameraComponent;
     class Scene;
     class Camera;
@@ -16,7 +16,7 @@ namespace DCraft {
     class Entity;
 }
 
-namespace DCraft {
+namespace hellfire {
     class SceneManager {
     public:
         SceneManager();

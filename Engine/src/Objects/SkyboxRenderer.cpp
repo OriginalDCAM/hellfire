@@ -9,8 +9,9 @@
 #include "DCraft/Application.h"
 #include <GL/glew.h>
 #include "DCraft/Structs/Skybox.h"
+#include "DCraft/Utility/ServiceLocator.h"
 
-namespace DCraft {
+namespace hellfire {
     // skyboxes cube vertices
     float skyboxVertices[] = {
         // positions          
@@ -88,8 +89,7 @@ namespace DCraft {
     }
 
     void SkyboxRenderer::load_skybox_shader() {
-        // TODO: Make this more scalable
-        skybox_shader_ = Application::get_instance().get_shader_manager().load_shader_from_files(
+        skybox_shader_ = ServiceLocator::get_service<ShaderManager>()->load_shader_from_files(
             "assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
     }
 

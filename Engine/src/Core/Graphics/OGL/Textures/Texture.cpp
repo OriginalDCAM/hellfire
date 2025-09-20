@@ -5,17 +5,21 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <stb/stb_image.h>
 
+#include "assimp/code/Common/Win32DebugLogStream.h"
 #include "DCraft/Graphics/Materials/Material.h"
+#include "DCraft/Utility/TextureUtils.h"
 
-namespace DCraft {
+namespace hellfire {
     // Static cache for TextureCache
     std::unordered_map<std::string, std::weak_ptr<Texture> > TextureCache::cache_;
 
     TextureSettings TextureSettings::for_type(TextureType type) {
         TextureSettings settings;
 
+        settings.max_size = 1024;
         switch (type) {
             case TextureType::NORMAL:
                 settings.flip_vertically = true;
@@ -92,15 +96,34 @@ namespace DCraft {
 
         // Set STBI settings
         stbi_set_flip_vertically_on_load(settings_.flip_vertically);
-        int desired_channels = 0; 
+        int desired_channels = 0;
         if (type_ == TextureType::DIFFUSE) {
-            desired_channels = 3; 
-        } else if (type_ == TextureType::ROUGHNESS || type_ == TextureType::METALNESS || 
+            desired_channels = 3;
+        } else if (type_ == TextureType::ROUGHNESS || type_ == TextureType::METALNESS ||
                    type_ == TextureType::AMBIENT_OCCLUSION) {
-            desired_channels = 1; 
-                   }
+            desired_channels = 1;
+        }
 
         unsigned char *data = stbi_load(path_.c_str(), &width, &height, &nr_channels, desired_channels);
+
+        // Downscale texture if needed
+        // if (settings_.max_size > 0 && (width > settings_.max_size || height > settings_.max_size)) {
+        //     const int new_width = std::min(width, settings_.max_size);
+        //     const int new_height = std::min(height, settings_.max_size);
+        //
+        //     const bool use_srgb = (type_ != TextureType::NORMAL);
+        //
+        //     unsigned char *resized_data = resize_image(data, width, height, new_width, new_height, desired_channels,
+        //                                                use_srgb);
+        //
+        //     stbi_image_free(data);
+        //     data = resized_data;
+        //     width = new_width;
+        //     height = new_height;
+        //
+        //     std::cout << "Downscaled texture from " << width << "x" << height << " to " << new_width << "x" <<
+        //             new_height << std::endl;
+        // }
 
         if (desired_channels > 0) {
             nr_channels = desired_channels;
@@ -189,9 +212,9 @@ namespace DCraft {
         // Clean up and mark as valid
         stbi_image_free(data);
         is_valid_ = true;
-    
-        std::cout << "Successfully loaded texture: " << path_ 
-                  << " (" << width << "x" << height << ", " << nr_channels << " channels)" << std::endl;
+
+        std::cout << "Successfully loaded texture: " << path_
+                << " (" << width << "x" << height << ", " << nr_channels << " channels)" << std::endl;
     }
 
     bool Texture::is_valid() const {

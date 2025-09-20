@@ -6,7 +6,7 @@
 
 #include "GL/glew.h"
 
-namespace DCraft {
+namespace hellfire {
     class Texture;
     class Material;
 
@@ -43,6 +43,8 @@ namespace DCraft {
         TextureWrap wrap_t = TextureWrap::REPEAT;
         bool generate_mipmaps = true;
         bool flip_vertically = true;
+
+        int max_size = -1;
 
         static TextureSettings for_type(TextureType type);
     };

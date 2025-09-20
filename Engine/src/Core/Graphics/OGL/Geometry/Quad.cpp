@@ -5,7 +5,7 @@
 #include "DCraft/Components/RenderableComponent.h"
 #include "DCraft/Structs/Entity.h"
 
-namespace DCraft {
+namespace hellfire {
     const std::vector<float> Quad::vertices_ = {
         1.0, 1.0, 0.0, // top-right
         -1.0, 1.0, 0.0, // top-left

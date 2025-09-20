@@ -9,7 +9,7 @@
 #include "DCraft/Structs/Entity.h"
 #include "DCraft/Structs/Component.h"
 
-namespace DCraft {
+namespace hellfire {
     class TransformComponent;
 
     class ScriptComponent : public Component {

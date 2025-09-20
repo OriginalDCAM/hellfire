@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace DCraft::Utility {
+namespace hellfire::Utility {
 
     struct FileFilter {
         std::string name;
@@ -28,4 +28,4 @@ namespace DCraft::Utility {
                                           const std::vector<FileFilter>& filters);
     };
 
-} // namespace DCraft::Utility
+} // namespace hellfire::Utility

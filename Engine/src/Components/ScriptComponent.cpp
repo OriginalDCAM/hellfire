@@ -5,7 +5,7 @@
 #include <DCraft/Components/ScriptComponent.h>
 #include "DCraft/Components/TransformComponent.h"
 
-namespace DCraft {
+namespace hellfire {
     TransformComponent * ScriptComponent::get_transform() const {
         return get_owner() ? get_owner()->get_component<TransformComponent>() : nullptr;
     }

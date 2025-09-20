@@ -14,7 +14,7 @@
 #include "DCraft/Graphics/Renderers/SkyboxRenderer.h"
 #include "DCraft/Structs/Scene.h"
 
-namespace DCraft {
+namespace hellfire {
     Renderer::Renderer(uint32_t fallback_program_id) : shader_registry_(&shader_manager_), fallback_shader_(nullptr),
                                                        fallback_program_(fallback_program_id),
                                                        render_to_framebuffer_(false), framebuffer_width_(800),

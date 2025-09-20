@@ -9,13 +9,13 @@
 
 #include "DCraft/Graphics/Textures/Texture.h"
 
-namespace DCraft {
+namespace hellfire {
     class MaterialInstance;
     class Application;
     class ShaderManager;
 }
 
-namespace DCraft {
+namespace hellfire {
     class Material : public std::enable_shared_from_this<Material> {
     public:
         enum class PropertyType {

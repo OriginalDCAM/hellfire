@@ -6,7 +6,7 @@
 #include "DCraft/Components/LightComponent.h"
 #include "DCraft/Structs/Entity.h"
 
-namespace DCraft {
+namespace hellfire {
     class DirectionalLight {
     public:
         static Entity* create(const std::string& name = "DirectionalLight", 

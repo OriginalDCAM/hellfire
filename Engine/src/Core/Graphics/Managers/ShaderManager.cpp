@@ -1,6 +1,10 @@
 ﻿//
 // Created by denzel on 13/08/2025.
 //
+#ifdef _WIN32
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#endif
 
 #include "DCraft/Graphics/Managers/ShaderManager.h"
 
@@ -12,12 +16,12 @@
 #include "DCraft/Graphics/OGL/glsl.h"
 #include "DCraft/Graphics/Textures/Texture.h"
 
-
 #ifdef _WIN32
 #include <windows.h> // For GetModuleFileNameA and MAX_PATH
+#undef byte
 #endif
 
-namespace DCraft {
+namespace hellfire {
     std::string ShaderManager::process_includes(const std::string &source, const std::string &base_path) {
         std::string processed = source;
         std::regex include_regex("#include\\s+\"([^\"]+)\"");

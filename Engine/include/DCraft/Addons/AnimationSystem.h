@@ -8,7 +8,7 @@
 #include "DCraft/Components/LightComponent.h"
 #include "DCraft/Structs/Entity.h"
 
-namespace DCraft {
+namespace hellfire {
     class AnimationSystem {
     public:
         // Animation callback type
@@ -186,4 +186,4 @@ namespace DCraft {
     private:
         std::vector<Animation> animations_;
     };
-} // namespace DCraft
+} // namespace hellfire

@@ -9,7 +9,7 @@
 
 #include "DCraft/Graphics/Textures/Texture.h"
 
-namespace DCraft {
+namespace hellfire {
     class TextureManager {
     public:
         static TextureManager &get_instance();

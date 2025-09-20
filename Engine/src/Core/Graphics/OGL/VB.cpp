@@ -1,6 +1,5 @@
 #include "DCraft/Graphics/OGL/VB.h"
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 
 VB::VB()
 {

@@ -1,7 +1,7 @@
 ﻿//
 // Created by denzel on 13/08/2025.
 //
-#include "DCraft/Graphics/Materials/MaterialRenderer.h"
+#include "../../../../include/DCraft/Graphics/Managers/MaterialManager.h"
 
 #include <iostream>
 #include <glm/glm.hpp>
@@ -9,8 +9,8 @@
 
 #include "DCraft/Graphics/Materials/Material.h"
 
-namespace DCraft {
-    void MaterialRenderer::bind_material(const Material &material) {
+namespace hellfire {
+    void MaterialManager::bind_material(const Material &material) {
         uint32_t shader_program = material.get_compiled_shader_id();
         if (shader_program == 0) {
             std::cerr << "Warning: Material " << material.get_name() << " has no compiled shader!" << std::endl;
@@ -20,11 +20,11 @@ namespace DCraft {
         material.bind();
     }
 
-    void MaterialRenderer::bind_property_to_shader(const Material::Property &property, uint32_t shader_program, int &texture_unit) {
+    void MaterialManager::bind_property_to_shader(const Material::Property &property, uint32_t shader_program, int &texture_unit) {
         bind_property(property, shader_program, texture_unit);
     }
 
-    void MaterialRenderer::bind_property(const Material::Property &property, uint32_t shader_program,
+    void MaterialManager::bind_property(const Material::Property &property, uint32_t shader_program,
                                          int &texture_unit) {
         const std::string& uniform_name = property.uniform_name;
             
@@ -136,7 +136,7 @@ namespace DCraft {
         }
     }
 
-    std::string MaterialRenderer::create_use_flag(const std::string &uniform_name) {
+    std::string MaterialManager::create_use_flag(const std::string &uniform_name) {
         return "use" + uniform_name;
     }
 

@@ -13,7 +13,7 @@
 #include "DCraft/Structs/Entity.h"
 #include "GL/glew.h"
 
-namespace DCraft {
+namespace hellfire {
     class LightComponent : public Component {
     public:
         enum LightType {

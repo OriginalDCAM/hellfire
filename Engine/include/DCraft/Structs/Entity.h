@@ -10,13 +10,13 @@
 #include <vector>
 
 
-namespace DCraft {
+namespace hellfire {
     class TransformComponent;
     class Component;
     class ScriptComponent;
 }
 
-namespace DCraft {
+namespace hellfire {
     class Entity {
     public:
         virtual ~Entity() {
@@ -137,5 +137,5 @@ namespace DCraft {
     };
     
 #include "DCraft/Structs/Entity.inl"
-} // namespace DCraft
+} // namespace hellfire
 
