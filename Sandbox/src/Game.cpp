@@ -15,26 +15,16 @@
 void Game::setup_callbacks(hellfire::Application &app) {
     hellfire::ApplicationCallbacks application_callbacks;
 
-    application_callbacks.init = [this](hellfire::Application &app) { init(app); };
     application_callbacks.setup = [this](hellfire::SceneManager &sm, const hellfire::AppInfo &info,
                                          hellfire::ShaderManager &shader_manager) {
         setup(sm, info, shader_manager);
     };
-    application_callbacks.update = [this](float dt) { update(dt); };
-    application_callbacks.process_input = [this](hellfire::Application &app, float dt) {
-        handle_input(app, dt);
-    };
-    application_callbacks.on_mouse_moved = [this](float x_offset, float y_offset) {
+    application_callbacks.update = [this](const float dt) { update(dt); };
+    application_callbacks.on_mouse_moved = [this](const float x_offset, const float y_offset) {
         process_mouse_movement(x_offset, y_offset);
     };
 
     app.set_callbacks(application_callbacks);
-}
-
-void Game::init(hellfire::Application &app) {
-
-    
-    
 }
 
 void Game::on_scene_activated(hellfire::Scene *scene) const {
@@ -55,14 +45,15 @@ void Game::on_scene_activated(hellfire::Scene *scene) const {
     std::clog << "Activated scene: " << scene_name << "\n";
 }
 
-void Game::setup(hellfire::SceneManager &sm, hellfire::AppInfo window, hellfire::ShaderManager &shader_manager) {
+void Game::setup(hellfire::SceneManager &sm, const hellfire::AppInfo& window, hellfire::ShaderManager &shader_manager) {
     auto im = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
     im->set_cursor_mode(hellfire::HIDDEN); 
     
     scene_manager_ = &sm;
+    app_info_ = &window;
 
     // Scene loading with code behind
-    scenes_["BoatScene"] = load_sponza_scene(window);
+    scenes_["BoatScene"] = load_sponza_scene(*app_info_);
 
     // Set the initial active scene
     sm.set_active_scene(scenes_["BoatScene"]);
@@ -73,7 +64,7 @@ void Game::setup(hellfire::SceneManager &sm, hellfire::AppInfo window, hellfire:
     });
 }
 
-void Game::handle_input(hellfire::Application &app, float delta_time) {
+void Game::handle_input(float delta_time) {
     auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
 
     if (input_manager->is_key_pressed(GLFW_KEY_1)) {
@@ -81,7 +72,7 @@ void Game::handle_input(hellfire::Application &app, float delta_time) {
     }
     if (input_manager->is_key_pressed(GLFW_KEY_2)) {
         if (!scenes_["SolarSystem"]) // Lazy initialization
-            scenes_["SolarSystem"] = load_solar_system_scene(app.get_window_info());
+            scenes_["SolarSystem"] = load_solar_system_scene(*app_info_);
         
         scene_manager_->set_active_scene(scenes_["SolarSystem"]);
     }
@@ -108,7 +99,8 @@ void Game::process_mouse_movement(float x_offset, float y_offset) const {
     }
 }
 
-void Game::update(float delta_time) const {
+void Game::update(float delta_time) {
+    handle_input(delta_time);
     for (auto &scene: scenes_) {
         scene.second->update(delta_time);
     }

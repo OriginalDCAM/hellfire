@@ -218,8 +218,8 @@ namespace hellfire {
         if (!material) {
             return false; 
         }
-        const auto transparency = material->get_property<float>("transparency", 1.0f);
-        const auto alpha = material->get_property<float>("alpha", 1.0f);
+        const auto transparency = material->get_property<float>("uTransparency", 1.0f);
+        const auto alpha = material->get_property<float>("uAlpha", 1.0f);
         const bool use_transparency = material->get_property<bool>("useTransparency", false);
         return transparency < 1.0f || alpha < 1.0f || use_transparency;
     }

@@ -184,7 +184,7 @@ std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_icy_instanced_ma
     material->set_property("roughness", 0.1f);                          
     material->set_property("metallic", 0.0f);                           
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
-    material->set_property("transparency", 0.8f);
+    material->set_property("uTransparency", 0.8f);
     return material;
 }
 
