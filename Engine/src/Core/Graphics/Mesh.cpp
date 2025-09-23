@@ -86,8 +86,9 @@ namespace hellfire {
         if (!material) return;
         
         vao_->bind();
-
-        glPolygonMode(GL_FRONT_AND_BACK, is_wireframe ? GL_LINE : GL_FILL);
+        
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE ? GL_LINE : GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Always restore
 

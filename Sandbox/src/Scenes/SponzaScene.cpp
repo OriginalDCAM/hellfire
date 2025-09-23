@@ -19,7 +19,6 @@ hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
         "assets/models/shuttle/orbiter_space_shuttle_ov-103_discovery.glb");
     spaceshuttle_model->transform()->set_scale(0.1f);
     scene->add_entity(spaceshuttle_model);
-
     
     hellfire::Entity *spaceshuttle_model_1 = hellfire::Asset::load(
         "assets/models/shuttle/orbiter_space_shuttle_ov-103_discovery.glb");
@@ -45,11 +44,11 @@ hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
     // scene->add_entity(character_model);
 
 
-    // hellfire::Entity *city_model = hellfire::Asset::load("assets/models/city/city.glb");
-    // city_model->transform()->set_position(0, 0, 0);
-    // city_model->transform()->set_rotation(-90, 0, 0);
-    // city_model->transform()->set_scale(0.01);
-    // scene->add_entity(city_model);
+    hellfire::Entity *city_model = hellfire::Asset::load("assets/models/city/city.glb");
+    city_model->transform()->set_position(0, 0, 0);
+    city_model->transform()->set_rotation(-90, 0, 0);
+    city_model->transform()->set_scale(0.01);
+    scene->add_entity(city_model);
 
     // hellfire::Entity* water_plane = hellfire::Quad::create("Water Level", glm::vec3(0, 0, 0.5));
     // water_plane->transform()->set_scale(100);
@@ -64,7 +63,7 @@ hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
     auto *main_camera = hellfire::PerspectiveCamera::create("Main Camera", 70.0f, window.aspect_ratio, 0.1f, 1000.0f);
 
     main_camera->transform()->set_position(0.0f, 0.0f, 0.0f);
-    main_camera->add_component<PlayerController>(3.0f);
+    main_camera->add_component<PlayerController>(5.0f);
     scene->add_entity(main_camera);
     scene->set_active_camera(main_camera);
 

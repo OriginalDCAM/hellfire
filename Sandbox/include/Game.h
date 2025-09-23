@@ -29,8 +29,9 @@ private:
     hellfire::SceneManager *scene_manager_;
     std::unordered_map<std::string, hellfire::Scene *> scenes_;
     const hellfire::AppInfo* app_info_ = nullptr;
+    hellfire::Scene* active_scene_;
 
-    void on_scene_activated(hellfire::Scene *scene) const;
+    void on_scene_activated(hellfire::Scene *scene);
 };
 
 
