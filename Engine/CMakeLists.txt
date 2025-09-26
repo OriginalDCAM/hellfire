@@ -2,7 +2,7 @@ set(LIBRARY_NAME HellfireEngine)
 
 # Collect source files
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
+file(GLOB_RECURSE HEADERS "src/*.h" "src/*.hpp")
 
 # Create the library
 add_library(${LIBRARY_NAME} ${SOURCES} ${HEADERS})
@@ -10,7 +10,7 @@ add_library(${LIBRARY_NAME} ${SOURCES} ${HEADERS})
 # Set include directories
 target_include_directories(${LIBRARY_NAME}
         PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include>
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -45,7 +45,7 @@ endif()
 # Set Visual Studio folder structure
 if (MSVC)
     source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${SOURCES})
-    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${HEADERS})
+    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Header Files" FILES ${HEADERS})
 endif ()
 
 install(TARGETS ${LIBRARY_NAME}
@@ -53,10 +53,10 @@ install(TARGETS ${LIBRARY_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin
-        INCLUDES DESTINATION include
+        INCLUDES DESTINATION src
 )
 
 install(
-        DIRECTORY include/
-        DESTINATION include
+        DIRECTORY src/
+        DESTINATION src
 )
