@@ -3,11 +3,11 @@
 //
 
 #include "Utils/AnimationInputHandler.h"
-#include "DCraft/Application.h"
+#include "../../../Engine/src/hellfire/core/Application.h"
 #include <iostream>
 #include <algorithm>
 
-#include "DCraft/Utility/ServiceLocator.h"
+#include "hellfire/utilities/ServiceLocator.h"
 #include "Utils/InputHandler.h"
 
 void AnimationInputHandler::register_orbit_controller(OrbitController* controller) {

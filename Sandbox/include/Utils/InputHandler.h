@@ -5,7 +5,7 @@
 #ifndef INPUTHANDLER_H
 #define INPUTHANDLER_H
 // #include "CameraController.h"
-#include "DCraft.h"
+#include "hellfire-core.h"
 
 
 class InputHandler {
