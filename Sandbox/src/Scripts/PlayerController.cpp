@@ -4,8 +4,10 @@
 
 #include "Scripts/PlayerController.h"
 
-#include "DCraft/Application.h"
-#include "DCraft/Components/CameraComponent.h"
+#include "../../../Engine/src/hellfire/core/Application.h"
+#include "hellfire/ecs/CameraComponent.h"
+#include "hellfire/utilities/ServiceLocator.h"
+#include "GLFW/glfw3.h"
 
 PlayerController::PlayerController(float movement_speed, float mouse_sensitivity) 
     : movement_speed_(movement_speed), mouse_sensitivity_(mouse_sensitivity) {
@@ -31,7 +33,7 @@ void PlayerController::handle_drone_mode(float delta_time) {
     
     time_since_last_v_press += delta_time;
     
-    if (DCraft::Application::get_instance().is_key_pressed('v') && time_since_last_v_press > 1.0f) {
+    if (hellfire::ServiceLocator::get_service<hellfire::InputManager>()->is_key_pressed('v') && time_since_last_v_press > 1.0f) {
         time_since_last_v_press = 0.0f;
         
         if (drone_mode_) {
@@ -62,7 +64,7 @@ void PlayerController::save_free_flight_position() {
 
 void PlayerController::restore_free_flight_position() {
     auto* transform = get_transform();
-    auto* camera = get_component<DCraft::CameraComponent>();
+    auto* camera = get_component<hellfire::CameraComponent>();
     if (!transform || !camera) return;
     
     transform->set_position(last_known_player_position);
@@ -73,7 +75,7 @@ void PlayerController::restore_free_flight_position() {
 
 void PlayerController::set_drone_overview_position() {
     auto* transform = get_transform();
-    auto* camera = get_component<DCraft::CameraComponent>();
+    auto* camera = get_component<hellfire::CameraComponent>();
     if (!transform || !camera) return;
 
     // Above Jupiter
@@ -90,20 +92,20 @@ void PlayerController::set_drone_overview_position() {
 }
 
 void PlayerController::handle_keyboard_look(float delta_time) {
-    auto& app = DCraft::Application::get_instance();
+    auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
     
     set_float("look_speed", 45.0f);
     
-    if (app.is_key_pressed('j')) { // Look left
+    if (input_manager->is_key_pressed(GLFW_KEY_J)) { // Look left
         yaw_ -= get_float("look_speed") * delta_time;
     }
-    if (app.is_key_pressed('l')) { // Look right
+    if (input_manager->is_key_pressed(GLFW_KEY_L)) { // Look right
         yaw_ += get_float("look_speed") * delta_time;
     }
-    if (app.is_key_pressed('i')) { // Look up
+    if (input_manager->is_key_pressed(GLFW_KEY_I)) { // Look up
         pitch_ += get_float("look_speed") * delta_time;
     }
-    if (app.is_key_pressed('k')) { // Look down
+    if (input_manager->is_key_pressed(GLFW_KEY_K)) { // Look down
         pitch_ -= get_float("look_speed") * delta_time;
     }
     
@@ -115,39 +117,39 @@ void PlayerController::handle_keyboard_look(float delta_time) {
 }
 
 void PlayerController::handle_movement(float delta_time) const {
-    auto &app = DCraft::Application::get_instance();
-    auto *camera = get_component<DCraft::CameraComponent>();
+    auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
+    auto *camera = get_component<hellfire::CameraComponent>();
     if (!camera) return;
 
     glm::vec3 movement_direction(0.0f);
 
-    // Full 3D movement (perfect for space/drone mode)
-    if (app.is_key_pressed('w')) {
+    // Full 3D movement 
+    if (input_manager->is_key_pressed(GLFW_KEY_W)) {
         movement_direction += camera->get_front_vector(); 
     }
-    if (app.is_key_pressed('s')) {
+    if (input_manager->is_key_pressed(GLFW_KEY_S)) {
         movement_direction -= camera->get_front_vector(); 
     }
-    if (app.is_key_pressed('a')) {
+    if (input_manager->is_key_pressed(GLFW_KEY_A)) {
         movement_direction -= camera->get_right_vector();
     }
-    if (app.is_key_pressed('d')) {
+    if (input_manager->is_key_pressed(GLFW_KEY_D)) {
         movement_direction += camera->get_right_vector();
     }
-    if (app.is_key_pressed('q')) {
+    if (input_manager->is_key_pressed(GLFW_KEY_Q)) {
         movement_direction -= camera->get_up_vector(); 
     }
-    if (app.is_key_pressed('e')) {
+    if (input_manager->is_key_pressed(GLFW_KEY_E)) {
         movement_direction += camera->get_up_vector();
     }
 
     float current_speed = movement_speed_;
-    if (app.is_shift_pressed()) {
-        current_speed *= 3.0f; 
-    }
-    if (app.is_ctrl_pressed()) {
-        current_speed *= 0.3f; 
-    }
+    // if (input_manager.is_shift_pressed()) {
+    //     current_speed *= 3.0f; 
+    // }
+    // if (input_manager.is_ctrl_pressed()) {
+    //     current_speed *= 0.3f; 
+    // }
 
     // Normalize movement direction
     if (glm::length(movement_direction) > 0.0f) {
@@ -155,7 +157,7 @@ void PlayerController::handle_movement(float delta_time) const {
     }
 
     // Apply movement to transform
-    if (DCraft::TransformComponent *transform = get_transform()) {
+    if (hellfire::TransformComponent *transform = get_transform()) {
         glm::vec3 current_position = transform->get_position();
         glm::vec3 new_position = current_position + movement_direction * current_speed * delta_time;
         transform->set_position(new_position.x, new_position.y, new_position.z);
@@ -184,7 +186,7 @@ void PlayerController::handle_mouse_movement(float x_offset, float y_offset) {
 }
 
 void PlayerController::update_camera_orientation() const {
-    auto *camera = get_component<DCraft::CameraComponent>();
+    auto *camera = get_component<hellfire::CameraComponent>();
     if (!camera) return;
 
     // Update camera's internal vectors by setting yaw/pitch directly

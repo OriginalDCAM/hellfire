@@ -5,9 +5,9 @@
 #include <glm/detail/type_vec.hpp>
 #include <glm/detail/type_vec3.hpp>
 
-#include "DCraft/Components/ScriptComponent.h"
+#include "hellfire/ecs/ScriptComponent.h"
 
-class OrbitController : public DCraft::ScriptComponent {
+class OrbitController : public hellfire::ScriptComponent {
 public:
     OrbitController(float orbit_radius = 10.0f, float orbit_speed = 2.0f, float rotation_speed = 2.0f) 
         : orbit_radius_(orbit_radius), orbit_speed_(orbit_speed), rotation_speed_(rotation_speed) {}
