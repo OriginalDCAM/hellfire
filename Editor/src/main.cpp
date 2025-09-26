@@ -2,10 +2,10 @@
 // Created by denzel on 17/09/2025.
 //
 
-#include "DCraft/Application.h"
+#include "../../Engine/src/hellfire/core/Application.h"
 
 #ifdef HELLFIRE_EDITOR_ENABLED
-#include "EditorPlugin.h"
+#include "CoreEditorPlugin.h"
 #endif
 
 int main() {
@@ -13,7 +13,7 @@ int main() {
 
 #ifdef HELLFIRE_EDITOR_ENABLED
     // Register editor plugin
-    app.register_plugin(std::make_unique<hellfire::editor::EditorPlugin>());
+    app.register_plugin(std::make_unique<hellfire::editor::CoreEditorPlugin>());
 #endif
 
     app.initialize();
