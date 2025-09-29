@@ -4,68 +4,39 @@
 
 #include "Scenes/SponzaScene.h"
 
-#include "../../../Engine/src/hellfire/core/Application.h"
-#include "hellfire/assets/Asset.h"
-#include "../../../Engine/src/hellfire/scene/CameraFactory.h"
-#include "hellfire/graphics/Geometry/Quad.h"
-#include "hellfire/graphics/lighting/DirectionalLight.h"
-#include "../../../Engine/src/hellfire/scene/Scene.h"
-#include "../../../Engine/src/hellfire/graphics/Skybox.h"
-#include "Scripts/PlayerController.h"
+#include "hellfire-core.h"
 
 hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
-    auto *scene = new hellfire::Scene("Sponza Scene");
-    hellfire::Entity *spaceshuttle_model = hellfire::Asset::load(
+    const auto scene = new hellfire::Scene("Sponza Scene");
+    hellfire::EntityID spaceshuttle_model_id = hellfire::Asset::load(scene, 
         "assets/models/shuttle/orbiter_space_shuttle_ov-103_discovery.glb");
-    spaceshuttle_model->transform()->set_scale(0.1f);
-    scene->add_entity(spaceshuttle_model);
+    auto* spaceshuttle_one = scene->get_entity(spaceshuttle_model_id);
+    spaceshuttle_one->transform()->set_scale(0.1f);
+
     
-    hellfire::Entity *spaceshuttle_model_1 = hellfire::Asset::load(
+    hellfire::EntityID spaceshuttle_model_id_two = hellfire::Asset::load(scene, 
         "assets/models/shuttle/orbiter_space_shuttle_ov-103_discovery.glb");
-    spaceshuttle_model_1->transform()->set_scale(0.1f);
-    spaceshuttle_model_1->transform()->set_position(0,20,0);
-    scene->add_entity(spaceshuttle_model_1);
-
-    hellfire::Entity *spaceshuttle_model_2 = hellfire::Asset::load(
-        "assets/models/shuttle/orbiter_space_shuttle_ov-103_discovery.glb");
-    spaceshuttle_model_2->transform()->set_scale(0.1f);
-    spaceshuttle_model_2->transform()->set_position(10,10,0);
-    scene->add_entity(spaceshuttle_model_2);
-
-    // hellfire::Entity *backpack_model = hellfire::Asset::load("assets/models/backpack/survival_guitar_backpack.glb");
-    // backpack_model->transform()->set_position(30, 1, 30);
-    // backpack_model->transform()->set_scale(0.1f);
-    // scene->add_entity(backpack_model);
-
-    // hellfire::Entity *character_model = hellfire::Asset::load("assets/models/guy/scene.gltf");
-    // character_model->transform()->set_position(0.9, 0, 0);
-    // character_model->transform()->set_scale(0.1f);
-    // character_model->transform()->set_rotation(-90, 0, 0);
-    // scene->add_entity(character_model);
-
-
-    hellfire::Entity *city_model = hellfire::Asset::load("assets/models/city/city.glb");
+    auto* spaceshuttle_two = scene->get_entity(spaceshuttle_model_id_two);
+    spaceshuttle_two->transform()->set_scale(0.1f);
+    spaceshuttle_two->transform()->set_position(0,20,0);
+    
+    
+    hellfire::EntityID city_model_id = hellfire::Asset::load(scene, "assets/models/city/city.glb");
+    auto* city_model = scene->get_entity(city_model_id);
     city_model->transform()->set_position(0, 0, 0);
     city_model->transform()->set_rotation(-90, 0, 0);
     city_model->transform()->set_scale(0.01);
-    scene->add_entity(city_model);
 
-    // hellfire::Entity* water_plane = hellfire::Quad::create("Water Level", glm::vec3(0, 0, 0.5));
-    // water_plane->transform()->set_scale(100);
-    // water_plane->transform()->set_position(0, -7, 0);
-    // scene->add_entity(water_plane);
-
-    auto *sunlight = hellfire::DirectionalLight::create("Sol Light", glm::vec3(-0.22f, -1.0f, 0.0f), glm::vec3(1.0f),
-                                                      1.2f);
-    sunlight->get_component<hellfire::LightComponent>()->set_intensity(1.2f);
-    scene->add_entity(sunlight);
-
-    auto *main_camera = hellfire::PerspectiveCamera::create("Main Camera", 70.0f, window.aspect_ratio, 0.1f, 1000.0f);
-
-    main_camera->transform()->set_position(0.0f, 0.0f, 0.0f);
-    main_camera->add_component<PlayerController>(5.0f);
-    scene->add_entity(main_camera);
-    scene->set_active_camera(main_camera);
+    hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(scene, "Sol Light", glm::vec3(-0.22f, 1.0f, 0.0f), glm::vec3(1.0f), 1.3f);
+    
+    // Camera
+    hellfire::EntityID camera_id = hellfire::PerspectiveCamera::create(
+        scene, "Main Camera", 70.0f, window.aspect_ratio, 0.1f, 1000.0f,
+        glm::vec3(10.0f, 5.0f, 0.0f)
+    );
+    hellfire::Entity *camera = scene->get_entity(camera_id);
+    camera->add_component<PlayerController>(10.0f);
+    scene->set_active_camera(camera_id);
 
     auto *skybox = new hellfire::Skybox();
     skybox->set_cubemap_faces({

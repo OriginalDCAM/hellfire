@@ -13,14 +13,13 @@ namespace hellfire {
     class Camera;
     class ObjectDeserializer;
     class ObjectSerializer;
-    class Entity;
+    using EntityID = uint32_t;
 }
 
 namespace hellfire {
     class SceneManager {
     public:
         SceneManager();
-
         ~SceneManager();
 
         // Setup callback for when a scene is activated
@@ -46,20 +45,17 @@ namespace hellfire {
 
         Scene *create_scene(const std::string &name = "GameScene");
 
-        Entity *find_entity_by_name(const std::string &name);
+        EntityID find_entity_by_name(const std::string &name);
 
         // Accessor to objects
-        std::vector<Camera *> get_cameras() const;
-
-        void set_active_camera(Entity *camera) const;
-
+        void set_active_camera(EntityID camera) const;
         CameraComponent *get_active_camera() const;
 
         void set_active_scene(Scene *scene);
 
         void set_active_scene(const std::shared_ptr<Scene> &scene);
 
-        std::vector<Entity *> get_camera_entities() const;
+        std::vector<EntityID> get_camera_entities() const;
 
         Scene *get_active_scene() const {
             if (!active_scene_) return nullptr;
@@ -70,9 +66,6 @@ namespace hellfire {
     private:
         std::vector<Scene*> scenes_;
         Scene *active_scene_;
-
-        // std::unique_ptr<ObjectDeserializer> object_deserializer_;
-        // std::unique_ptr<ObjectSerializer> object_serializer_;
 
         // Helper methods
         SceneActivatedCallback scene_activated_callback_;

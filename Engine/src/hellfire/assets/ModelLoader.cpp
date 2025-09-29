@@ -8,6 +8,8 @@
 #include "assimp/Importer.hpp"
 #include "hellfire/ecs/RenderableComponent.h"
 #include "../ecs/Entity.h"
+#include "hellfire/ecs/components/MeshComponent.h"
+#include "hellfire/scene/Scene.h"
 
 namespace fs = std::filesystem;
 
@@ -19,7 +21,7 @@ namespace hellfire::Addons {
     std::unordered_map<std::string, std::shared_ptr<Material> > ModelLoader::material_cache;
     std::unordered_map<std::string, std::shared_ptr<Texture> > ModelLoader::texture_cache;
 
-    std::unique_ptr<Entity> ModelLoader::load_model(const std::filesystem::path &filepath, unsigned int import_flags) {
+    EntityID ModelLoader::load_model(Scene *scene, const std::filesystem::path &filepath, unsigned int import_flags) {
         auto start_time = std::chrono::high_resolution_clock::now();
         std::cout << "Loading model: " << filepath << std::endl;
 
@@ -31,24 +33,24 @@ namespace hellfire::Addons {
         }
 
         // Parse model file
-        const aiScene *scene = importer.ReadFile(filepath.string(), import_flags);
+        const aiScene *ai_scene = importer.ReadFile(filepath.string(), import_flags);
 
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        if (!ai_scene || ai_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !ai_scene->mRootNode) {
             std::cerr << "ModelLoader: Cannot load " << filepath << " - "
                     << importer.GetErrorString() << std::endl;
-            return nullptr;
+            return 0;
         }
 
         // Debug information
 #if MODEL_LOADER_DEBUG
-        debug_scene_info(scene, filepath.string());
+        debug_scene_info(ai_scene, filepath.string());
 #endif
 
         // Pre-process materials for caching
-        preprocess_materials(scene, filepath.string());
+        preprocess_materials(ai_scene, filepath.string());
 
         // Process the scene
-        std::unique_ptr<Entity> imported_model = process_node(scene->mRootNode, scene, filepath.string());
+        EntityID imported_model = process_node(scene, ai_scene->mRootNode, ai_scene, filepath.string());
 
         auto end_time = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
@@ -119,47 +121,84 @@ namespace hellfire::Addons {
         return to;
     }
 
-    std::unique_ptr<Entity> ModelLoader::process_node(aiNode *node, const aiScene *scene, const std::string &filepath) {
-        std::unique_ptr<Entity> entity = std::make_unique<Entity>(node->mName.C_Str());
+    EntityID ModelLoader::process_node(Scene *scene, aiNode *node, const aiScene *ai_scene, const std::string &filepath,
+                                       EntityID parent_id) {
+    EntityID entity_id = scene->create_entity(node->mName.C_Str());
+    Entity* entity = scene->get_entity(entity_id);
 
-        glm::mat4 transform = aiMatrix4x4ToGlm(node->mTransformation);
+    // Apply transform
+    glm::mat4 transform = aiMatrix4x4ToGlm(node->mTransformation);
+    glm::vec3 translation, scale, skew;
+    glm::quat rotation;
+    glm::vec4 perspective;
+    glm::decompose(transform, scale, rotation, translation, skew, perspective);
 
-        // Extract the transformation data from the transform matrix
-        glm::vec3 translation, scale, skew;
-        glm::quat rotation;
-        glm::vec4 perspective;
-        glm::decompose(transform, scale, rotation, translation, skew, perspective);
+    entity->transform()->set_position(translation);
+    entity->transform()->set_scale(scale);
+    entity->transform()->set_rotation(rotation);
 
-        entity->transform()->set_position(translation);
-        entity->transform()->set_scale(scale);
-        entity->transform()->set_rotation(rotation);
+    if (parent_id != 0) {
+        scene->set_parent(entity_id, parent_id);
+    }
 
-        // Process meshes
-        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            unsigned int mesh_index = node->mMeshes[i];
-            aiMesh *mesh = scene->mMeshes[mesh_index];
-
-            std::shared_ptr<Mesh> processed_mesh = process_mesh(mesh, scene, filepath);
-
-            if (node->mNumMeshes == 1) {
-                auto renderable_component = entity->add_component<RenderableComponent>();
-                renderable_component->set_mesh(processed_mesh);
+    // Process meshes
+    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+        unsigned int mesh_index = node->mMeshes[i];
+        aiMesh* ai_mesh = ai_scene->mMeshes[mesh_index];
+        
+        // Process mesh (no material)
+        std::shared_ptr<Mesh> processed_mesh = process_mesh(ai_mesh, ai_scene, filepath);
+        
+        // Get material separately
+        std::shared_ptr<Material> material = nullptr;
+        if (ai_mesh->mMaterialIndex >= 0) {
+            const aiMaterial* ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
+            std::string material_key = create_material_key(ai_material, filepath, ai_mesh->mMaterialIndex);
+            
+            auto cached_material = material_cache.find(material_key);
+            if (cached_material != material_cache.end()) {
+                material = cached_material->second;
             } else {
-                // Multiple meshes: create child entity for each mesh
-                std::string mesh_name = mesh->mName.length > 0 ? mesh->mName.C_Str() : ("Mesh_" + std::to_string(i));
-                std::unique_ptr<Entity> mesh_entity = std::make_unique<Entity>(mesh_name);
-                const auto renderable_component = mesh_entity->add_component<RenderableComponent>();
-                renderable_component->set_mesh(processed_mesh);
-                entity->add(mesh_entity.release());
+                material = create_material(ai_material, ai_scene, filepath);
+                material_cache[material_key] = material;
             }
         }
 
-        for (unsigned int child_index = 0; child_index < node->mNumChildren; child_index++) {
-            std::unique_ptr<Entity> child = process_node(node->mChildren[child_index], scene, filepath);
-            entity->add(child.release());
-        }
+        if (node->mNumMeshes == 1) {
+            // Single mesh: add components to this entity
+            auto* mesh_comp = entity->add_component<MeshComponent>();
+            mesh_comp->set_mesh(processed_mesh);
 
-        return entity;
+            auto* renderable = entity->add_component<RenderableComponent>();
+            if (material) {
+                renderable->set_material(material);
+            }
+        } else {
+            // Multiple meshes: create child entity for each
+            std::string mesh_name = ai_mesh->mName.length > 0 ? 
+                ai_mesh->mName.C_Str() : ("Mesh_" + std::to_string(i));
+
+            EntityID child_id = scene->create_entity(mesh_name);
+            Entity* child = scene->get_entity(child_id);
+
+            auto* mesh_comp = child->add_component<MeshComponent>();
+            mesh_comp->set_mesh(processed_mesh);
+
+            auto* renderable = child->add_component<RenderableComponent>();
+            if (material) {
+                renderable->set_material(material);
+            }
+
+            scene->set_parent(child_id, entity_id);
+        }
+    }
+
+    // Process children recursively
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+        process_node(scene, node->mChildren[i], ai_scene, filepath, entity_id);
+    }
+
+    return entity_id;
     }
 
     void ModelLoader::process_mesh_vertices(aiMesh *mesh, std::vector<Vertex> &vertices,
@@ -229,37 +268,24 @@ namespace hellfire::Addons {
     }
 
     std::shared_ptr<Mesh> ModelLoader::process_mesh(aiMesh *mesh, const aiScene *scene, const std::string &filepath) {
-        // create a mesh key and try to find it in cache
+        // Create mesh key and check cache
         std::string mesh_key = create_mesh_key(mesh, filepath);
         auto cached = mesh_cache.find(mesh_key);
         if (cached != mesh_cache.end()) {
             std::cout << "Using cached mesh: " << mesh_key << std::endl;
-            return mesh_cache[mesh_key];
+            return cached->second;
         }
 
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-
         process_mesh_vertices(mesh, vertices, indices);
 
+        // Create mesh WITHOUT material
         auto processed_mesh = std::make_shared<Mesh>(vertices, indices);
-
-        if (mesh->mMaterialIndex >= 0) {
-            const aiMaterial *ai_material = scene->mMaterials[mesh->mMaterialIndex];
-            std::string material_key = create_material_key(ai_material, filepath, mesh->mMaterialIndex);
-
-            auto cached_material = material_cache.find(material_key);
-            if (cached_material != material_cache.end()) {
-                // Use cached material
-                processed_mesh->set_material(cached_material->second);
-            } else {
-                // Fallback to creating material 
-                auto material = create_material(ai_material, scene, filepath);
-                processed_mesh->set_material(material);
-            }
-        }
-
+    
+        // Cache the mesh
         mesh_cache[mesh_key] = processed_mesh;
+    
         return processed_mesh;
     }
 
@@ -400,7 +426,7 @@ namespace hellfire::Addons {
 
             if (!scene || texture_index >= static_cast<int>(scene->mNumTextures)) {
                 std::cerr << "Embedded texture index " << texture_index << " is out of range! Scene has "
-                        << (scene ? scene->mNumTextures  : 0) << " embedded textures" << std::endl;
+                        << (scene ? scene->mNumTextures : 0) << " embedded textures" << std::endl;
                 return false;
             }
 

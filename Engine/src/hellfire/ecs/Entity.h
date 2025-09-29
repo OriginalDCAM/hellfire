@@ -17,30 +17,20 @@ namespace hellfire {
 }
 
 namespace hellfire {
+    using EntityID = uint32_t;
+    
     class Entity {
     public:
-        virtual ~Entity() {
-            cleanup_scripts();
+        virtual ~Entity() = default;
 
-            for (const auto *child: children_) {
-                std::clog << "Deleting child named: " << child->get_name() << ", from the parent: " << get_name() <<
-                        '\n';
-                delete child;
-            }
+        explicit Entity(EntityID id, const std::string &name)
+            : id_(id), name_(name) {
         }
 
-        explicit Entity(const std::string &name);
-
-
-        // Add an entity component
-        void add(Entity *child);
-
-        void remove(Entity *child);
-
-        // Getters
+        // Identification
+        [[nodiscard]] uint32_t get_id() const { return id_; }
         [[nodiscard]] const std::string &get_name() const { return name_; }
-        [[nodiscard]] const std::vector<Entity *> &get_children() const { return children_; }
-        [[nodiscard]] Entity *get_parent() const { return parent_; }
+        void set_name(const std::string &name) { name_ = name; }
 
         // Component management
         template<typename T, typename... Args>
@@ -57,85 +47,32 @@ namespace hellfire {
         template<typename T>
         bool remove_component();
 
+        // Script management
         [[nodiscard]] const std::vector<ScriptComponent *> &get_script_components() const;
 
-        void setup_recursive() {
-            if (!initialized_) {
-                setup();
-            }
-        }
-
-        // Recursive cleanup method
-        void cleanup_recursive() {
-            // Cleanup children first
-            for (auto *child: children_) {
-                child->cleanup_recursive();
-            }
-
-            // Then cleanup self
-            cleanup_scripts();
-            initialized_ = false;
-        }
-
-        void setup_children_recursive() const {
-            for (auto *child: children_) {
-                child->setup_recursive();
-            }
-        }
-
-        void update_children_recursive(const float delta_time) const {
-            for (auto *child: children_) {
-                child->update(delta_time);
-            }
-        }
-
-        // Lifecycle management
-        virtual void setup() {
-            initialize_scripts();
-            initialized_ = true;
-
-            setup_children_recursive();
-        }
-
-        virtual void update(const float delta_time) {
-            update_scripts(delta_time);
-
-            update_children_recursive(delta_time);
-        }
-
-        void update_world_matrices() const;
-
-        // Script specific methods
         void initialize_scripts() const;
 
-        void update_scripts(const float delta_time) const;
+        void update_scripts(float delta_time) const;
 
         void cleanup_scripts() const;
 
-        // Event broadcasting to all script components
-        void broadcast_event(const std::string &event_name, void *data = nullptr, const bool recursive = false) const;
+        // Event system (non-recursive)
+        void broadcast_event(const std::string &event_name, void *data = nullptr) const;
 
-        // Send event to a specific script component type
         template<typename T>
-        void send_event_to_script(const std::string &event_name, void *data = nullptr, const bool recursive = false);
+        void send_event_to_script(const std::string &event_name, void *data = nullptr);
 
-        // Setters
-        void set_name(const std::string &name) { name_ = name; }
-
-        // Convenience methods for transform
+        // Convenience methods
         TransformComponent *transform();
 
         [[nodiscard]] const TransformComponent *transform() const;
 
     private:
-        std::unordered_map<std::type_index, std::unique_ptr<Component> > components_;
-        std::vector<Entity *> children_;
-        std::vector<ScriptComponent *> script_components_;
-        Entity *parent_ = nullptr;
+        EntityID id_;
         std::string name_;
-        bool initialized_ = false;
+        std::unordered_map<std::type_index, std::unique_ptr<Component> > components_;
+        std::vector<ScriptComponent *> script_components_;
     };
-    
+
 #include "Entity.inl"
 } // namespace hellfire
-
