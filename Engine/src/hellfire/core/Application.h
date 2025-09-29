@@ -1,5 +1,7 @@
 // Application.h
 #pragma once
+#include <complex.h>
+
 #include "../platform/IWindow.h"
 #include "../scene/SceneManager.h"
 #include "../graphics/renderer/Renderer.h"
@@ -35,7 +37,7 @@ namespace hellfire {
         bool first_mouse = true;
 
         MousePos mouse_pos;
-        bool should_warp_cursor = false;
+        bool should_warp_cursor = true;
     };
 
     class Application : public IWindowEventHandler {
