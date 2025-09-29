@@ -213,8 +213,8 @@ namespace hellfire {
         stbi_image_free(data);
         is_valid_ = true;
 
-        std::cout << "Successfully loaded texture: " << path_
-                << " (" << width << "x" << height << ", " << nr_channels << " channels)" << std::endl;
+        // std::cout << "Successfully loaded texture: " << path_
+        //         << " (" << width << "x" << height << ", " << nr_channels << " channels)" << std::endl;
     }
 
     bool Texture::is_valid() const {
