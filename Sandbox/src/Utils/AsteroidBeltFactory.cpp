@@ -10,75 +10,95 @@
 #include "hellfire/assets/Asset.h"
 #include "hellfire/ecs/InstancedRenderableComponent.h"
 #include "hellfire/ecs/RenderableComponent.h"
+#include "hellfire/ecs/components/MeshComponent.h"
+#include "hellfire/scene/SceneManager.h"
+#include "hellfire/utilities/ServiceLocator.h"
 
-hellfire::Entity * AsteroidBeltFactory::create_asteroid_belt(const size_t quantity) {
+hellfire::EntityID AsteroidBeltFactory::create_asteroid_belt(hellfire::Scene *scene, const size_t quantity) {
     // Load all asteroid types
-    const std::vector materials = {
+    std::vector<hellfire::EntityID> model_ids = {
+        hellfire::Asset::load(scene, "assets/models/asteroid_normal.obj"),
+        hellfire::Asset::load(scene, "assets/models/asteroid_metal_big.obj"),
+        hellfire::Asset::load(scene, "assets/models/asteroid_rocky.obj"),
+        hellfire::Asset::load(scene, "assets/models/asteroid_crystal.obj"),
+        hellfire::Asset::load(scene, "assets/models/asteroid_less_rocky.obj")
+    };
+
+    // Helper function to extract mesh
+    auto extract_mesh = [scene](hellfire::EntityID entity_id) -> std::shared_ptr<hellfire::Mesh> {
+        std::shared_ptr<hellfire::Mesh> mesh = nullptr;
+        std::function<void(hellfire::EntityID)> find_mesh = [&](hellfire::EntityID id) {
+            if (mesh) return;
+
+            hellfire::Entity* entity = scene->get_entity(id);
+            if (!entity) return;
+
+            auto* mesh_comp = entity->get_component<hellfire::MeshComponent>();
+            if (mesh_comp && mesh_comp->has_mesh()) {
+                mesh = mesh_comp->get_mesh();
+            }
+            
+            // Search children
+            for (hellfire::EntityID child_id : scene->get_children(id)) {
+                find_mesh(child_id);
+            }
+        };
+        
+        find_mesh(entity_id);
+        return mesh;
+    };
+
+    // Extract meshes
+    std::vector<std::shared_ptr<hellfire::Mesh>> asteroid_meshes;
+    for (hellfire::EntityID model_id : model_ids) {
+        auto mesh = extract_mesh(model_id);
+        if (mesh) {
+            asteroid_meshes.push_back(mesh);
+        }
+        // Delete the loaded model entities - we only need their meshes
+        scene->destroy_entity(model_id);
+    }
+
+    const std::vector<std::shared_ptr<hellfire::Material>> materials = {
         create_rocky_instanced_material(),
-        create_metallic_instanced_material(), 
+        create_metallic_instanced_material(),
         create_icy_instanced_material(),
         create_crystal_instanced_material(),
         create_dusty_instanced_material()
     };
-    
-    auto asteroid_normal = hellfire::Asset::load("assets/models/asteroid_normal.obj");
-    auto asteroid_metal_big = hellfire::Asset::load("assets/models/asteroid_metal_big.obj");
-    auto asteroid_rocky = hellfire::Asset::load("assets/models/asteroid_rocky.obj");
-    auto asteroid_crystal = hellfire::Asset::load("assets/models/asteroid_crystal.obj");
-    auto asteroid_less_rocky = hellfire::Asset::load("assets/models/asteroid_less_rocky.obj");
 
-    // Helper function to extract mesh
-    auto extract_mesh = [](hellfire::Entity* entity) -> std::shared_ptr<hellfire::Mesh> {
-        std::shared_ptr<hellfire::Mesh> mesh = nullptr;
-        std::function<void(hellfire::Entity *)> find_mesh = [&](hellfire::Entity *e) {
-            if (mesh) return;
-            auto *renderable = e->get_component<hellfire::RenderableComponent>();
-            if (renderable && renderable->has_mesh()) {
-                mesh = renderable->get_mesh_shared();
-                return;
-            }
-            for (auto *child: e->get_children()) {
-                find_mesh(child);
-            }
-        };
-        find_mesh(entity);
-        return mesh;
-    };
-
-    // Extract all meshes
-    std::vector asteroid_meshes = {
-        extract_mesh(asteroid_normal),
-        extract_mesh(asteroid_metal_big), 
-        extract_mesh(asteroid_rocky),
-        extract_mesh(asteroid_crystal),
-        extract_mesh(asteroid_less_rocky)
-    };
+    // Create main belt entity
+    hellfire::EntityID belt_id = scene->create_entity("Asteroid Belt");
     
-    auto *asteroid_belt = new hellfire::Entity("Asteroid Belt");
-        const size_t total_asteroids = quantity;
-    size_t asteroids_per_type = total_asteroids / asteroid_meshes.size();
+    const size_t asteroids_per_type = quantity / asteroid_meshes.size();
     
-    // Create separate child entity for each asteroid type
+    // Create child entity for each asteroid type
     for (size_t i = 0; i < asteroid_meshes.size(); ++i) {
         std::string type_name = "Asteroid Type " + std::to_string(i);
-        auto *type_entity = new hellfire::Entity(type_name);
-        
-        // Add instanced component to child entity
-        auto *instanced_comp = type_entity->add_component<hellfire::InstancedRenderableComponent>(
+        hellfire::EntityID type_id = scene->create_entity(type_name);
+        hellfire::Entity* type_entity = scene->get_entity(type_id);
+
+        // Add mesh component
+        auto* mesh_comp = type_entity->add_component<hellfire::MeshComponent>();
+        mesh_comp->set_mesh(asteroid_meshes[i]);
+
+        // Add instanced renderable component
+        auto* instanced_comp = type_entity->add_component<hellfire::InstancedRenderableComponent>(
             asteroid_meshes[i], asteroids_per_type
         );
-        instanced_comp->set_material(materials[i]);
-        
-        // Generate instances for this type
+        instanced_comp->set_material(materials[i % materials.size()]);
+
+        // Generate instances
         std::vector<hellfire::InstancedRenderableComponent::InstanceData> asteroids = 
             generate_asteroid_belt_data(asteroids_per_type);
         instanced_comp->set_instances(asteroids);
-        
-        // Add child to main belt entity
-        asteroid_belt->add(type_entity);
+
+        // Parent to belt
+        scene->set_parent(type_id, belt_id);
     }
 
-    return asteroid_belt;
+    return belt_id;
+
 }
 
 std::vector<hellfire::InstancedRenderableComponent::InstanceData> AsteroidBeltFactory::generate_asteroid_belt_data(
@@ -146,27 +166,27 @@ std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_rocky_instanced_
         "assets/shaders/instanced.vert",
         "assets/shaders/instanced.frag"
     );
-    
+
     material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
-    material->set_property("baseColor", glm::vec3(0.4f, 0.35f, 0.3f));   
-    material->set_property("roughness", 0.8f);                         
-    material->set_property("metallic", 0.0f);                          
+    material->set_property("baseColor", glm::vec3(0.4f, 0.35f, 0.3f));
+    material->set_property("roughness", 0.8f);
+    material->set_property("metallic", 0.0f);
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
     return material;
 }
 
 std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_metallic_instanced_material() {
     auto material = hellfire::MaterialBuilder::create_custom(
-        "Metallic Instanced Material", 
+        "Metallic Instanced Material",
         "assets/shaders/instanced.vert",
         "assets/shaders/instanced.frag"
     );
 
-    
+
     material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
-    material->set_property("baseColor", glm::vec3(0.3f, 0.3f, 0.35f));   
-    material->set_property("roughness", 0.2f);                         
-    material->set_property("metallic", 0.9f);                            
+    material->set_property("baseColor", glm::vec3(0.3f, 0.3f, 0.35f));
+    material->set_property("roughness", 0.2f);
+    material->set_property("metallic", 0.9f);
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
     return material;
 }
@@ -174,15 +194,15 @@ std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_metallic_instanc
 std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_icy_instanced_material() {
     auto material = hellfire::MaterialBuilder::create_custom(
         "Icy Instanced Material",
-        "assets/shaders/instanced.vert", 
+        "assets/shaders/instanced.vert",
         "assets/shaders/instanced.frag"
     );
 
-    
+
     material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
-    material->set_property("baseColor", glm::vec3(0.7f, 0.8f, 0.9f));    
-    material->set_property("roughness", 0.1f);                          
-    material->set_property("metallic", 0.0f);                           
+    material->set_property("baseColor", glm::vec3(0.7f, 0.8f, 0.9f));
+    material->set_property("roughness", 0.1f);
+    material->set_property("metallic", 0.0f);
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
     material->set_property("uTransparency", 0.8f);
     return material;
@@ -192,15 +212,15 @@ std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_crystal_instance
     auto material = hellfire::MaterialBuilder::create_custom(
         "Crystal Instanced Material",
         "assets/shaders/instanced.vert",
-        "assets/shaders/instanced.frag"  
+        "assets/shaders/instanced.frag"
     );
 
-    
+
     material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
-    material->set_property("baseColor", glm::vec3(0.6f, 0.3f, 0.8f));   
-    material->set_property("roughness", 0.0f);                          
-    material->set_property("metallic", 0.3f);                           
-    material->set_property("emissive", glm::vec3(0.1f, 0.05f, 0.15f));   
+    material->set_property("baseColor", glm::vec3(0.6f, 0.3f, 0.8f));
+    material->set_property("roughness", 0.0f);
+    material->set_property("metallic", 0.3f);
+    material->set_property("emissive", glm::vec3(0.1f, 0.05f, 0.15f));
     return material;
 }
 
@@ -212,9 +232,9 @@ std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_dusty_instanced_
     );
 
     material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
-    material->set_property("baseColor", glm::vec3(0.5f, 0.4f, 0.25f));   
-    material->set_property("roughness", 0.9f);                          
-    material->set_property("metallic", 0.0f);                           
+    material->set_property("baseColor", glm::vec3(0.5f, 0.4f, 0.25f));
+    material->set_property("roughness", 0.9f);
+    material->set_property("metallic", 0.0f);
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
     return material;
 }

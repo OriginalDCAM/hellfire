@@ -8,52 +8,10 @@
 #include <glm/detail/type_mat.hpp>
 
 namespace hellfire {
-    Entity::Entity(const std::string &name) {
-        set_name(name);
-        add_component<TransformComponent>();
-    }
-
-    void Entity::add(Entity *child) {
-        if (const auto entity = std::find(children_.begin(), children_.end(), child); entity == children_.end()) {
-            if (child->parent_ != nullptr) {
-                child->parent_->remove(child);
-            }
-
-            children_.push_back(child);
-            child->parent_ = this;
-
-            if (initialized_) {
-                child->setup_recursive();
-            }
-        }
-    }
-
-    void Entity::remove(Entity *child) {
-        if (const auto entity = std::find(children_.begin(), children_.end(), child); entity != children_.end()) {
-            // Remove from children's list
-            children_.erase(entity);
-            child->parent_ = nullptr;
-        }
-    }
-
     const std::vector<ScriptComponent *> &Entity::get_script_components() const {
         return script_components_;
     }
 
-    void Entity::update_world_matrices() const {
-        if (auto *transform = get_component<TransformComponent>()) {
-            const glm::mat4 *parent_world = nullptr;
-            if (parent_ && parent_->has_component<TransformComponent>()) {
-                parent_world = &parent_->get_component<TransformComponent>()->get_world_matrix();
-            }
-            transform->update_world_matrix(parent_world);
-        }
-
-        // Update children
-        for (const auto *child: children_) {
-            child->update_world_matrices();
-        }
-    }
 
     void Entity::initialize_scripts() const {
         for (auto *script: script_components_) {
@@ -73,16 +31,9 @@ namespace hellfire {
         }
     }
 
-    void Entity::broadcast_event(const std::string &event_name, void *data, const bool recursive) const {
-        for (auto *script: script_components_) {
+    void Entity::broadcast_event(const std::string &event_name, void *data) const {
+        for (auto *script : script_components_) {
             script->trigger_event(event_name, data);
-        }
-
-        // Optionally broadcast to children
-        if (recursive) {
-            for (const auto *child: children_) {
-                child->broadcast_event(event_name, data, true);
-            }
         }
     }
 

@@ -70,20 +70,8 @@ namespace hellfire {
             }
         }
 
-        static uint32_t get_shader_to_use(Mesh *mesh, uint32_t fallback_shader) {
-            if (!mesh) return fallback_shader;
-
-            const std::shared_ptr<Material> material = mesh->get_material();
-            if (!material) return fallback_shader;
-
-            return material->get_compiled_shader_id() != 0
-                       ? material->get_compiled_shader_id()
-                       : fallback_shader;
-        }
-
-        // Common mesh validation
-        static bool validate_mesh_for_rendering(Mesh *mesh) {
-            return mesh && mesh->get_material();
+        static bool is_valid_mesh(const std::shared_ptr<Mesh>& mesh) {
+            return mesh && mesh->get_index_count() > 0;
         }
     };
 }

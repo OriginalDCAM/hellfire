@@ -10,6 +10,7 @@
 #include "hellfire/ecs/CameraComponent.h"
 #include "hellfire/ecs/InstancedRenderableComponent.h"
 #include "hellfire/ecs/LightComponent.h"
+#include "hellfire/ecs/components/MeshComponent.h"
 #include "hellfire/graphics/renderer/SkyboxRenderer.h"
 #include "hellfire/scene/Scene.h"
 
@@ -44,7 +45,7 @@ namespace hellfire {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        
+
         glDepthFunc(GL_LESS);
 
         glDisable(GL_CULL_FACE);
@@ -71,7 +72,7 @@ namespace hellfire {
     void Renderer::begin_frame() {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
@@ -143,20 +144,34 @@ namespace hellfire {
     void Renderer::render_internal(Scene &scene, CameraComponent &camera) {
         opaque_objects_.clear();
         transparent_objects_.clear();
+        opaque_instanced_objects_.clear();
+        transparent_instanced_objects_.clear();
 
-        // 1. Collect light data and store in render context
-        std::vector<Entity *> light_entities = scene.find_entities_with_component<LightComponent>();
+        // Store this for collect methods
+        scene_ = &scene;
+
+        // Collect lights
+        std::vector<EntityID> light_entity_ids = scene.find_entities_with_component<LightComponent>();
+        std::vector<Entity *> light_entities;
+        for (const EntityID id: light_entity_ids) {
+            if (Entity *e = scene.get_entity(id)) {
+                light_entities.push_back(e);
+            }
+        }
         store_lights_in_context(light_entities, camera);
 
-        // 2. Collect render commands
-        auto *camera_transform = camera.get_owner()->get_component<TransformComponent>();
+        // Get camera position
+        EntityID camera_entity_id = scene.get_active_camera_entity();
+        Entity *camera_entity = scene.get_entity(camera_entity_id);
+        auto *camera_transform = camera_entity ? camera_entity->get_component<TransformComponent>() : nullptr;
         glm::vec3 camera_pos = camera_transform ? camera_transform->get_world_position() : glm::vec3(0.0f);
 
-        for (Entity *entity: scene.get_entities()) {
-            collect_render_commands_recursive(entity, camera_pos);
+        // Collect render commands from root entities
+        for (EntityID root_id: scene.get_root_entities()) {
+            collect_render_commands_recursive(root_id, camera_pos);
         }
 
-        // 3. Render in proper order
+        // Render
         glm::mat4 view = camera.get_view_matrix();
         glm::mat4 projection = camera.get_projection_matrix();
 
@@ -165,57 +180,63 @@ namespace hellfire {
         render_transparent_pass(view, projection);
     }
 
-    void Renderer::collect_render_commands_recursive(Entity *entity, const glm::vec3 &camera_pos) {
-        // Check if this entity is renderable
-        if (auto *renderable = entity->get_component<RenderableComponent>()) {
-            if (const auto *transform = entity->get_component<TransformComponent>()) {
-                if (renderable->has_mesh()) {
-                    if (std::shared_ptr<Material> material = renderable->get_material()) {
-                        const glm::vec3 object_pos = transform->get_world_position();
-                        const float distance = glm::length(camera_pos - object_pos);
-                        const bool is_transparent = is_material_transparent(material);
+    void Renderer::collect_render_commands_recursive(EntityID entity_id, const glm::vec3 &camera_pos) {
+        Entity *entity = scene_->get_entity(entity_id);
+        if (!entity) return;
 
-                        const RenderCommand cmd = {entity, renderable, material, distance, is_transparent};
+        // Check for renderable + mesh components
+        auto *renderable = entity->get_component<RenderableComponent>();
+        auto *mesh_comp = entity->get_component<MeshComponent>();
+        auto *transform = entity->get_component<TransformComponent>();
 
-                        if (is_transparent) {
-                            transparent_objects_.push_back(cmd);
-                        } else {
-                            opaque_objects_.push_back(cmd);
-                        }
+        // Need all three to render
+        if (renderable && mesh_comp && transform) {
+            auto mesh = mesh_comp->get_mesh();
+            auto material = renderable->get_material();
+
+            if (mesh && material) {
+                const glm::vec3 object_pos = transform->get_world_position();
+                const float distance = glm::length(camera_pos - object_pos);
+                const bool is_transparent = is_material_transparent(material);
+
+                RenderCommand cmd = {entity_id, mesh, material, distance, is_transparent};
+
+                if (is_transparent) {
+                    transparent_objects_.push_back(cmd);
+                } else {
+                    opaque_objects_.push_back(cmd);
+                }
+            }
+        }
+
+        if (auto *instanced = entity->get_component<InstancedRenderableComponent>()) {
+            if (transform && instanced->has_mesh() && instanced->get_instance_count() > 0) {
+                if (auto material = instanced->get_material()) {
+                    glm::vec3 object_pos = transform->get_world_position();
+                    float distance = glm::length(camera_pos - object_pos);
+                    bool is_transparent = is_material_transparent(material);
+
+                    InstancedRenderCommand cmd = {entity_id, instanced, material, distance, is_transparent};
+
+                    if (is_transparent) {
+                        transparent_instanced_objects_.push_back(cmd);
+                    } else {
+                        opaque_instanced_objects_.push_back(cmd);
                     }
                 }
             }
         }
 
-        if (auto* instanced_renderable = entity->get_component<InstancedRenderableComponent>()) {
-            if (auto* transform = entity->get_component<TransformComponent>()) {
-                if (instanced_renderable->has_mesh() && instanced_renderable->get_instance_count() > 0) {
-                    if (std::shared_ptr<Material> material = instanced_renderable->get_material()) {
-                        glm::vec3 object_pos = transform->get_world_position();
-                        float distance = glm::length(camera_pos - object_pos);
-                        bool is_transparent = is_material_transparent(material);
-                    
-                        InstancedRenderCommand cmd = {entity, instanced_renderable, material, distance, is_transparent};
-                    
-                        if (is_transparent) {
-                            transparent_instanced_objects_.push_back(cmd);
-                        } else {
-                            opaque_instanced_objects_.push_back(cmd);
-                        }
-                    }
-                }
-            }
-        }
-
-        for (Entity *child: entity->get_children()) {
-            collect_render_commands_recursive(child, camera_pos);
+        // Recurse through children using scene hierarchy
+        for (EntityID child_id: scene_->get_children(entity_id)) {
+            collect_render_commands_recursive(child_id, camera_pos);
         }
     }
 
 
     bool Renderer::is_material_transparent(const std::shared_ptr<Material> &material) {
         if (!material) {
-            return false; 
+            return false;
         }
         const auto transparency = material->get_property<float>("uTransparency", 1.0f);
         const auto alpha = material->get_property<float>("uAlpha", 1.0f);
@@ -224,12 +245,11 @@ namespace hellfire {
     }
 
     void Renderer::render_opaque_pass(const glm::mat4 &view, const glm::mat4 &projection) {
-        // TODO: make this a render setting that could be passed via global method
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glDisable(GL_BLEND);
-        
+
         glDisable(GL_CULL_FACE);
 
         std::sort(opaque_objects_.begin(), opaque_objects_.end(),
@@ -238,18 +258,11 @@ namespace hellfire {
                   });
 
         for (const auto &cmd: opaque_objects_) {
-            if (Shader* shader_to_use = get_shader_for_material(cmd.material)) {
-                cmd.renderable->draw(view, projection, *shader_to_use, context_);
-            } else {
-                // Fallback to old method if no shader wrapper available
-                cmd.renderable->draw(view, projection, *fallback_shader_, context_);
-            }
+            draw_render_command(cmd, view, projection);
         }
 
-        for (const auto& cmd : opaque_instanced_objects_) {
-            if (Shader* shader_to_use = get_shader_for_material(cmd.material)) {
-                cmd.instanced_renderable->draw(view, projection, *shader_to_use, context_);
-            }
+        for (const auto &cmd: opaque_instanced_objects_) {
+            draw_instanced_command(cmd, view, projection);
         }
     }
 
@@ -267,27 +280,83 @@ namespace hellfire {
                   });
 
         for (const auto &cmd: transparent_objects_) {
-            if (Shader* shader_to_use = get_shader_for_material(cmd.material)) {
-                cmd.renderable->draw(view, projection, *shader_to_use, context_);
-            } else {
-                // Fallback to old method if no shader wrapper available
-                cmd.renderable->draw(view, projection, *fallback_shader_, context_);
-            }
+            draw_render_command(cmd, view, projection);
         }
 
-        for (const auto& cmd : transparent_instanced_objects_) {
-            if (Shader* shader_to_use = get_shader_for_material(cmd.material)) {
-                cmd.instanced_renderable->draw(view, projection, *shader_to_use, context_);
-            }
+        for (const auto &cmd: transparent_instanced_objects_) {
+            draw_instanced_command(cmd, view, projection);
         }
 
         glDepthMask(GL_TRUE);
     }
 
+    void Renderer::draw_render_command(const RenderCommand &cmd, const glm::mat4 &view, const glm::mat4 &projection) {
+        Entity *entity = scene_->get_entity(cmd.entity_id);
+        if (!entity) return;
+
+        auto *transform = entity->get_component<TransformComponent>();
+        if (!transform) return;
+
+        Shader *shader = get_shader_for_material(cmd.material);
+        if (!shader) shader = fallback_shader_;
+
+        glUseProgram(shader->get_program_id());
+
+        // Upload lights
+        if (context_) {
+            RenderingUtils::upload_lights_to_shader(*shader, context_);
+        }
+
+        // Upload default uniforms
+        RenderingUtils::set_standard_uniforms(*shader, transform->get_world_matrix(), view, projection);
+
+        // Bind material and draw mesh
+        cmd.material->bind();
+        cmd.mesh->draw();
+        cmd.material->unbind();
+    }
+
+    void Renderer::draw_instanced_command(const InstancedRenderCommand &cmd, const glm::mat4 &view,
+                                          const glm::mat4 &projection) {
+        Entity *entity = scene_->get_entity(cmd.entity_id);
+        if (!entity) return;
+
+        Shader *shader = get_shader_for_material(cmd.material);
+        if (!shader) shader = fallback_shader_;
+
+        glUseProgram(shader->get_program_id());
+
+        // Upload lights
+        if (context_) {
+            RenderingUtils::upload_lights_to_shader(*shader, context_);
+        }
+
+        // Upload uniforms
+        RenderingUtils::set_standard_uniforms(*shader, glm::mat4(1.0f), view, projection);
+
+        // Prepare instanced data
+        cmd.instanced_renderable->prepare_for_draw();
+
+        // Bind material and draw
+        cmd.material->bind();
+
+        auto mesh = cmd.instanced_renderable->get_mesh();
+        if (mesh) {
+            mesh->bind();
+            cmd.instanced_renderable->bind_instance_buffers();
+            mesh->draw_instanced(cmd.instanced_renderable->get_instance_count());
+            cmd.instanced_renderable->unbind_instance_buffers();
+            mesh->unbind();
+        }
+
+        cmd.material->unbind();
+    }
+
+
     void Renderer::render_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection) const {
         if (!scene || !scene->has_skybox()) return;
 
-       glDisable(GL_CULL_FACE);
+        glDisable(GL_CULL_FACE);
 
         CameraComponent *camera_comp = scene->get_active_camera();
         if (camera_comp) {

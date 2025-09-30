@@ -119,12 +119,8 @@ namespace hellfire {
             }
         }
 
-        void update_world_matrix(const glm::mat4 *parent_world_matrix = nullptr) {
-            if (parent_world_matrix) {
-                world_matrix_ = *parent_world_matrix * local_matrix_;
-            } else {
-                world_matrix_ = local_matrix_;
-            }
+        void update_world_matrix(const glm::mat4& parent_world_matrix) {
+                world_matrix_ = parent_world_matrix * local_matrix_;
         }
 
         // Reset matrices to identity - useful for initialization

@@ -1,7 +1,5 @@
 // Application.h
 #pragma once
-#include <complex.h>
-
 #include "../platform/IWindow.h"
 #include "../scene/SceneManager.h"
 #include "../graphics/renderer/Renderer.h"
