@@ -91,6 +91,24 @@ namespace hellfire::editor {
         }
     }
 
+    void CoreEditorPlugin::render_menu_bar() {
+        if (ImGui::BeginMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("New Project")) {
+                    std::cout << "New Project" << std::endl;
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Scene")) {
+                if (ImGui::MenuItem("New Scene")) {
+                    std::cout << "New scene created!" << std::endl;
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+    }
+
     void CoreEditorPlugin::on_render() {
         if (!imgui_initialized_) return;
 
@@ -133,7 +151,8 @@ namespace hellfire::editor {
         ImGui::SetNextWindowSize(viewport->Size);
         ImGui::SetNextWindowViewport(viewport->ID);
 
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking |
+                                        ImGuiWindowFlags_NoTitleBar |
                                         ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
                                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
                                         ImGuiWindowFlags_NoNavFocus;
@@ -144,6 +163,8 @@ namespace hellfire::editor {
 
         ImGui::Begin("DockSpace", nullptr, window_flags);
         ImGui::PopStyleVar(3);
+
+        render_menu_bar();
 
         // Create dockspace
         ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");

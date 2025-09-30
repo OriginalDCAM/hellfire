@@ -151,7 +151,7 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
     scene->set_parent(mars_id, world_id);
 
     // Asteroid belt
-    hellfire::EntityID asteroid_belt_id = AsteroidBeltFactory::create_asteroid_belt(scene, 25000);
+    hellfire::EntityID asteroid_belt_id = AsteroidBeltFactory::create_asteroid_belt(scene, 250);
     scene->set_parent(asteroid_belt_id, world_id);
 
     hellfire::EntityID jupiter_id = create_planet("Jupiter", 8.0f, glm::vec3(0, 0, 180),
