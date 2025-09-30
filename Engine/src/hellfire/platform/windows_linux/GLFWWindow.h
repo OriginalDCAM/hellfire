@@ -17,6 +17,8 @@ namespace hellfire {
 
         void poll_events() override;
 
+        void wait_for_events() override;
+
         void set_title(const std::string &title) override;
 
         void set_size(int width, int height) override;
@@ -50,6 +52,9 @@ namespace hellfire {
 
         static void window_size_callback(GLFWwindow *window, int width, int height);
 
+        static void window_iconifiy_callback(GLFWwindow *window, int iconified);
+
+
     public:
         void set_event_handler(IWindowEventHandler *handler) override;
 
@@ -58,5 +63,6 @@ namespace hellfire {
         void warp_cursor(double x, double y) override;
 
         void set_cursor_mode(CursorMode mode) override;
+
     };
 }
