@@ -46,7 +46,9 @@ namespace hellfire {
 
         void set_aspect_ratio(float aspect);
 
-        float get_aspect_ratio() const { return aspect_ratio_; }
+        float get_aspect_ratio() const {
+            return aspect_ratio_;
+        }
 
         void set_clip_planes(float near_plane, float far_plane);
 

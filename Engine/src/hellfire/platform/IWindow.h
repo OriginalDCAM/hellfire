@@ -43,6 +43,9 @@ namespace hellfire {
         virtual void on_window_resize(int width, int height) {
         }
 
+        virtual void on_window_minimize(bool minimized) {
+        }
+
         virtual void on_render() {
         }
     };
@@ -60,6 +63,8 @@ namespace hellfire {
 
         virtual void poll_events() = 0;
 
+        virtual void wait_for_events() = 0;
+
         virtual void set_event_handler(IWindowEventHandler *event_handler) = 0;
 
         // Window properties
@@ -70,6 +75,7 @@ namespace hellfire {
         virtual glm::ivec2 get_size() const = 0;
 
         virtual glm::ivec2 get_framebuffer_size() const = 0;
+
 
         // Input handling
         virtual bool is_key_pressed(int keycode) const = 0;
