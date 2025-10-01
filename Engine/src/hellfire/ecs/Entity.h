@@ -9,10 +9,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Component.h"
+
 
 namespace hellfire {
     class TransformComponent;
-    class Component;
     class ScriptComponent;
 }
 
