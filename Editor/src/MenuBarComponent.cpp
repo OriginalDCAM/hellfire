@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include "imgui.h"
+#include "hellfire/platform/IWindow.h"
 #include "hellfire/scene/Scene.h"
 #include "hellfire/scene/SceneManager.h"
 #include "hellfire/utilities/FileDialog.h"

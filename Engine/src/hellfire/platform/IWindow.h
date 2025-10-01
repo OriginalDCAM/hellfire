@@ -76,7 +76,6 @@ namespace hellfire {
 
         virtual glm::ivec2 get_framebuffer_size() const = 0;
 
-
         // Input handling
         virtual bool is_key_pressed(int keycode) const = 0;
 
