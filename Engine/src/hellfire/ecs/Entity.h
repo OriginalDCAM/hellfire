@@ -16,6 +16,10 @@ namespace hellfire {
     class ScriptComponent;
 }
 
+class Test {
+    bool is_looking = true;
+};
+
 namespace hellfire {
     using EntityID = uint32_t;
     

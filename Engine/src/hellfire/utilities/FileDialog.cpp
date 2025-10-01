@@ -52,7 +52,7 @@ namespace hellfire::Utility {
     }
 
     std::string FileDialog::win32_save_file(const std::string &default_filename,
-                                            const std::vector<FileFilter> &filters) {
+                                            const std::vector<FileFilter> &filters, std::string &save_name_to) {
         std::string filepath;
 
         OPENFILENAMEA ofn;
@@ -117,6 +117,14 @@ namespace hellfire::Utility {
 
         if (GetSaveFileNameA(&ofn) == TRUE) {
             filepath = ofn.lpstrFile;
+
+            // Extract filename from full path and save to save_name_to
+            size_t lastSlash = filepath.find_last_of("\\/");
+            if (lastSlash != std::string::npos) {
+                save_name_to = filepath.substr(lastSlash + 1);
+            } else {
+                save_name_to = filepath;
+            }
         }
 
         return filepath;
@@ -232,12 +240,15 @@ namespace hellfire::Utility {
 #endif
     }
 
-    std::string FileDialog::save_file(const std::string &default_filename,
+    std::string FileDialog::save_file(std::string &save_name_to, const std::string &default_filename,
                                       const std::vector<FileFilter> &filters) {
 #ifdef _WIN32
-        return win32_save_file(default_filename, filters);
+        return win32_save_file(default_filename, filters, save_name_to);
 #else
         return imgui_save_file(default_filename, filters);
 #endif
     }
 }
+
+    
+
