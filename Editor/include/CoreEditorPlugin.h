@@ -5,9 +5,9 @@
 #pragma once
 #include <memory>
 #include <unordered_map>
-#include <vector>
 
 #include "EditorComponent.h"
+#include "MenuBarComponent.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
 
@@ -46,9 +46,12 @@ namespace hellfire::editor {
 
         void on_window_focus(bool focused) override;
     private:
+        EditorContext editor_context_;
         Application* app_ = nullptr;
         bool imgui_initialized_ = false;
         bool show_demo_ = false;
-        std::unordered_map<uint32_t, std::unique_ptr<EditorComponent>>ui_components = {};
+        
+        // UI Components
+        std::unique_ptr<MenuBarComponent> menu_bar_;
     };
 }

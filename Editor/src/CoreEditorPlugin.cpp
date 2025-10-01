@@ -6,15 +6,12 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui.h"
+#include "EditorComponent.h"
 #include "MenuBarComponent.h"
 #include "hellfire/core/Application.h"
 #include "hellfire/platform/IWindow.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
-
-#define MENUBAR_COMPONENT 0
-#define VIEWPORT_COMPONENT 1 
-#define SCENE_HIERARCHY_COMPONENT 2 
 
 namespace hellfire::editor {
     void CoreEditorPlugin::on_initialize(Application &app) {
@@ -28,7 +25,9 @@ namespace hellfire::editor {
 
         initialize_imgui(window);
 
-        ui_components[MENUBAR_COMPONENT] = std::make_unique<MenuBarComponent>();
+        // Set context for UI components
+        menu_bar_ = std::make_unique<MenuBarComponent>();
+        menu_bar_->set_context(&editor_context_);
     }
 
     void CoreEditorPlugin::initialize_imgui(IWindow *window) {
@@ -40,6 +39,10 @@ namespace hellfire::editor {
         // Enable docking and multi-viewport
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+        io.ConfigViewportsNoDecoration = false;
+        io.ConfigViewportsNoTaskBarIcon = false;
+        io.ConfigViewportsNoAutoMerge = false;
 
         // Setup style
         ImGui::StyleColorsDark();
@@ -102,6 +105,13 @@ namespace hellfire::editor {
     void CoreEditorPlugin::on_render() {
         if (!imgui_initialized_) return;
 
+        // Sync editor context with scene manager
+        auto sm = ServiceLocator::get_service<SceneManager>();
+        if (sm && editor_context_.active_scene != sm->get_active_scene()) {
+            editor_context_.active_scene = sm->get_active_scene();
+            editor_context_.selected_entity_id = 0;
+        }
+
         // Create main dockspace
         create_dockspace();
 
@@ -154,7 +164,7 @@ namespace hellfire::editor {
         ImGui::Begin("DockSpace", nullptr, window_flags);
         ImGui::PopStyleVar(3);
         
-        ui_components[MENUBAR_COMPONENT]->render();
+        menu_bar_->render();
         
         // Create dockspace
         ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
