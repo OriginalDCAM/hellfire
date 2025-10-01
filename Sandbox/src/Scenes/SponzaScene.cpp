@@ -5,6 +5,7 @@
 #include "Scenes/SponzaScene.h"
 
 #include "hellfire-core.h"
+#include "Scripts/PlayerController.h"
 
 hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
     const auto scene = new hellfire::Scene("Sponza Scene");
