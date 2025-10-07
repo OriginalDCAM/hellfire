@@ -7,17 +7,35 @@ file(GLOB_RECURSE APP_HEADERS "include/*.h" "include*.hpp")
 add_executable(${APP_NAME} ${APP_SOURCES} ${APP_HEADERS})
 
 target_include_directories(${APP_NAME}
-PRIVATE
-${CMAKE_CURRENT_SOURCE_DIR}/include
-${CMAKE_CURRENT_SOURCE_DIR}/src
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(${APP_NAME}
         PRIVATE
-        HellfireEngine 
+        HellfireEngine
         imgui
         glfw
 )
+
+if (WIN32)
+    # Create a directory junction for assets
+    add_custom_command(TARGET ${APP_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E remove -f "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
+            COMMAND cmd /c "mklink /J \"$<TARGET_FILE_DIR:${APP_NAME}>\\assets\" \"${CMAKE_CURRENT_SOURCE_DIR}\\assets\""
+            COMMENT "Creating directory junction to assets directory"
+    )
+else ()
+    # Unix symlink for assets
+    add_custom_command(TARGET ${APP_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E remove -f "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+            "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+            "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
+            COMMENT "Creating symlink to assets directory"
+    )
+endif ()
 
 target_compile_definitions(${APP_NAME} PRIVATE HELLFIRE_EDITOR_ENABLED)
 
@@ -43,6 +61,6 @@ if (MSVC)
     # Add source grouping
     source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${APP_SOURCES})
     source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${APP_HEADERS})
-endif()
+endif ()
 
 

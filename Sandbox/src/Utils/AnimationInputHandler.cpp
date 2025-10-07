@@ -14,10 +14,7 @@ void AnimationInputHandler::register_orbit_controller(OrbitController* controlle
 }
 
 void AnimationInputHandler::unregister_orbit_controller(OrbitController* controller) {
-    orbit_controllers_.erase(
-        std::remove(orbit_controllers_.begin(), orbit_controllers_.end(), controller),
-        orbit_controllers_.end()
-    );
+    std::erase(orbit_controllers_, controller);
 }
 
 void AnimationInputHandler::handle_input() {

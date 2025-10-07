@@ -11,6 +11,12 @@ out vec4 fragColor;
 void main() {
     // Sample base textures
     vec4 diffuseValue = sampleDiffuseTexture(vTexCoords);
+    
+    if (useLuminanceAsAlpha) {
+        float luminance = dot(diffuseValue.rgb, vec3(0.299, 0.587, 0.114));
+        diffuseValue.a = luminance;
+    }
+    
     vec4 baseColor = applyVertexColors(diffuseValue, vColor);
 
     // Calculate surface normal
@@ -18,6 +24,8 @@ void main() {
 
     // Calculate lighting
     vec3 result = calculateLambertLighting(normal, baseColor.rgb, vFragPos);
+
+
 
     // Apply transparency and gamma correction
     float finalAlpha = calculateFinalAlpha(baseColor.a);

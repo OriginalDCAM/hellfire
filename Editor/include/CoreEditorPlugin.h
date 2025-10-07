@@ -4,7 +4,6 @@
 
 #pragma once
 #include <memory>
-#include <unordered_map>
 
 #include "EditorComponent.h"
 #include "MenuBarComponent.h"
@@ -28,7 +27,7 @@ namespace hellfire::editor {
 
         void on_render() override;
 
-        void render_test_windows();
+        void render_viewport_window();
 
         void create_dockspace();
 

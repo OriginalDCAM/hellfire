@@ -11,7 +11,7 @@
 #include "hellfire/graphics/shader/Shader.h"
 #include "Component.h"
 #include "Entity.h"
-#include "GL/glew.h"
+#include "hellfire/graphics/backends/opengl/Framebuffer.h"
 
 namespace hellfire {
     class LightComponent : public Component {
@@ -39,13 +39,18 @@ namespace hellfire {
         float inner_cone_angle_ = 30.0f;
         float outer_cone_angle_ = 45.0f;
 
+        // Shadow properties
+        std::unique_ptr<Framebuffer> shadow_framebuffer_;
+        glm::mat4 light_space_matrix_;
+        bool cast_shadows_ = true;
+
     public:
-        LightComponent(LightType type = LightType::DIRECTIONAL) : type_(type) {
+        explicit LightComponent(const LightType type = DIRECTIONAL) : type_(type) {
         }
 
         // Type management
         LightType get_light_type() const { return type_; }
-        void set_light_type(LightType type) { type_ = type; }
+        void set_light_type(const LightType type) { type_ = type; }
 
         // Common properties
         void set_color(const glm::vec3 &color) { color_ = color; }
@@ -70,17 +75,21 @@ namespace hellfire {
         }
 
         void look_at(const glm::vec3 &target) {
-            auto *transform = get_owner()->get_component<TransformComponent>();
-            
-            if (transform) {
-                glm::vec3 position = transform->get_position();
-                glm::vec3 new_direction = glm::normalize(target - position);
+            if (const TransformComponent *transform = get_owner()->get_component<TransformComponent>()) {
+                const glm::vec3 position = transform->get_position();
+                const glm::vec3 new_direction = glm::normalize(target - position);
+                
                 set_direction(new_direction);
             }
         }
 
         // Point light methods
-        void set_range(float range) { range_ = range; }
+        void set_range(const float range) {
+            if (range == NAN) {
+                std::cerr << "LightComponent::ERROR: " << range << "is not a number!" << std::endl;
+            }
+            range_ = range;
+        }
         float get_range() const { return range_; }
 
         void set_attenuation(float attenuation) { attenuation_ = attenuation; }
@@ -108,10 +117,13 @@ namespace hellfire {
             }
         }
 
+        void set_cast_shadows(bool cast_shadows) { cast_shadows_ = cast_shadows; }
+
         // Factory methods for convenience
-        static LightComponent *create_directional(const glm::vec3 &direction = glm::vec3(0.0f, -1.0f, 0.0f)) {
+        static LightComponent *create_directional(const glm::vec3 &direction = glm::vec3(0.0f, -1.0f, 0.0f), bool cast_shadows = true) {
             auto *light = new LightComponent(DIRECTIONAL);
             light->set_direction(direction);
+            light->set_cast_shadows(cast_shadows);
             return light;
         }
 

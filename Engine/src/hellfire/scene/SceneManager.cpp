@@ -5,6 +5,9 @@
 #include <fstream>
 #include <iostream>
 
+#include "hellfire/graphics/Skybox.h"
+#include "hellfire/graphics/Geometry/Cube.h"
+
 namespace hellfire {
     SceneManager::SceneManager() : active_scene_(nullptr) {}
 
@@ -67,6 +70,8 @@ namespace hellfire {
                 glm::vec3(0, 0, 10)
             );
             new_scene->set_active_camera(camera_id);
+
+            Cube::create(new_scene, "Default Cube", {.position = glm::vec3(0, -1, -5)});
         }
 
         return new_scene;

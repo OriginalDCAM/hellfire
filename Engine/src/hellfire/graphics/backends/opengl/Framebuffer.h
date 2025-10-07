@@ -1,6 +1,7 @@
 ﻿//
 // Created by denzel on 31/05/2025.
 //
+#pragma once
 
 #include <cstdint>
 

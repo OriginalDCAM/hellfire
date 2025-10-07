@@ -26,6 +26,9 @@ namespace hellfire::editor {
 
         initialize_imgui(window);
 
+        // Make sure the renderer render's the scene to a framebuffer
+        ServiceLocator::get_service<Renderer>()->set_render_to_framebuffer(true);
+
         // Set context for UI components
         menu_bar_ = std::make_unique<MenuBarComponent>();
         menu_bar_->set_context(&editor_context_);
@@ -120,27 +123,21 @@ namespace hellfire::editor {
             ImGui::ShowDemoWindow(&show_demo_);
         }
 
-        render_test_windows();
+        render_viewport_window();
     }
 
-    void CoreEditorPlugin::render_test_windows() {
+    void CoreEditorPlugin::render_viewport_window() {
         // Test window 3 - Game Viewport
         if (ImGui::Begin("Game Viewport")) {
             ImVec2 size = ImGui::GetContentRegionAvail();
             if (size.x > 0 && size.y > 0) {
-                // Draw a simple placeholder
-                ImDrawList *draw_list = ImGui::GetWindowDrawList();
-                ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
-                ImVec2 canvas_size = ImGui::GetContentRegionAvail();
+                auto* renderer = ServiceLocator::get_service<Renderer>();
 
-                draw_list->AddRectFilled(canvas_pos,
-                                         ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y),
-                                         IM_COL32(50, 50, 50, 255));
-                draw_list->AddRect(canvas_pos,
-                                   ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y),
-                                   IM_COL32(255, 255, 255, 255));
+                // Resize framebuffer to match viewport
+                renderer->resize_scene_framebuffer(static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y));
 
-                ImGui::InvisibleButton("canvas", canvas_size);
+                const uint32_t scene_texture = renderer->get_scene_texture();
+                ImGui::Image(scene_texture, size, ImVec2(0, 1), ImVec2(1, 0)); // Flip y for opengl
             }
         }
         ImGui::End();

@@ -99,6 +99,7 @@ namespace hellfire {
         SkyboxRenderer skybox_renderer_;
         
         void collect_render_commands_recursive(EntityID entity_id, const glm::vec3& camera_pos);
+        void collect_all_render_commands(Scene &scene, const glm::vec3 &camera_pos);
         void store_lights_in_context(const std::vector<Entity*>& light_entities, CameraComponent& camera) const;
         void render_internal(Scene& scene, CameraComponent& camera);
         
@@ -110,10 +111,11 @@ namespace hellfire {
         // Draw methods
         void draw_render_command(const RenderCommand& cmd, const glm::mat4& view, const glm::mat4& projection);
         void draw_instanced_command(const InstancedRenderCommand& cmd, const glm::mat4& view, const glm::mat4& projection);
-
-
+        
         // Utility methods
         bool is_material_transparent(const std::shared_ptr<Material> &material);
+
+        static const glm::vec3 & get_camera_position(Scene &scene);
         
     };
 }

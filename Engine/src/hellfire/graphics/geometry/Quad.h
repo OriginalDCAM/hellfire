@@ -25,6 +25,8 @@ namespace hellfire
             glm::vec3 rotation = glm::vec3(0.0f);
             glm::vec3 scale = glm::vec3(1.0f);
         };
+        
+        Quad() = delete;
 
         static EntityID create(Scene* scene, const std::string& name, const Config& config = Config{});
         static std::shared_ptr<Mesh> create_mesh();
@@ -36,7 +38,6 @@ namespace hellfire
         static const std::vector<float> uvs_;  
         static const std::vector<unsigned int> indices_;
 
-        Quad() = delete;
     };
 
 }

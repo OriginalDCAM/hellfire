@@ -18,7 +18,7 @@
 
 hellfire::EntityID AsteroidBeltFactory::create_asteroid_belt(hellfire::Scene *scene, const size_t quantity) {
     // Load all asteroid types
-    std::vector<hellfire::EntityID> model_ids = {
+    const std::vector model_ids = {
         hellfire::Asset::load(scene, "assets/models/asteroid_normal.obj"),
         hellfire::Asset::load(scene, "assets/models/asteroid_metal_big.obj"),
         hellfire::Asset::load(scene, "assets/models/asteroid_rocky.obj"),
@@ -52,16 +52,15 @@ hellfire::EntityID AsteroidBeltFactory::create_asteroid_belt(hellfire::Scene *sc
 
     // Extract meshes
     std::vector<std::shared_ptr<hellfire::Mesh>> asteroid_meshes;
-    for (hellfire::EntityID model_id : model_ids) {
-        auto mesh = extract_mesh(model_id);
-        if (mesh) {
+    for (const hellfire::EntityID model_id : model_ids) {
+        if (const auto mesh = extract_mesh(model_id)) {
             asteroid_meshes.push_back(mesh);
         }
         // Delete the loaded model entities - we only need their meshes
         scene->destroy_entity(model_id);
     }
 
-    const std::vector<std::shared_ptr<hellfire::Material>> materials = {
+    const std::vector materials = {
         create_rocky_instanced_material(),
         create_metallic_instanced_material(),
         create_icy_instanced_material(),
@@ -70,14 +69,14 @@ hellfire::EntityID AsteroidBeltFactory::create_asteroid_belt(hellfire::Scene *sc
     };
 
     // Create main belt entity
-    hellfire::EntityID belt_id = scene->create_entity("Asteroid Belt");
+    const hellfire::EntityID belt_id = scene->create_entity("Asteroid Belt");
 
     const size_t asteroids_per_type = quantity / asteroid_meshes.size();
 
     // Create child entity for each asteroid type
     for (size_t i = 0; i < asteroid_meshes.size(); ++i) {
         std::string type_name = "Asteroid Type " + std::to_string(i);
-        hellfire::EntityID type_id = scene->create_entity(type_name);
+        const hellfire::EntityID type_id = scene->create_entity(type_name);
         hellfire::Entity* type_entity = scene->get_entity(type_id);
 
         // Add mesh component

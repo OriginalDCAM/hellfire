@@ -41,7 +41,6 @@ namespace hellfire {
     }
 
     void Renderer::init() {
-        // TODO: Read renderer options from a config file
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -141,12 +140,25 @@ namespace hellfire {
         ogl_context->camera_component = &camera;
     }
 
-    void Renderer::render_internal(Scene &scene, CameraComponent &camera) {
-        opaque_objects_.clear();
-        transparent_objects_.clear();
-        opaque_instanced_objects_.clear();
-        transparent_instanced_objects_.clear();
+    void Renderer::collect_all_render_commands(Scene &scene, const glm::vec3 &camera_pos) {
+        scene_ = &scene;
 
+        for (EntityID root_id: scene.get_root_entities()) {
+            collect_render_commands_recursive(root_id, camera_pos);
+        }
+    }
+
+    const glm::vec3 &Renderer::get_camera_position(Scene &scene) {
+        const EntityID camera_entity_id = scene.get_active_camera_entity();
+        const Entity *camera_entity = scene.get_entity(camera_entity_id);
+        
+        if (const auto *camera_transform = camera_entity ? camera_entity->get_component<TransformComponent>() : nullptr)
+            return camera_transform->get_world_position();
+        
+        return glm::vec3(0.0f);
+    }
+
+    void Renderer::render_internal(Scene &scene, CameraComponent &camera) {
         // Store this for collect methods
         scene_ = &scene;
 
@@ -161,15 +173,10 @@ namespace hellfire {
         store_lights_in_context(light_entities, camera);
 
         // Get camera position
-        EntityID camera_entity_id = scene.get_active_camera_entity();
-        Entity *camera_entity = scene.get_entity(camera_entity_id);
-        auto *camera_transform = camera_entity ? camera_entity->get_component<TransformComponent>() : nullptr;
-        glm::vec3 camera_pos = camera_transform ? camera_transform->get_world_position() : glm::vec3(0.0f);
+        glm::vec3 camera_pos = get_camera_position(scene);
 
         // Collect render commands from root entities
-        for (EntityID root_id: scene.get_root_entities()) {
-            collect_render_commands_recursive(root_id, camera_pos);
-        }
+        collect_all_render_commands(scene, camera_pos);
 
         // Render
         glm::mat4 view = camera.get_view_matrix();
