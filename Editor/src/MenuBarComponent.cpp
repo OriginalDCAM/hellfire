@@ -55,6 +55,9 @@ namespace hellfire::editor {
             const std::string filepath = Utility::FileDialog::open_file({scene_ext_filter});
             if (!filepath.empty()) {
                 auto scene = sm->load_scene(filepath);
+
+                setup_default_scene_with_default_entities(scene);
+                
                 sm->set_active_scene(scene);
 
                 if (context_) {

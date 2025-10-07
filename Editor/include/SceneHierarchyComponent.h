@@ -10,6 +10,6 @@ public:
     void render() override;
 private:
     void render_list();
-    void render_list_item();
+    void render_list_item(EntityID entity_id);
 };
 }
