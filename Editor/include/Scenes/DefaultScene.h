@@ -4,20 +4,24 @@
 
 #include "hellfire/graphics/Skybox.h"
 #include "hellfire/graphics/geometry/Cube.h"
+#include "hellfire/graphics/geometry/Sphere.h"
+#include "hellfire/graphics/lighting/DirectionalLight.h"
 
 void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
     hellfire::EntityID camera_id = hellfire::PerspectiveCamera::create(
         scene, "Main Camera",
-        45.0f, 16.0f / 9.0f, 0.1f, 400.0f,
+        90.0f, 16.0f / 9.0f, 0.1f, 400.0f,
         glm::vec3(0, 0, 10)
     );
 
+        hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(scene, "Sol Light", glm::vec3(-0.22f, 1.0f, 0.22f), glm::vec3(0.0f, 0.4f, 0.5f), 1.0f);
+
     scene->set_active_camera(camera_id);
-    for (int i = 0; i < 100; i++) {
-        auto entity_id = hellfire::Cube::create(scene, "Cube_" + std::to_string(i), {.rotation = glm::vec3(-32.0f, 22.0f, 0.0f)});
+    for (int i = 0; i < 1; i++) {
+        auto entity_id = hellfire::Cube::create(scene, "Cube_" + std::to_string(i), {.rotation = glm::vec3(-45.0f, 45.0f, 45.0f)});
 
         if (i % 2 == 0) {
-        auto child_entity_id = hellfire::Cube::create(scene, "Cube_Child_" + std::to_string(i), {.rotation = glm::vec3(-32.0f, 22.0f, 0.0f)});
+        auto child_entity_id = hellfire::Sphere::create(scene, "Sphere_Child_" + std::to_string(i), {.color = glm::vec3(0.5, 0.2, 0.7), .position = glm::vec3(-1.5f, -1.5f, -1.5f)});
             scene->set_parent(child_entity_id, entity_id);
         }
         

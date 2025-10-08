@@ -6,7 +6,8 @@
 #include <iostream>
 
 namespace hellfire {
-    SceneManager::SceneManager() : active_scene_(nullptr) {}
+    SceneManager::SceneManager() : active_scene_(nullptr) {
+    }
 
     SceneManager::~SceneManager() {
         clear();
@@ -16,15 +17,15 @@ namespace hellfire {
         return scenes_;
     }
 
-    Scene* SceneManager::create_scene(const std::string& name) {
-        auto* scene = new Scene(name);
+    Scene *SceneManager::create_scene(const std::string &name) {
+        auto *scene = new Scene(name);
         scenes_.push_back(scene);
         return scene;
     }
 
-    Scene* SceneManager::load_scene(const std::string& filename) {
+    Scene *SceneManager::load_scene(const std::string &filename) {
         // Check if already loaded
-        for (Scene* scene : scenes_) {
+        for (Scene *scene: scenes_) {
             if (scene->get_source_filename() == filename) {
                 std::cout << "Scene already loaded: " << filename << "\n";
                 return scene;
@@ -40,7 +41,7 @@ namespace hellfire {
         nlohmann::json scene_data;
         try {
             file >> scene_data;
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Failed to parse scene file: " << e.what() << std::endl;
             return nullptr;
         }
@@ -51,28 +52,18 @@ namespace hellfire {
             return nullptr;
         }
 
-        Scene* new_scene = create_scene(scene_data["name"]);
+        Scene *new_scene = create_scene(scene_data["name"]);
         new_scene->set_source_filename(filename);
 
         // TODO: Deserialize entities from scene_data["entities"]
         if (scene_data.contains("entities") && !scene_data["entities"].empty()) {
             // Deserialize entities here when implemented
             std::cout << "TODO: Deserialize " << scene_data["entities"].size() << " entities\n";
-        } else {
-            // Only create default camera if scene is truly empty
-            std::cout << "Empty scene loaded, creating default camera\n";
-            EntityID camera_id = PerspectiveCamera::create(
-                new_scene, "Main Camera", 
-                45.0f, 16.0f/9.0f, 0.1f, 100.0f,
-                glm::vec3(0, 0, 10)
-            );
-            new_scene->set_active_camera(camera_id);
         }
-
         return new_scene;
     }
 
-    bool SceneManager::save_scene(const std::string& filepath, Scene* scene) const {
+    bool SceneManager::save_scene(const std::string &filepath, Scene *scene) const {
         if (!scene) scene = get_active_scene();
         if (!scene) return false;
 
@@ -82,14 +73,14 @@ namespace hellfire {
             scene_data["version"] = "1.0";
 
             json entities_array = json::array();
-        
+
             // TODO: Iterate through scene entities
             // for (EntityID id : scene->get_all_entity_ids()) {
             //     Entity* entity = scene->get_entity(id);
             //     json entity_data = serialize_entity(entity);
             //     entities_array.push_back(entity_data);
             // }
-        
+
             scene_data["entities"] = entities_array;
 
             std::ofstream file(filepath);
@@ -99,11 +90,11 @@ namespace hellfire {
             }
 
             file << std::setw(4) << scene_data << std::endl;
-        
-            scene->set_source_filename(filepath); 
-        
+
+            scene->set_source_filename(filepath);
+
             return true;
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Error saving scene: " << e.what() << std::endl;
             return false;
         }
@@ -116,16 +107,16 @@ namespace hellfire {
     }
 
     void SceneManager::clear() {
-        for (Scene* scene : scenes_) {
+        for (Scene *scene: scenes_) {
             delete scene;
         }
         scenes_.clear();
         active_scene_ = nullptr;
     }
 
-    EntityID SceneManager::find_entity_by_name(const std::string& name) {
+    EntityID SceneManager::find_entity_by_name(const std::string &name) {
         if (active_scene_) {
-            Entity* entity = active_scene_->find_entity_by_name(name);
+            Entity *entity = active_scene_->find_entity_by_name(name);
             return entity ? entity->get_id() : 0;
         }
         return 0;
@@ -137,7 +128,7 @@ namespace hellfire {
         }
     }
 
-    CameraComponent* SceneManager::get_active_camera() const {
+    CameraComponent *SceneManager::get_active_camera() const {
         if (active_scene_) {
             return active_scene_->get_active_camera();
         }
@@ -151,7 +142,7 @@ namespace hellfire {
         return {};
     }
 
-    void SceneManager::set_active_scene(Scene* scene) {
+    void SceneManager::set_active_scene(Scene *scene) {
         if (scene == active_scene_) return;
 
         active_scene_ = scene;
