@@ -27,7 +27,7 @@ hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
     city_model->transform()->set_position(0, 0, 0);
     city_model->transform()->set_scale(0.01);
 
-    hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(scene, "Sol Light", glm::vec3(-0.22f, -1.0f, 0.0f), glm::vec3(1.0f), 1.3f);
+    hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(scene, "Sol Light", glm::vec3(-0.22f, -1.0f, 0.0f), glm::vec3(1.0f), 0.6f);
     
     // Camera
     hellfire::EntityID camera_id = hellfire::PerspectiveCamera::create(

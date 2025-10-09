@@ -25,6 +25,9 @@ namespace hellfire::editor {
             throw std::runtime_error("EditorPlugin: No window service available");
         }
 
+        // Make sure vsync is enabled by default
+        window->enable_vsync(true);
+
         initialize_imgui(window);
 
         // Make sure the renderer render's the scene to a framebuffer
@@ -121,7 +124,7 @@ namespace hellfire::editor {
 
         // Create main dockspace
         create_dockspace();
-        
+
         scene_hierarchy_->render();
         render_viewport_window();
     }
@@ -153,10 +156,11 @@ namespace hellfire::editor {
         }
         ImGui::End();
     }
-    void TextCentered(const std::string& text) {
-        auto viewport_size  = ImGui::GetContentRegionAvail();
+
+    void TextCentered(const std::string &text) {
+        auto viewport_size = ImGui::GetContentRegionAvail();
         auto text_width = ImGui::CalcTextSize(text.c_str()).x;
-        ImGui::SetCursorPos(ImVec2((viewport_size.x - text_width)/2, viewport_size.y/2));
+        ImGui::SetCursorPos(ImVec2((viewport_size.x - text_width) / 2, viewport_size.y / 2));
         ImGui::SetWindowFontScale(1.5f);
         ImGui::Text(text.c_str());
         ImGui::SetWindowFontScale(1.0f);
@@ -167,8 +171,7 @@ namespace hellfire::editor {
 
         const std::string &scene_name = editor_context_.active_scene->get_name();
 
-
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGuiViewport *viewport = ImGui::GetMainViewport();
         ImVec2 default_size = ImVec2(viewport->Size.x / 1.5, viewport->Size.y / 1.5);
         ImVec2 default_pos = ImVec2(
             viewport->Pos.x + (viewport->Size.x - default_size.x) * 0.5f,
@@ -180,26 +183,47 @@ namespace hellfire::editor {
         ImGui::SetNextWindowSizeConstraints(ImVec2(320, 180), ImVec2(UINT_MAX, UINT_MAX));
 
         if (ImGui::Begin(scene_name.c_str())) {
-                ImVec2 viewport_size = ImGui::GetContentRegionAvail();
+            ImVec2 viewport_size = ImGui::GetContentRegionAvail();
+
+            // Store last valid size
+            static ImVec2 last_valid_size = {800, 600};
+            static ImVec2 last_resize_size = {0, 0};
+            static float last_resize_time = 0.0f;
+            const float RESIZE_DELAY = 0.016f; 
+
+            // Use last valid size if current one is invalid
             if (viewport_size.x > 0 && viewport_size.y > 0) {
-                auto *renderer = ServiceLocator::get_service<Renderer>();
-                renderer->resize_scene_framebuffer(static_cast<uint32_t>(viewport_size.x), static_cast<uint32_t>(viewport_size.y));
+                last_valid_size = viewport_size;
+            } else {
+                viewport_size = last_valid_size;
+            }
+
+            auto *renderer = ServiceLocator::get_service<Renderer>();
+            float current_time = static_cast<float>(ImGui::GetTime());
+
+            // Only resize if dimensions actually changed
+            static ImVec2 last_viewport_size = {0, 0};
+            if (viewport_size.x != last_viewport_size.x || viewport_size.y != last_viewport_size.y &&  (current_time - last_resize_time) > RESIZE_DELAY) {
+                renderer->resize_scene_framebuffer(static_cast<uint32_t>(viewport_size.x),
+                                                   static_cast<uint32_t>(viewport_size.y));
+                last_viewport_size = viewport_size;
+                last_resize_time = current_time;
 
                 // Update camera's aspect ratio
-                if (auto* camera = editor_context_.active_scene->get_active_camera()) {
-                    float aspect = viewport_size.x / viewport_size.y;
-                    camera->set_aspect_ratio(aspect);
+                if (auto *camera = editor_context_.active_scene->get_active_camera()) {
+                    const float aspect_ratio = viewport_size.x / viewport_size.y;
+                    camera->set_aspect_ratio(aspect_ratio);
                 }
-
-                const uint32_t scene_texture = renderer->get_scene_texture();
-                if (!editor_context_.active_scene->get_active_camera()) {
-                    TextCentered("No Active Camera In Scene!");
-                } else {
-                    ImGui::Image(scene_texture, viewport_size);
-                }
-
-                render_viewport_stats_overlay();
             }
+
+            const uint32_t scene_texture = renderer->get_scene_texture();
+            if (!editor_context_.active_scene->get_active_camera()) {
+                TextCentered("No Active Camera In Scene!");
+            } else {
+                ImGui::Image(scene_texture, viewport_size);
+            }
+
+            render_viewport_stats_overlay();
         }
         ImGui::End();
     }
