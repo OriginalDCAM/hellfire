@@ -5,6 +5,7 @@
 #include "Scenes/SponzaScene.h"
 
 #include "hellfire-core.h"
+#include "Scripts/PlayerController.h"
 
 hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
     const auto scene = new hellfire::Scene("Sponza Scene");
@@ -21,13 +22,12 @@ hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
     spaceshuttle_two->transform()->set_position(0,20,0);
     
     
-    hellfire::EntityID city_model_id = hellfire::Asset::load(scene, "assets/models/city/city.glb");
+    hellfire::EntityID city_model_id = hellfire::Asset::load(scene, "assets/models/sponza-palace/source/scene.glb");
     auto* city_model = scene->get_entity(city_model_id);
     city_model->transform()->set_position(0, 0, 0);
-    city_model->transform()->set_rotation(-90, 0, 0);
     city_model->transform()->set_scale(0.01);
 
-    hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(scene, "Sol Light", glm::vec3(-0.22f, 1.0f, 0.0f), glm::vec3(1.0f), 1.3f);
+    hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(scene, "Sol Light", glm::vec3(-0.22f, -1.0f, 0.0f), glm::vec3(1.0f), 0.6f);
     
     // Camera
     hellfire::EntityID camera_id = hellfire::PerspectiveCamera::create(

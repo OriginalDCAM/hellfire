@@ -50,6 +50,18 @@ namespace hellfire {
 
         glDisable(GL_CULL_FACE);
 
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // Makes errors appear immediately
+        glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, 
+                                  GLenum severity, GLsizei length, 
+                                  const GLchar* message, const void* userParam) {
+            if (type == GL_DEBUG_TYPE_ERROR) {
+                std::cerr << "GL ERROR: " << message << std::endl;
+                __debugbreak();
+                // Optionally set a breakpoint here
+            }
+        }, nullptr);
+
         skybox_renderer_.initialize();
     }
 
@@ -345,7 +357,6 @@ namespace hellfire {
             mesh->bind();
             cmd.instanced_renderable->bind_instance_buffers();
             mesh->draw_instanced(cmd.instanced_renderable->get_instance_count());
-            cmd.instanced_renderable->unbind_instance_buffers();
             mesh->unbind();
         }
 
@@ -367,28 +378,30 @@ namespace hellfire {
     void Renderer::create_scene_framebuffer(uint32_t width, uint32_t height) {
         framebuffer_width_ = width;
         framebuffer_height_ = height;
-        scene_framebuffer_ = std::make_unique<Framebuffer>(width, height);
+        scene_framebuffers_[0] = std::make_unique<Framebuffer>(width, height);
+        scene_framebuffers_[1] = std::make_unique<Framebuffer>(width, height);
     }
 
     void Renderer::resize_scene_framebuffer(uint32_t width, uint32_t height) {
-        if (scene_framebuffer_) {
-            framebuffer_width_ = width;
-            framebuffer_height_ = height;
-            scene_framebuffer_->resize(width, height);
-        } else {
-            create_scene_framebuffer(width, height);
+        framebuffer_width_ = width;
+        framebuffer_height_ = height;
+
+        // Resize both buffers
+        if (scene_framebuffers_[0]) {
+            scene_framebuffers_[current_fb_index_]->resize(width, height);
         }
     }
 
     uint32_t Renderer::get_scene_texture() const {
-        if (scene_framebuffer_) {
-            return scene_framebuffer_->get_color_texture();
+        int display_index = 1 - current_fb_index_;
+        if (scene_framebuffers_[display_index]) {
+            return scene_framebuffers_[display_index]->get_color_texture();
         }
         return 0;
     }
 
     void Renderer::render_to_texture(Scene &scene, CameraComponent &camera, uint32_t width, uint32_t height) {
-        if (!scene_framebuffer_ || scene_framebuffer_->get_width() != width || scene_framebuffer_->get_height() !=
+        if (!scene_framebuffers_[0] || scene_framebuffers_[current_fb_index_]->get_width() != width || scene_framebuffers_[current_fb_index_]->get_height() !=
             height) {
             resize_scene_framebuffer(width, height);
         }
@@ -397,22 +410,28 @@ namespace hellfire {
     }
 
     void Renderer::render_scene_to_framebuffer(Scene &scene, CameraComponent &camera) {
-        if (!scene_framebuffer_) {
+        if (!scene_framebuffers_[0]) {
             create_scene_framebuffer(framebuffer_width_, framebuffer_height_);
         }
 
-        scene_framebuffer_->bind();
-
-        glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+        // Check if the OTHER buffer (display buffer) needs resizing
+        int display_index = 1 - current_fb_index_;
+        if (scene_framebuffers_[display_index] && 
+            (scene_framebuffers_[display_index]->get_width() != framebuffer_width_ ||
+             scene_framebuffers_[display_index]->get_height() != framebuffer_height_)) {
+            scene_framebuffers_[display_index]->resize(framebuffer_width_, framebuffer_height_);
+             }
+        
+        scene_framebuffers_[current_fb_index_]->bind();
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glEnable(GL_DEPTH_TEST);
-
         render_internal(scene, camera);
-
-        scene_framebuffer_->unbind();
-
+        scene_framebuffers_[current_fb_index_]->unbind();
         glFlush();
+
+        // Swap for next frame
+        current_fb_index_ = 1 - current_fb_index_;
     }
 
     void Renderer::set_fallback_shader(Shader &fallback_shader) {

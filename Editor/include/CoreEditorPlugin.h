@@ -3,6 +3,12 @@
 //
 
 #pragma once
+#include <memory>
+#include <unordered_map>
+
+#include "EditorComponent.h"
+#include "MenuBarComponent.h"
+#include "SceneHierarchyComponent.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
 
@@ -21,11 +27,11 @@ namespace hellfire::editor {
 
         void on_end_frame() override;
 
-        void render_menu_bar();
-
         void on_render() override;
 
-        void render_test_windows();
+        void render_viewport_stats_overlay();
+
+        void render_viewport_window();
 
         void create_dockspace();
 
@@ -43,8 +49,13 @@ namespace hellfire::editor {
 
         void on_window_focus(bool focused) override;
     private:
+        EditorContext editor_context_;
         Application* app_ = nullptr;
         bool imgui_initialized_ = false;
         bool show_demo_ = true;
+        
+        // UI Components
+        std::unique_ptr<MenuBarComponent> menu_bar_;
+        std::unique_ptr<SceneHierarchyComponent> scene_hierarchy_;
     };
 }

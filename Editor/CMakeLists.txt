@@ -19,6 +19,24 @@ target_link_libraries(${APP_NAME}
         glfw
 )
 
+if (WIN32)
+    # Create a directory junction for assets
+    add_custom_command(TARGET ${APP_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E remove -f "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
+            COMMAND cmd /c "mklink /J \"$<TARGET_FILE_DIR:${APP_NAME}>\\assets\" \"${CMAKE_CURRENT_SOURCE_DIR}\\assets\""
+            COMMENT "Creating directory junction to assets directory"
+    )
+else()
+    # Unix symlink for assets
+    add_custom_command(TARGET ${APP_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E remove -f "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+            "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+            "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
+            COMMENT "Creating symlink to assets directory"
+    )
+endif()
+
 target_compile_definitions(${APP_NAME} PRIVATE HELLFIRE_EDITOR_ENABLED)
 
 # Set working directory for debugging in various IDEs

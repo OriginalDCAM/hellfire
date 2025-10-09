@@ -5,11 +5,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <fstream>
 #include <iostream>
-#include <set>
 #include <stb/stb_image.h>
 
 #include "hellfire/graphics/material/Material.h"
-#include "hellfire/utilities/TextureUtils.h"
 
 namespace hellfire {
     // Static cache for TextureCache
@@ -223,11 +221,6 @@ namespace hellfire {
     void Texture::bind(unsigned int slot) const {
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, texture_id_);
-
-        GLenum error = glGetError();
-        if (error != GL_NO_ERROR) {
-            std::cerr << "OpenGL error in texture bind: " << error << std::endl;
-        }
     }
 
     void Texture::unbind() const {

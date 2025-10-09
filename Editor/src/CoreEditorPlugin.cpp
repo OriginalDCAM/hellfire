@@ -3,8 +3,13 @@
 //
 #include "CoreEditorPlugin.h"
 
+#include "CoreEditorStyles.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "EditorComponent.h"
+#include "MenuBarComponent.h"
+#include "SceneHierarchyComponent.h"
 #include "hellfire/core/Application.h"
 #include "hellfire/platform/IWindow.h"
 #include "hellfire/utilities/ServiceLocator.h"
@@ -20,7 +25,20 @@ namespace hellfire::editor {
             throw std::runtime_error("EditorPlugin: No window service available");
         }
 
+        // Make sure vsync is enabled by default
+        window->enable_vsync(true);
+
         initialize_imgui(window);
+
+        // Make sure the renderer render's the scene to a framebuffer
+        ServiceLocator::get_service<Renderer>()->set_render_to_framebuffer(true);
+
+        // Set context for UI components
+        menu_bar_ = std::make_unique<MenuBarComponent>();
+        menu_bar_->set_context(&editor_context_);
+
+        scene_hierarchy_ = std::make_unique<SceneHierarchyComponent>();
+        scene_hierarchy_->set_context(&editor_context_);
     }
 
     void CoreEditorPlugin::initialize_imgui(IWindow *window) {
@@ -33,8 +51,12 @@ namespace hellfire::editor {
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
+        io.ConfigViewportsNoDecoration = false;
+        io.ConfigViewportsNoTaskBarIcon = false;
+        io.ConfigViewportsNoAutoMerge = false;
+
         // Setup style
-        ImGui::StyleColorsDark();
+        styles::SetupDarkRedModeStyle();
 
         ImGuiStyle &style = ImGui::GetStyle();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -91,56 +113,117 @@ namespace hellfire::editor {
         }
     }
 
-    void CoreEditorPlugin::render_menu_bar() {
-        if (ImGui::BeginMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("New Project")) {
-                    std::cout << "New Project" << std::endl;
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Scene")) {
-                if (ImGui::MenuItem("New Scene")) {
-                    std::cout << "New scene created!" << std::endl;
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-    }
-
     void CoreEditorPlugin::on_render() {
         if (!imgui_initialized_) return;
+
+        // Sync editor context with scene manager
+        auto sm = ServiceLocator::get_service<SceneManager>();
+        if (sm && editor_context_.active_scene != sm->get_active_scene()) {
+            editor_context_.active_scene = sm->get_active_scene();
+        }
 
         // Create main dockspace
         create_dockspace();
 
-        if (show_demo_) {
-            ImGui::ShowDemoWindow(&show_demo_);
-        }
-
-        render_test_windows();
+        scene_hierarchy_->render();
+        render_viewport_window();
     }
 
-    void CoreEditorPlugin::render_test_windows() {
-        // Test window 3 - Game Viewport
-        if (ImGui::Begin("Game Viewport")) {
-            ImVec2 size = ImGui::GetContentRegionAvail();
-            if (size.x > 0 && size.y > 0) {
-                // Draw a simple placeholder
-                ImDrawList *draw_list = ImGui::GetWindowDrawList();
-                ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
-                ImVec2 canvas_size = ImGui::GetContentRegionAvail();
+    void CoreEditorPlugin::render_viewport_stats_overlay() {
+        ImVec2 window_pos = ImGui::GetWindowPos();
 
-                draw_list->AddRectFilled(canvas_pos,
-                                         ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y),
-                                         IM_COL32(50, 50, 50, 255));
-                draw_list->AddRect(canvas_pos,
-                                   ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y),
-                                   IM_COL32(255, 255, 255, 255));
+        // Position overlay in top-left corner with padding
+        const float padding = 10.0f;
+        ImGui::SetNextWindowPos(ImVec2(window_pos.x + padding, window_pos.y + padding + ImGui::GetFrameHeight()));
+        ImGui::SetNextWindowBgAlpha(0.35f);
 
-                ImGui::InvisibleButton("canvas", canvas_size);
+        ImGuiWindowFlags overlay_flags =
+                ImGuiWindowFlags_NoDecoration |
+                ImGuiWindowFlags_AlwaysAutoResize |
+                ImGuiWindowFlags_NoSavedSettings |
+                ImGuiWindowFlags_NoFocusOnAppearing |
+                ImGuiWindowFlags_NoNav |
+                ImGuiWindowFlags_NoMove;
+
+        if (ImGui::Begin("##ViewportStats", nullptr, overlay_flags)) {
+            ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+            ImGui::Text("Frame Time: %.2f ms", 1000.0f / ImGui::GetIO().Framerate);
+
+            if (editor_context_.active_scene) {
+                ImGui::Separator();
+                ImGui::Text("Entities: %zu", editor_context_.active_scene->get_entity_count());
             }
+        }
+        ImGui::End();
+    }
+
+    void TextCentered(const std::string &text) {
+        auto viewport_size = ImGui::GetContentRegionAvail();
+        auto text_width = ImGui::CalcTextSize(text.c_str()).x;
+        ImGui::SetCursorPos(ImVec2((viewport_size.x - text_width) / 2, viewport_size.y / 2));
+        ImGui::SetWindowFontScale(1.5f);
+        ImGui::Text(text.c_str());
+        ImGui::SetWindowFontScale(1.0f);
+    }
+
+    void CoreEditorPlugin::render_viewport_window() {
+        if (!editor_context_.active_scene) return;
+
+        const std::string &scene_name = editor_context_.active_scene->get_name();
+
+        ImGuiViewport *viewport = ImGui::GetMainViewport();
+        ImVec2 default_size = ImVec2(viewport->Size.x / 1.5, viewport->Size.y / 1.5);
+        ImVec2 default_pos = ImVec2(
+            viewport->Pos.x + (viewport->Size.x - default_size.x) * 0.5f,
+            viewport->Pos.y + (viewport->Size.y - default_size.y) * 0.5f
+        );
+
+        ImGui::SetNextWindowSize(default_size, ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(default_pos, ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSizeConstraints(ImVec2(320, 180), ImVec2(UINT_MAX, UINT_MAX));
+
+        if (ImGui::Begin(scene_name.c_str())) {
+            ImVec2 viewport_size = ImGui::GetContentRegionAvail();
+
+            // Store last valid size
+            static ImVec2 last_valid_size = {800, 600};
+            static ImVec2 last_resize_size = {0, 0};
+            static float last_resize_time = 0.0f;
+            const float RESIZE_DELAY = 0.016f; 
+
+            // Use last valid size if current one is invalid
+            if (viewport_size.x > 0 && viewport_size.y > 0) {
+                last_valid_size = viewport_size;
+            } else {
+                viewport_size = last_valid_size;
+            }
+
+            auto *renderer = ServiceLocator::get_service<Renderer>();
+            float current_time = static_cast<float>(ImGui::GetTime());
+
+            // Only resize if dimensions actually changed
+            static ImVec2 last_viewport_size = {0, 0};
+            if (viewport_size.x != last_viewport_size.x || viewport_size.y != last_viewport_size.y &&  (current_time - last_resize_time) > RESIZE_DELAY) {
+                renderer->resize_scene_framebuffer(static_cast<uint32_t>(viewport_size.x),
+                                                   static_cast<uint32_t>(viewport_size.y));
+                last_viewport_size = viewport_size;
+                last_resize_time = current_time;
+
+                // Update camera's aspect ratio
+                if (auto *camera = editor_context_.active_scene->get_active_camera()) {
+                    const float aspect_ratio = viewport_size.x / viewport_size.y;
+                    camera->set_aspect_ratio(aspect_ratio);
+                }
+            }
+
+            const uint32_t scene_texture = renderer->get_scene_texture();
+            if (!editor_context_.active_scene->get_active_camera()) {
+                TextCentered("No Active Camera In Scene!");
+            } else {
+                ImGui::Image(scene_texture, viewport_size);
+            }
+
+            render_viewport_stats_overlay();
         }
         ImGui::End();
     }
@@ -164,8 +247,7 @@ namespace hellfire::editor {
         ImGui::Begin("DockSpace", nullptr, window_flags);
         ImGui::PopStyleVar(3);
 
-        render_menu_bar();
-
+        menu_bar_->render();
         // Create dockspace
         ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);

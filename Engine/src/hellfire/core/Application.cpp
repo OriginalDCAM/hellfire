@@ -9,6 +9,7 @@ namespace hellfire {
         window_info_.width = width;
         window_info_.height = height;
         window_info_.aspect_ratio = static_cast<float>(width) / height;
+        window_info_.title = title;
     }
 
     Application::~Application() {
@@ -70,7 +71,7 @@ namespace hellfire {
         input_manager_ = std::make_unique<InputManager>();
 
         window_ = std::make_unique<GLFWWindow>();
-        if (!window_->create(window_info_.width, window_info_.height, "Hellfire Engine")) {
+        if (!window_->create(window_info_.width, window_info_.height, window_info_.title)) {
             throw std::runtime_error("Failed to create window");
         }
 

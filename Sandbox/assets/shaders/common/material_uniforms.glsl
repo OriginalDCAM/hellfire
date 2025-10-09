@@ -35,4 +35,5 @@ uniform int textureWrapMode;
 uniform float uAlpha;
 uniform float uTransparency;
 uniform bool useTransparency;
+uniform bool useLuminanceAsAlpha;
 

@@ -9,7 +9,7 @@
 #endif
 
 int main() {
-    hellfire::Application app(800, 600, "Editor");
+    hellfire::Application app(800, 600, "Hellfire Editor");
 
 #ifdef HELLFIRE_EDITOR_ENABLED
     // Register editor plugin
