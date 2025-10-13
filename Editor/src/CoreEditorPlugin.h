@@ -6,11 +6,12 @@
 #include <memory>
 #include <unordered_map>
 
-#include "EditorComponent.h"
-#include "MenuBarComponent.h"
-#include "SceneHierarchyComponent.h"
+#include "UI/Components/EditorComponent.h"
+#include "UI/Components/MenuBarComponent.h"
+#include "UI/Components/SceneHierarchyComponent.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
+#include "UI/Components/ViewportComponent.h"
 
 namespace hellfire::editor {
     class CoreEditorPlugin final : public IApplicationPlugin {
@@ -28,10 +29,6 @@ namespace hellfire::editor {
         void on_end_frame() override;
 
         void on_render() override;
-
-        void render_viewport_stats_overlay();
-
-        void render_viewport_window();
 
         void create_dockspace();
 
@@ -57,5 +54,6 @@ namespace hellfire::editor {
         // UI Components
         std::unique_ptr<MenuBarComponent> menu_bar_;
         std::unique_ptr<SceneHierarchyComponent> scene_hierarchy_;
+        std::unique_ptr<ViewportComponent> scene_viewport_;
     };
 }
