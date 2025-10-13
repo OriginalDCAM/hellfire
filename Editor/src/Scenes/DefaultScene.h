@@ -18,7 +18,7 @@ void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
         hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(scene, "Sol Light", glm::vec3(-0.22f, 1.0f, 0.22f), glm::vec3(0.0f, 0.4f, 0.5f), 1.0f);
 
     scene->set_active_camera(camera_id);
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 0; i++) {
         auto entity_id = hellfire::Cube::create(scene, "Cube_" + std::to_string(i), {.rotation = glm::vec3(-45.0f, 45.0f, 45.0f)});
         scene->get_entity(entity_id)->add_component<RotateScript>();
 

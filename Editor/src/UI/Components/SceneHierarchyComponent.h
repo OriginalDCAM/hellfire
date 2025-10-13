@@ -7,6 +7,8 @@
 namespace hellfire::editor {
 class SceneHierarchyComponent : public EditorComponent {
 public:
+    void render_context_menu();
+
     void render() override;
 private:
     void render_list();

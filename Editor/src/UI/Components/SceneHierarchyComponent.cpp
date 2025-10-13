@@ -5,28 +5,44 @@
 
 #include <imgui.h>
 
+#include "hellfire/graphics/geometry/Cube.h"
+#include "hellfire/graphics/geometry/Quad.h"
+#include "hellfire/graphics/geometry/Sphere.h"
+
 namespace hellfire::editor {
+    void SceneHierarchyComponent::render_context_menu() {
+        if (ImGui::BeginPopupContextWindow("HierarchyContextMenu")) {
+            const auto active_scene = context_->active_scene;
+            if (ImGui::MenuItem("Create Empty Entity")) {
+                if (active_scene) {
+                    active_scene->create_entity();
+                }
+            }
+            if (ImGui::BeginMenu("Mesh")) {
+                if (ImGui::MenuItem("Cube")) {
+                    Cube::create(active_scene, "Cube", {});
+                }
+                if (ImGui::MenuItem("Sphere")) {
+                    Sphere::create(active_scene, "Sphere", {});
+                }
+                if (ImGui::MenuItem("Quad")) {
+                    Quad::create(active_scene, "Quad");
+                }
+                if (ImGui::MenuItem("Cylinder", 0, false, false)) { }
+                if (ImGui::MenuItem("Stair", 0, false, false)) { }
+                ImGui::EndMenu();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
     void SceneHierarchyComponent::render() {
         const ImVec2 window_size = ImGui::GetContentRegionAvail();
         ImGui::SetNextWindowSize(ImVec2(window_size.x / 3, window_size.y / 3), ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Scene Hierarchy Panel")) {
             if (context_->active_scene) {
                 render_list();
-                if (ImGui::BeginPopupContextWindow("HierarchyContextMenu")) {
-                    if (ImGui::MenuItem("Create Empty Entity")) {
-                        // Create new entity
-                    }
-                    if (ImGui::BeginMenu("Mesh")) {
-                        // Paste entity
-                        if (ImGui::MenuItem("Cube")) { }
-                        if (ImGui::MenuItem("Sphere")) { }
-                        if (ImGui::MenuItem("Plane")) { }
-                        if (ImGui::MenuItem("Cylinder", 0, false, false)) { }
-                        if (ImGui::MenuItem("Stair", 0, false, false)) { }
-                        ImGui::EndMenu();
-                    }
-                    ImGui::EndPopup();
-                }
+                render_context_menu();
                 
             } else {
                 ImGui::Text("No scene selected");

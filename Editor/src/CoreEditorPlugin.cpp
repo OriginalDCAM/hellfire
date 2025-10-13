@@ -68,7 +68,7 @@ namespace hellfire::editor {
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
-        GLFWwindow *glfw_window = static_cast<GLFWwindow *>(window->get_native_handle());
+        auto *glfw_window = static_cast<GLFWwindow *>(window->get_native_handle());
         if (!glfw_window) {
             throw std::runtime_error("EditorPlugin: Could not get GLFW window handle");
         }
