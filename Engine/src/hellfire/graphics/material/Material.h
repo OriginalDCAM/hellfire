@@ -214,12 +214,12 @@ namespace hellfire {
             set_property("uvOffset", offset);
         }
 
-        void set_uv_rotation(float rotation) {
+        void set_uv_rotation(const float rotation) {
             set_property("uvRotation", rotation);
         }
 
         //== Transparency convenience methods===
-        void set_transparency(float alpha) {
+        void set_opacity(const float alpha) {
             set_property("uAlpha", alpha);
             set_property("useTransparency", alpha < 1.0f);
         }
@@ -341,7 +341,7 @@ namespace hellfire {
         }
 
         MaterialChain &transparency(float alpha) {
-            material_->set_transparency(alpha);
+            material_->set_opacity(alpha);
             return *this;
         }
 

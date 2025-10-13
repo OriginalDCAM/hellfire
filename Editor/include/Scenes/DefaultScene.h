@@ -2,6 +2,7 @@
 // Created by denzel on 07/10/2025.
 //
 
+#include "RotateScript.h"
 #include "hellfire/graphics/Skybox.h"
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Sphere.h"
@@ -19,6 +20,7 @@ void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
     scene->set_active_camera(camera_id);
     for (int i = 0; i < 1; i++) {
         auto entity_id = hellfire::Cube::create(scene, "Cube_" + std::to_string(i), {.rotation = glm::vec3(-45.0f, 45.0f, 45.0f)});
+        scene->get_entity(entity_id)->add_component<RotateScript>();
 
         if (i % 2 == 0) {
         auto child_entity_id = hellfire::Sphere::create(scene, "Sphere_Child_" + std::to_string(i), {.color = glm::vec3(0.5, 0.2, 0.7), .position = glm::vec3(-1.5f, -1.5f, -1.5f)});

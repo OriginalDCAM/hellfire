@@ -335,7 +335,7 @@ namespace hellfire::Addons {
         }
 
         if (ai_material->Get(AI_MATKEY_OPACITY, value) == AI_SUCCESS) {
-            material.set_transparency(value);
+            material.set_opacity(value);
             material.set_property("uOpacity", value);
             material.set_property("uAlpha", value);
         }

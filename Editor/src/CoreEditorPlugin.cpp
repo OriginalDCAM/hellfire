@@ -125,6 +125,10 @@ namespace hellfire::editor {
         // Create main dockspace
         create_dockspace();
 
+        if (show_demo_) {
+            ImGui::ShowDemoWindow(&show_demo_);
+        }
+
         scene_hierarchy_->render();
         render_viewport_window();
     }

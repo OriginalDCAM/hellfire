@@ -9,9 +9,9 @@
 
 namespace hellfire {
     bool Material::is_transparent() const {
-        float alpha = get_property<float>("uAlpha", 1.0f);
-        float transparency = get_property<float>("uTransparency", 1.0f);
-        bool use_transparency = get_property<bool>("useTransparency", false);
+        const auto alpha = get_property<float>("uAlpha", 1.0f);
+        const auto transparency = get_property<float>("uTransparency", 1.0f);
+        const bool use_transparency = get_property<bool>("useTransparency", false);
         
         return (alpha < 1.0f) || (transparency < 1.0f) || use_transparency;
     }

@@ -1,4 +1,6 @@
-﻿#include "../../../Engine/src/hellfire/scene/CameraFactory.h"
+﻿#include <utility>
+
+#include "../../../Engine/src/hellfire/scene/CameraFactory.h"
 #include "hellfire/assets/Asset.h"
 #include "hellfire/graphics/lighting/DirectionalLight.h"
 #include "Scenes/SolarSystemScene.h"
@@ -42,7 +44,7 @@ MaterialMap load_material_map() {
 
     auto earth_cloud_material = hellfire::MaterialBuilder::create_lambert("Earth Cloud Material");
     earth_cloud_material->set_texture(planet_surface_dir + "earth_clouds.png", hellfire::TextureType::DIFFUSE);
-    earth_cloud_material->set_transparency(0.50f);
+    earth_cloud_material->set_opacity(0.75f);
     earth_cloud_material->set_property("useLuminanceAsAlpha", true);
     materials["EARTH_CLOUD_MATERIAL"] = earth_cloud_material;
 
@@ -97,9 +99,9 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
     // Helper for creating planets
     auto create_planet = [&](const std::string &name, float scale, const glm::vec3 &position,
                              std::shared_ptr<hellfire::Material> material,
-                             float orbit_radius = 0.0f, float orbit_speed = 0.0f) -> hellfire::EntityID {
+                             const float orbit_radius = 0.0f, float orbit_speed = 0.0f) -> hellfire::EntityID {
         hellfire::EntityID id = hellfire::Sphere::create(scene, name, {
-                                                             .material = material,
+                                                             .material = std::move(material),
                                                              .position = position,
                                                              .scale = glm::vec3(scale),
                                                              .rings = 64,
@@ -157,7 +159,7 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
     scene->set_parent(asteroid_belt_id, world_id);
 
     hellfire::EntityID jupiter_id = create_planet("Jupiter", 8.0f, glm::vec3(0, 0, 180),
-                                                  materials["JUPITER_MATERIAL"], 180.0f, 0.023f);
+                                                  materials["JUPITER_MATERIAL"], 180.0f, 0.0023f);
     scene->set_parent(jupiter_id, world_id);
 
     hellfire::EntityID saturn_id = create_planet("Saturn", 7.5f, glm::vec3(0, 0, 240),
