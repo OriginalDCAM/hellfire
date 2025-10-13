@@ -3,12 +3,11 @@
 add_compile_definitions(HELLFIRE_EDITOR_ENABLED)
 
 file(GLOB_RECURSE APP_SOURCES "src/*.cpp")
-file(GLOB_RECURSE APP_HEADERS "include/*.h" "include*.hpp")
+file(GLOB_RECURSE APP_HEADERS "src/*.h" "src/*.hpp")
 add_executable(${APP_NAME} ${APP_SOURCES} ${APP_HEADERS})
 
 target_include_directories(${APP_NAME}
 PRIVATE
-${CMAKE_CURRENT_SOURCE_DIR}/include
 ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
@@ -60,7 +59,7 @@ if (MSVC)
 
     # Add source grouping
     source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${APP_SOURCES})
-    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${APP_HEADERS})
+    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Header Files" FILES ${APP_HEADERS})
 endif()
 
 
