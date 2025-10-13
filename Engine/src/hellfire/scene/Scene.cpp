@@ -2,7 +2,6 @@
 
 #include "../graphics/Skybox.h"
 #include "hellfire/assets/AnimationSystem.h"
-#include "hellfire/assets/AnimationSystem.h"
 #include "hellfire/ecs/CameraComponent.h"
 
 namespace hellfire {
@@ -14,8 +13,10 @@ namespace hellfire {
     }
 
     EntityID Scene::create_entity(const std::string &name) {
+        std::string unique_name = generate_unique_name(name);
+        
         EntityID id = next_id_++;
-        auto entity = std::make_unique<Entity>(id, name);
+        auto entity = std::make_unique<Entity>(id, unique_name);
 
         entity->add_component<TransformComponent>();
         
@@ -167,6 +168,43 @@ namespace hellfire {
 
     void Scene::set_skybox(Skybox *skybox) {
         skybox_.reset(skybox);
+    }
+
+    std::string Scene::generate_unique_name(const std::string &base_name) {
+        // Check if base name exists
+        bool name_exists = false;
+        for (const auto& [id, entity] : entities_) {
+                if (entity->get_name() == base_name) {
+                    name_exists = true;
+                    break;
+                }
+        }
+
+        // If base name is unique, use it
+        if (!name_exists) {
+            name_counters_[base_name] = 0;
+            return base_name;
+        }
+
+        // Otherwise, find next available number
+        int& counter = name_counters_[base_name];
+        std::string unique_name;
+
+        do {
+            counter++;
+            unique_name = base_name + " (" + std::to_string(counter) + ")";
+
+            // Check if this numbered name exists
+            name_exists = false;
+            for (const auto &entity: entities_ | std::views::values) {
+                if (entity->get_name() == unique_name) {
+                    name_exists = true;
+                    break;
+                }
+            }
+        } while (name_exists);
+
+        return unique_name;
     }
 
     void Scene::update_hierarchy(EntityID entity_id, float delta_time) {

@@ -77,6 +77,7 @@ namespace hellfire {
         void set_source_filename(const std::string &filename) { source_filename_ = filename; }
         const std::string &get_source_filename() const { return source_filename_; }
         bool was_loaded_from_file() const { return !source_filename_.empty(); }
+        std::string generate_unique_name(const std::string& base_name);
 
     private:
         // All entities owned by scene
@@ -94,6 +95,7 @@ namespace hellfire {
         bool is_active_;
         std::string source_filename_;
         std::unique_ptr<Skybox> skybox_;
+        std::unordered_map<std::string, int> name_counters_;
 
         // Helper methods
         void update_hierarchy(EntityID entity_id, float delta_time);
