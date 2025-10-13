@@ -33,5 +33,5 @@ void main() {
     float finalAlpha = calculateFinalAlpha(baseColor.a);
     result = applyGammaCorrection(result);
 
-    fragColor = vec4(normal, finalAlpha);
+    fragColor = vec4(result, finalAlpha);
 }
