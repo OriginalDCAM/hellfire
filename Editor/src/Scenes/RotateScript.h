@@ -3,7 +3,6 @@
 //
 
 #pragma once
-#include "glm/glm.hpp"
 #include "hellfire/ecs/ScriptComponent.h"
 #include "hellfire/ecs/TransformComponent.h"
 

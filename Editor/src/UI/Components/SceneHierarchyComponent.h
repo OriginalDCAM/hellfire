@@ -12,6 +12,9 @@ public:
     void render() override;
 private:
     void render_list();
+
+    void render_add_entity_menu();
+
     void render_list_item(EntityID entity_id);
 };
 }

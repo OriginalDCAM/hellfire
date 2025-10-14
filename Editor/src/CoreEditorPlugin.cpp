@@ -16,6 +16,7 @@
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
 #include "UI/Components/Viewport/SceneCameraScript.h"
 #include "UI/Components/Viewport/ViewportComponent.h"
+#include "IconsFontAwesome6.h"
 
 namespace hellfire::editor {
     void CoreEditorPlugin::on_initialize(Application &app) {
@@ -51,6 +52,17 @@ namespace hellfire::editor {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
+
+        // Load default font
+        io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
+        static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+        ImFontConfig icons_config;
+        icons_config.MergeMode = true;
+        icons_config.PixelSnapH = true;
+        icons_config.GlyphMinAdvanceX = 16.0f;
+        icons_config.GlyphOffset = ImVec2(0, 0);
+
+        io.Fonts->AddFontFromFileTTF("assets/fonts/Font Awesome 7 Free-Solid-900.otf", 16.0f, &icons_config, icons_ranges);
 
         // Enable docking and multi-viewport
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;

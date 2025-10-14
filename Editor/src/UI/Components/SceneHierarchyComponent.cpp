@@ -5,6 +5,7 @@
 
 #include <imgui.h>
 
+#include "IconsFontAwesome6.h"
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Quad.h"
@@ -15,42 +16,7 @@
 namespace hellfire::editor {
     void SceneHierarchyComponent::render_context_menu() {
         if (ImGui::BeginPopupContextWindow("HierarchyContextMenu")) {
-            const auto active_scene = context_->active_scene;
-            if (ImGui::MenuItem("Create Empty Entity")) {
-                if (active_scene) {
-                    active_scene->create_entity();
-                }
-            }
-            if (ImGui::BeginMenu("Mesh")) {
-                if (ImGui::MenuItem("Cube")) {
-                    const EntityID new_cube_id = Cube::create(active_scene, "Cube", {});
-                    context_->selected_entity_id = new_cube_id;
-                }
-                if (ImGui::MenuItem("Sphere")) {
-                    const EntityID new_sphere_id = Sphere::create(active_scene, "Sphere", {});
-                    context_->selected_entity_id = new_sphere_id;
-                }
-                if (ImGui::MenuItem("Quad")) {
-                    const EntityID new_quad_id = Quad::create(active_scene, "Quad");
-                    context_->selected_entity_id = new_quad_id;
-                }
-                ImGui::Separator(); 
-                if (ImGui::MenuItem("Cylinder", 0, false, false)) { }
-                if (ImGui::MenuItem("Stair", 0, false, false)) { }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Lights")) {
-                if (ImGui::MenuItem("Directional")) {
-                    const EntityID new_directional_light_id = DirectionalLight::create(active_scene, "Directional Light");
-                    context_->selected_entity_id = new_directional_light_id;
-                }
-                if (ImGui::MenuItem("Point")) {
-                    const EntityID new_point_light_id = PointLight::create(active_scene, "Point Light");
-                    context_->selected_entity_id = new_point_light_id;
-                }
-                if (ImGui::MenuItem("Spot", 0, false, false)) {}
-                ImGui::EndMenu();
-            }
+            render_add_entity_menu();
             ImGui::EndPopup();
         }
     }
@@ -60,6 +26,30 @@ namespace hellfire::editor {
         ImGui::SetNextWindowSize(ImVec2(window_size.x / 3, window_size.y / 3), ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Scene Hierarchy Panel")) {
             if (context_->active_scene) {
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, 6.0f));
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                // Add button at the top
+                if (ImGui::Button(ICON_FA_PLUS "##AddEntity")) {
+                    ImGui::OpenPopup("AddEntityPopup");
+                }
+
+                ImGui::PopStyleColor(3);
+                ImGui::PopStyleVar(2);
+
+                // Tooltip for button
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Add Entity");
+                }
+
+                // Popup menu for adding entities
+                if (ImGui::BeginPopup("AddEntityPopup")) {
+                    render_add_entity_menu();
+                    ImGui::EndPopup();
+                }
+                ImGui::Separator();
                 render_context_menu();
                 render_list();
                 
@@ -72,12 +62,59 @@ namespace hellfire::editor {
 
     void SceneHierarchyComponent::render_list() {
         const std::string &active_scene_name = context_->active_scene->get_name();
+
+        // Open by default
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        
         if (ImGui::TreeNode(active_scene_name.c_str())) {
             for (const EntityID entity_id: context_->active_scene->get_root_entities()) {
                 render_list_item(entity_id);
             }
             
             ImGui::TreePop();
+        }
+    }
+
+    void SceneHierarchyComponent::render_add_entity_menu() {
+        const auto active_scene = context_->active_scene;
+        
+        if (ImGui::MenuItem("Empty Entity")) {
+            if (active_scene) {
+                const EntityID new_entity_id = active_scene->create_entity();
+                context_->selected_entity_id = new_entity_id;
+            }
+        }
+    
+        if (ImGui::BeginMenu("Mesh")) {
+            if (ImGui::MenuItem("Cube")) {
+                const EntityID new_cube_id = Cube::create(active_scene, "Cube", {});
+                context_->selected_entity_id = new_cube_id;
+            }
+            if (ImGui::MenuItem("Sphere")) {
+                const EntityID new_sphere_id = Sphere::create(active_scene, "Sphere", {});
+                context_->selected_entity_id = new_sphere_id;
+            }
+            if (ImGui::MenuItem("Quad")) {
+                const EntityID new_quad_id = Quad::create(active_scene, "Quad");
+                context_->selected_entity_id = new_quad_id;
+            }
+            ImGui::Separator(); 
+            if (ImGui::MenuItem("Cylinder", nullptr, false, false)) { }
+            if (ImGui::MenuItem("Stair", nullptr, false, false)) { }
+            ImGui::EndMenu();
+        }
+    
+        if (ImGui::BeginMenu("Lights")) {
+            if (ImGui::MenuItem("Directional")) {
+                const EntityID new_directional_light_id = DirectionalLight::create(active_scene, "Directional Light");
+                context_->selected_entity_id = new_directional_light_id;
+            }
+            if (ImGui::MenuItem("Point")) {
+                const EntityID new_point_light_id = PointLight::create(active_scene, "Point Light");
+                context_->selected_entity_id = new_point_light_id;
+            }
+            if (ImGui::MenuItem("Spot", nullptr, false, false)) {}
+            ImGui::EndMenu();
         }
     }
 
@@ -113,7 +150,8 @@ namespace hellfire::editor {
         }
 
         // Render the tree node
-        bool node_open = ImGui::TreeNodeEx(entity_name.c_str(), flags);
+        std::string display_name = ICON_FA_CUBES " " + entity_name;
+        bool node_open = ImGui::TreeNodeEx(display_name.c_str(), flags);
 
         if (ImGui::IsItemClicked()) {
             context_->selected_entity_id = entity_id;
@@ -131,6 +169,7 @@ namespace hellfire::editor {
                 context_->active_scene->destroy_entity(entity_id);
                 if (context_->selected_entity_id == entity_id) {
                     context_->selected_entity_id = 0; // Deselect
+                    ImGui::TreePop();
                 }
                 ImGui::EndPopup();
                 ImGui::PopID();
