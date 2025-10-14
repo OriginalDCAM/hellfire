@@ -2,9 +2,9 @@
 // Created by denzel on 14/08/2025.
 //
 
-#include "Scripts/PlayerController.h"
+#include "UI/COmponents/Viewport/SceneCameraScript.h"
 
-#include "../../../Engine/src/hellfire/core/Application.h"
+#include "hellfire/core/Application.h"
 #include "hellfire/ecs/CameraComponent.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "GLFW/glfw3.h"
@@ -24,71 +24,8 @@ void SceneCameraScript::on_init() {
 }
 
 void SceneCameraScript::on_update(float delta_time) {
-    handle_drone_mode(delta_time);
-    handle_movement(delta_time);
-}
-
-void SceneCameraScript::handle_drone_mode(float delta_time) {
-    static float time_since_last_v_press = 0.2f; 
-    
-    time_since_last_v_press += delta_time;
-    
-    if (hellfire::ServiceLocator::get_service<hellfire::InputManager>()->is_key_pressed('v') && time_since_last_v_press > 1.0f) {
-        time_since_last_v_press = 0.0f;
-        
-        if (drone_mode_) {
-            // Switching FROM drone mode TO free flight
-            drone_mode_ = false;
-            restore_free_flight_position();
-        } else {
-            // Switching FROM free flight TO drone mode
-            save_free_flight_position();
-            drone_mode_ = true;
-            set_drone_overview_position();
-        }
-    }
-    
-    // Handle keyboard looking
     handle_keyboard_look(delta_time);
-}
-
-void SceneCameraScript::save_free_flight_position() {
-    const auto* transform = get_transform();
-    if (!transform) return;
-    
-    // Save the current position and orientation
-    last_known_player_position = transform->get_position();
-    saved_yaw_ = yaw_;
-    saved_pitch_ = pitch_;
-}
-
-void SceneCameraScript::restore_free_flight_position() {
-    auto* transform = get_transform();
-    auto* camera = get_component<hellfire::CameraComponent>();
-    if (!transform || !camera) return;
-    
-    transform->set_position(last_known_player_position);
-    yaw_ = saved_yaw_;
-    pitch_ = saved_pitch_;
-    update_camera_orientation();
-}
-
-void SceneCameraScript::set_drone_overview_position() {
-    auto* transform = get_transform();
-    auto* camera = get_component<hellfire::CameraComponent>();
-    if (!transform || !camera) return;
-
-    // Above Jupiter
-    glm::vec3 overview_position(0.0f, 25.0f, 200.0f); 
-    transform->set_position(overview_position);
-    
-    // Look at the center of the solar system (where the sun is)
-    glm::vec3 look_at_target(0.0f, 0.0f, 0.0f);
-    camera->look_at(look_at_target);
-    
-    yaw_ = camera->get_yaw();
-    pitch_ = camera->get_pitch();
-    
+    handle_movement(delta_time);
 }
 
 void SceneCameraScript::handle_keyboard_look(float delta_time) {
@@ -166,7 +103,7 @@ void SceneCameraScript::handle_movement(float delta_time) const {
 }
 
 void SceneCameraScript::on_remove() {
-    std::cout << "PlayerController removed from entity: " << get_owner()->get_name() << std::endl;
+    std::cout << "SceneCameraScript removed from entity: " << get_owner()->get_name() << std::endl;
 }
 
 void SceneCameraScript::handle_mouse_movement(float x_offset, float y_offset) {
@@ -194,7 +131,4 @@ void SceneCameraScript::update_camera_orientation() const {
     camera->set_pitch(pitch_);
 }
 
-void SceneCameraScript::on_interact() {
-    // TODO: raycast from cursor to object for object information (planet name, orbit speed, avg temperature, etc.)
-    std::cout << "Player interacted!" << std::endl;
-}
+

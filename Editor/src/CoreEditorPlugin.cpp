@@ -14,7 +14,8 @@
 #include "hellfire/platform/IWindow.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
-#include "UI/Components/ViewportComponent.h"
+#include "UI/Components/Viewport/SceneCameraScript.h"
+#include "UI/Components/Viewport/ViewportComponent.h"
 
 namespace hellfire::editor {
     void CoreEditorPlugin::on_initialize(Application &app) {
@@ -192,10 +193,16 @@ namespace hellfire::editor {
     }
 
     bool CoreEditorPlugin::on_mouse_move(float x, float y, float x_offset, float y_offset) {
+        if (scene_viewport_->is_editor_camera_active()) {
+                scene_viewport_->get_editor_camera()->get_component<SceneCameraScript>()->handle_mouse_movement(x_offset, -y_offset);
+                return true;
+        }
+
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureMouse) {
             return true;
         }
+
 
         return false;
     }
@@ -215,5 +222,9 @@ namespace hellfire::editor {
 
     void CoreEditorPlugin::on_window_focus(bool focused) {
         IApplicationPlugin::on_window_focus(focused);
+    }
+
+    Entity *CoreEditorPlugin::get_render_camera_override() {
+        return scene_viewport_->get_editor_camera();
     }
 }

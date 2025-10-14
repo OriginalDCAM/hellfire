@@ -48,6 +48,14 @@ namespace hellfire {
             on_event(event_name, data);
         }
 
+        void set_enabled(const bool enabled) {
+            enabled_ = enabled;
+        }
+
+        bool is_enabled() const {
+            return enabled_;
+        }
+
         // Variable management for script state
         void set_float(const std::string &name, float value) { float_vars_[name] = value; }
 
@@ -85,6 +93,7 @@ namespace hellfire {
         }
 
     protected:
+        bool enabled_ = true;
         // Protected variables that derived classes can access
         std::unordered_map<std::string, float> float_vars_;
         std::unordered_map<std::string, bool> bool_vars_;

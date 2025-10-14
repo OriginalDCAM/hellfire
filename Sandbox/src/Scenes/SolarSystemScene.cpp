@@ -173,7 +173,7 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
     );
     hellfire::Entity *camera = scene->get_entity(camera_id);
     camera->get_component<hellfire::CameraComponent>()->look_at(glm::vec3(0.0f));
-    camera->add_component<PlayerController>(12.5f);
+    camera->add_component<SceneCameraScript>(12.5f);
     scene->set_parent(camera_id, world_id);
     scene->set_active_camera(camera_id);
 

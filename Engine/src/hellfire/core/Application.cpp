@@ -129,7 +129,15 @@ namespace hellfire {
         renderer_.begin_frame();
 
         if (auto *active_scene = scene_manager_.get_active_scene()) {
-            renderer_.render(*active_scene); 
+            Entity *camera_override = nullptr;
+
+            call_plugins([&camera_override](IApplicationPlugin &plugin) {
+                if (!camera_override) {
+                    camera_override = plugin.get_render_camera_override();
+                }
+            });
+
+            renderer_.render(*active_scene, camera_override);
         }
 
         // Plugin render
@@ -218,11 +226,10 @@ namespace hellfire {
         if (width == 0 || height == 0) {
             return;
         }
-        
+
         window_info_.width = width;
         window_info_.height = height;
         window_info_.aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
-
 
 
         glViewport(0, 0, width, height);

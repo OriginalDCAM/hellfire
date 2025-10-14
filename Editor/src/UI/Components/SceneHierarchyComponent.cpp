@@ -9,6 +9,8 @@
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Quad.h"
 #include "hellfire/graphics/geometry/Sphere.h"
+#include "hellfire/graphics/lighting/DirectionalLight.h"
+#include "hellfire/graphics/lighting/PointLight.h"
 
 namespace hellfire::editor {
     void SceneHierarchyComponent::render_context_menu() {
@@ -35,6 +37,18 @@ namespace hellfire::editor {
                 ImGui::Separator(); 
                 if (ImGui::MenuItem("Cylinder", 0, false, false)) { }
                 if (ImGui::MenuItem("Stair", 0, false, false)) { }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Lights")) {
+                if (ImGui::MenuItem("Directional")) {
+                    const EntityID new_directional_light_id = DirectionalLight::create(active_scene, "Directional Light");
+                    context_->selected_entity_id = new_directional_light_id;
+                }
+                if (ImGui::MenuItem("Point")) {
+                    const EntityID new_point_light_id = PointLight::create(active_scene, "Point Light");
+                    context_->selected_entity_id = new_point_light_id;
+                }
+                if (ImGui::MenuItem("Spot", 0, false, false)) {}
                 ImGui::EndMenu();
             }
             ImGui::EndPopup();

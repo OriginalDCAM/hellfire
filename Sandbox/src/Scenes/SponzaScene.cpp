@@ -35,7 +35,7 @@ hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
         glm::vec3(10.0f, 5.0f, 0.0f)
     );
     hellfire::Entity *camera = scene->get_entity(camera_id);
-    camera->add_component<PlayerController>(10.0f);
+    camera->add_component<SceneCameraScript>(10.0f);
     scene->set_active_camera(camera_id);
 
     auto *skybox = new hellfire::Skybox();

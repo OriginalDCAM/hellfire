@@ -65,18 +65,30 @@ namespace hellfire {
         skybox_renderer_.initialize();
     }
 
-    void Renderer::render(Scene &scene, float time) {
-        CameraComponent *camera = scene.get_active_camera();
-        if (!camera) {
+    void Renderer::render(Scene &scene, Entity* camera_override = nullptr) {
+        Entity* camera_entity = camera_override;
+        if (!camera_entity) {
+            EntityID camera_id = scene.get_active_camera_entity();
+            camera_entity = scene.get_entity(camera_id);
+            
+        }
+
+        if (!camera_entity) {
             std::cerr << "No active camera in scene!" << std::endl;
             return;
         }
 
+        auto camera_comp = camera_entity->get_component<CameraComponent>();
+
+        if (!camera_comp) {
+            std::cerr << "Camera entity missing CameraComponent" << std::endl;
+        }
+
         if (render_to_framebuffer_) {
-            render_scene_to_framebuffer(scene, *camera);
+            render_scene_to_framebuffer(scene, *camera_comp);
         } else {
             begin_frame();
-            render_internal(scene, *camera);
+            render_internal(scene, *camera_comp);
             end_frame();
         }
     }
@@ -173,9 +185,7 @@ namespace hellfire {
         store_lights_in_context(light_entities, camera);
 
         // Get camera position
-        EntityID camera_entity_id = scene.get_active_camera_entity();
-        Entity *camera_entity = scene.get_entity(camera_entity_id);
-        auto *camera_transform = camera_entity ? camera_entity->get_component<TransformComponent>() : nullptr;
+        auto *camera_transform = camera.get_owner()->transform();
         glm::vec3 camera_pos = camera_transform ? camera_transform->get_world_position() : glm::vec3(0.0f);
 
         // Collect render commands from root entities
@@ -188,7 +198,7 @@ namespace hellfire {
         glm::mat4 projection = camera.get_projection_matrix();
 
         render_opaque_pass(view, projection);
-        render_skybox_pass(&scene, view, projection);
+        render_skybox_pass(&scene, view, projection, &camera);
         render_transparent_pass(view, projection);
     }
 
@@ -364,12 +374,11 @@ namespace hellfire {
     }
 
 
-    void Renderer::render_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection) const {
+    void Renderer::render_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection, CameraComponent* camera_comp) const {
         if (!scene || !scene->has_skybox()) return;
 
         glDisable(GL_CULL_FACE);
 
-        CameraComponent *camera_comp = scene->get_active_camera();
         if (camera_comp) {
             skybox_renderer_.render(scene->get_skybox(), camera_comp);
         }

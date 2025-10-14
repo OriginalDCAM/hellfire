@@ -10,11 +10,6 @@ public:
     explicit SceneCameraScript(float movement_speed = 5.0f, float mouse_sensitivity = 0.1f);
 
     void on_init() override;
-    void handle_drone_mode(float delta_time);
-
-    void save_free_flight_position();
-
-    void restore_free_flight_position();
 
     void handle_keyboard_look(float delta_time);
     void on_update(float delta_time) override;
@@ -45,10 +40,8 @@ private:
     float saved_pitch_ = 0.0f;
 
     glm::vec3 last_known_player_position = glm::vec3(0.0f);
-    glm::vec3 drone_position = glm::vec3(100.0f, 100.0f, 100.0f);
 
     void update_camera_orientation() const;
     void handle_movement(float delta_time) const;
-    void set_drone_overview_position(); 
     void on_interact();
 };

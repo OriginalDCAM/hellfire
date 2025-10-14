@@ -11,7 +11,7 @@
 #include "UI/Components/SceneHierarchyComponent.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
-#include "UI/Components/ViewportComponent.h"
+#include "UI/Components/Viewport/ViewportComponent.h"
 
 namespace hellfire::editor {
     class CoreEditorPlugin final : public IApplicationPlugin {
@@ -45,6 +45,9 @@ namespace hellfire::editor {
         void on_window_resize(int width, int height) override;
 
         void on_window_focus(bool focused) override;
+
+        Entity * get_render_camera_override() override;
+
     private:
         EditorContext editor_context_;
         Application* app_ = nullptr;

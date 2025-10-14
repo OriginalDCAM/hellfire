@@ -21,7 +21,9 @@ namespace hellfire {
 
     void Entity::update_scripts(const float delta_time) const {
         for (auto *script: script_components_) {
-            script->update(delta_time);
+            if (script->is_enabled()) {
+                script->update(delta_time);
+            }
         }
     }
 
@@ -32,12 +34,12 @@ namespace hellfire {
     }
 
     void Entity::broadcast_event(const std::string &event_name, void *data) const {
-        for (auto *script : script_components_) {
+        for (auto *script: script_components_) {
             script->trigger_event(event_name, data);
         }
     }
 
-    TransformComponent * Entity::transform() {
+    TransformComponent *Entity::transform() {
         auto *comp = get_component<TransformComponent>();
         if (!comp) {
             std::clog << "Warning: Entity '" << get_name()
@@ -47,5 +49,5 @@ namespace hellfire {
         return comp;
     }
 
-    const TransformComponent * Entity::transform() const { return get_component<TransformComponent>(); }
+    const TransformComponent *Entity::transform() const { return get_component<TransformComponent>(); }
 }

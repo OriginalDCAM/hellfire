@@ -37,5 +37,8 @@ namespace hellfire {
 
         virtual void on_window_focus(bool focused) {
         }
+
+        // Allow plugins to override camera
+        virtual Entity* get_render_camera_override() { return nullptr; }
     };
 }

@@ -54,7 +54,7 @@ namespace hellfire {
         ~Renderer();
         
         void init();
-        void render(Scene& scene, float time = 0.0f);
+        void render(Scene &scene, Entity *camera_override);
         void begin_frame();
         void end_frame();
 
@@ -107,7 +107,7 @@ namespace hellfire {
         // Rendering passes
         void render_opaque_pass(const glm::mat4& view, const glm::mat4& projection);
         void render_transparent_pass(const glm::mat4& view, const glm::mat4& projection);
-        void render_skybox_pass(Scene* scene, const glm::mat4& view, const glm::mat4& projection) const;
+        void render_skybox_pass(Scene* scene, const glm::mat4& view, const glm::mat4& projection, CameraComponent* camera_comp) const;
 
         // Draw methods
         void draw_render_command(const RenderCommand& cmd, const glm::mat4& view, const glm::mat4& projection);
