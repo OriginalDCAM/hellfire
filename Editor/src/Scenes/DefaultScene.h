@@ -3,6 +3,7 @@
 //
 
 #include "RotateScript.h"
+#include "hellfire/assets/Asset.h"
 #include "hellfire/graphics/Skybox.h"
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Sphere.h"
@@ -20,15 +21,16 @@ void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
         auto child_entity_id = hellfire::Sphere::create(scene, "Sphere_Child_" + std::to_string(i), {.color = glm::vec3(0.5, 0.2, 0.7), .position = glm::vec3(-1.5f, -1.5f, -1.5f)});
             scene->set_parent(child_entity_id, entity_id);
         }
-        
     }
+
+    auto back_pack = hellfire::Asset::load(scene, "assets/models/city/city.glb");
 
     auto *skybox = new hellfire::Skybox();
     skybox->set_cubemap_faces({
         "assets/skyboxes/px.png", // +X
         "assets/skyboxes/nx.png", // -X
-        "assets/skyboxes/py.png", // +Y
-        "assets/skyboxes/ny.png", // -Y
+        "assets/skyboxes/ny.png", // +Y
+        "assets/skyboxes/py.png", // -Y
         "assets/skyboxes/pz.png", // +Z
         "assets/skyboxes/nz.png" // -Z
     });
