@@ -5,6 +5,7 @@
 
 #include <imgui.h>
 
+#include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Quad.h"
 #include "hellfire/graphics/geometry/Sphere.h"
@@ -20,14 +21,18 @@ namespace hellfire::editor {
             }
             if (ImGui::BeginMenu("Mesh")) {
                 if (ImGui::MenuItem("Cube")) {
-                    Cube::create(active_scene, "Cube", {});
+                    const EntityID new_cube_id = Cube::create(active_scene, "Cube", {});
+                    context_->selected_entity_id = new_cube_id;
                 }
                 if (ImGui::MenuItem("Sphere")) {
-                    Sphere::create(active_scene, "Sphere", {});
+                    const EntityID new_sphere_id = Sphere::create(active_scene, "Sphere", {});
+                    context_->selected_entity_id = new_sphere_id;
                 }
                 if (ImGui::MenuItem("Quad")) {
-                    Quad::create(active_scene, "Quad");
+                    const EntityID new_quad_id = Quad::create(active_scene, "Quad");
+                    context_->selected_entity_id = new_quad_id;
                 }
+                ImGui::Separator(); 
                 if (ImGui::MenuItem("Cylinder", 0, false, false)) { }
                 if (ImGui::MenuItem("Stair", 0, false, false)) { }
                 ImGui::EndMenu();
@@ -41,8 +46,8 @@ namespace hellfire::editor {
         ImGui::SetNextWindowSize(ImVec2(window_size.x / 3, window_size.y / 3), ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Scene Hierarchy Panel")) {
             if (context_->active_scene) {
-                render_list();
                 render_context_menu();
+                render_list();
                 
             } else {
                 ImGui::Text("No scene selected");
@@ -98,6 +103,26 @@ namespace hellfire::editor {
 
         if (ImGui::IsItemClicked()) {
             context_->selected_entity_id = entity_id;
+        }
+
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Duplicate", "Ctrl+D", false, false)) {
+                // TODO: Implement duplicate
+            }
+            if (ImGui::MenuItem("Rename", "F2", false, false)) {
+                // TODO: Open rename dialog
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Delete", "Del")) {
+                context_->active_scene->destroy_entity(entity_id);
+                if (context_->selected_entity_id == entity_id) {
+                    context_->selected_entity_id = 0; // Deselect
+                }
+                ImGui::EndPopup();
+                ImGui::PopID();
+                return; // Don't render children of deleted entity
+            }
+            ImGui::EndPopup();
         }
 
         // Recursively render children if node is open
