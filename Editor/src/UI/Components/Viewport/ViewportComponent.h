@@ -19,6 +19,11 @@ public:
 
     Entity* get_editor_camera() const { return editor_camera_; }
     bool is_editor_camera_active() const { return camera_active_; }
+
+    ImVec2 get_viewport_pos() { return viewport_pos_; }
+
+    ImVec2 get_viewport_size() { return viewport_size_; }
+    bool is_viewport_hovered() const { return viewport_hovered_; }
 private:
     void create_editor_camera();
     void destroy_editor_camera();
@@ -28,8 +33,15 @@ private:
     Entity* editor_camera_ = nullptr;
     bool camera_active_ = false;
 
-    ImVec2 last_viewport_size_ = {800,600};
     float last_resize_time_ = 0.0f;
+
+    // Viewport position
+    ImVec2 viewport_pos_;
+    // The size of the viewport
+    ImVec2 viewport_size_;
+    // Whether the viewport is hovered
+    bool viewport_hovered_ = false;
+    ImVec2 last_mouse_pos_;
 };
     
 }

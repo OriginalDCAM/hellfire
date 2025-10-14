@@ -239,8 +239,7 @@ namespace hellfire {
             for (const EntityID camera_id: scene_manager_.get_camera_entities()) {
                 if (const Entity *camera_entity = active_scene->get_entity(camera_id)) {
                     if (auto *camera_comp = camera_entity->get_component<CameraComponent>()) {
-                        camera_comp->set_aspect_ratio(window_info_.aspect_ratio);
-                    }
+                        camera_comp->set_aspect_ratio(window_info_.aspect_ratio); }
                 }
             }
         }

@@ -7,6 +7,7 @@
 
 #include "imgui.h"
 #include "SceneCameraScript.h"
+#include "hellfire/platform/windows_linux/GLFWWindow.h"
 
 namespace hellfire::editor {
     ViewportComponent::ViewportComponent() {
@@ -70,11 +71,11 @@ namespace hellfire::editor {
         if (camera_script->is_enabled()) {
             camera_script->update(0.1f);
         }
-
+        
         // Hide cursor when camera is active
         if (camera_active_) {
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-        }
+        } 
     }
 
 
@@ -95,9 +96,9 @@ namespace hellfire::editor {
 
         // Store last valid size
         if (viewport_size.x > 0 && viewport_size.y > 0) {
-            last_viewport_size_ = viewport_size;
+            viewport_size_ = viewport_size;
         } else {
-            viewport_size = last_viewport_size_;
+            viewport_size = viewport_size_;
         }
 
         // Resize framebuffer if needed
@@ -162,6 +163,12 @@ namespace hellfire::editor {
             : "Viewport";
         
         if (ImGui::Begin(window_name.c_str())) {
+            // Store the viewport bound for outside usage
+            viewport_pos_ = ImGui::GetWindowPos();
+            viewport_size_ = ImGui::GetWindowSize();
+            viewport_hovered_ = ImGui::IsWindowHovered();
+            last_mouse_pos_ = ImGui::GetMousePos();
+            
             render_viewport_image();
             update_camera_control();
             render_viewport_stats_overlay();
