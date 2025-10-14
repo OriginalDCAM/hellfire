@@ -210,7 +210,7 @@ namespace hellfire {
         window_info_.mouse_pos.y = y;
 
         // Skip large jumps (window focus, etc)
-        if (abs(x_offset) > 100 || abs(y_offset) > 100) return;
+        // if (abs(x_offset) > 100 || abs(y_offset) > 100) return;
 
         bool consumed = call_plugins_until_consumed([x, y, x_offset, y_offset](IApplicationPlugin &plugin) {
             return plugin.on_mouse_move(x, y, x_offset, y_offset);

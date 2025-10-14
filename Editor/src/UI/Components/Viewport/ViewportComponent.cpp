@@ -58,9 +58,17 @@ namespace hellfire::editor {
         }
 
         // Camera is active when right-clicking viewport
-        bool viewport_hovered = ImGui::IsWindowHovered();
-        bool right_mouse_held = ImGui::IsMouseDown(ImGuiMouseButton_Right);
-        camera_active_ = viewport_hovered && right_mouse_held;
+        bool viewport_hovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+        bool right_mouse_pressed  = ImGui::IsMouseClicked(ImGuiMouseButton_Right);
+        bool right_mouse_released = ImGui::IsMouseReleased(ImGuiMouseButton_Right);
+
+        if (right_mouse_pressed && viewport_hovered) {
+            camera_active_ = true;
+            ImGui::GetIO().WantCaptureMouse = false; // don't let ImGui eat camera input
+        }
+        if (right_mouse_released) {
+            camera_active_ = false;
+        }
 
         // Enable/Disable camera script
         auto* camera_script = editor_camera_->get_component<SceneCameraScript>();
@@ -73,9 +81,14 @@ namespace hellfire::editor {
         }
         
         // Hide cursor when camera is active
+        auto window = ServiceLocator::get_service<IWindow>();
+        GLFWwindow* glfwWindow = static_cast<GLFWwindow*>(window->get_native_handle());
         if (camera_active_) {
+            glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-        } 
+        } else {
+            glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
     }
 
 

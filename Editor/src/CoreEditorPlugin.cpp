@@ -194,47 +194,12 @@ namespace hellfire::editor {
 
     bool CoreEditorPlugin::on_mouse_move(float x, float y, float x_offset, float y_offset) {
         if (scene_viewport_->is_editor_camera_active()) {
+            // Update camera with offset
             scene_viewport_->get_editor_camera()
                 ->get_component<SceneCameraScript>()
                 ->handle_mouse_movement(x_offset, -y_offset);
         
-            // Get viewport bounds
-            ImVec2 viewport_pos = scene_viewport_->get_viewport_pos();
-            ImVec2 viewport_size = scene_viewport_->get_viewport_size();
-        
-            // Convert current mouse position to screen coordinates
-            ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-            float screen_x = x + main_viewport->Pos.x;
-            float screen_y = y + main_viewport->Pos.y;
-        
-            float relative_x = screen_x - viewport_pos.x;
-            float relative_y = screen_y - viewport_pos.y;
-        
-            // Tighter margin - warp sooner (50 pixels instead of 100)
-            const float margin = 50.0f;
-        
-            // Check if cursor is near any edge OR outside viewport
-            bool needs_warp = relative_x < margin || 
-                             relative_x > viewport_size.x - margin ||
-                             relative_y < margin || 
-                             relative_y > viewport_size.y - margin ||
-                             relative_x < 0 || relative_x > viewport_size.x ||
-                             relative_y < 0 || relative_y > viewport_size.y;
-        
-            if (needs_warp) {
-                // Calculate center in screen coordinates
-                float center_screen_x = viewport_pos.x + viewport_size.x * 0.5f;
-                float center_screen_y = viewport_pos.y + viewport_size.y * 0.5f;
-            
-                // Convert to window coordinates for GLFW
-                float center_window_x = center_screen_x - main_viewport->Pos.x;
-                float center_window_y = center_screen_y - main_viewport->Pos.y;
-            
-                const auto window = ServiceLocator::get_service<IWindow>();
-                window->warp_cursor(center_window_x, center_window_y);
-            }
-        
-            return true;
+        return true;
         }
  
 
