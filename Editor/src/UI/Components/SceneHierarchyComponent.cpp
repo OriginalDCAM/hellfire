@@ -57,6 +57,11 @@ namespace hellfire::editor {
             }
         }
         ImGui::End();
+
+        if (entity_to_delete_ != 0) {
+            context_->active_scene->destroy_entity(entity_to_delete_);
+            entity_to_delete_ = 0;
+        }
     }
 
     void SceneHierarchyComponent::render_list() {
@@ -66,7 +71,7 @@ namespace hellfire::editor {
         constexpr ImGuiTreeNodeFlags flags =
                 ImGuiTreeNodeFlags_DefaultOpen | // Open by default
                 ImGuiTreeNodeFlags_SpanAvailWidth | // Full width
-                    ImGuiTreeNodeFlags_OpenOnArrow |
+                ImGuiTreeNodeFlags_OpenOnArrow |
                 ImGuiTreeNodeFlags_DrawLinesToNodes; // Draw lines to each child node
 
         if (ImGui::TreeNodeEx(active_scene_name.c_str(), flags)) {
@@ -78,28 +83,27 @@ namespace hellfire::editor {
         }
     }
 
-    void SceneHierarchyComponent::render_add_entity_menu() {
+    void SceneHierarchyComponent::render_add_entity_menu(EntityID parent_id) {
         const auto active_scene = context_->active_scene;
+        bool has_parent = parent_id != 0;
 
+        EntityID new_entity_id = 0;
         if (ImGui::MenuItem("Empty Entity")) {
             if (active_scene) {
-                const EntityID new_entity_id = active_scene->create_entity();
+                new_entity_id = active_scene->create_entity();
                 context_->selected_entity_id = new_entity_id;
             }
         }
 
         if (ImGui::BeginMenu("Mesh")) {
             if (ImGui::MenuItem("Cube")) {
-                const EntityID new_cube_id = Cube::create(active_scene, "Cube", {});
-                context_->selected_entity_id = new_cube_id;
+                new_entity_id = Cube::create(active_scene, "Cube", {});
             }
             if (ImGui::MenuItem("Sphere")) {
-                const EntityID new_sphere_id = Sphere::create(active_scene, "Sphere", {});
-                context_->selected_entity_id = new_sphere_id;
+                new_entity_id = Sphere::create(active_scene, "Sphere", {});
             }
             if (ImGui::MenuItem("Quad")) {
-                const EntityID new_quad_id = Quad::create(active_scene, "Quad");
-                context_->selected_entity_id = new_quad_id;
+                new_entity_id = Quad::create(active_scene, "Quad");
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Cylinder", nullptr, false, false)) {
@@ -111,17 +115,20 @@ namespace hellfire::editor {
 
         if (ImGui::BeginMenu("Lights")) {
             if (ImGui::MenuItem("Directional")) {
-                const EntityID new_directional_light_id = DirectionalLight::create(active_scene, "Directional Light");
-                context_->selected_entity_id = new_directional_light_id;
+                new_entity_id = DirectionalLight::create(active_scene, "Directional Light");
             }
             if (ImGui::MenuItem("Point")) {
-                const EntityID new_point_light_id = PointLight::create(active_scene, "Point Light");
-                context_->selected_entity_id = new_point_light_id;
+                new_entity_id = PointLight::create(active_scene, "Point Light");
             }
             if (ImGui::MenuItem("Spot", nullptr, false, false)) {
             }
             ImGui::EndMenu();
         }
+        if (new_entity_id != 0) {
+            context_->selected_entity_id = new_entity_id;
+            if (has_parent) active_scene->set_parent(new_entity_id, parent_id);
+        }
+        
     }
 
     void SceneHierarchyComponent::render_list_item(EntityID entity_id) {
@@ -170,6 +177,8 @@ namespace hellfire::editor {
         }
 
         if (ImGui::BeginPopupContextItem()) {
+            render_add_entity_menu(entity_id);
+            ImGui::Separator();
             if (ImGui::MenuItem("Duplicate", "Ctrl+D", false, false)) {
                 // TODO: Implement duplicate
             }
@@ -179,14 +188,12 @@ namespace hellfire::editor {
             ImGui::Separator();
             if (ImGui::MenuItem("Delete", "Del")) {
                 context_->active_scene->destroy_entity(entity_id);
+                entity_to_delete_ = entity_id;
                 if (context_->selected_entity_id == entity_id) {
                     context_->selected_entity_id = 0; // Deselect
-                    ImGui::TreePop();
                 }
-                ImGui::EndPopup();
-                ImGui::PopID();
-                return; // Don't render children of deleted entity
             }
+
             ImGui::EndPopup();
         }
 

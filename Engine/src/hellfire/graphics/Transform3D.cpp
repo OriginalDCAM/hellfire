@@ -28,6 +28,7 @@ namespace hellfire {
         rotation_x_ = glm::radians(angles.x);
         rotation_y_ = glm::radians(angles.y);
         rotation_z_ = glm::radians(angles.z);
+        rotation_in_degrees_ = glm::vec3(glm::degrees(rotation_x_), glm::degrees(rotation_y_), glm::degrees(rotation_z_));
         use_euler_angles_ = true;
         use_rotation_matrix_ = false;
         update_local_matrix();
@@ -44,12 +45,9 @@ namespace hellfire {
         set_rotation(euler_degrees);
     }
 
-    glm::vec3 Transform3D::get_rotation() {
-        return glm::vec3(
-    glm::degrees(rotation_x_),
-    glm::degrees(rotation_y_),
-    glm::degrees(rotation_z_)
-);
+    glm::vec3& Transform3D::get_rotation() {
+        return rotation_in_degrees_;
+
     }
 
     void Transform3D::extract_euler_angles_(const glm::mat4 &rotation_matrix, float &x, float &y,

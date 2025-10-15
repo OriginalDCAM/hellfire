@@ -103,25 +103,6 @@ namespace hellfire {
 
         unsigned char *data = stbi_load(path_.c_str(), &width, &height, &nr_channels, desired_channels);
 
-        // Downscale texture if needed
-        // if (settings_.max_size > 0 && (width > settings_.max_size || height > settings_.max_size)) {
-        //     const int new_width = std::min(width, settings_.max_size);
-        //     const int new_height = std::min(height, settings_.max_size);
-        //
-        //     const bool use_srgb = (type_ != TextureType::NORMAL);
-        //
-        //     unsigned char *resized_data = resize_image(data, width, height, new_width, new_height, desired_channels,
-        //                                                use_srgb);
-        //
-        //     stbi_image_free(data);
-        //     data = resized_data;
-        //     width = new_width;
-        //     height = new_height;
-        //
-        //     std::cout << "Downscaled texture from " << width << "x" << height << " to " << new_width << "x" <<
-        //             new_height << std::endl;
-        // }
-
         if (desired_channels > 0) {
             nr_channels = desired_channels;
         }

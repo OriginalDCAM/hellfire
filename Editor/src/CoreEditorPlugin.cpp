@@ -45,6 +45,9 @@ namespace hellfire::editor {
 
         scene_viewport_ = std::make_unique<ViewportComponent>();
         scene_viewport_->set_context(&editor_context_);
+
+        inspector_panel_ = std::make_unique<InspectorComponent>();
+        inspector_panel_->set_context(&editor_context_);
     }
 
     void CoreEditorPlugin::initialize_imgui(IWindow *window) {
@@ -147,6 +150,7 @@ namespace hellfire::editor {
         }
 
         scene_hierarchy_->render();
+        inspector_panel_->render();
         scene_viewport_->render();
     }
 
@@ -209,7 +213,7 @@ namespace hellfire::editor {
             // Update camera with offset
             scene_viewport_->get_editor_camera()
                 ->get_component<SceneCameraScript>()
-                ->handle_mouse_movement(x_offset, -y_offset);
+                ->handle_mouse_movement(x_offset, y_offset);
         
         return true;
         }

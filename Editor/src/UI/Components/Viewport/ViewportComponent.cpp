@@ -154,7 +154,7 @@ namespace hellfire::editor {
             ImGui::Text("Editor Camera Missing!");
         } else {
             ImGui::Image(reinterpret_cast<void*>(static_cast<uintptr_t>(scene_texture)), 
-                        viewport_size);
+                        viewport_size, ImVec2(0, 1), ImVec2(1, 0));
         }
     }
 

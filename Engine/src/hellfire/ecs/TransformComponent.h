@@ -10,6 +10,7 @@ namespace hellfire {
     class TransformComponent : public Component {
     public:
         TransformComponent() = default;
+        glm::vec3& get_position() { return transform_.get_position(); }
         const glm::vec3& get_position() const { return transform_.get_position(); }
         void set_position(float x, float y, float z) { transform_.set_position(x, y, z); }
         void set_position(const glm::vec3& position) { transform_.set_position(position); }
@@ -21,6 +22,7 @@ namespace hellfire {
 
         
         const glm::vec3& get_scale() const { return transform_.get_scale(); }
+        glm::vec3& get_scale() { return transform_.get_scale(); }
         void set_scale(float x, float y, float z) { transform_.set_scale(glm::vec3(x, y, z)); }
         void set_scale(float value) { transform_.set_scale(glm::vec3(value, value, value)); }
         void set_scale(glm::vec3& scale) { transform_.set_scale(scale); }

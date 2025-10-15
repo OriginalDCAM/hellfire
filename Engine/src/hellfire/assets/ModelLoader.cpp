@@ -156,7 +156,7 @@ namespace hellfire::Addons {
     }
 
     // Process meshes
-    if (entity_id != 0) {  // Add this check!
+    if (entity_id != 0) {  
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             unsigned int mesh_index = node->mMeshes[i];
             aiMesh* ai_mesh = ai_scene->mMeshes[mesh_index];

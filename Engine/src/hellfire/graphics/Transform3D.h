@@ -25,6 +25,7 @@ namespace hellfire {
         }
 
         // Position methods
+        glm::vec3 &get_position() { return position_; }
         const glm::vec3 &get_position() const { return position_; }
 
         void set_position(const glm::vec3 &new_position) {
@@ -49,6 +50,7 @@ namespace hellfire {
         void match_orientation(const Transform3D &other);
 
         glm::vec3 get_scale() const { return scale_; }
+        glm::vec3& get_scale() { return scale_; }
 
         void set_rotation(const glm::vec3 &angles);
 
@@ -142,7 +144,7 @@ namespace hellfire {
             use_scale_matrix_ = false;
         }
 
-        glm::vec3 get_rotation();
+        glm::vec3& get_rotation();
 
         json to_json() {
             json j;
@@ -167,13 +169,13 @@ namespace hellfire {
         glm::mat4 translation_matrix_;
         glm::mat4 scale_matrix_;
 
-        // Flags to use direct matrices instead of component-based transforms
         bool use_rotation_matrix_;
         bool use_translation_matrix_;
         bool use_scale_matrix_;
         float rotation_x_ = 0.0f;
         float rotation_y_ = 0.0f;
         float rotation_z_ = 0.0f;
+        glm::vec3 rotation_in_degrees_ = glm::vec3(0.0f);
         bool use_euler_angles_ = false;
 
         void extract_euler_angles_(const glm::mat4 &rotation_matrix, float &x, float &y, float &z);

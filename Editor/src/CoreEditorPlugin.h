@@ -11,6 +11,7 @@
 #include "UI/Components/SceneHierarchyComponent.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
+#include "UI/Components/Inspector/InspectorComponent.h"
 #include "UI/Components/Viewport/ViewportComponent.h"
 
 namespace hellfire::editor {
@@ -58,5 +59,6 @@ namespace hellfire::editor {
         std::unique_ptr<MenuBarComponent> menu_bar_;
         std::unique_ptr<SceneHierarchyComponent> scene_hierarchy_;
         std::unique_ptr<ViewportComponent> scene_viewport_;
+        std::unique_ptr<InspectorComponent> inspector_panel_;
     };
 }

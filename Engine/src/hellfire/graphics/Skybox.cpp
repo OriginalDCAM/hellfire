@@ -25,7 +25,7 @@ namespace hellfire {
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-        // stbi_set_flip_vertically_on_load(true);
+        stbi_set_flip_vertically_on_load(false);
         int width, height, nrChannels;
         for (uint32_t i = 0; i < faces.size(); i++) {
             unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
@@ -40,7 +40,7 @@ namespace hellfire {
             }
         }
 
-        // stbi_set_flip_vertically_on_load(false);
+        stbi_set_flip_vertically_on_load(false);
 
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

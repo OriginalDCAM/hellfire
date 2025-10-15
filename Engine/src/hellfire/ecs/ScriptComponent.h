@@ -92,6 +92,12 @@ namespace hellfire {
             return get_owner() ? get_owner()->template get_component<T>() : nullptr;
         }
 
+        
+        std::unordered_map<std::string, bool>& get_bool_vars() {
+            return bool_vars_;
+        }
+        
+
     protected:
         bool enabled_ = true;
         // Protected variables that derived classes can access
