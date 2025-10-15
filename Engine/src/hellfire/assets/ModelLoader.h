@@ -28,6 +28,47 @@ namespace hellfire::Addons {
 
         static void print_cache_stats();
 
+        // Import flag presets
+        struct ImportFlags {
+            // For editor preview - preserve hierarchy, minimal processing
+            static constexpr unsigned int PREVIEW =
+                    aiProcess_Triangulate |
+                    aiProcess_FlipUVs |  // CRITICAL for correct textures
+                    aiProcess_GenSmoothNormals |  // Generate if missing
+                    aiProcess_CalcTangentSpace |
+                    aiProcess_JoinIdenticalVertices |
+                    aiProcess_ValidateDataStructure;
+
+            // For runtime use - preserve hierarchy but optimize vertices
+            static constexpr unsigned int RUNTIME =
+                    aiProcess_Triangulate |
+                    aiProcess_FlipUVs |  // CRITICAL
+                    aiProcess_GenSmoothNormals |
+                    aiProcess_CalcTangentSpace |
+                    aiProcess_JoinIdenticalVertices |
+                    aiProcess_ImproveCacheLocality |
+                    aiProcess_RemoveRedundantMaterials |
+                    aiProcess_SortByPType |
+                    aiProcess_FindInvalidData |
+                    aiProcess_ValidateDataStructure;
+
+            // For high quality/production builds
+            static constexpr unsigned int HIGH_QUALITY =
+                    RUNTIME |
+                    aiProcess_GenUVCoords |
+                    aiProcess_TransformUVCoords |
+                    aiProcess_FindInstances |
+                    aiProcess_OptimizeMeshes |  
+                    aiProcess_Debone;
+            
+            // For baked/optimized static meshes 
+            static constexpr unsigned int OPTIMIZED =
+                    RUNTIME |
+                    aiProcess_OptimizeMeshes |     // Merge meshes
+                    aiProcess_OptimizeGraph |      // Flatten hierarchy
+                    aiProcess_PreTransformVertices; // Bake transforms
+        };
+
     private:
         enum class MaterialType {
             LAMBERT,
@@ -35,34 +76,12 @@ namespace hellfire::Addons {
             PBR
         };
 
-        // Import flag presets
-        struct ImportFlags {
-            // For preview
-            static constexpr unsigned int PREVIEW =
-                    aiProcess_Triangulate |
-                    aiProcess_JoinIdenticalVertices |
-                    aiProcess_RemoveRedundantMaterials;
 
-            // For runtime use (default)
-            static constexpr unsigned int RUNTIME =
-                    PREVIEW |
-                    aiProcess_CalcTangentSpace |
-                    aiProcess_ImproveCacheLocality |
-                    aiProcess_OptimizeMeshes |
-                    aiProcess_OptimizeGraph |
-                    aiProcess_ValidateDataStructure;
-
-            // Slower for best quality
-            static constexpr unsigned int HIGH_QUALITY =
-                    RUNTIME |
-                    aiProcess_GenSmoothNormals |
-                    aiProcess_CalcTangentSpace |
-                    aiProcess_FlipUVs |
-                    aiProcess_EmbedTextures;
-        };
 
         // Node processing
         static EntityID process_node(Scene* scene,aiNode *node, const aiScene *ai_scene, const std::string &filepath,EntityID parent_id = 0);
+
+        static bool is_identity_transform(const aiMatrix4x4 &matrix);
 
         // Mesh processing
         static void process_mesh_vertices(aiMesh *mesh, std::vector<Vertex> &vertices,

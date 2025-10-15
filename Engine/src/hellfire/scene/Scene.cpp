@@ -230,6 +230,7 @@ namespace hellfire {
             return; 
         }
 
+        transform->update_local_matrix();
         transform->update_world_matrix(parent_world);
 
         // Recurse into children with this entity's world matrix

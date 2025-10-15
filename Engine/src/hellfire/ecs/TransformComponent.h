@@ -39,6 +39,9 @@ namespace hellfire {
             transform_.look_at(target, up);
         }
 
+        void update_local_matrix() {
+            transform_.update_local_matrix();
+        }
         void update_world_matrix(const glm::mat4& parent_world_matrix) {
             transform_.update_world_matrix(parent_world_matrix);
         }

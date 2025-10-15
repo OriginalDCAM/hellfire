@@ -51,6 +51,7 @@ namespace hellfire::Addons {
 
         // Process the scene
         EntityID imported_model = process_node(scene, ai_scene->mRootNode, ai_scene, filepath.string());
+        scene->update_world_matrices();
 
         auto end_time = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
@@ -123,84 +124,109 @@ namespace hellfire::Addons {
 
     EntityID ModelLoader::process_node(Scene *scene, aiNode *node, const aiScene *ai_scene, const std::string &filepath,
                                        EntityID parent_id) {
-    EntityID entity_id = scene->create_entity(node->mName.C_Str());
-    Entity* entity = scene->get_entity(entity_id);
+    bool should_create_entity = node->mNumMeshes > 0 || 
+                               node->mNumChildren > 0 || 
+                               !is_identity_transform(node->mTransformation);
 
-    // Apply transform
-    glm::mat4 transform = aiMatrix4x4ToGlm(node->mTransformation);
-    glm::vec3 translation, scale, skew;
-    glm::quat rotation;
-    glm::vec4 perspective;
-    glm::decompose(transform, scale, rotation, translation, skew, perspective);
+    EntityID entity_id = 0;  
+    Entity* entity = nullptr;
 
-    entity->transform()->set_position(translation);
-    entity->transform()->set_scale(scale);
-    entity->transform()->set_rotation(rotation);
+    if (should_create_entity) {
+        std::string node_name = node->mName.length > 0 ? 
+            node->mName.C_Str() : 
+            ("Node_" + std::to_string(reinterpret_cast<uintptr_t>(node)));
 
-    if (parent_id != 0) {
-        scene->set_parent(entity_id, parent_id);
+        entity_id = scene->create_entity(node_name);
+        entity = scene->get_entity(entity_id);
+
+        // Apply transform
+        glm::mat4 transform = aiMatrix4x4ToGlm(node->mTransformation);
+        glm::vec3 translation, scale, skew;
+        glm::quat rotation;
+        glm::vec4 perspective;
+        glm::decompose(transform, scale, rotation, translation, skew, perspective);
+
+        entity->transform()->set_position(translation);
+        entity->transform()->set_scale(scale);
+        entity->transform()->set_rotation(rotation);
+
+        if (parent_id != 0) {
+            scene->set_parent(entity_id, parent_id);
+        }
     }
 
     // Process meshes
-    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-        unsigned int mesh_index = node->mMeshes[i];
-        aiMesh* ai_mesh = ai_scene->mMeshes[mesh_index];
+    if (entity_id != 0) {  // Add this check!
+        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+            unsigned int mesh_index = node->mMeshes[i];
+            aiMesh* ai_mesh = ai_scene->mMeshes[mesh_index];
         
-        // Process mesh (no material)
-        std::shared_ptr<Mesh> processed_mesh = process_mesh(ai_mesh, ai_scene, filepath);
+            std::shared_ptr<Mesh> processed_mesh = process_mesh(ai_mesh, ai_scene, filepath);
         
-        // Get material separately
-        std::shared_ptr<Material> material = nullptr;
-        if (ai_mesh->mMaterialIndex >= 0) {
-            const aiMaterial* ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
-            std::string material_key = create_material_key(ai_material, filepath, ai_mesh->mMaterialIndex);
+            // Get material
+            std::shared_ptr<Material> material = nullptr;
+            if (ai_mesh->mMaterialIndex >= 0) {
+                const aiMaterial* ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
+                std::string material_key = create_material_key(ai_material, filepath, ai_mesh->mMaterialIndex);
             
-            auto cached_material = material_cache.find(material_key);
-            if (cached_material != material_cache.end()) {
-                material = cached_material->second;
+                auto cached_material = material_cache.find(material_key);
+                if (cached_material != material_cache.end()) {
+                    material = cached_material->second;
+                } else {
+                    material = create_material(ai_material, ai_scene, filepath);
+                    material_cache[material_key] = material;
+                }
+            }
+
+            // Determine where to attach mesh components
+            EntityID mesh_entity_id;
+            Entity* mesh_entity;
+
+            if (node->mNumMeshes == 1) {
+                // Single mesh: attach to current node
+                mesh_entity_id = entity_id;
+                mesh_entity = entity;
             } else {
-                material = create_material(ai_material, ai_scene, filepath);
-                material_cache[material_key] = material;
-            }
-        }
+                // Multiple meshes: create submesh entity
+                std::string mesh_name = ai_mesh->mName.length > 0 ? 
+                    ai_mesh->mName.C_Str() : 
+                    (std::string(node->mName.C_Str()) + "_Mesh_" + std::to_string(i));
 
-        if (node->mNumMeshes == 1) {
-            // Single mesh: add components to this entity
-            auto* mesh_comp = entity->add_component<MeshComponent>();
+                mesh_entity_id = scene->create_entity(mesh_name);
+                mesh_entity = scene->get_entity(mesh_entity_id);
+                scene->set_parent(mesh_entity_id, entity_id);
+            }
+
+            // Add mesh and material components
+            auto* mesh_comp = mesh_entity->add_component<MeshComponent>();
             mesh_comp->set_mesh(processed_mesh);
 
-            auto* renderable = entity->add_component<RenderableComponent>();
+            auto* renderable = mesh_entity->add_component<RenderableComponent>();
             if (material) {
                 renderable->set_material(material);
             }
-        } else {
-            // Multiple meshes: create child entity for each
-            std::string mesh_name = ai_mesh->mName.length > 0 ? 
-                ai_mesh->mName.C_Str() : ("Mesh_" + std::to_string(i));
-
-            EntityID child_id = scene->create_entity(mesh_name);
-            Entity* child = scene->get_entity(child_id);
-
-            auto* mesh_comp = child->add_component<MeshComponent>();
-            mesh_comp->set_mesh(processed_mesh);
-
-            auto* renderable = child->add_component<RenderableComponent>();
-            if (material) {
-                renderable->set_material(material);
-            }
-
-            scene->set_parent(child_id, entity_id);
         }
     }
-
+    
     // Process children recursively
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        process_node(scene, node->mChildren[i], ai_scene, filepath, entity_id);
+        process_node(scene, node->mChildren[i], ai_scene, filepath, 
+                    entity_id != 0 ? entity_id : parent_id);
     }
 
     return entity_id;
     }
-
+    
+    bool ModelLoader::is_identity_transform(const aiMatrix4x4& matrix) {
+        const float epsilon = 0.0001f;
+        return std::abs(matrix.a1 - 1.0f) < epsilon && std::abs(matrix.b2 - 1.0f) < epsilon &&
+               std::abs(matrix.c3 - 1.0f) < epsilon && std::abs(matrix.d4 - 1.0f) < epsilon &&
+               std::abs(matrix.a2) < epsilon && std::abs(matrix.a3) < epsilon && std::abs(matrix.a4) < epsilon &&
+               std::abs(matrix.b1) < epsilon && std::abs(matrix.b3) < epsilon && std::abs(matrix.b4) < epsilon &&
+               std::abs(matrix.c1) < epsilon && std::abs(matrix.c2) < epsilon && std::abs(matrix.c4) < epsilon &&
+               std::abs(matrix.d1) < epsilon && std::abs(matrix.d2) < epsilon && std::abs(matrix.d3) < epsilon;
+    }
+    
     void ModelLoader::process_mesh_vertices(aiMesh *mesh, std::vector<Vertex> &vertices,
                                             std::vector<unsigned int> &indices) {
         vertices.reserve(mesh->mNumVertices);

@@ -52,7 +52,6 @@ namespace hellfire::editor {
                 ImGui::Separator();
                 render_context_menu();
                 render_list();
-                
             } else {
                 ImGui::Text("No scene selected");
             }
@@ -63,28 +62,32 @@ namespace hellfire::editor {
     void SceneHierarchyComponent::render_list() {
         const std::string &active_scene_name = context_->active_scene->get_name();
 
-        // Open by default
-        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-        
-        if (ImGui::TreeNode(active_scene_name.c_str())) {
+        // Set the flags for the tree node
+        constexpr ImGuiTreeNodeFlags flags =
+                ImGuiTreeNodeFlags_DefaultOpen | // Open by default
+                ImGuiTreeNodeFlags_SpanAvailWidth | // Full width
+                    ImGuiTreeNodeFlags_OpenOnArrow |
+                ImGuiTreeNodeFlags_DrawLinesToNodes; // Draw lines to each child node
+
+        if (ImGui::TreeNodeEx(active_scene_name.c_str(), flags)) {
             for (const EntityID entity_id: context_->active_scene->get_root_entities()) {
                 render_list_item(entity_id);
             }
-            
+
             ImGui::TreePop();
         }
     }
 
     void SceneHierarchyComponent::render_add_entity_menu() {
         const auto active_scene = context_->active_scene;
-        
+
         if (ImGui::MenuItem("Empty Entity")) {
             if (active_scene) {
                 const EntityID new_entity_id = active_scene->create_entity();
                 context_->selected_entity_id = new_entity_id;
             }
         }
-    
+
         if (ImGui::BeginMenu("Mesh")) {
             if (ImGui::MenuItem("Cube")) {
                 const EntityID new_cube_id = Cube::create(active_scene, "Cube", {});
@@ -98,12 +101,14 @@ namespace hellfire::editor {
                 const EntityID new_quad_id = Quad::create(active_scene, "Quad");
                 context_->selected_entity_id = new_quad_id;
             }
-            ImGui::Separator(); 
-            if (ImGui::MenuItem("Cylinder", nullptr, false, false)) { }
-            if (ImGui::MenuItem("Stair", nullptr, false, false)) { }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Cylinder", nullptr, false, false)) {
+            }
+            if (ImGui::MenuItem("Stair", nullptr, false, false)) {
+            }
             ImGui::EndMenu();
         }
-    
+
         if (ImGui::BeginMenu("Lights")) {
             if (ImGui::MenuItem("Directional")) {
                 const EntityID new_directional_light_id = DirectionalLight::create(active_scene, "Directional Light");
@@ -113,7 +118,8 @@ namespace hellfire::editor {
                 const EntityID new_point_light_id = PointLight::create(active_scene, "Point Light");
                 context_->selected_entity_id = new_point_light_id;
             }
-            if (ImGui::MenuItem("Spot", nullptr, false, false)) {}
+            if (ImGui::MenuItem("Spot", nullptr, false, false)) {
+            }
             ImGui::EndMenu();
         }
     }
@@ -139,7 +145,7 @@ namespace hellfire::editor {
         // Set up tree node flags
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
                                    ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                                   ImGuiTreeNodeFlags_SpanAvailWidth;
+                                   ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DrawLinesToNodes;
 
         if (is_selected) {
             flags |= ImGuiTreeNodeFlags_Selected;
@@ -149,9 +155,15 @@ namespace hellfire::editor {
             flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
         }
 
+        // Styles
+        ImGui::PushStyleVar(ImGuiStyleVar_TreeLinesRounding, 3.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 6.0f));
+
         // Render the tree node
         std::string display_name = ICON_FA_CUBES " " + entity_name;
         bool node_open = ImGui::TreeNodeEx(display_name.c_str(), flags);
+
+        ImGui::PopStyleVar(2);
 
         if (ImGui::IsItemClicked()) {
             context_->selected_entity_id = entity_id;
