@@ -32,7 +32,7 @@ namespace hellfire::editor {
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
                 // Add button at the top
-                if (ImGui::Button(ICON_FA_PLUS "##AddEntity")) {
+                if (ImGui::Button(ICON_FA_PLUS "##AddEntity", ImVec2(40, 30))) {
                     ImGui::OpenPopup("AddEntityPopup");
                 }
 

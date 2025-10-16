@@ -28,7 +28,7 @@ namespace hellfire::editor {
             // Entity name
             static char name_buffer[256];
             strncpy_s(name_buffer, selected_entity->get_name().c_str(), 255);
-            
+
             ImGui::Text("Name");
             ImGui::SameLine(120);
             if (ImGui::InputText("##EntityName", name_buffer, 256)) {
@@ -71,9 +71,9 @@ namespace hellfire::editor {
             auto position = transform->get_position();
             auto rotation = transform->get_rotation();
             auto scale = transform->get_scale();
-            
+
             ImGui::Indent();
-    
+
             ImGui::Text("Position");
             ImGui::SameLine(120);
             ImGui::DragFloat3("##Position", &position[0]);
@@ -84,7 +84,7 @@ namespace hellfire::editor {
             ImGui::DragFloat3("##Rotation", &rotation[0]);
             transform->set_rotation(rotation);
 
-            
+
             ImGui::Text("Scale");
             ImGui::SameLine(120);
             ImGui::DragFloat3("##Scale", &scale[0]);
@@ -110,7 +110,7 @@ namespace hellfire::editor {
 
     void InspectorComponent::render_light_component(LightComponent *light) {
         if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen)) {
-            const char* light_types[] = {"Directional", "Point"};
+            const char *light_types[] = {"Directional", "Point"};
             int current_type = light->get_light_type();
 
             if (ImGui::Combo("Type", &current_type, light_types, 2)) {
@@ -143,23 +143,23 @@ namespace hellfire::editor {
     }
 
     void InspectorComponent::render_directional_light_component(LightComponent *light) {
-        
     }
 
     void InspectorComponent::render_point_light_component(LightComponent *light) {
     }
-    
+
 
     void InspectorComponent::render_camera_component(CameraComponent *camera) {
     }
 
     void InspectorComponent::render_script_component(ScriptComponent *script) {
-        for (const auto& [label, value] : script->get_bool_vars()) {
-            bool current_value = value;
-            if (ImGui::Checkbox(label.c_str(), &current_value)) {
-                script->set_bool(label, current_value);
+        if (ImGui::CollapsingHeader(script->get_class_name())) {
+            for (const auto &[label, value]: script->get_bool_vars()) {
+                bool current_value = value;
+                if (ImGui::Checkbox(label.c_str(), &current_value)) {
+                    script->set_bool(label, current_value);
+                }
             }
         }
-        
     }
 }

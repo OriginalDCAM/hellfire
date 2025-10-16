@@ -18,8 +18,8 @@ namespace hellfire {
     public:
         enum LightType {
             DIRECTIONAL,
-            SPOT,
-            POINT
+            POINT,
+            SPOT
         };
 
     private:
@@ -40,7 +40,7 @@ namespace hellfire {
         float outer_cone_angle_ = 45.0f;
 
     public:
-        LightComponent(LightType type = LightType::DIRECTIONAL) : type_(type) {
+        LightComponent(LightType type = DIRECTIONAL) : type_(type) {
         }
 
         // Type management

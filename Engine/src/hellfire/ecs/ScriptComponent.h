@@ -9,6 +9,11 @@
 #include "Entity.h"
 #include "Component.h"
 
+#define SCRIPT_CLASS(ClassName) \
+    public: \
+    const char* get_class_name() const override { return #ClassName; } \
+    static const char* static_class_name() { return #ClassName; }
+
 namespace hellfire {
     class TransformComponent;
 
@@ -92,14 +97,17 @@ namespace hellfire {
             return get_owner() ? get_owner()->template get_component<T>() : nullptr;
         }
 
-        
-        std::unordered_map<std::string, bool>& get_bool_vars() {
+
+        std::unordered_map<std::string, bool> &get_bool_vars() {
             return bool_vars_;
         }
-        
 
+        virtual const char* get_class_name() const {
+            return {};
+        }
     protected:
         bool enabled_ = true;
+
         // Protected variables that derived classes can access
         std::unordered_map<std::string, float> float_vars_;
         std::unordered_map<std::string, bool> bool_vars_;

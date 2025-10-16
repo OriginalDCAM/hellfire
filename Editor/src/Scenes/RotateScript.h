@@ -6,8 +6,10 @@
 #include "hellfire/ecs/ScriptComponent.h"
 #include "hellfire/ecs/TransformComponent.h"
 
+
 class RotateScript : public hellfire::ScriptComponent {
 public:
+    SCRIPT_CLASS(RotateScript);
     void on_init() override {
         set_bool("should_rotate", true);
     }
