@@ -107,6 +107,7 @@ namespace hellfire::editor {
         }
     }
 
+
     void InspectorComponent::render_light_component(LightComponent *light) {
         if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen)) {
             const char* light_types[] = {"Directional", "Point"};
@@ -129,17 +130,25 @@ namespace hellfire::editor {
 
             switch (light->get_light_type()) {
                 case LightComponent::DIRECTIONAL:
-                    // render_directional_light_component(light);
+                    render_directional_light_component(light);
                     break;
                 case LightComponent::SPOT:
                     // render_spot_light_component(light);
                     break;
                 case LightComponent::POINT:
-                    // render_point_light_component(light);
+                    render_point_light_component(light);
                     break;
             }
         }
     }
+
+    void InspectorComponent::render_directional_light_component(LightComponent *light) {
+        
+    }
+
+    void InspectorComponent::render_point_light_component(LightComponent *light) {
+    }
+    
 
     void InspectorComponent::render_camera_component(CameraComponent *camera) {
     }
