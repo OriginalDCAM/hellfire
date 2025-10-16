@@ -219,7 +219,7 @@ namespace hellfire {
             if (mesh && material) {
                 const glm::vec3 object_pos = transform->get_world_position();
                 const float distance = glm::length(camera_pos - object_pos);
-                const bool is_transparent = is_material_transparent(material);
+                const bool is_transparent = material->is_transparent();
 
                 RenderCommand cmd = {entity_id, mesh, material, distance, is_transparent};
 
@@ -236,7 +236,7 @@ namespace hellfire {
                 if (auto material = instanced->get_material()) {
                     glm::vec3 object_pos = transform->get_world_position();
                     float distance = glm::length(camera_pos - object_pos);
-                    bool is_transparent = is_material_transparent(material);
+                    bool is_transparent = material->is_transparent();
 
                     InstancedRenderCommand cmd = {entity_id, instanced, material, distance, is_transparent};
 
@@ -253,17 +253,6 @@ namespace hellfire {
         for (EntityID child_id: scene_->get_children(entity_id)) {
             collect_render_commands_recursive(child_id, camera_pos);
         }
-    }
-
-
-    bool Renderer::is_material_transparent(const std::shared_ptr<Material> &material) {
-        if (!material) {
-            return false;
-        }
-        const auto transparency = material->get_property<float>("uTransparency", 1.0f);
-        const auto alpha = material->get_property<float>("uAlpha", 1.0f);
-        const bool use_transparency = material->get_property<bool>("useTransparency", false);
-        return transparency < 1.0f || alpha < 1.0f || use_transparency;
     }
 
     void Renderer::render_opaque_pass(const glm::mat4 &view, const glm::mat4 &projection) {
@@ -328,6 +317,8 @@ namespace hellfire {
         if (context_) {
             RenderingUtils::upload_lights_to_shader(*shader, context_);
         }
+
+        shader->set_vec3("uAmbientLight", scene_->get_ambient_light());
 
         // Upload default uniforms
         RenderingUtils::set_standard_uniforms(*shader, transform->get_world_matrix(), view, projection);
@@ -473,7 +464,8 @@ namespace hellfire {
             uint32_t compiled_id = compile_material_shader(material);
             if (compiled_id != 0) {
                 material->set_compiled_shader_id(compiled_id);
-                return shader_registry_.get_shader_from_id(compiled_id);
+                auto shader =  shader_registry_.get_shader_from_id(compiled_id);
+                return shader;
             }
         }
 

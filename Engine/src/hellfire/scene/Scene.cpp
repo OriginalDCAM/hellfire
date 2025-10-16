@@ -5,7 +5,7 @@
 #include "hellfire/ecs/CameraComponent.h"
 
 namespace hellfire {
-    Scene::Scene(const std::string &name) : name_(name), is_active_(false), active_camera_entity_id_(0) {
+    Scene::Scene(const std::string &name) : name_(name), is_active_(false) {
     }
 
     Scene::~Scene() {

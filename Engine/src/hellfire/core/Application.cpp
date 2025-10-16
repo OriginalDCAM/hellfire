@@ -19,7 +19,7 @@ namespace hellfire {
         try {
             Shader *shader = shader_registry_.load_and_get_shader(
                 "assets/shaders/standard.vert",
-                "assets/shaders/lambert.frag"
+                "assets/shaders/phong.frag"
             );
 
             if (shader && shader->is_valid()) {

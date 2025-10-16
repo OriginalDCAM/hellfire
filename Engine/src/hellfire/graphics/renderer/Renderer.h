@@ -112,10 +112,5 @@ namespace hellfire {
         // Draw methods
         void draw_render_command(const RenderCommand& cmd, const glm::mat4& view, const glm::mat4& projection);
         void draw_instanced_command(const InstancedRenderCommand& cmd, const glm::mat4& view, const glm::mat4& projection);
-
-
-        // Utility methods
-        bool is_material_transparent(const std::shared_ptr<Material> &material);
-        
     };
 }

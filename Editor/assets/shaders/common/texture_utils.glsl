@@ -41,10 +41,6 @@ vec3 calculateSurfaceNormal(vec2 texCoords, vec3 vertexNormal, mat3 tbn) {
     return normalize(vertexNormal);
 }
 
-float calculateFinalAlpha(float baseAlpha) {
-    return useTransparency ? baseAlpha * uAlpha * uTransparency : baseAlpha;
-}
-
 vec3 applyGammaCorrection(vec3 color) {
     return pow(color, vec3(1.0/2.2));
 }

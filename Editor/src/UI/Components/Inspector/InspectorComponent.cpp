@@ -5,7 +5,6 @@
 #include "InspectorComponent.h"
 
 #include "imgui.h"
-#include "imgui_internal.h"
 #include "hellfire/ecs/LightComponent.h"
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/ecs/ScriptComponent.h"
@@ -103,7 +102,58 @@ namespace hellfire::editor {
 
     void InspectorComponent::render_renderable_component(RenderableComponent *renderable) {
         if (ImGui::CollapsingHeader("Renderable", ImGuiTreeNodeFlags_DefaultOpen)) {
-            // TODO: Decide which inputs to use for this component
+            std::shared_ptr<Material> material = renderable->get_material();
+
+            ImGui::Indent();
+            ImGui::Text("Material Properties");
+
+            for (const auto &prop: material->get_properties() | std::views::values) {
+                switch (prop.type) {
+                    case Material::PropertyType::FLOAT: {
+                        float float_val = std::get<float>(prop.value);
+                        ImGui::Text("%s", prop.name.c_str());
+                        ImGui::SameLine(120);
+                        std::string prop_name = "##" + prop.name;
+                        if (ImGui::DragFloat(prop_name.c_str(), &float_val)) {
+                            material->set_property(prop.name, float_val);
+                        }
+                        break;
+                    }
+                    case Material::PropertyType::VEC2: {
+                        glm::vec2 vec2_val = std::get<glm::vec2>(prop.value);
+                        ImGui::Text("%s", prop.name.c_str());
+                        ImGui::SameLine(120);
+                        std::string prop_name = "##" + prop.name;
+                        if (ImGui::DragFloat2(prop_name.c_str(), &vec2_val[0])) {
+                            material->set_property(prop.name, vec2_val);
+                        }
+                        break;
+                    }
+                    case Material::PropertyType::COLOR3: {
+                        glm::vec3 vec3_val = std::get<glm::vec3>(prop.value);
+                        ImGui::Text("%s", prop.name.c_str());
+                        ImGui::SameLine(120);
+                        std::string prop_name = "##" + prop.name;
+                        if (ImGui::ColorEdit3(prop_name.c_str(), &vec3_val[0])) {
+                            material->set_property(prop.name, vec3_val, prop.type);
+                        }
+                        break;
+                    }
+                    case Material::PropertyType::VEC3: {
+                        glm::vec3 vec3_val = std::get<glm::vec3>(prop.value);
+                        ImGui::Text("%s", prop.name.c_str());
+                        ImGui::SameLine(120);
+                        std::string prop_name = "##" + prop.name;
+                        if (ImGui::ColorEdit3(prop_name.c_str(), &vec3_val[0])) {
+                            material->set_property(prop.name, vec3_val);
+                        }
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+            ImGui::Unindent();
         }
     }
 
@@ -154,10 +204,12 @@ namespace hellfire::editor {
 
     void InspectorComponent::render_script_component(ScriptComponent *script) {
         if (ImGui::CollapsingHeader(script->get_class_name())) {
-            for (const auto &[label, value]: script->get_bool_vars()) {
-                bool current_value = value;
-                if (ImGui::Checkbox(label.c_str(), &current_value)) {
-                    script->set_bool(label, current_value);
+            for (const auto &property_info: script->get_properties()) {
+                if (property_info.type == ScriptComponent::PropertyType::BOOL) {
+                    auto* boolean_value = static_cast<bool*>(property_info.data_ptr);
+                    if (ImGui::Checkbox(property_info.name.c_str(), boolean_value)) {
+                        
+                    }
                 }
             }
         }

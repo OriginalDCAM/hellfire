@@ -45,7 +45,7 @@ namespace hellfire {
         if (config.material) {
             renderable->set_material(config.material);
         } else {
-            auto material = MaterialBuilder::create_lambert("Quad Material");
+            auto material = MaterialBuilder::create("Quad Material");
             renderable->set_material(material);
         }
         

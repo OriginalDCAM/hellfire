@@ -17,6 +17,11 @@
 }
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse, vec3 specular) {
+    float distance = length(light.position - fragPos);
+
+    // Early out if outside light range
+    if (distance > light.range) return vec3(0.0);
+    
     vec3 lightDir = normalize(light.position - fragPos);
     vec3 viewDir = normalize(viewPos - fragPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);
@@ -28,7 +33,6 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse, v
     float spec = pow(max(dot(normal, halfwayDir), 0.0), uShininess);
 
     // Attenuation
-    float distance = length(light.position - fragPos);
     float attenuation = clamp(1.0 - (distance * distance) / (light.range * light.range), 0.0, 1.0);
     attenuation *= attenuation;
 
@@ -41,16 +45,17 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse, v
 }
 
 vec3 calculateBlinnPhongLighting(vec3 normal, vec3 baseColor, vec3 fragPos) {
-    vec3 result = uAmbientColor * baseColor;
+    vec3 result = uAmbientLight * baseColor;
 
+    vec3 materialDiffuse = uDiffuseColor * baseColor;
     // Add directional lights
     for (int i = 0; i < min(numDirectionalLights, MAX_DIRECTIONAL_LIGHTS); i++) {
-        result += calcDirectionalLight(directionalLights[i], normal, fragPos, baseColor, uSpecularColor);
+        result += calcDirectionalLight(directionalLights[i], normal, fragPos, materialDiffuse, uSpecularColor);
     }
 
     // Add point lights
     for (int i = 0; i < min(numPointLights, MAX_POINT_LIGHTS); i++) {
-        result += calcPointLight(pointLights[i], normal, fragPos, baseColor, uSpecularColor);
+        result += calcPointLight(pointLights[i], normal, fragPos, materialDiffuse, uSpecularColor);
     }
 
     return result;

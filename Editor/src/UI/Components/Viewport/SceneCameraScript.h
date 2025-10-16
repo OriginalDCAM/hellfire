@@ -6,8 +6,10 @@
 #include <glm/detail/type_vec3.hpp>
 
 class SceneCameraScript final : public hellfire::ScriptComponent {
-public:
+    SCRIPT_CLASS(SceneCameraScript);
     explicit SceneCameraScript(float movement_speed = 5.0f, float mouse_sensitivity = 0.1f);
+
+    SCRIPT_VAR(float, look_speed, 45.0f);
 
     void on_init() override;
 

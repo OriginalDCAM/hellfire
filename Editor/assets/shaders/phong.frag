@@ -19,8 +19,5 @@ void main() {
     // Calculate lighting
     vec3 result = calculateBlinnPhongLighting(normal, baseColor.rgb, vFragPos);
 
-    // Apply transparency
-    float finalAlpha = calculateFinalAlpha(baseColor.a);
-
-    fragColor = vec4(result, finalAlpha);
+    fragColor = vec4(result, uOpacity);
 }

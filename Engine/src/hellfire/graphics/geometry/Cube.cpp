@@ -93,7 +93,7 @@ namespace hellfire {
         if (config.material) {
             renderable->set_material(config.material);
         } else {
-            auto material = MaterialBuilder::create_lambert("Cube Material");
+            auto material = MaterialBuilder::create("Cube Material");
             renderable->set_material(material);
         }
         

@@ -8,17 +8,21 @@
 
 
 class RotateScript : public hellfire::ScriptComponent {
-public:
     SCRIPT_CLASS(RotateScript);
+    
+    SCRIPT_VAR(bool, should_rotate, true);
+    SCRIPT_VAR(glm::vec3, rotation_speed, glm::vec3(45.0f, 45.0f, 0.0f));
+
     void on_init() override {
-        set_bool("should_rotate", true);
+        REGISTER_VAR(should_rotate, BOOL);
+        REGISTER_VAR(rotation_speed, VEC3);
     }
 
     void on_update(float delta_time) override {
-        if (get_bool("should_rotate")) {
-            auto current_rotation = get_transform()->get_rotation();
-            current_rotation = current_rotation + glm::vec3(45, 45, 0) * delta_time;
-            get_transform()->set_rotation(current_rotation);
+        if (should_rotate) {
+            auto current = get_transform()->get_rotation();
+            current += rotation_speed * delta_time;
+            get_transform()->set_rotation(glm::mod(current, glm::vec3(360.0f)));
         }
     }
 };

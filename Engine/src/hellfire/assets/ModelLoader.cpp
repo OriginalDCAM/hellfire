@@ -325,7 +325,7 @@ namespace hellfire::Addons {
         std::string name = material_name.length > 0 ? material_name.C_Str() : "ImportedMaterial";
 
         // Create Lambert Material 
-        auto material = MaterialBuilder::create_lambert(name);
+        auto material = MaterialBuilder::create(name);
 
         // Load ALL properties
         load_essential_material_properties(ai_material, *material);

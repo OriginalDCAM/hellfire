@@ -30,10 +30,10 @@ namespace hellfire {
         while (std::regex_search(processed, match, include_regex)) {
             std::string include_relative_path = match[1].str();
             std::string include_full_path = base_path + include_relative_path;
-        
+
             // Get the directory of the included file for nested includes
             std::string include_dir = get_directory_from_path(include_full_path);
-        
+
             std::string include_content = load_include_file(include_full_path, include_dir);
             processed = processed.replace(match.position(), match.length(), include_content);
         }
@@ -41,7 +41,7 @@ namespace hellfire {
         return processed;
     }
 
-    std::string ShaderManager::load_include_file(const std::string &path,  const std::string &base_path) {
+    std::string ShaderManager::load_include_file(const std::string &path, const std::string &base_path) {
         if (include_cache_.find(path) != include_cache_.end()) {
             return include_cache_[path];
         }
@@ -61,13 +61,13 @@ namespace hellfire {
         include_cache_[path] = content;
         return clean_shader_content(content, base_path);
     }
-    
+
     std::string ShaderManager::get_directory_from_path(const std::string &file_path) {
         size_t last_slash = file_path.find_last_of("/\\");
         if (last_slash != std::string::npos) {
             return file_path.substr(0, last_slash + 1);
         }
-        return "./"; 
+        return "./";
     }
 
     std::string ShaderManager::process_defines(const std::string &source,
@@ -128,35 +128,35 @@ namespace hellfire {
         base_path = std::string(exePath);
         base_path = base_path.substr(0, base_path.find_last_of("\\/")) + "/";
 #endif
-            
+
         std::string abs_path = path; //  base_path + path 
         std::cout << "Loading shader from: " << abs_path << std::endl;
-            
-        char* file_content = glsl::readFile(abs_path.c_str());
+
+        char *file_content = glsl::readFile(abs_path.c_str());
         if (!file_content) {
             throw std::runtime_error("Failed to read shader file: " + abs_path);
         }
-            
+
         std::string content(file_content);
-        delete[] file_content; 
-            
+        delete[] file_content;
+
         return content;
     }
 
     std::string ShaderManager::ShaderVariant::get_key() const {
         std::string key = vertex_path + "|" + fragment_path + "|";
-        for (const auto& define : defines) {
+        for (const auto &define: defines) {
             key += define + ",";
         }
         return key;
     }
 
-    std::string ShaderManager::clean_shader_content(const std::string& content, const std::string& filepath) {
+    std::string ShaderManager::clean_shader_content(const std::string &content, const std::string &filepath) {
         std::string cleaned = content;
-    
+
         // UTF-8 BOM is EF BB BF (shows as ï»¿ in text)
         std::string bom = "\xEF\xBB\xBF";
-    
+
         // Remove ALL occurrences of BOM, not just at the beginning
         size_t pos = 0;
         int removedCount = 0;
@@ -164,45 +164,45 @@ namespace hellfire {
             cleaned.erase(pos, bom.length());
             removedCount++;
         }
-    
+
         if (removedCount > 0) {
             std::cout << "Removed " << removedCount << " BOM sequences from: " << filepath << std::endl;
         }
-    
+
         return cleaned;
     }
 
     uint32_t ShaderManager::load_shader(const ShaderVariant &variant) {
         std::string cache_key = variant.get_key();
-            
+
         // Check if already compiled
         if (compiled_shaders_.find(cache_key) != compiled_shaders_.end()) {
             return compiled_shaders_[cache_key];
         }
-            
+
         try {
             // Load and process vertex shader
             std::string vertex_base_path = get_directory_from_path(variant.vertex_path);
             std::string fragment_base_path = get_directory_from_path(variant.fragment_path);
-        
+
             // Load and process vertex shader
             std::string vertex_source = load_shader_file(variant.vertex_path);
             vertex_source = process_includes(vertex_source, vertex_base_path);
             vertex_source = process_defines(vertex_source, variant.defines);
-            
+
             // Load and process fragment shader
             std::string fragment_source = load_shader_file(variant.fragment_path);
             fragment_source = process_includes(fragment_source, fragment_base_path);
             fragment_source = process_defines(fragment_source, variant.defines);
-                
+
             // Compile shader 
             uint32_t program = compile_shader_program(vertex_source, fragment_source);
-                
+
             // Cache compiled shader
             compiled_shaders_[cache_key] = program;
-                
+
             return program;
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Error loading shader: " << e.what() << std::endl;
             return 0;
         }
@@ -210,42 +210,24 @@ namespace hellfire {
 
     uint32_t ShaderManager::get_shader_for_material(Material &material) {
         ShaderVariant variant;
-            
+
         // Check if material has custom shader
         if (material.has_custom_shader()) {
-            const auto* shader_info = material.get_shader_info();
+            const auto *shader_info = material.get_shader_info();
             variant.vertex_path = shader_info->vertex_path;
             variant.fragment_path = shader_info->fragment_path;
             variant.defines = shader_info->defines;
-                
+
             // Add automatic defines based on properties
             add_automatic_defines(material, variant.defines);
         } else {
-            // Use built-in shader based on material type
-            int material_type = material.get_builtin_material_type();
-                
-            switch (material_type) {
-                case 0: // Lambert
-                    variant.vertex_path = "assets/shaders/standard.vert";
-                    variant.fragment_path = "assets/shaders/lambert.frag";
-                    break;
-                case 1: // Phong
-                    variant.vertex_path = "assets/shaders/standard.vert";
-                    variant.fragment_path = "assets/shaders/phong.frag";
-                    break;
-                case 2: // PBR
-                    variant.vertex_path = "assets/shaders/standard.vert";
-                    variant.fragment_path = "assets/shaders/pbr.frag";
-                    break;
-                default:
-                    variant.vertex_path = "assets/shaders/standard.vert";
-                    variant.fragment_path = "assets/shaders/lambert.frag";
-                    break;
-            }
+            variant.vertex_path = "assets/shaders/standard.vert";
+            variant.fragment_path = "assets/shaders/phong.frag";
+
             // Add automatic defines for built-in shaders
             add_automatic_defines(material, variant.defines);
         }
-            
+
         uint32_t shader_id = load_shader(variant);
         material.set_compiled_shader_id(shader_id);
         return shader_id;
@@ -257,22 +239,22 @@ namespace hellfire {
     }
 
     void ShaderManager::add_automatic_defines(const Material &material, std::unordered_set<std::string> &defines) {
-        if (material.get_property<Texture*>("diffuseTexture", nullptr)) {
+        if (material.get_property<Texture *>("diffuseTexture", nullptr)) {
             defines.insert("HAS_DIFFUSE_TEXTURE");
         }
-        if (material.get_property<Texture*>("normalTexture", nullptr)) {
+        if (material.get_property<Texture *>("normalTexture", nullptr)) {
             defines.insert("HAS_NORMAL_TEXTURE");
         }
-        if (material.get_property<Texture*>("specularTexture", nullptr)) {
+        if (material.get_property<Texture *>("specularTexture", nullptr)) {
             defines.insert("HAS_SPECULAR_TEXTURE");
         }
-        if (material.get_property<Texture*>("emissionTexture", nullptr)) {
+        if (material.get_property<Texture *>("emissionTexture", nullptr)) {
             defines.insert("HAS_EMISSION_TEXTURE");
         }
-        if (material.get_property<Texture*>("roughnessTexture", nullptr)) {
+        if (material.get_property<Texture *>("roughnessTexture", nullptr)) {
             defines.insert("HAS_ROUGHNESS_TEXTURE");
         }
-        if (material.get_property<Texture*>("metallicTexture", nullptr)) {
+        if (material.get_property<Texture *>("metallicTexture", nullptr)) {
             defines.insert("HAS_METALLIC_TEXTURE");
         }
     }
@@ -281,17 +263,17 @@ namespace hellfire {
         try {
             std::string vertex_source = load_shader_file(vertex_path);
             std::string fragment_source = load_shader_file(fragment_path);
-                
+
             uint32_t program_id = compile_shader_program(vertex_source, fragment_source);
-                
+
             if (program_id != 0) {
                 // Track shader for cleanup (using file paths as key)
                 std::string cache_key = vertex_path + "|" + fragment_path;
                 compiled_shaders_[cache_key] = program_id;
             }
-                
+
             return program_id;
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Error loading shaders: " << e.what() << std::endl;
             return 0;
         }
@@ -299,9 +281,9 @@ namespace hellfire {
 
     void ShaderManager::clear_cache() {
         include_cache_.clear();
-            
+
         // Clean up compiled shaders
-        for (const auto& [key, shader_id] : compiled_shaders_) {
+        for (const auto &[key, shader_id]: compiled_shaders_) {
             glDeleteProgram(shader_id);
         }
         compiled_shaders_.clear();
@@ -310,16 +292,15 @@ namespace hellfire {
     std::vector<uint32_t> ShaderManager::get_all_shader_ids() const {
         std::vector<uint32_t> shader_ids;
         shader_ids.reserve(compiled_shaders_.size());
-        for (const auto& [key, id] : compiled_shaders_) {
+        for (const auto &[key, id]: compiled_shaders_) {
             shader_ids.push_back(id);
         }
         return shader_ids;
     }
 
-    uint32_t ShaderManager::
-    compile_shader_program(const std::string &vertex_source, const std::string &fragment_source) {
-        const char* vertex_src = vertex_source.c_str();
-        const char* fragment_src = fragment_source.c_str();
+    uint32_t ShaderManager::compile_shader_program(const std::string &vertex_source, const std::string &fragment_source) {
+        const char *vertex_src = vertex_source.c_str();
+        const char *fragment_src = fragment_source.c_str();
 
         GLuint vertex_shader = glsl::makeVertexShader(vertex_src);
         if (vertex_shader == 0) {

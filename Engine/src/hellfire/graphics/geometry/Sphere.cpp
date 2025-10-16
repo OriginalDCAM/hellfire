@@ -32,7 +32,7 @@ namespace hellfire {
         if (config.material) {
             renderable->set_material(config.material);
         } else {
-            auto material = MaterialBuilder::create_lambert("Sphere Material");
+            auto material = MaterialBuilder::create("Sphere Material");
             renderable->set_material(material);
         }
         

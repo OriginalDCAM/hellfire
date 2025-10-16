@@ -8,24 +8,73 @@
 
 #include "Entity.h"
 #include "Component.h"
+#include "glm/detail/type_vec.hpp"
 
 #define SCRIPT_CLASS(ClassName) \
     public: \
     const char* get_class_name() const override { return #ClassName; } \
     static const char* static_class_name() { return #ClassName; }
 
+// Property macro that registers the variable for serialization
+#define SCRIPT_VAR(Type, Name, Default) \
+Type Name = Default
+
+// Helper macro for registration of variables
+#define REGISTER_VAR(Name, Type) \
+register_property(#Name, &Name, PropertyType::Type)
+
 namespace hellfire {
     class TransformComponent;
 
     class ScriptComponent : public Component {
     public:
+        enum class PropertyType {
+            FLOAT, INT, BOOL, STRING, VEC2, VEC3, VEC4, COLOR3, COLOR4, TEXTURE, MATERIAL, ARRAY
+        };
+
+        struct PropertyInfo {
+            std::string name;
+            PropertyType type;
+            void *data_ptr; // Pointer to actual member variable
+
+            // Helper to get/set value through pointer
+            template<typename T>
+            T &get() { return *static_cast<T *>(data_ptr); }
+        };
+
+    protected:
+        std::vector<PropertyInfo> properties_;
+
+        // Register a property for editor/serialization
+        template<typename T>
+        void register_property(const std::string &name, T *ptr, PropertyType type) {
+            properties_.push_back({name, type, static_cast<void *>(ptr)});
+        }
+
+        bool enabled_ = true;
+
+        template<typename T>
+        static PropertyType deduce_type() {
+            if constexpr (std::is_same_v<T, bool>) return PropertyType::BOOL;
+            if constexpr (std::is_same_v<T, float>) return PropertyType::FLOAT;
+            if constexpr (std::is_same_v<T, int>) return PropertyType::INT;
+            if constexpr (std::is_same_v<T, glm::vec2>) return PropertyType::VEC2;
+            if constexpr (std::is_same_v<T, glm::vec3>) return PropertyType::VEC3;
+            if constexpr (std::is_same_v<T, glm::vec4>) return PropertyType::VEC4;
+            if constexpr (std::is_same_v<T, std::string>) return PropertyType::STRING;
+            return PropertyType::FLOAT; // Default
+        }
+
+    public:
         ScriptComponent() = default;
 
         virtual ~ScriptComponent() = default;
 
+        const std::vector<PropertyInfo> &get_properties() const { return properties_; }
+
         // Virtual lifecycle methods
         virtual void on_init() {
-        };
+        }
 
         virtual void on_update(float delta_time) {
         }
@@ -37,51 +86,15 @@ namespace hellfire {
         }
 
         // Called by the entity system
-        void init() {
-            on_init();
-        }
+        void init() { on_init(); }
+        void update(float delta_time) { on_update(delta_time); }
+        void remove() { on_remove(); }
 
-        void update(float delta_time) {
-            on_update(delta_time);
-        }
+        void trigger_event(const std::string &event_name, void *data = nullptr) { on_event(event_name, data); }
 
-        void remove() {
-            on_remove();
-        }
+        void set_enabled(const bool enabled) { enabled_ = enabled; }
 
-        void trigger_event(const std::string &event_name, void *data = nullptr) {
-            on_event(event_name, data);
-        }
-
-        void set_enabled(const bool enabled) {
-            enabled_ = enabled;
-        }
-
-        bool is_enabled() const {
-            return enabled_;
-        }
-
-        // Variable management for script state
-        void set_float(const std::string &name, float value) { float_vars_[name] = value; }
-
-        float get_float(const std::string &name, float default_val = 0.0f) const {
-            auto it = float_vars_.find(name);
-            return it != float_vars_.end() ? it->second : default_val;
-        }
-
-        void set_bool(const std::string &name, bool value) { bool_vars_[name] = value; }
-
-        bool get_bool(const std::string &name, bool default_val = false) const {
-            auto it = bool_vars_.find(name);
-            return it != bool_vars_.end() ? it->second : default_val;
-        }
-
-        void set_string(const std::string &name, const std::string &value) { string_vars_[name] = value; }
-
-        std::string get_string(const std::string &name, const std::string &default_val = "") const {
-            auto it = string_vars_.find(name);
-            return it != string_vars_.end() ? it->second : default_val;
-        }
+        bool is_enabled() const { return enabled_; }
 
         // Utility methods for common operations
         TransformComponent *get_transform() const;
@@ -97,20 +110,8 @@ namespace hellfire {
             return get_owner() ? get_owner()->template get_component<T>() : nullptr;
         }
 
-
-        std::unordered_map<std::string, bool> &get_bool_vars() {
-            return bool_vars_;
-        }
-
-        virtual const char* get_class_name() const {
+        virtual const char *get_class_name() const {
             return {};
         }
-    protected:
-        bool enabled_ = true;
-
-        // Protected variables that derived classes can access
-        std::unordered_map<std::string, float> float_vars_;
-        std::unordered_map<std::string, bool> bool_vars_;
-        std::unordered_map<std::string, std::string> string_vars_;
     };
 }

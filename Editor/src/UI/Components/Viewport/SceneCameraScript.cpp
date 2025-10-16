@@ -15,6 +15,7 @@ SceneCameraScript::SceneCameraScript(float movement_speed, float mouse_sensitivi
 
 void SceneCameraScript::on_init() {
     std::cout << "PlayerController initialized for entity: " << get_owner()->get_name() << std::endl;
+    REGISTER_VAR(look_speed, FLOAT);
 
     last_known_player_position = get_transform()->get_position();
 
@@ -31,19 +32,17 @@ void SceneCameraScript::on_update(float delta_time) {
 void SceneCameraScript::handle_keyboard_look(float delta_time) {
     auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
     
-    set_float("look_speed", 45.0f);
-    
     if (input_manager->is_key_pressed(GLFW_KEY_J)) { // Look left
-        yaw_ -= get_float("look_speed") * delta_time;
+        yaw_ -= look_speed * delta_time;
     }
     if (input_manager->is_key_pressed(GLFW_KEY_L)) { // Look right
-        yaw_ += get_float("look_speed") * delta_time;
+        yaw_ += look_speed * delta_time;
     }
     if (input_manager->is_key_pressed(GLFW_KEY_I)) { // Look up
-        pitch_ += get_float("look_speed") * delta_time;
+        pitch_ += look_speed * delta_time;
     }
     if (input_manager->is_key_pressed(GLFW_KEY_K)) { // Look down
-        pitch_ -= get_float("look_speed") * delta_time;
+        pitch_ -= look_speed * delta_time;
     }
     
     // Constrain pitch

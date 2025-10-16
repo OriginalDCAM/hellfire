@@ -3,6 +3,7 @@
 
 #include "../ecs/Entity.h"
 #include "glm/mat4x4.hpp"
+#include "glm/detail/type_vec3.hpp"
 #include "nlohmann/json.hpp"
 
 static constexpr hellfire::EntityID INVALID_ENTITY = 0;
@@ -79,6 +80,11 @@ namespace hellfire {
         bool was_loaded_from_file() const { return !source_filename_.empty(); }
         std::string generate_unique_name(const std::string& base_name);
 
+        void set_ambient_light(float intensity) {
+            ambient_light_ = glm::vec3(intensity);
+        }
+        glm::vec3 get_ambient_light() const { return ambient_light_; }
+
     private:
         // All entities owned by scene
         std::unordered_map<EntityID, std::unique_ptr<Entity> > entities_;
@@ -94,8 +100,11 @@ namespace hellfire {
         std::string name_;
         bool is_active_;
         std::string source_filename_;
-        std::unique_ptr<Skybox> skybox_;
         std::unordered_map<std::string, int> name_counters_;
+
+        
+        std::unique_ptr<Skybox> skybox_;
+        glm::vec3 ambient_light_ =  glm::vec3(0.4f);
 
         // Helper methods
         void update_hierarchy(EntityID entity_id, float delta_time);
