@@ -342,22 +342,22 @@ namespace hellfire::Addons {
 
         if (ai_material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
             material.set_diffuse_color(glm::vec3(color.r, color.g, color.b));
-            material.set_property("uDiffuse", glm::vec3(color.r, color.g, color.b));
-            material.set_property("uAlbedo", glm::vec3(color.r, color.g, color.b));
+            material.set_property("uDiffuse", glm::vec3(color.r, color.g, color.b), Material::PropertyType::COLOR3);
+            material.set_property("uAlbedo", glm::vec3(color.r, color.g, color.b), Material::PropertyType::COLOR3);
         }
 
         if (ai_material->Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
             material.set_ambient_color(glm::vec3(color.r, color.g, color.b));
-            material.set_property("uAmbient", glm::vec3(color.r, color.g, color.b));
+            material.set_property("uAmbient", glm::vec3(color.r, color.g, color.b), Material::PropertyType::COLOR3);
         }
 
         if (ai_material->Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS) {
             material.set_specular_color(glm::vec3(color.r, color.g, color.b));
-            material.set_property("uSpecular", glm::vec3(color.r, color.g, color.b));
+            material.set_property("uSpecular", glm::vec3(color.r, color.g, color.b),Material::PropertyType::COLOR3);
         }
 
         if (ai_material->Get(AI_MATKEY_COLOR_EMISSIVE, color) == AI_SUCCESS) {
-            material.set_property("uEmissive", glm::vec3(color.r, color.g, color.b));
+            material.set_property("uEmissive", glm::vec3(color.r, color.g, color.b),Material::PropertyType::COLOR3);
         }
 
         if (ai_material->Get(AI_MATKEY_OPACITY, value) == AI_SUCCESS) {
