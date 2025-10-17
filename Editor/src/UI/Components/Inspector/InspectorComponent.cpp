@@ -10,6 +10,7 @@
 #include "hellfire/ecs/ScriptComponent.h"
 #include "hellfire/ecs/TransformComponent.h"
 #include "hellfire/ecs/components/MeshComponent.h"
+#include "UI/ui.h"
 
 namespace hellfire::editor {
     void InspectorComponent::render() {
@@ -73,21 +74,16 @@ namespace hellfire::editor {
 
             ImGui::Indent();
 
-            ImGui::Text("Position");
-            ImGui::SameLine(120);
-            ImGui::DragFloat3("##Position", &position[0]);
-            transform->set_position(position);
+            if (ui::Vec3Input("Position", &position, 0.1f)) {
+                transform->set_position(position);
+            }
 
-            ImGui::Text("Rotation");
-            ImGui::SameLine(120);
-            ImGui::DragFloat3("##Rotation", &rotation[0]);
-            transform->set_rotation(rotation);
-
-
-            ImGui::Text("Scale");
-            ImGui::SameLine(120);
-            ImGui::DragFloat3("##Scale", &scale[0]);
-            transform->set_scale(scale);
+            if (ui::Vec3Input("Rotation", &rotation, 0.1f)) {
+                transform->set_position(rotation);
+            }
+            if (ui::Vec3Input("Scale", &scale, 0.1f)) {
+                transform->set_position(scale);
+            }
 
             ImGui::Unindent();
         }
@@ -111,60 +107,53 @@ namespace hellfire::editor {
                 switch (prop.type) {
                     case Material::PropertyType::FLOAT: {
                         float float_val = std::get<float>(prop.value);
-                        ImGui::Text("%s", prop.name.c_str());
-                        ImGui::SameLine(120);
-                        std::string prop_name = "##" + prop.name;
-                        if (ImGui::DragFloat(prop_name.c_str(), &float_val)) {
+                        if (ui::FloatInput(prop.name, &float_val)) {
                             material->set_property(prop.name, float_val);
                         }
                         break;
                     }
                     case Material::PropertyType::TEXTURE: {
-                        const auto texture_ptr = std::get<Texture*>(prop.value);
-                        ImGui::Text("%s", prop.name.c_str());
-                        ImGui::SameLine(120);
-                        std::string prop_name = "##" + prop.name;
-                        ImGui::Image(texture_ptr->get_id(), ImVec2( 32, 32));
+                        auto texture_ptr = std::get<Texture*>(prop.value);
+
+                        // Construct the "use" property name
+                        std::string use_property_name = "use" + ui::capitalize_first(prop.name);
+    
+                        // Retrieve the "use" flag from the material
+                        bool property_enabled = material->get_property<bool>(use_property_name);
+
+                        if (ui::TexturePropertyInput(prop.name, texture_ptr, property_enabled, material.get())) {
+                            // Update both the texture and the "use" flag
+                            material->set_property(prop.name, texture_ptr);
+                            material->set_property(use_property_name, property_enabled);
+                        }
                         break;
                     }
                     case Material::PropertyType::VEC2: {
                         glm::vec2 vec2_val = std::get<glm::vec2>(prop.value);
-                        ImGui::Text("%s", prop.name.c_str());
-                        ImGui::SameLine(120);
-                        std::string prop_name = "##" + prop.name;
-                        if (ImGui::DragFloat2(prop_name.c_str(), &vec2_val[0])) {
+                        if (ui::Vec2Input(prop.name, &vec2_val)) {
                             material->set_property(prop.name, vec2_val);
                         }
                         break;
                     }
                     case Material::PropertyType::COLOR3: {
                         glm::vec3 vec3_val = std::get<glm::vec3>(prop.value);
-                        ImGui::Text("%s", prop.name.c_str());
-                        ImGui::SameLine(120);
-                        std::string prop_name = "##" + prop.name;
-                        if (ImGui::ColorEdit3(prop_name.c_str(), &vec3_val[0])) {
+                        if (ui::ColorPickerRGBInput(prop.name, &vec3_val)) {
                             material->set_property(prop.name, vec3_val, prop.type);
                         }
                         break;
                     }
                     case Material::PropertyType::VEC3: {
                         glm::vec3 vec3_val = std::get<glm::vec3>(prop.value);
-                        ImGui::Text("%s", prop.name.c_str());
-                        ImGui::SameLine(120);
-                        std::string prop_name = "##" + prop.name;
-                        if (ImGui::ColorEdit3(prop_name.c_str(), &vec3_val[0])) {
+                        if (ui::Vec3Input(prop.name, &vec3_val)) {
                             material->set_property(prop.name, vec3_val);
                         }
                         break;
                     }
                     case Material::PropertyType::BOOL: {
-                        bool bool_value = std::get<bool>(prop.value);
-                        std::string prop_name = "##" + prop.name;
-                        ImGui::Text("%s", prop.name.c_str());
-                        ImGui::SameLine(160);
-                        if (ImGui::Checkbox(prop_name.c_str(), &bool_value)) {
-                            material->set_property(prop.name, bool_value);
-                        }
+                        // bool bool_value = std::get<bool>(prop.value);
+                        // if (ui::BoolInput(prop.name, &bool_value)) {
+                        //     material->set_property(prop.name, bool_value);
+                        // }
                         break;
                     }
                     default: {
@@ -187,15 +176,15 @@ namespace hellfire::editor {
             }
 
             auto color = light->get_color();
-            if (ImGui::ColorEdit3("Color", &color[0])) {
+            if (ui::ColorPickerRGBInput("Color", &color)) {
                 light->set_color(color);
             }
 
-            // NOTE: Intensity set to a maximum of 10 because otherwise the picture will get too bright
             float intensity = light->get_intensity();
-            if (ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 10.0f)) {
+            if (ui::FloatInput("Intensity", &intensity, 0.1f, 0.0f, 100.0f)) {
                 light->set_intensity(intensity);
             }
+
 
             switch (light->get_light_type()) {
                 case LightComponent::DIRECTIONAL:
@@ -226,11 +215,8 @@ namespace hellfire::editor {
             ImGui::Indent();
             for (const auto &prop: script->get_properties()) {
                 if (prop.type == ScriptComponent::PropertyType::BOOL) {
-                    auto* boolean_value = static_cast<bool*>(prop.data_ptr);
-                    std::string prop_name = "##" + prop.name;
-                    ImGui::Text("%s", prop.name.c_str());
-                    ImGui::SameLine(120);
-                    ImGui::Checkbox(prop_name.c_str(), boolean_value);
+                    auto *boolean_value = static_cast<bool *>(prop.data_ptr);
+                    ui::BoolInput(prop.name, boolean_value);
                 }
             }
             ImGui::Unindent();
