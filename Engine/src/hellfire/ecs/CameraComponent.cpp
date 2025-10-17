@@ -86,9 +86,7 @@ namespace hellfire {
     }
 
     void CameraComponent::look_at(const glm::vec3 &target) {
-        if (!get_owner()) return;
-
-        auto *transform = get_owner()->get_component<TransformComponent>();
+        auto *transform = get_owner().get_component<TransformComponent>();
         if (!transform) return;
 
         target_ = target;
@@ -136,13 +134,7 @@ namespace hellfire {
     }
 
     void CameraComponent::update_view_matrix() const {
-        if (!get_owner()) {
-            view_matrix_ = glm::mat4(1.0f);
-            view_dirty_ = false;
-            return;
-        }
-
-        auto* transform = get_owner()->get_component<TransformComponent>();
+        auto* transform = get_owner().get_component<TransformComponent>();
         if (!transform) {
             view_matrix_ = glm::mat4(1.0f);
             view_dirty_ = false;

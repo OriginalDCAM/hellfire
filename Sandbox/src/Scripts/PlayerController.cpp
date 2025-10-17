@@ -14,7 +14,7 @@ SceneCameraScript::SceneCameraScript(float movement_speed, float mouse_sensitivi
 }
 
 void SceneCameraScript::on_init() {
-    std::cout << "PlayerController initialized for entity: " << get_owner()->get_name() << std::endl;
+    std::cout << "PlayerController initialized for entity: " << get_owner().get_name() << std::endl;
 
     last_known_player_position = get_transform()->get_position();
 
@@ -93,7 +93,7 @@ void SceneCameraScript::set_drone_overview_position() {
 
 void SceneCameraScript::handle_keyboard_look(float delta_time) {
     auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
-    
+
     set_float("look_speed", 45.0f);
     
     if (input_manager->is_key_pressed(GLFW_KEY_J)) { // Look left
@@ -166,7 +166,7 @@ void SceneCameraScript::handle_movement(float delta_time) const {
 }
 
 void SceneCameraScript::on_remove() {
-    std::cout << "PlayerController removed from entity: " << get_owner()->get_name() << std::endl;
+    std::cout << "PlayerController removed from entity: " << get_owner().get_name() << std::endl;
 }
 
 void SceneCameraScript::handle_mouse_movement(float x_offset, float y_offset) {

@@ -7,6 +7,6 @@
 
 namespace hellfire {
     TransformComponent * ScriptComponent::get_transform() const {
-        return get_owner() ? get_owner()->get_component<TransformComponent>() : nullptr;
+        return get_owner().transform();
     }
 }

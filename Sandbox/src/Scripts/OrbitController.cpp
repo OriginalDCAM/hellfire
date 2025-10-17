@@ -19,7 +19,7 @@ void OrbitController::on_init() {
 
     AnimationInputHandler::get_instance().register_orbit_controller(this);
 
-    std::cout << "OrbitController initialized for: " << get_owner()->get_name() << std::endl;
+    std::cout << "OrbitController initialized for: " << get_owner().get_name() << std::endl;
  
 }
 

@@ -102,12 +102,12 @@ namespace hellfire {
         // Helper method to check if the owner has a specific component
         template<typename T>
         bool has_component() const {
-            return get_owner() ? get_owner()->template has_component<T>() : false;
+            return get_owner().has_component<T>();
         }
 
         template<typename T>
         T *get_component() const {
-            return get_owner() ? get_owner()->template get_component<T>() : nullptr;
+            return get_owner().get_component<T>();
         }
 
         virtual const char *get_class_name() const {

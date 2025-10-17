@@ -14,10 +14,8 @@ SceneCameraScript::SceneCameraScript(float movement_speed, float mouse_sensitivi
 }
 
 void SceneCameraScript::on_init() {
-    std::cout << "PlayerController initialized for entity: " << get_owner()->get_name() << std::endl;
+    std::cout << "PlayerController initialized for entity: " << get_owner().get_name() << std::endl;
     REGISTER_VAR(look_speed, FLOAT);
-
-    last_known_player_position = get_transform()->get_position();
 
     // Initialize camera orientation
     yaw_ = -90.0f;
@@ -80,12 +78,6 @@ void SceneCameraScript::handle_movement(float delta_time) const {
     }
 
     float current_speed = movement_speed_;
-    // if (input_manager.is_shift_pressed()) {
-    //     current_speed *= 3.0f; 
-    // }
-    // if (input_manager.is_ctrl_pressed()) {
-    //     current_speed *= 0.3f; 
-    // }
 
     // Normalize movement direction
     if (glm::length(movement_direction) > 0.0f) {
@@ -102,7 +94,7 @@ void SceneCameraScript::handle_movement(float delta_time) const {
 }
 
 void SceneCameraScript::on_remove() {
-    std::cout << "SceneCameraScript removed from entity: " << get_owner()->get_name() << std::endl;
+    std::cout << "SceneCameraScript removed from entity: " << get_owner().get_name() << std::endl;
 }
 
 void SceneCameraScript::handle_mouse_movement(float x_offset, float y_offset) {

@@ -15,7 +15,6 @@ void main() {
 
     // Calculate surface normal
     vec3 normal = normalize(vNormal);
-
     // Calculate lighting
     vec3 result = calculateBlinnPhongLighting(normal, baseColor.rgb, vFragPos);
 

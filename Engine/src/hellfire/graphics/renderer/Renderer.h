@@ -49,17 +49,20 @@ namespace hellfire {
 
     class Renderer {
     public:
-        Renderer(uint32_t fallback_program_id);
         Renderer();
-        ~Renderer();
+        ~Renderer() = default;
         
         void init();
         void render(Scene &scene, Entity *camera_override);
+
+        void reset_framebuffer_data();
+
+        void clear_drawable_objects_list();
+
         void begin_frame();
         void end_frame();
 
         [[nodiscard]] Shader *get_default_shader() const;
-        [[nodiscard]] void* get_context() const;
 
         // Framebuffer management
         void create_scene_framebuffer(uint32_t width, uint32_t height);
@@ -82,7 +85,7 @@ namespace hellfire {
         
         Shader* fallback_shader_;
         uint32_t fallback_program_;
-        void* context_;
+        std::unique_ptr<OGLRendererContext> context_;
         Scene* scene_; // Current scene being rendered
 
         std::unique_ptr<Framebuffer> scene_framebuffers_[2];

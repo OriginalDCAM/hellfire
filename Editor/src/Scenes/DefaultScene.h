@@ -19,7 +19,7 @@ void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
         aiProcess_CalcTangentSpace |
         aiProcess_GenSmoothNormals;
 
-    // auto back_pack = hellfire::Asset::load(scene, "assets/models/backpack/survival_guitar_backpack.glb", test_flags);
+    auto back_pack = hellfire::Asset::load(scene, "assets/models/shuttle/orbiter_space_shuttle_ov-103_discovery.glb", test_flags);
     hellfire::EntityID cube_id = hellfire::Cube::create(scene,"Rotating cube", {});
     auto cube_entity = scene->get_entity(cube_id);
     cube_entity->add_component<RotateScript>();

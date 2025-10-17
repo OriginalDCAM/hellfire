@@ -97,7 +97,7 @@ namespace hellfire {
 
     private:
         std::string name_;
-        std::unordered_map<std::string, Property> properties_;
+        std::map<std::string, Property> properties_;
 
         // ===Shader information===
         std::optional<ShaderInfo> custom_shader_info_;

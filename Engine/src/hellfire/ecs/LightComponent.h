@@ -40,7 +40,7 @@ namespace hellfire {
         float outer_cone_angle_ = 45.0f;
 
     public:
-        LightComponent(LightType type = DIRECTIONAL) : type_(type) {
+        explicit LightComponent(LightType type = DIRECTIONAL) : type_(type) {
         }
 
         // Type management
@@ -70,11 +70,11 @@ namespace hellfire {
         }
 
         void look_at(const glm::vec3 &target) {
-            auto *transform = get_owner()->get_component<TransformComponent>();
+            auto transform = get_owner().get_component<TransformComponent>();
             
             if (transform) {
-                glm::vec3 position = transform->get_position();
-                glm::vec3 new_direction = glm::normalize(target - position);
+                const glm::vec3 position = transform->get_position();
+                const glm::vec3 new_direction = glm::normalize(target - position);
                 set_direction(new_direction);
             }
         }
@@ -138,11 +138,9 @@ namespace hellfire {
 
             // Get world position from transform
             glm::vec3 position(0.0f);
-            if (get_owner()) {
-                auto *transform = get_owner()->get_component<TransformComponent>();
+                auto *transform = get_owner().get_component<TransformComponent>();
                 if (transform) {
                     position = transform->get_position();
-                }
             }
 
             shader.set_point_light(light_index, position, color_, intensity_, range_, attenuation_);
@@ -150,33 +148,7 @@ namespace hellfire {
 
         void upload_spot_to_shader(Shader& shader, int light_index) const {
             // TODO: Actually support spotlights in shader
-            // std::string base = "spotLights[" + std::to_string(light_index) + "]";
-
-            // Get world position and direction from transform
-            // glm::vec3 position(0.0f);
-            // glm::vec3 world_direction = direction_;
-
-            // if (get_owner()) {
-            //     auto *transform = get_owner()->get_component<TransformComponent>();
-            //     if (transform) {
-            //         position = transform->get_position();
-            //         // Transform direction by entity's rotation
-            //         glm::mat4 rotation = transform->get_rotation_matrix();
-            //         world_direction = glm::mat3(rotation) * direction_;
-            //     }
-            // }
-            // glUniform3fv(glGetUniformLocation(shader_program, (base + ".position").c_str()), 1,
-            //              glm::value_ptr(position));
-            // glUniform3fv(glGetUniformLocation(shader_program, (base + ".direction").c_str()), 1,
-            //              glm::value_ptr(world_direction));
-            // glUniform3fv(glGetUniformLocation(shader_program, (base + ".color").c_str()), 1,
-            //              glm::value_ptr(color_));
-            // glUniform1f(glGetUniformLocation(shader_program, (base + ".intensity").c_str()), intensity_);
-            // glUniform1f(glGetUniformLocation(shader_program, (base + ".range").c_str()), range_);
-            // glUniform1f(glGetUniformLocation(shader_program, (base + ".innerConeAngle").c_str()),
-            //             glm::cos(glm::radians(inner_cone_angle_)));
-            // glUniform1f(glGetUniformLocation(shader_program, (base + ".outerConeAngle").c_str()),
-            //             glm::cos(glm::radians(outer_cone_angle_)));
+         
         }
     };
 }

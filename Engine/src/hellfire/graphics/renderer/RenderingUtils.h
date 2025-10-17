@@ -33,15 +33,12 @@ namespace hellfire {
             shader.set_time(time);
         }
 
-        static void upload_lights_to_shader(Shader& shader, void* renderer_context) {
-            if (!renderer_context) return;
-
-            OGLRendererContext* ogl_context = static_cast<OGLRendererContext*>(renderer_context);
-            shader.set_light_counts(ogl_context->num_directional_lights, ogl_context->num_point_lights);
+        static void upload_lights_to_shader(Shader& shader, OGLRendererContext& renderer_context) {
+            shader.set_light_counts(renderer_context.num_directional_lights, renderer_context.num_point_lights);
 
             // Upload directional lights
-            for (int i = 0; i < ogl_context->num_directional_lights && i < 4; i++) {
-                Entity* light_entity = ogl_context->directional_light_entities[i];
+            for (int i = 0; i < renderer_context.num_directional_lights && i < 4; i++) {
+                Entity* light_entity = renderer_context.directional_light_entities[i];
                 if (light_entity) {
                     auto* light_component = light_entity->get_component<LightComponent>();
                     if (light_component) {
@@ -51,8 +48,8 @@ namespace hellfire {
             }
 
             // Upload point lights  
-            for (int i = 0; i < ogl_context->num_point_lights && i < 8; i++) {
-                Entity* light_entity = ogl_context->point_light_entities[i];
+            for (int i = 0; i < renderer_context.num_point_lights && i < 8; i++) {
+                Entity* light_entity = renderer_context.point_light_entities[i];
                 if (light_entity) {
                     auto* light_component = light_entity->get_component<LightComponent>();
                     if (light_component) {
@@ -62,8 +59,8 @@ namespace hellfire {
             }
 
             // Upload camera position
-            if (ogl_context->camera_component) {
-                auto* camera_transform = ogl_context->camera_component->get_owner()->get_component<TransformComponent>();
+            if (renderer_context.camera_component) {
+                auto* camera_transform = renderer_context.camera_component->get_owner().get_component<TransformComponent>();
                 if (camera_transform) {
                     shader.set_camera_position(camera_transform->get_world_position());
                 }

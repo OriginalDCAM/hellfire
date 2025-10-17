@@ -15,41 +15,15 @@
 #include "hellfire/scene/Scene.h"
 
 namespace hellfire {
-    Renderer::Renderer(uint32_t fallback_program_id) : shader_registry_(&shader_manager_), fallback_shader_(nullptr),
-                                                       fallback_program_(fallback_program_id),
-                                                       render_to_framebuffer_(false), framebuffer_width_(800),
-                                                       framebuffer_height_(600) {
-        auto *ogl_context = new OGLRendererContext();
-        ogl_context->shader_handle = fallback_program_id;
-        context_ = static_cast<void *>(ogl_context);
-    }
-
     Renderer::Renderer()
         : shader_registry_(nullptr), fallback_shader_(nullptr), fallback_program_(0), render_to_framebuffer_(false),
           framebuffer_width_(800), framebuffer_height_(600) {
-        auto *ogl_context = new OGLRendererContext();
-        ogl_context->shader_handle = 0;
-        context_ = static_cast<void *>(ogl_context);
-    }
-
-    Renderer::~Renderer() {
-        if (context_) {
-            const auto *ogl_context = static_cast<OGLRendererContext *>(context_);
-            delete ogl_context;
-            context_ = nullptr;
-        }
+        context_ = std::make_unique<OGLRendererContext>();
+        context_->shader_handle = 0;
     }
 
     void Renderer::init() {
-        // TODO: Read renderer options from a config file
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glDepthFunc(GL_LESS);
-
-        glDisable(GL_CULL_FACE);
-
+        // Enable debugging for OpenGL
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // Makes errors appear immediately
         glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, 
@@ -93,18 +67,26 @@ namespace hellfire {
         }
     }
 
-    void Renderer::begin_frame() {
+    void Renderer::reset_framebuffer_data() {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void Renderer::clear_drawable_objects_list() {
+        opaque_objects_.clear();
+        transparent_objects_.clear();
+        opaque_instanced_objects_.clear();
+        transparent_instanced_objects_.clear();
+    }
+
+    void Renderer::begin_frame() {
+        reset_framebuffer_data();
 
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
 
-        opaque_objects_.clear();
-        transparent_objects_.clear();
-        opaque_instanced_objects_.clear();
-        transparent_instanced_objects_.clear();
+        clear_drawable_objects_list();
     }
 
     void Renderer::end_frame() {
@@ -115,13 +97,9 @@ namespace hellfire {
         return fallback_shader_;
     }
 
-    void *Renderer::get_context() const {
-        return context_;
-    }
 
     void Renderer::store_lights_in_context(const std::vector<Entity *> &light_entities, CameraComponent &camera) const {
-        OGLRendererContext *ogl_context = static_cast<OGLRendererContext *>(context_);
-        if (!ogl_context) return;
+        if (!context_) return;
 
         // Separate lights by type
         std::vector<Entity *> directional_lights;
@@ -149,28 +127,24 @@ namespace hellfire {
         }
 
         // Store light counts
-        ogl_context->num_directional_lights = static_cast<int>(directional_lights.size());
-        ogl_context->num_point_lights = static_cast<int>(point_lights.size());
+        context_->num_directional_lights = static_cast<int>(directional_lights.size());
+        context_->num_point_lights = static_cast<int>(point_lights.size());
 
         // Store light entities (you may need to adapt your context structure)
-        for (int i = 0; i < ogl_context->num_directional_lights; i++) {
-            ogl_context->directional_light_entities[i] = directional_lights[i];
+        for (int i = 0; i < context_->num_directional_lights; i++) {
+            context_->directional_light_entities[i] = directional_lights[i];
         }
 
-        for (int i = 0; i < ogl_context->num_point_lights; i++) {
-            ogl_context->point_light_entities[i] = point_lights[i];
+        for (int i = 0; i < context_->num_point_lights; i++) {
+            context_->point_light_entities[i] = point_lights[i];
         }
 
         // Store camera component
-        ogl_context->camera_component = &camera;
+        context_->camera_component = &camera;
     }
 
     void Renderer::render_internal(Scene &scene, CameraComponent &camera) {
-        opaque_objects_.clear();
-        transparent_objects_.clear();
-        opaque_instanced_objects_.clear();
-        transparent_instanced_objects_.clear();
-
+        clear_drawable_objects_list();
         // Store this for collect methods
         scene_ = &scene;
 
@@ -185,7 +159,7 @@ namespace hellfire {
         store_lights_in_context(light_entities, camera);
 
         // Get camera position
-        auto *camera_transform = camera.get_owner()->transform();
+        auto *camera_transform = camera.get_owner().transform();
         glm::vec3 camera_pos = camera_transform ? camera_transform->get_world_position() : glm::vec3(0.0f);
 
         // Collect render commands from root entities
@@ -315,7 +289,7 @@ namespace hellfire {
 
         // Upload lights
         if (context_) {
-            RenderingUtils::upload_lights_to_shader(*shader, context_);
+            RenderingUtils::upload_lights_to_shader(*shader, *context_);
         }
 
         shader->set_vec3("uAmbientLight", scene_->get_ambient_light());
@@ -341,7 +315,7 @@ namespace hellfire {
 
         // Upload lights
         if (context_) {
-            RenderingUtils::upload_lights_to_shader(*shader, context_);
+            RenderingUtils::upload_lights_to_shader(*shader, *context_);
         }
 
         // Upload uniforms
@@ -423,8 +397,7 @@ namespace hellfire {
              }
         
         scene_framebuffers_[current_fb_index_]->bind();
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        reset_framebuffer_data();
         glEnable(GL_DEPTH_TEST);
         render_internal(scene, camera);
         scene_framebuffers_[current_fb_index_]->unbind();
@@ -438,8 +411,7 @@ namespace hellfire {
         fallback_shader_ = &fallback_shader;
 
         if (context_) {
-            auto *ogl_context = static_cast<OGLRendererContext *>(context_);
-            ogl_context->shader_handle = fallback_shader.get_program_id();
+            context_->shader_handle = fallback_shader.get_program_id();
         }
     }
 

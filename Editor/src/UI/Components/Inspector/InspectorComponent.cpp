@@ -119,6 +119,14 @@ namespace hellfire::editor {
                         }
                         break;
                     }
+                    case Material::PropertyType::TEXTURE: {
+                        const auto texture_ptr = std::get<Texture*>(prop.value);
+                        ImGui::Text("%s", prop.name.c_str());
+                        ImGui::SameLine(120);
+                        std::string prop_name = "##" + prop.name;
+                        ImGui::Image(texture_ptr->get_id(), ImVec2( 32, 32));
+                        break;
+                    }
                     case Material::PropertyType::VEC2: {
                         glm::vec2 vec2_val = std::get<glm::vec2>(prop.value);
                         ImGui::Text("%s", prop.name.c_str());
@@ -147,6 +155,17 @@ namespace hellfire::editor {
                         if (ImGui::ColorEdit3(prop_name.c_str(), &vec3_val[0])) {
                             material->set_property(prop.name, vec3_val);
                         }
+                        break;
+                    }
+                    case Material::PropertyType::BOOL: {
+                        bool bool_value = std::get<bool>(prop.value);
+                        std::string prop_name = "##" + prop.name;
+                        ImGui::Text("%s", prop.name.c_str());
+                        ImGui::SameLine(160);
+                        if (ImGui::Checkbox(prop_name.c_str(), &bool_value)) {
+                            material->set_property(prop.name, bool_value);
+                        }
+                        break;
                     }
                     default: {
                         break;
@@ -202,16 +221,19 @@ namespace hellfire::editor {
     void InspectorComponent::render_camera_component(CameraComponent *camera) {
     }
 
-    void InspectorComponent::render_script_component(ScriptComponent *script) {
-        if (ImGui::CollapsingHeader(script->get_class_name())) {
-            for (const auto &property_info: script->get_properties()) {
-                if (property_info.type == ScriptComponent::PropertyType::BOOL) {
-                    auto* boolean_value = static_cast<bool*>(property_info.data_ptr);
-                    if (ImGui::Checkbox(property_info.name.c_str(), boolean_value)) {
-                        
-                    }
+    void InspectorComponent::render_script_component(const ScriptComponent *script) {
+        if (ImGui::CollapsingHeader(script->get_class_name(), ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Indent();
+            for (const auto &prop: script->get_properties()) {
+                if (prop.type == ScriptComponent::PropertyType::BOOL) {
+                    auto* boolean_value = static_cast<bool*>(prop.data_ptr);
+                    std::string prop_name = "##" + prop.name;
+                    ImGui::Text("%s", prop.name.c_str());
+                    ImGui::SameLine(120);
+                    ImGui::Checkbox(prop_name.c_str(), boolean_value);
                 }
             }
+            ImGui::Unindent();
         }
     }
 }

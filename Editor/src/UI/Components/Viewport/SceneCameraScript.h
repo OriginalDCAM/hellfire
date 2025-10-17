@@ -36,13 +36,6 @@ private:
     float yaw_ = -90.0f;
     float pitch_ = 0.0f;
 
-    bool drone_mode_ = true; // Start in drone mode
-
-    float saved_yaw_ = -90.0f;
-    float saved_pitch_ = 0.0f;
-
-    glm::vec3 last_known_player_position = glm::vec3(0.0f);
-
     void update_camera_orientation() const;
     void handle_movement(float delta_time) const;
     void on_interact();
