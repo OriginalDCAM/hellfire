@@ -97,72 +97,99 @@ namespace hellfire::editor {
 
 
     void InspectorComponent::render_renderable_component(RenderableComponent *renderable) {
-        if (ImGui::CollapsingHeader("Renderable", ImGuiTreeNodeFlags_DefaultOpen)) {
-            std::shared_ptr<Material> material = renderable->get_material();
+        if (!ImGui::CollapsingHeader("Renderable", ImGuiTreeNodeFlags_DefaultOpen)) {
+            return;
+        }
 
-            ImGui::Indent();
-            ImGui::Text("Material Properties");
+        ImGui::Indent();
+        std::shared_ptr<Material> material = renderable->get_material();
+        // TODO: When serialization is implemented, handle this with being able to load materials from files
+        if (!material) {
+            ImGui::TextDisabled("No material assigned");
+            return;
+        }
 
-            for (const auto &prop: material->get_properties() | std::views::values) {
-                switch (prop.type) {
-                    case Material::PropertyType::FLOAT: {
-                        float float_val = std::get<float>(prop.value);
-                        if (ui::FloatInput(prop.name, &float_val)) {
-                            material->set_property(prop.name, float_val);
-                        }
-                        break;
-                    }
-                    case Material::PropertyType::TEXTURE: {
-                        auto texture_ptr = std::get<Texture*>(prop.value);
+        // Show material name and type
+        ImGui::Text("Material: %s", material->get_name().c_str());
+        if (material->has_custom_shader()) {
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "[Custom]");
+        }
+        ImGui::Separator();
 
-                        // Construct the "use" property name
-                        std::string use_property_name = "use" + ui::capitalize_first(prop.name);
-    
-                        // Retrieve the "use" flag from the material
-                        bool property_enabled = material->get_property<bool>(use_property_name);
+        // Standard Properties
+        if (!material->has_custom_shader()) {
+            if (ImGui::CollapsingHeader("Colors", ImGuiTreeNodeFlags_DefaultOpen)) {
+                // Diffuse
+                auto diffuse = material->get_property<glm::vec3>(
+                    MaterialConstants::DIFFUSE_COLOR);
+                if (ui::ColorPickerRGBInput("Diffuse", &diffuse)) {
+                    material->set_diffuse_color(diffuse);
+                }
 
-                        if (ui::TexturePropertyInput(prop.name, texture_ptr, property_enabled, material.get())) {
-                            // Update both the texture and the "use" flag
-                            material->set_property(prop.name, texture_ptr);
-                            material->set_property(use_property_name, property_enabled);
-                        }
-                        break;
-                    }
-                    case Material::PropertyType::VEC2: {
-                        glm::vec2 vec2_val = std::get<glm::vec2>(prop.value);
-                        if (ui::Vec2Input(prop.name, &vec2_val)) {
-                            material->set_property(prop.name, vec2_val);
-                        }
-                        break;
-                    }
-                    case Material::PropertyType::COLOR3: {
-                        glm::vec3 vec3_val = std::get<glm::vec3>(prop.value);
-                        if (ui::ColorPickerRGBInput(prop.name, &vec3_val)) {
-                            material->set_property(prop.name, vec3_val, prop.type);
-                        }
-                        break;
-                    }
-                    case Material::PropertyType::VEC3: {
-                        glm::vec3 vec3_val = std::get<glm::vec3>(prop.value);
-                        if (ui::Vec3Input(prop.name, &vec3_val)) {
-                            material->set_property(prop.name, vec3_val);
-                        }
-                        break;
-                    }
-                    case Material::PropertyType::BOOL: {
-                        // bool bool_value = std::get<bool>(prop.value);
-                        // if (ui::BoolInput(prop.name, &bool_value)) {
-                        //     material->set_property(prop.name, bool_value);
-                        // }
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
+                // Specular
+                auto specular = material->get_property<glm::vec3>(
+                    MaterialConstants::SPECULAR_COLOR);
+                if (ui::ColorPickerRGBInput("Specular", &specular)) {
+                    material->set_specular_color(specular);
                 }
             }
-            ImGui::Unindent();
+
+            if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
+                // Opacity
+                float opacity = material->get_property<float>(
+                    MaterialConstants::OPACITY);
+                if (ui::FloatInput("Opacity", &opacity, 0.1f, 0.0f, 1.0f)) {
+                    material->set_opacity(opacity);
+                }
+
+                // Shininess
+                float shininess = material->get_property<float>(
+                    MaterialConstants::SHININESS);
+                if (ui::FloatInput("Shininess", &shininess, 1.0f, 0.0f, 512.0f)) {
+                    material->set_shininess(shininess);
+                }
+
+                // Metallic
+                float metallic = material->get_property<float>(
+                    MaterialConstants::METALLIC);
+                if (ui::FloatInput("Metallic", &metallic, 0.1f, 0.0f, 1.0f)) {
+                    material->set_metallic(metallic);
+                }
+
+                // Roughness
+                float roughness = material->get_property<float>(
+                    MaterialConstants::ROUGHNESS);
+                if (ui::FloatInput("Roughness", &roughness, 0.1f, 0.0f, 1.0f)) {
+                    material->set_roughness(roughness);
+                }
+            }
+
+            if (ImGui::CollapsingHeader("UV Transform")) {
+                // UV tiling
+                auto tiling = material->get_property<glm::vec2>(
+                    MaterialConstants::UV_TILING);
+                if (ui::Vec2Input("Tiling", &tiling)) {
+                    material->set_uv_tiling(tiling);
+                }
+
+                // UV Offset
+                auto offset = material->get_property<glm::vec2>(
+                    MaterialConstants::UV_OFFSET);
+                if (ui::Vec2Input("Offset", &offset)) {
+                    material->set_uv_offset(offset);
+                }
+            }
         }
+
+        // Textures
+        if (ImGui::CollapsingHeader("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
+            for (const auto &slot: TextureSlotManager::get_all_slots()) {
+                ui::TextureSlotWidget(material.get(), slot);
+                ImGui::Spacing();
+            }
+        }
+        ImGui::Unindent();
     }
 
 
