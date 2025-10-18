@@ -53,7 +53,7 @@ namespace hellfire::editor {
         EditorContext editor_context_;
         Application* app_ = nullptr;
         bool imgui_initialized_ = false;
-        bool show_demo_ = true;
+        bool show_demo_ = false;
         
         // UI Components
         std::unique_ptr<MenuBarComponent> menu_bar_;

@@ -17,6 +17,7 @@
 #include "UI/Components/Viewport/SceneCameraScript.h"
 #include "UI/Components/Viewport/ViewportComponent.h"
 #include "IconsFontAwesome6.h"
+#include "Scenes/DefaultScene.h"
 
 namespace hellfire::editor {
     void CoreEditorPlugin::on_initialize(Application &app) {
@@ -48,6 +49,13 @@ namespace hellfire::editor {
 
         inspector_panel_ = std::make_unique<InspectorComponent>();
         inspector_panel_->set_context(&editor_context_);
+
+        // TEMP:
+    const auto sm = hellfire::ServiceLocator::get_service<hellfire::SceneManager>();
+        const auto new_scene = sm->create_scene("Test");
+        setup_default_scene_with_default_entities(new_scene);
+        sm->set_active_scene(new_scene);
+        
     }
 
     void CoreEditorPlugin::initialize_imgui(IWindow *window) {
