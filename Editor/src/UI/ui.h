@@ -6,11 +6,11 @@
 #include <string>
 
 #include "imgui.h"
+#include "Components/Inspector/TextureSlotManager.h"
 #include "glm/detail/type_vec.hpp"
 #include "glm/detail/type_vec2.hpp"
 #include "glm/detail/type_vec3.hpp"
 #include "glm/detail/type_vec4.hpp"
-#include "hellfire/graphics/managers/TextureManager.h"
 #include "hellfire/utilities/FileDialog.h"
 
 namespace hellfire::editor::ui {
@@ -67,7 +67,7 @@ namespace hellfire::editor::ui {
         });
     }
 
-    
+
     inline std::string capitalize_first(const std::string &str) {
         if (str.empty()) return str;
         std::string result = str;
@@ -75,52 +75,71 @@ namespace hellfire::editor::ui {
         return result;
     }
 
-    inline bool TexturePropertyInput(const std::string &label, Texture *&texture,  bool& property_enabled, Material *material = nullptr) {
-        // Push unique ID to prevent conflicts
-        ImGui::PushID(label.c_str());
-        bool value_changed = false;
+inline bool TextureSlotWidget(
+    Material* material, 
+    const TextureSlotManager::SlotInfo& slot
+) {
+    ImGui::PushID(slot.uniform_name);
+    bool changed = false;
 
-        // Checkbox to enable/disable texture
-        if (BoolInput(label, &property_enabled)) {
-            if (!property_enabled) {
-                texture = nullptr;
-            }
-            value_changed = true;
+    // Get current state
+    const bool is_enabled = TextureSlotManager::is_slot_enabled(*material, slot);
+    Texture* current_texture = TextureSlotManager::get_slot_texture(*material, slot);
+
+    // Checkbox to enable/disable
+    bool enabled_copy = is_enabled;
+    if (ImGui::Checkbox(slot.display_name, &enabled_copy)) {
+        material->set_property(slot.flag_name, enabled_copy);
+        
+        if (!enabled_copy && current_texture) {
+            // User disabled - clear texture
+            TextureSlotManager::disable_slot(*material, slot);
         }
-
-        // If the texture is enabled, show additional controls
-        if (property_enabled) {
-            ImGui::Indent();
-
-            // Display current texture thumbnail
-            if (texture) {
-                ImGui::Text("Current Texture");
-                ImGui::SameLine(120);
-                ImGui::Image(texture->get_id(), ImVec2(64, 64));
-            } else {
-                ImGui::Text("No Texture Selected");
-            }
-
-            // Button to change texture
-            ImGui::Text("Texture");
-            ImGui::SameLine(120);
-            if (ImGui::Button("Choose Texture")) {
-                Utility::FileFilter image_ext_filter = {"Image files", "*.png;*.jpg;*.tga;"};
-                const std::string selected_path = Utility::FileDialog::open_file({image_ext_filter});
-                if (!selected_path.empty()) {
-                    // Load new texture
-                    const auto new_texture = new Texture(selected_path);
-                    texture = new_texture;
-                    value_changed = true;
-                    property_enabled = true;
-                }
-            }
-            ImGui::Unindent();
-        }
-        ImGui::PopID();
-
-        return value_changed;
+        changed = true;
     }
+
+    // Show texture controls when enabled
+    if (enabled_copy) {
+        ImGui::Indent();
+
+        // Thumbnail preview
+        if (current_texture && current_texture->is_valid()) {
+            ImGui::Image(
+                current_texture->get_id(),
+                ImVec2(64, 64)
+            );
+            ImGui::SameLine();
+        }
+
+        // Button column
+        ImGui::BeginGroup();
+        
+        // Choose/Change button
+        if (ImGui::Button(current_texture ? "Change##tex" : "Choose##tex", ImVec2(120, 0))) {
+            Utility::FileFilter filter = {"Images", "*.png;*.jpg;*.jpeg;*.tga;*.bmp"};
+            const std::string path = Utility::FileDialog::open_file({filter});
+            
+            if (!path.empty()) {
+                TextureSlotManager::enable_slot(*material, slot, path);
+                changed = true;
+            }
+        }
+
+        // Clear button (only if texture exists)
+        if (current_texture) {
+            if (ImGui::Button("Clear##tex", ImVec2(120, 0))) {
+                TextureSlotManager::disable_slot(*material, slot,  true);
+                changed = true;
+            }
+        }
+        
+        ImGui::EndGroup();
+        ImGui::Unindent();
+    }
+
+    ImGui::PopID();
+    return changed;
+}
 
     template<typename... Ts>
     bool render_property(const std::string &name, std::variant<Ts...> &value) {
