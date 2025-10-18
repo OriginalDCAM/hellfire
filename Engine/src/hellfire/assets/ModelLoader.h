@@ -100,6 +100,13 @@ namespace hellfire::Addons {
         static void load_material_textures(const aiMaterial *ai_material, Material &material, const aiScene *scene,
                                            const std::string &filepath);
 
+        static bool try_load_embedded_texture_unified(const std::string &path_str, const aiScene *scene, TextureType type,
+                                                      Material &material);
+
+        static bool try_load_external_texture_unified(const std::string &path_str, const std::string &filepath,
+                                                      TextureType type,
+                                                      Material &material);
+
         // Texture processing
         static bool try_load_embedded_texture(const std::string &path_str, const aiScene *scene, TextureType dcr_type,
                                               Material &material, const std::string &property_name);

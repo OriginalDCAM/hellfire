@@ -124,100 +124,100 @@ namespace hellfire::Addons {
 
     EntityID ModelLoader::process_node(Scene *scene, aiNode *node, const aiScene *ai_scene, const std::string &filepath,
                                        EntityID parent_id) {
-    bool should_create_entity = node->mNumMeshes > 0 || 
-                               node->mNumChildren > 0 || 
-                               !is_identity_transform(node->mTransformation);
+        bool should_create_entity = node->mNumMeshes > 0 ||
+                                    node->mNumChildren > 0 ||
+                                    !is_identity_transform(node->mTransformation);
 
-    EntityID entity_id = 0;  
-    Entity* entity = nullptr;
+        EntityID entity_id = 0;
+        Entity *entity = nullptr;
 
-    if (should_create_entity) {
-        std::string node_name = node->mName.length > 0 ? 
-            node->mName.C_Str() : 
-            ("Node_" + std::to_string(reinterpret_cast<uintptr_t>(node)));
+        if (should_create_entity) {
+            std::string node_name = node->mName.length > 0
+                                        ? node->mName.C_Str()
+                                        : ("Node_" + std::to_string(reinterpret_cast<uintptr_t>(node)));
 
-        entity_id = scene->create_entity(node_name);
-        entity = scene->get_entity(entity_id);
+            entity_id = scene->create_entity(node_name);
+            entity = scene->get_entity(entity_id);
 
-        // Apply transform
-        glm::mat4 transform = aiMatrix4x4ToGlm(node->mTransformation);
-        glm::vec3 translation, scale, skew;
-        glm::quat rotation;
-        glm::vec4 perspective;
-        glm::decompose(transform, scale, rotation, translation, skew, perspective);
+            // Apply transform
+            glm::mat4 transform = aiMatrix4x4ToGlm(node->mTransformation);
+            glm::vec3 translation, scale, skew;
+            glm::quat rotation;
+            glm::vec4 perspective;
+            glm::decompose(transform, scale, rotation, translation, skew, perspective);
 
-        entity->transform()->set_position(translation);
-        entity->transform()->set_scale(scale);
-        entity->transform()->set_rotation(rotation);
+            entity->transform()->set_position(translation);
+            entity->transform()->set_scale(scale);
+            entity->transform()->set_rotation(rotation);
 
-        if (parent_id != 0) {
-            scene->set_parent(entity_id, parent_id);
+            if (parent_id != 0) {
+                scene->set_parent(entity_id, parent_id);
+            }
         }
-    }
 
-    // Process meshes
-    if (entity_id != 0) {  
-        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            unsigned int mesh_index = node->mMeshes[i];
-            aiMesh* ai_mesh = ai_scene->mMeshes[mesh_index];
-        
-            std::shared_ptr<Mesh> processed_mesh = process_mesh(ai_mesh, ai_scene, filepath);
-        
-            // Get material
-            std::shared_ptr<Material> material = nullptr;
-            if (ai_mesh->mMaterialIndex >= 0) {
-                const aiMaterial* ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
-                std::string material_key = create_material_key(ai_material, filepath, ai_mesh->mMaterialIndex);
-            
-                auto cached_material = material_cache.find(material_key);
-                if (cached_material != material_cache.end()) {
-                    material = cached_material->second;
+        // Process meshes
+        if (entity_id != 0) {
+            for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+                unsigned int mesh_index = node->mMeshes[i];
+                aiMesh *ai_mesh = ai_scene->mMeshes[mesh_index];
+
+                std::shared_ptr<Mesh> processed_mesh = process_mesh(ai_mesh, ai_scene, filepath);
+
+                // Get material
+                std::shared_ptr<Material> material = nullptr;
+                if (ai_mesh->mMaterialIndex >= 0) {
+                    const aiMaterial *ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
+                    std::string material_key = create_material_key(ai_material, filepath, ai_mesh->mMaterialIndex);
+
+                    auto cached_material = material_cache.find(material_key);
+                    if (cached_material != material_cache.end()) {
+                        material = cached_material->second;
+                    } else {
+                        material = create_material(ai_material, ai_scene, filepath);
+                        material_cache[material_key] = material;
+                    }
+                }
+
+                // Determine where to attach mesh components
+                EntityID mesh_entity_id;
+                Entity *mesh_entity;
+
+                if (node->mNumMeshes == 1) {
+                    // Single mesh: attach to current node
+                    mesh_entity_id = entity_id;
+                    mesh_entity = entity;
                 } else {
-                    material = create_material(ai_material, ai_scene, filepath);
-                    material_cache[material_key] = material;
+                    // Multiple meshes: create submesh entity
+                    std::string mesh_name = ai_mesh->mName.length > 0
+                                                ? ai_mesh->mName.C_Str()
+                                                : (std::string(node->mName.C_Str()) + "_Mesh_" + std::to_string(i));
+
+                    mesh_entity_id = scene->create_entity(mesh_name);
+                    mesh_entity = scene->get_entity(mesh_entity_id);
+                    scene->set_parent(mesh_entity_id, entity_id);
+                }
+
+                // Add mesh and material components
+                auto *mesh_comp = mesh_entity->add_component<MeshComponent>();
+                mesh_comp->set_mesh(processed_mesh);
+
+                auto *renderable = mesh_entity->add_component<RenderableComponent>();
+                if (material) {
+                    renderable->set_material(material);
                 }
             }
-
-            // Determine where to attach mesh components
-            EntityID mesh_entity_id;
-            Entity* mesh_entity;
-
-            if (node->mNumMeshes == 1) {
-                // Single mesh: attach to current node
-                mesh_entity_id = entity_id;
-                mesh_entity = entity;
-            } else {
-                // Multiple meshes: create submesh entity
-                std::string mesh_name = ai_mesh->mName.length > 0 ? 
-                    ai_mesh->mName.C_Str() : 
-                    (std::string(node->mName.C_Str()) + "_Mesh_" + std::to_string(i));
-
-                mesh_entity_id = scene->create_entity(mesh_name);
-                mesh_entity = scene->get_entity(mesh_entity_id);
-                scene->set_parent(mesh_entity_id, entity_id);
-            }
-
-            // Add mesh and material components
-            auto* mesh_comp = mesh_entity->add_component<MeshComponent>();
-            mesh_comp->set_mesh(processed_mesh);
-
-            auto* renderable = mesh_entity->add_component<RenderableComponent>();
-            if (material) {
-                renderable->set_material(material);
-            }
         }
-    }
-    
-    // Process children recursively
-    for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        process_node(scene, node->mChildren[i], ai_scene, filepath, 
-                    entity_id != 0 ? entity_id : parent_id);
+
+        // Process children recursively
+        for (unsigned int i = 0; i < node->mNumChildren; i++) {
+            process_node(scene, node->mChildren[i], ai_scene, filepath,
+                         entity_id != 0 ? entity_id : parent_id);
+        }
+
+        return entity_id;
     }
 
-    return entity_id;
-    }
-    
-    bool ModelLoader::is_identity_transform(const aiMatrix4x4& matrix) {
+    bool ModelLoader::is_identity_transform(const aiMatrix4x4 &matrix) {
         const float epsilon = 0.0001f;
         return std::abs(matrix.a1 - 1.0f) < epsilon && std::abs(matrix.b2 - 1.0f) < epsilon &&
                std::abs(matrix.c3 - 1.0f) < epsilon && std::abs(matrix.d4 - 1.0f) < epsilon &&
@@ -226,7 +226,7 @@ namespace hellfire::Addons {
                std::abs(matrix.c1) < epsilon && std::abs(matrix.c2) < epsilon && std::abs(matrix.c4) < epsilon &&
                std::abs(matrix.d1) < epsilon && std::abs(matrix.d2) < epsilon && std::abs(matrix.d3) < epsilon;
     }
-    
+
     void ModelLoader::process_mesh_vertices(aiMesh *mesh, std::vector<Vertex> &vertices,
                                             std::vector<unsigned int> &indices) {
         vertices.reserve(mesh->mNumVertices);
@@ -308,10 +308,10 @@ namespace hellfire::Addons {
 
         // Create mesh WITHOUT material
         auto processed_mesh = std::make_shared<Mesh>(vertices, indices);
-    
+
         // Cache the mesh
         mesh_cache[mesh_key] = processed_mesh;
-    
+
         return processed_mesh;
     }
 
@@ -340,43 +340,38 @@ namespace hellfire::Addons {
         aiColor3D color;
         float value;
 
+        // Load color properties and convert them to the engine's material system
         if (ai_material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
             material.set_diffuse_color(glm::vec3(color.r, color.g, color.b));
-            material.set_property("uDiffuse", glm::vec3(color.r, color.g, color.b), Material::PropertyType::COLOR3);
-            material.set_property("uAlbedo", glm::vec3(color.r, color.g, color.b), Material::PropertyType::COLOR3);
         }
 
         if (ai_material->Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
             material.set_ambient_color(glm::vec3(color.r, color.g, color.b));
-            material.set_property("uAmbient", glm::vec3(color.r, color.g, color.b), Material::PropertyType::COLOR3);
         }
 
         if (ai_material->Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS) {
             material.set_specular_color(glm::vec3(color.r, color.g, color.b));
-            material.set_property("uSpecular", glm::vec3(color.r, color.g, color.b),Material::PropertyType::COLOR3);
         }
 
         if (ai_material->Get(AI_MATKEY_COLOR_EMISSIVE, color) == AI_SUCCESS) {
-            material.set_property("uEmissive", glm::vec3(color.r, color.g, color.b),Material::PropertyType::COLOR3);
+            material.set_emissive_color(glm::vec3(color.r, color.g, color.b));
         }
 
+        // Load scalar properties using constants
         if (ai_material->Get(AI_MATKEY_OPACITY, value) == AI_SUCCESS) {
             material.set_opacity(value);
-            material.set_property("uOpacity", value);
-            material.set_property("uAlpha", value);
         }
 
         if (ai_material->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS) {
             material.set_shininess(value);
-            material.set_property("uShininess", value);
         }
 
         if (ai_material->Get(AI_MATKEY_METALLIC_FACTOR, value) == AI_SUCCESS) {
-            material.set_property("uMetallic", value);
+            material.set_metallic(value);
         }
 
         if (ai_material->Get(AI_MATKEY_ROUGHNESS_FACTOR, value) == AI_SUCCESS) {
-            material.set_property("uRoughness", value);
+            material.set_roughness(value);
         }
     }
 
@@ -398,78 +393,59 @@ namespace hellfire::Addons {
 
     void ModelLoader::load_material_textures(const aiMaterial *ai_material, Material &material, const aiScene *scene,
                                              const std::string &filepath) {
-        // Pre-compute search paths once
-        thread_local std::vector<std::string> search_paths;
-        if (search_paths.empty()) {
-            search_paths = get_texture_search_paths(filepath);
-        }
-
-        auto load_texture_fast = [&](aiTextureType ai_type, TextureType dcr_type, const std::string &property_name) {
+        auto load_texture = [&](aiTextureType ai_type, TextureType dcr_type) {
             if (ai_material->GetTextureCount(ai_type) == 0) return;
 
             aiString texture_path;
             if (ai_material->GetTexture(ai_type, 0, &texture_path) != AI_SUCCESS) return;
 
             std::string path_str = texture_path.C_Str();
-#if MODEL_LOADER_DEBUG
-            std::cout << "Processing " << property_name << " texture: " << path_str << std::endl;
-#endif
 
             // Try embedded texture first
-            if (try_load_embedded_texture(path_str, scene, dcr_type, material, property_name)) {
+            if (try_load_embedded_texture_unified(path_str, scene, dcr_type, material)) {
                 return;
             }
 
             // Try external texture
-            if (try_load_external_texture(path_str, filepath, dcr_type, material, property_name)) {
+            if (try_load_external_texture_unified(path_str, filepath, dcr_type, material)) {
                 return;
             }
 
             std::cerr << "Failed to load texture: " << path_str << std::endl;
         };
 
-        // Load most common texture types
-        load_texture_fast(aiTextureType_DIFFUSE, TextureType::DIFFUSE, "uDiffuseTexture");
-        load_texture_fast(aiTextureType_NORMALS, TextureType::NORMAL, "uNormalTexture");
-        // load_texture_fast(aiTextureType_SPECULAR, TextureType::SPECULAR, "uSpecularTexture");
-        // load_texture_fast(aiTextureType_METALNESS, TextureType::METALNESS, "uMetallicTexture");
-        // load_texture_fast(aiTextureType_DIFFUSE_ROUGHNESS, TextureType::ROUGHNESS, "uRoughnessTexture");
-        // load_texture_fast(aiTextureType_AMBIENT_OCCLUSION, TextureType::AMBIENT_OCCLUSION, "uAoTexture");
-        // load_texture_fast(aiTextureType_EMISSIVE, TextureType::EMISSIVE, "uEmissiveTexture");
+        // Load textures using the enum-based system
+        load_texture(aiTextureType_DIFFUSE, TextureType::DIFFUSE);
+        load_texture(aiTextureType_NORMALS, TextureType::NORMAL);
+        load_texture(aiTextureType_SPECULAR, TextureType::SPECULAR);
+        load_texture(aiTextureType_METALNESS, TextureType::METALNESS);
+        load_texture(aiTextureType_DIFFUSE_ROUGHNESS, TextureType::ROUGHNESS);
+        load_texture(aiTextureType_AMBIENT_OCCLUSION, TextureType::AMBIENT_OCCLUSION);
+        load_texture(aiTextureType_EMISSIVE, TextureType::EMISSIVE);
     }
 
-    bool ModelLoader::try_load_embedded_texture(const std::string &path_str, const aiScene *scene, TextureType dcr_type,
-                                                Material &material, const std::string &property_name) {
+    bool ModelLoader::try_load_embedded_texture_unified(const std::string &path_str,
+                                                        const aiScene *scene,
+                                                        TextureType type,
+                                                        Material &material) {
         if (path_str.empty() || path_str[0] != '*') {
             return false;
         }
-#if MODEL_LOADER_DEBUG
-        std::cout << "Found embedded texture reference: " << path_str << std::endl;
-#endif
 
         try {
             int texture_index = std::stoi(path_str.substr(1));
 
             if (!scene || texture_index >= static_cast<int>(scene->mNumTextures)) {
-                std::cerr << "Embedded texture index " << texture_index << " is out of range! Scene has "
-                        << (scene ? scene->mNumTextures : 0) << " embedded textures" << std::endl;
+                std::cerr << "Embedded texture index " << texture_index << " is out of range!" << std::endl;
                 return false;
             }
 
             const aiTexture *embedded_texture = scene->mTextures[texture_index];
 
-#if MODEL_LOADER_DEBUG
-            std::cout << "Processing embedded texture " << texture_index << std::endl;
-            std::cout << "Format hint: '" << embedded_texture->achFormatHint << "'" << std::endl;
-            std::cout << "Dimensions: " << embedded_texture->mWidth << "x" << embedded_texture->mHeight << std::endl;
-#endif
-
-            // Handle compressed embedded textures (PNG, JPG, etc.)
+            // Handle compressed embedded textures
             if (embedded_texture->mHeight == 0) {
-                // Determine file extension
                 std::string extension = embedded_texture->achFormatHint;
                 if (extension.empty() || extension.length() > 4) {
-                    // Try to detect format from magic bytes
                     const unsigned char *data = reinterpret_cast<const unsigned char *>(embedded_texture->pcData);
                     if (data && embedded_texture->mWidth >= 2) {
                         if (data[0] == 0xFF && data[1] == 0xD8) extension = "jpg";
@@ -481,7 +457,6 @@ namespace hellfire::Addons {
                     }
                 }
 
-                // Save embedded texture to temp file and load it
                 std::string temp_filename = "temp_texture_" + std::to_string(texture_index) + "." + extension;
 
                 std::ofstream temp_file(temp_filename, std::ios::binary);
@@ -492,23 +467,14 @@ namespace hellfire::Addons {
 
                 temp_file.write(reinterpret_cast<const char *>(embedded_texture->pcData), embedded_texture->mWidth);
                 temp_file.close();
-#if MODEL_LOADER_DEBUG
-                std::cout << "Saved embedded texture to: " << temp_filename << " (" << embedded_texture->mWidth <<
-                        " bytes)" << std::endl;
-#endif
 
                 try {
-                    auto texture = new Texture(temp_filename, dcr_type);
-                    if (texture && texture->is_valid()) {
-                        material.add_texture(*texture, property_name, 0);
-#if MODEL_LOADER_DEBUG
-                        std::cout << "Successfully loaded embedded texture: " << property_name << std::endl;
-#endif
-                        std::filesystem::remove(temp_filename);
-                        return true;
-                    } else {
-                        std::cout << "Failed to create valid texture from embedded data" << std::endl;
-                    }
+                    // Use the unified texture setting API
+                    material.set_texture(temp_filename, type, 0);
+
+
+                    std::filesystem::remove(temp_filename);
+                    return true;
                 } catch (const std::exception &e) {
                     std::cerr << "Exception loading embedded texture: " << e.what() << std::endl;
                 }
@@ -516,12 +482,10 @@ namespace hellfire::Addons {
                 std::filesystem::remove(temp_filename);
                 return false;
             }
-            // Handle uncompressed embedded textures (raw RGBA data)
+            // Handle uncompressed embedded textures
             else {
                 std::cout << "Uncompressed embedded texture found - needs direct GPU upload implementation" <<
                         std::endl;
-                // TODO: Implement direct GPU upload from RGBA data
-                // The data is in embedded_texture->pcData as RGBA pixels
                 return false;
             }
         } catch (const std::exception &e) {
@@ -530,35 +494,33 @@ namespace hellfire::Addons {
         }
     }
 
-    bool ModelLoader::try_load_external_texture(const std::string &path_str, const std::string &filepath,
-                                                TextureType dcr_type, Material &material,
-                                                const std::string &property_name) {
+    bool ModelLoader::try_load_external_texture_unified(const std::string &path_str, 
+                                                        const std::string &filepath,
+                                                        TextureType type, 
+                                                        Material &material) {
         std::string texture_filename = std::filesystem::path(path_str).filename().string();
         std::filesystem::path model_dir = std::filesystem::path(filepath).parent_path();
 
-        // Try different path combinations
         std::vector<std::string> possible_paths = {
-            path_str, // Original path
-            model_dir.string() + "/" + path_str, // Relative to model file
-            model_dir.string() + "/textures/" + texture_filename, // textures subfolder
-            model_dir.string() + "/Textures/" + texture_filename, // Textures subfolder
-            model_dir.string() + "/texture/" + texture_filename, // texture subfolder
-            model_dir.string() + "/materials/" + texture_filename, // materials folder
-            model_dir.string() + "/source/" + texture_filename, // source folder
-            model_dir.string() + "/../textures/" + texture_filename, // Parent directory textures
-            model_dir.string() + "/" + texture_filename, // Same directory as model
-            "assets/models/" + texture_filename, // Common assets structure
+            path_str,
+            model_dir.string() + "/" + path_str,
+            model_dir.string() + "/textures/" + texture_filename,
+            model_dir.string() + "/Textures/" + texture_filename,
+            model_dir.string() + "/texture/" + texture_filename,
+            model_dir.string() + "/materials/" + texture_filename,
+            model_dir.string() + "/source/" + texture_filename,
+            model_dir.string() + "/../textures/" + texture_filename,
+            model_dir.string() + "/" + texture_filename,
+            "assets/models/" + texture_filename,
             "assets/textures/" + texture_filename
         };
 
         for (const auto &test_path: possible_paths) {
             if (std::filesystem::exists(test_path)) {
-                auto texture = load_cached_texture(test_path, dcr_type);
+                auto texture = load_cached_texture(test_path, type);
                 if (texture) {
-                    material.add_texture(*texture, property_name, 0);
-#if MODEL_LOADER_DEBUG
-                    std::cout << "Loaded external texture: " << property_name << " from " << test_path << std::endl;
-#endif
+                    // Use the unified texture setting API
+                    material.set_texture(texture, 0);
                     return true;
                 }
             }
