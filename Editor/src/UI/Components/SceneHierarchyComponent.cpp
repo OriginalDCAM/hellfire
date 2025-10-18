@@ -49,7 +49,7 @@ namespace hellfire::editor {
                     render_add_entity_menu();
                     ImGui::EndPopup();
                 }
-                ImGui::Separator();
+                ImGui::Spacing();
                 render_context_menu();
                 render_list();
             } else {
