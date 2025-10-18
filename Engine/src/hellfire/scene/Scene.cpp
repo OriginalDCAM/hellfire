@@ -50,11 +50,11 @@ namespace hellfire {
         if (const auto parent_it = parent_map_.find(id); parent_it != parent_map_.end()) {
             const EntityID parent_id = parent_it->second;
             auto &siblings = children_map_[parent_id];
-            siblings.erase(std::remove(siblings.begin(), siblings.end(), id), siblings.end());
+            std::erase(siblings, id);
             parent_map_.erase(parent_it);
         } else {
             // Remove from roots
-            root_entities_.erase(std::remove(root_entities_.begin(), root_entities_.end(), id), root_entities_.end());
+            std::erase(root_entities_, id);
         }
 
         // Remove children mapping
