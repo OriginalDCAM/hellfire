@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -7,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
 
+#include "MaterialConstants.h"
 #include "hellfire/graphics/texture/Texture.h"
 
 namespace hellfire {
@@ -19,7 +21,7 @@ namespace hellfire {
     class Material : public std::enable_shared_from_this<Material> {
     public:
         enum class PropertyType {
-            FLOAT, VEC2, VEC3, COLOR3, VEC4, COLOR4, TEXTURE, BOOL, INT, MAT3, MAT4
+            FLOAT, VEC2, VEC3, COLOR3, VEC4, COLOR4, TEXTURE, TEXTURE_FLAG, BOOL, INT, MAT3, MAT4
         };
 
         struct Property {
@@ -98,22 +100,18 @@ namespace hellfire {
     private:
         std::string name_;
         std::map<std::string, Property> properties_;
-
-        // ===Shader information===
         std::optional<ShaderInfo> custom_shader_info_;
         uint32_t compiled_shader_id_ = 0;
 
-        // Instancing
+        // Instancing support
         std::shared_ptr<Material> base_material_;
         std::unordered_map<std::string, Property> overrides_;
         mutable std::unordered_set<std::string> touched_uniforms_;
 
     public:
-        explicit Material(const std::string &name) : name_(name) {
-        }
+        explicit Material(const std::string &name) : name_(name) {}
 
-
-        // ===uniform setter for setting properties/overrides===
+        // Generic Property Setters
         template<typename T>
         void set_property(const std::string &name, const T &value, PropertyType type,
                           const std::string &uniform_name = "") {
@@ -125,7 +123,7 @@ namespace hellfire {
             properties_[name] = Property(name, value, uniform_name);
         }
 
-        // ===property getter
+        // Generic Property Getter
         template<typename T>
         T get_property(const std::string &name, const T &default_value = T{}) const {
             if (const auto it = properties_.find(name); it != properties_.end()) {
@@ -136,7 +134,76 @@ namespace hellfire {
             return default_value;
         }
 
-        // ===custom shader support===
+        // Texture Management
+        Material& set_texture(const std::string &path, TextureType type, int texture_slot = 0) {
+            auto* texture = new Texture(path, type);
+            return set_texture_internal(texture, type, texture_slot);
+        }
+        
+        Material& set_texture(const std::shared_ptr<Texture> &texture, int texture_slot = 0) {
+            return set_texture_internal(texture.get(), texture->get_type(), texture_slot);
+        }
+        
+        Material& set_texture(Texture* texture, int texture_slot = 0) {
+            return set_texture_internal(texture, texture->get_type(), texture_slot);
+        }
+
+        // Color Setters
+        void set_diffuse_color(const glm::vec3 &color) { 
+            set_property(MaterialConstants::DIFFUSE_COLOR, color, PropertyType::COLOR3); 
+        }
+        
+        void set_ambient_color(const glm::vec3 &color) { 
+            set_property(MaterialConstants::AMBIENT_COLOR, color, PropertyType::COLOR3); 
+        }
+        
+        void set_specular_color(const glm::vec3 &color) { 
+            set_property(MaterialConstants::SPECULAR_COLOR, color, PropertyType::COLOR3); 
+        }
+        
+        void set_emissive_color(const glm::vec3 &color) { 
+            set_property(MaterialConstants::EMISSIVE_COLOR, color, PropertyType::COLOR3); 
+        }
+
+        //  Material Property Setters 
+        void set_shininess(float shininess) { 
+            set_property(MaterialConstants::SHININESS, shininess); 
+        }
+
+        void set_metallic(float metallic) { 
+            set_property(MaterialConstants::METALLIC, metallic); 
+        }
+        
+        void set_roughness(float roughness) { 
+            set_property(MaterialConstants::ROUGHNESS, roughness); 
+        }
+        
+        void set_opacity(float opacity) {
+            set_property(MaterialConstants::OPACITY, glm::clamp(opacity, 0.0f, 1.0f));
+        }
+
+        bool is_transparent() const {
+            return get_property<float>(MaterialConstants::OPACITY, 1.0f) < 1.0f;
+        }
+
+        // UV Transform
+        void set_uv_tiling(const glm::vec2 &tiling) {
+            set_property(MaterialConstants::UV_TILING, tiling);
+        }
+
+        void set_uv_tiling(float x, float y) {
+            set_uv_tiling(glm::vec2(x, y));
+        }
+
+        void set_uv_offset(const glm::vec2 &offset) {
+            set_property(MaterialConstants::UV_OFFSET, offset);
+        }
+
+        void set_uv_rotation(float rotation) {
+            set_property(MaterialConstants::UV_ROTATION, rotation);
+        }
+
+        // Custom Shader Support
         void set_custom_shader(const std::string &vertex_path, const std::string &fragment_path) {
             custom_shader_info_ = ShaderInfo{vertex_path, fragment_path};
         }
@@ -173,70 +240,36 @@ namespace hellfire {
             return compiled_shader_id_;
         }
 
-        // ===Convenience methods===
-        void set_diffuse_color(const glm::vec3 &color) { set_property("uDiffuseColor", color); }
-        void set_ambient_color(const glm::vec3 &color) { set_property("uAmbientColor", color); }
-        void set_specular_color(const glm::vec3 &color) { set_property("uSpecularColor", color); }
-        void set_shininess(const float shininess) { set_property("uShininess", shininess); }
-        void set_diffuse_texture(const Texture *texture) { set_property("uDiffuseTexture", texture); }
-
-        void set_uv_tiling(const glm::vec2 &tiling) {
-            set_property("uvTiling", tiling);
-        }
-
-        void set_uv_tiling(float x, float y) {
-            set_uv_tiling(glm::vec2(x, y));
-        }
-
-        void set_uv_offset(const glm::vec2 &offset) {
-            set_property("uvOffset", offset);
-        }
-
-        void set_uv_rotation(const float rotation) {
-            set_property("uvRotation", rotation);
-        }
-
-        //== Transparency convenience methods===
-        void set_opacity(const float opacity) {
-            set_property("uOpacity", glm::clamp(opacity, 0.0f, 1.0f));
-        }
-
-        bool is_transparent() const;
-
-        void set_diffuse_texture(Texture *texture) {
-            set_property("uDiffuseTexture", texture);
-            set_property("useUDiffuseTexture", texture != nullptr);
-        }
-
-        void set_texture(const std::string &path, TextureType type);
-
-        void set_texture(const std::shared_ptr<Texture> &texture);
-
-        Material &add_texture(const std::string &path, const std::string &uniform_name, int texture_slot = -1);
-
-        Material &add_texture(Texture &texture, const std::string &uniform_name, int texture_slot);
-
+        /// Used to bind a Material for rendering
         void bind() const;
-
         void unbind() const;
 
-        // === Getters ===
+        // Getters 
         const auto &get_properties() const { return properties_; }
-
-        void set_name(const std::string &name) {
-            name_ = name;
-        }
-
         const std::string &get_name() const { return name_; }
-
+        void set_name(const std::string &name) { name_ = name; }
     private:
-        void set_texture_usage_flag(const std::string &uniform_name, bool value);
+        Material& set_texture_internal(Texture* texture, TextureType type, int texture_slot) {
+            const char* uniform_name = MaterialConstants::get_texture_uniform_name(type);
+            const char* flag_name = MaterialConstants::get_texture_flag_name(type);
+
+            if (!uniform_name || !flag_name) {
+                std::cerr << "Warning: Unsupported texture type" << std::endl;
+                return *this;
+            }
+
+            if (texture_slot >= 0) {
+                texture->set_slot(texture_slot);
+                set_property(uniform_name + std::string("Slot"), texture_slot);
+            }
+
+            set_property(uniform_name, texture, uniform_name);
+            set_property(flag_name, texture != nullptr);
+
+            return *this;
+        }
 
         void bind_all_properties(uint32_t shader_program, int &texture_unit) const;
-
-        void bind_base_properties(uint32_t shader_program, int &texture_unit) const {
-            bind_all_properties(shader_program, texture_unit);
-        }
 
         bool has_property(const std::string &name) const {
             return properties_.find(name) != properties_.end();
@@ -253,12 +286,9 @@ namespace hellfire {
     class MaterialBuilder {
     public:
         static std::shared_ptr<Material> create(const std::string &name);
-
-        // Create material with custom shader
         static std::shared_ptr<Material> create_custom(const std::string &name,
                                                        const std::string &vertex_path,
                                                        const std::string &fragment_path);
-
     private:
         static void compile_shader_from_material(Material &material);
     };
