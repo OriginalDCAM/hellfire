@@ -10,7 +10,7 @@
 #include "hellfire/graphics/lighting/DirectionalLight.h"
 #include "UI/Components/Viewport/SceneCameraScript.h"
 
-void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
+inline void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
     hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(
         scene, "Sol Light", glm::vec3(-0.22f, 1.0f, 0.22f), glm::vec3(0.0f, 0.4f, 0.5f), 1.0f);
 
@@ -37,21 +37,21 @@ void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
     scene->set_skybox(skybox);
 }
 
-void create_default_scene() {
-    const auto sm = hellfire::ServiceLocator::get_service<hellfire::SceneManager>();
-    hellfire::Utility::FileFilter scene_ext_filter = {"Hellfire Scene", "*.hfscene"};
-
-    std::string scene_name; // Name gets passed as a reference to the save_file method of the file dialog
-    const std::string save_path = hellfire::Utility::FileDialog::save_file(scene_name, "Untitled", {scene_ext_filter});
-
-    if (!scene_name.empty()) {
-        const auto new_scene = sm->create_scene(scene_name);
-
-        setup_default_scene_with_default_entities(new_scene);
-
-        sm->save_scene(save_path, new_scene);
-        sm->set_active_scene(new_scene);
-    }
+inline void create_default_scene() {
+    // const auto sm = hellfire::ServiceLocator::get_service<hellfire::SceneManager>();
+    // hellfire::Utility::FileFilter scene_ext_filter = {"Hellfire Scene", "*.hfscene"};
+    //
+    // std::string scene_name; // Name gets passed as a reference to the save_file method of the file dialog
+    // const std::string save_path = hellfire::Utility::FileDialog::save_file(scene_name, "Untitled", {scene_ext_filter});
+    //
+    // if (!scene_name.empty()) {
+    //     const auto new_scene = sm->create_scene(scene_name);
+    //
+    //     setup_default_scene_with_default_entities(new_scene);
+    //
+    //     sm->save_scene(save_path, new_scene);
+    //     sm->set_active_scene(new_scene);
+    // }
 }
 
 
