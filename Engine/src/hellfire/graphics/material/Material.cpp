@@ -15,6 +15,8 @@ namespace hellfire {
             return;
         }
 
+        bound_texture_units_.clear();
+
         int texture_unit = 0;
         bind_all_properties(shader_program, texture_unit);
     }
@@ -23,20 +25,29 @@ namespace hellfire {
         uint32_t shader_program = get_compiled_shader_id();
         if (shader_program == 0) return;
 
-        int texture_unit = 0;
+        unbind_all_textures();
+    }
 
-        for (const std::string &uniform_name: touched_uniforms_) {
-            if (base_material_->has_property(uniform_name)) {
-                auto base_property = base_material_->get_property_object(uniform_name);
-                MaterialManager::bind_property_to_shader(base_property, shader_program, texture_unit);
-            }
+    void Material::unbind_all_textures() const {
+        // Unbind all textures that were bound during the last bind() call
+        for (int texture_unit : bound_texture_units_) {
+            glActiveTexture(GL_TEXTURE0 + texture_unit);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
-        touched_uniforms_.clear();
+        bound_texture_units_.clear();
     }
 
     void Material::bind_all_properties(const uint32_t shader_program, int &texture_unit) const {
         for (const auto &property: properties_ | std::views::values) {
+            // Track texture unit usage
+            int start_texture_unit = texture_unit;
+            
             MaterialManager::bind_property_to_shader(property, shader_program, texture_unit);
+
+            // If a texture was bound, track which unit it used
+            if (property.type == PropertyType::TEXTURE && texture_unit > start_texture_unit) {
+                bound_texture_units_.push_back(start_texture_unit);
+            }
         }
     }
 

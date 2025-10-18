@@ -244,11 +244,15 @@ namespace hellfire {
         void bind() const;
         void unbind() const;
 
+        void unbind_all_textures() const;
+
         // Getters 
         const auto &get_properties() const { return properties_; }
         const std::string &get_name() const { return name_; }
         void set_name(const std::string &name) { name_ = name; }
     private:
+        mutable std::vector<int> bound_texture_units_;
+        
         Material& set_texture_internal(Texture* texture, TextureType type, int texture_slot) {
             const char* uniform_name = MaterialConstants::get_texture_uniform_name(type);
             const char* flag_name = MaterialConstants::get_texture_flag_name(type);
