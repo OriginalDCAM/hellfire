@@ -79,10 +79,10 @@ namespace hellfire::editor {
             }
 
             if (ui::Vec3Input("Rotation", &rotation, 0.1f)) {
-                transform->set_position(rotation);
+                transform->set_rotation(rotation);
             }
             if (ui::Vec3Input("Scale", &scale, 0.1f)) {
-                transform->set_position(scale);
+                transform->set_scale(scale);
             }
 
             ImGui::Unindent();
