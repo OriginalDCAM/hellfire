@@ -53,7 +53,7 @@ namespace hellfire {
         void set_active_camera(EntityID camera) const;
         CameraComponent *get_active_camera() const;
 
-        void set_active_scene(Scene *scene);
+        void set_active_scene(Scene *scene, bool should_play = true);
 
         void set_active_scene(const std::shared_ptr<Scene> &scene);
 

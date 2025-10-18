@@ -42,9 +42,7 @@ namespace hellfire {
 
         // Scene lifecycle
         virtual void initialize();
-
         virtual void update(float delta_time);
-
         void update_world_matrices();
 
         // Finding entities
@@ -73,8 +71,8 @@ namespace hellfire {
         // Scene properties
         const std::string &get_name() const { return name_; }
         void set_name(const std::string &name) { name_ = name; }
-        bool is_active() const { return is_active_; }
-        void set_active(bool active) { is_active_ = active; }
+        bool is_playing() const { return is_playing_; }
+        void set_playing(bool active) { is_playing_ = active; }
         void set_source_filename(const std::string &filename) { source_filename_ = filename; }
         const std::string &get_source_filename() const { return source_filename_; }
         bool was_loaded_from_file() const { return !source_filename_.empty(); }
@@ -98,7 +96,7 @@ namespace hellfire {
         EntityID next_id_ = 1;
         EntityID active_camera_entity_id_ = 0;
         std::string name_;
-        bool is_active_;
+        bool is_playing_;
         std::string source_filename_;
         std::unordered_map<std::string, int> name_counters_;
 

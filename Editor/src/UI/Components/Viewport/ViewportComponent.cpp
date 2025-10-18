@@ -181,9 +181,10 @@ namespace hellfire::editor {
             viewport_size_ = ImGui::GetWindowSize();
             viewport_hovered_ = ImGui::IsWindowHovered();
             last_mouse_pos_ = ImGui::GetMousePos();
-            
             render_viewport_image();
             update_camera_control();
+
+            if (viewport_size_.x > 256)
             render_viewport_stats_overlay();
         }
         ImGui::End();
@@ -192,11 +193,9 @@ namespace hellfire::editor {
 
 
     void ViewportComponent::render_viewport_stats_overlay() {
-        ImVec2 window_pos = ImGui::GetWindowPos();
-
         // Position overlay in top-left corner with padding
         const float padding = 10.0f;
-        ImGui::SetNextWindowPos(ImVec2(window_pos.x + padding, window_pos.y + padding + ImGui::GetFrameHeight()));
+        ImGui::SetNextWindowPos(ImVec2( viewport_pos_.x + padding,  viewport_pos_.y + padding + ImGui::GetFrameHeight()));
         ImGui::SetNextWindowBgAlpha(0.35f);
 
         ImGuiWindowFlags overlay_flags =

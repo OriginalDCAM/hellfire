@@ -74,14 +74,14 @@ namespace hellfire::editor {
 
             ImGui::Indent();
 
-            if (ui::Vec3Input("Position", &position, 0.1f)) {
+            if (ui::vec3_input("Position", &position, 0.1f)) {
                 transform->set_position(position);
             }
 
-            if (ui::Vec3Input("Rotation", &rotation, 0.1f)) {
+            if (ui::vec3_input("Rotation", &rotation, 0.1f)) {
                 transform->set_rotation(rotation);
             }
-            if (ui::Vec3Input("Scale", &scale, 0.1f)) {
+            if (ui::vec3_input("Scale", &scale, 0.1f)) {
                 transform->set_scale(scale);
             }
 
@@ -123,14 +123,14 @@ namespace hellfire::editor {
                 // Diffuse
                 auto diffuse = material->get_property<glm::vec3>(
                     MaterialConstants::DIFFUSE_COLOR);
-                if (ui::ColorPickerRGBInput("Diffuse", &diffuse)) {
+                if (ui::color_picker_rgb_input("Diffuse", &diffuse)) {
                     material->set_diffuse_color(diffuse);
                 }
 
                 // Specular
                 auto specular = material->get_property<glm::vec3>(
                     MaterialConstants::SPECULAR_COLOR);
-                if (ui::ColorPickerRGBInput("Specular", &specular)) {
+                if (ui::color_picker_rgb_input("Specular", &specular)) {
                     material->set_specular_color(specular);
                 }
             }
@@ -139,28 +139,28 @@ namespace hellfire::editor {
                 // Opacity
                 float opacity = material->get_property<float>(
                     MaterialConstants::OPACITY);
-                if (ui::FloatInput("Opacity", &opacity, 0.1f, 0.0f, 1.0f)) {
+                if (ui::float_input("Opacity", &opacity, 0.1f, 0.0f, 1.0f)) {
                     material->set_opacity(opacity);
                 }
 
                 // Shininess
                 float shininess = material->get_property<float>(
                     MaterialConstants::SHININESS);
-                if (ui::FloatInput("Shininess", &shininess, 1.0f, 0.0f, 512.0f)) {
+                if (ui::float_input("Shininess", &shininess, 1.0f, 0.0f, 512.0f)) {
                     material->set_shininess(shininess);
                 }
 
                 // Metallic
                 float metallic = material->get_property<float>(
                     MaterialConstants::METALLIC);
-                if (ui::FloatInput("Metallic", &metallic, 0.1f, 0.0f, 1.0f)) {
+                if (ui::float_input("Metallic", &metallic, 0.1f, 0.0f, 1.0f)) {
                     material->set_metallic(metallic);
                 }
 
                 // Roughness
                 float roughness = material->get_property<float>(
                     MaterialConstants::ROUGHNESS);
-                if (ui::FloatInput("Roughness", &roughness, 0.1f, 0.0f, 1.0f)) {
+                if (ui::float_input("Roughness", &roughness, 0.1f, 0.0f, 1.0f)) {
                     material->set_roughness(roughness);
                 }
             }
@@ -169,14 +169,14 @@ namespace hellfire::editor {
                 // UV tiling
                 auto tiling = material->get_property<glm::vec2>(
                     MaterialConstants::UV_TILING);
-                if (ui::Vec2Input("Tiling", &tiling)) {
+                if (ui::vec2_input("Tiling", &tiling)) {
                     material->set_uv_tiling(tiling);
                 }
 
                 // UV Offset
                 auto offset = material->get_property<glm::vec2>(
                     MaterialConstants::UV_OFFSET);
-                if (ui::Vec2Input("Offset", &offset)) {
+                if (ui::vec2_input("Offset", &offset)) {
                     material->set_uv_offset(offset);
                 }
             }
@@ -185,7 +185,7 @@ namespace hellfire::editor {
         // Textures
         if (ImGui::CollapsingHeader("Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
             for (const auto &slot: TextureSlotManager::get_all_slots()) {
-                ui::TextureSlotWidget(material.get(), slot);
+                ui::texture_slot_widget(material.get(), slot);
                 ImGui::Spacing();
             }
         }
@@ -203,12 +203,12 @@ namespace hellfire::editor {
             }
 
             auto color = light->get_color();
-            if (ui::ColorPickerRGBInput("Color", &color)) {
+            if (ui::color_picker_rgb_input("Color", &color)) {
                 light->set_color(color);
             }
 
             float intensity = light->get_intensity();
-            if (ui::FloatInput("Intensity", &intensity, 0.1f, 0.0f, 100.0f)) {
+            if (ui::float_input("Intensity", &intensity, 0.1f, 0.0f, 100.0f)) {
                 light->set_intensity(intensity);
             }
 
@@ -238,12 +238,17 @@ namespace hellfire::editor {
     }
 
     void InspectorComponent::render_script_component(const ScriptComponent *script) {
-        if (ImGui::CollapsingHeader(script->get_class_name(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::CollapsingHeader(script->get_class_name() , ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::Indent();
             for (const auto &prop: script->get_properties()) {
                 if (prop.type == ScriptComponent::PropertyType::BOOL) {
                     auto *boolean_value = static_cast<bool *>(prop.data_ptr);
-                    ui::BoolInput(prop.name, boolean_value);
+                    ui::bool_input(prop.name, boolean_value);
+                }
+
+                if (prop.type == ScriptComponent::PropertyType::VEC3) {
+                    auto *vec3_value = static_cast<glm::vec3*>(prop.data_ptr);
+                    ui::vec3_input(prop.name, vec3_value);
                 }
             }
             ImGui::Unindent();

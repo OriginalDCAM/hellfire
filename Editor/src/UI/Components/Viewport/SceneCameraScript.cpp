@@ -8,6 +8,7 @@
 #include "hellfire/ecs/CameraComponent.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "GLFW/glfw3.h"
+#include "hellfire/scene/Scene.h"
 
 SceneCameraScript::SceneCameraScript(float movement_speed, float mouse_sensitivity) 
     : movement_speed_(movement_speed), mouse_sensitivity_(mouse_sensitivity) {

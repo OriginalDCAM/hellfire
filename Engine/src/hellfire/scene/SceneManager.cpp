@@ -142,12 +142,12 @@ namespace hellfire {
         return {};
     }
 
-    void SceneManager::set_active_scene(Scene *scene) {
+    void SceneManager::set_active_scene(Scene *scene, const bool should_play) {
         if (scene == active_scene_) return;
 
         active_scene_ = scene;
         if (scene) {
-            scene->set_active(true);
+            scene->set_playing(should_play);
             if (scene_activated_callback_) {
                 scene_activated_callback_(scene);
             }

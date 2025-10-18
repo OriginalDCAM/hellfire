@@ -51,11 +51,10 @@ namespace hellfire::editor {
         inspector_panel_->set_context(&editor_context_);
 
         // TEMP:
-    const auto sm = hellfire::ServiceLocator::get_service<hellfire::SceneManager>();
+    const auto sm = ServiceLocator::get_service<SceneManager>();
         const auto new_scene = sm->create_scene("Test");
         setup_default_scene_with_default_entities(new_scene);
-        sm->set_active_scene(new_scene);
-        
+        sm->set_active_scene(new_scene, false); // Don't play in editor mode as default
     }
 
     void CoreEditorPlugin::initialize_imgui(IWindow *window) {

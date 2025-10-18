@@ -5,7 +5,7 @@
 #include "hellfire/ecs/CameraComponent.h"
 
 namespace hellfire {
-    Scene::Scene(const std::string &name) : name_(name), is_active_(false) {
+    Scene::Scene(const std::string &name) : name_(name), is_playing_(false) {
     }
 
     Scene::~Scene() {
@@ -14,12 +14,12 @@ namespace hellfire {
 
     EntityID Scene::create_entity(const std::string &name) {
         std::string unique_name = generate_unique_name(name);
-        
+
         EntityID id = next_id_++;
         auto entity = std::make_unique<Entity>(id, unique_name);
 
         entity->add_component<TransformComponent>();
-        
+
         entities_[id] = std::move(entity);
         root_entities_.push_back(id);
 
@@ -144,7 +144,7 @@ namespace hellfire {
     }
 
     void Scene::set_active_camera(const EntityID camera_id) {
-        Entity* entity = get_entity(camera_id);
+        Entity *entity = get_entity(camera_id);
         if (entity && entity->has_component<CameraComponent>()) {
             active_camera_entity_id_ = camera_id;
         }
@@ -152,13 +152,13 @@ namespace hellfire {
 
     CameraComponent *Scene::get_active_camera() const {
         if (active_camera_entity_id_ == 0) return nullptr;
-        const Entity* entity = const_cast<Scene*>(this)->get_entity(active_camera_entity_id_);
+        const Entity *entity = const_cast<Scene *>(this)->get_entity(active_camera_entity_id_);
         return entity ? entity->get_component<CameraComponent>() : nullptr;
     }
 
     std::vector<EntityID> Scene::get_camera_entities() const {
         std::vector<EntityID> cameras;
-        for (const auto& [id, entity] : entities_) {
+        for (const auto &[id, entity]: entities_) {
             if (entity->has_component<CameraComponent>()) {
                 cameras.push_back(id);
             }
@@ -173,11 +173,11 @@ namespace hellfire {
     std::string Scene::generate_unique_name(const std::string &base_name) {
         // Check if base name exists
         bool name_exists = false;
-        for (const auto& [id, entity] : entities_) {
-                if (entity->get_name() == base_name) {
-                    name_exists = true;
-                    break;
-                }
+        for (const auto &[id, entity]: entities_) {
+            if (entity->get_name() == base_name) {
+                name_exists = true;
+                break;
+            }
         }
 
         // If base name is unique, use it
@@ -187,7 +187,7 @@ namespace hellfire {
         }
 
         // Otherwise, find next available number
-        int& counter = name_counters_[base_name];
+        int &counter = name_counters_[base_name];
         std::string unique_name;
 
         do {
@@ -208,48 +208,50 @@ namespace hellfire {
     }
 
     void Scene::update_hierarchy(EntityID entity_id, float delta_time) {
-        Entity* entity = get_entity(entity_id);
+        Entity *entity = get_entity(entity_id);
         if (!entity) return;
 
-        entity->update_scripts(delta_time);
+        if (is_playing_) {
+            entity->update_scripts(delta_time);
+        }
 
-        for (EntityID child_id : get_children(entity_id)) {
+        for (EntityID child_id: get_children(entity_id)) {
             update_hierarchy(child_id, delta_time);
         }
     }
 
-    void Scene::update_world_matrices_recursive(EntityID entity_id, const glm::mat4& parent_world) {
-        Entity* entity = get_entity(entity_id);
+    void Scene::update_world_matrices_recursive(EntityID entity_id, const glm::mat4 &parent_world) {
+        Entity *entity = get_entity(entity_id);
         if (!entity) return;
 
-        TransformComponent* transform = entity->get_component<TransformComponent>();
+        TransformComponent *transform = entity->get_component<TransformComponent>();
         if (!transform) {
-            std::cerr << "CRITICAL: Entity '" << entity->get_name() 
-                      << "' (ID: " << entity_id << ") missing TransformComponent!\n";
+            std::cerr << "CRITICAL: Entity '" << entity->get_name()
+                    << "' (ID: " << entity_id << ") missing TransformComponent!\n";
             assert(false);
-            return; 
+            return;
         }
 
         transform->update_local_matrix();
         transform->update_world_matrix(parent_world);
 
         // Recurse into children with this entity's world matrix
-        const glm::mat4& this_world = transform->get_world_matrix();
-        for (EntityID child_id : get_children(entity_id)) {
+        const glm::mat4 &this_world = transform->get_world_matrix();
+        for (EntityID child_id: get_children(entity_id)) {
             update_world_matrices_recursive(child_id, this_world);
         }
     }
 
     void Scene::find_entities_recursive(EntityID entity_id, const std::function<bool(Entity *)> &predicate,
                                         std::vector<EntityID> &results) {
-        Entity* entity = get_entity(entity_id);
+        Entity *entity = get_entity(entity_id);
         if (!entity) return;
 
         if (predicate(entity)) {
             results.push_back(entity_id);
         }
 
-        for (EntityID child_id : get_children(entity_id)) {
+        for (EntityID child_id: get_children(entity_id)) {
             find_entities_recursive(child_id, predicate, results);
         }
     }

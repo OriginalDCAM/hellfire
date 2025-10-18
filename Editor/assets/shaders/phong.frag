@@ -14,7 +14,7 @@ void main() {
     vec4 baseColor = applyVertexColors(diffuseValue, vColor);
 
     // Calculate surface normal
-    vec3 normal = normalize(vNormal);
+    vec3 normal = calculateSurfaceNormal(vTexCoords, vNormal, vTBN);
     // Calculate lighting
     vec3 result = calculateBlinnPhongLighting(normal, baseColor.rgb, vFragPos);
 
