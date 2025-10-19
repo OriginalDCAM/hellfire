@@ -15,7 +15,7 @@ public:
     ~ViewportComponent() override;
     
     void render() override;
-    void render_viewport_stats_overlay();
+    void render_viewport_stats_overlay() const;
 
     Entity* get_editor_camera() const { return editor_camera_; }
     bool is_editor_camera_active() const { return camera_active_; }

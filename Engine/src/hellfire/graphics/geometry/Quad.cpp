@@ -39,6 +39,7 @@ namespace hellfire {
         std::vector<unsigned int> indices;
         get_quad_data(vertices, indices, config.color);
         mesh_comp->set_mesh(std::make_shared<Mesh>(vertices, indices));
+        mesh_comp->set_source(MeshSource::INTERNAL);
         
         // Add renderable component
         auto* renderable = entity->add_component<RenderableComponent>();

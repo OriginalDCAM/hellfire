@@ -92,6 +92,10 @@ namespace hellfire::editor {
     void InspectorComponent::render_mesh_component(MeshComponent *mesh) {
         if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen)) {
             // TODO: Decide which inputs to use for this component
+            // Probably allow for the mesh to be changed?
+            if (mesh->get_source() == MeshSource::INTERNAL) {
+                ImGui::Text("Internal Mesh Source");
+            }
         }
     }
 
@@ -228,13 +232,22 @@ namespace hellfire::editor {
     }
 
     void InspectorComponent::render_directional_light_component(LightComponent *light) {
+        if (ImGui::CollapsingHeader("Light Specific Properties")) {
+            
+        }
     }
 
     void InspectorComponent::render_point_light_component(LightComponent *light) {
+        if (ImGui::CollapsingHeader("Light Specific Properties")) {
+            
+        }
     }
 
 
     void InspectorComponent::render_camera_component(CameraComponent *camera) {
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+            
+        }
     }
 
     void InspectorComponent::render_script_component(const ScriptComponent *script) {

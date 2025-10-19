@@ -54,7 +54,7 @@ namespace hellfire::editor {
     const auto sm = ServiceLocator::get_service<SceneManager>();
         const auto new_scene = sm->create_scene("Test");
         setup_default_scene_with_default_entities(new_scene);
-        sm->set_active_scene(new_scene, false); // Don't play in editor mode as default
+        sm->set_active_scene(new_scene, true); // Don't play in editor mode as default
     }
 
     void CoreEditorPlugin::initialize_imgui(IWindow *window) {

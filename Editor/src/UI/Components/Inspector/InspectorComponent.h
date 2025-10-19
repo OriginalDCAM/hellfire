@@ -27,7 +27,7 @@ namespace hellfire::editor {
         /// Point light specific properties, attentuation, range, etc.
         static void render_point_light_component(LightComponent * light);
         /// General light properties, color, intensity, type
-        void render_light_component(LightComponent* light);
+        static void render_light_component(LightComponent* light);
         /// Camera specific properties, camera type, clip planes, 
         static void render_camera_component(CameraComponent* camera);
         /// Script specific properties, for now just booleans

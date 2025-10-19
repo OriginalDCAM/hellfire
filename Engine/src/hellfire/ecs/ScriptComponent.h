@@ -52,19 +52,6 @@ namespace hellfire {
         }
 
         bool enabled_ = true;
-
-        template<typename T>
-        static PropertyType deduce_type() {
-            if constexpr (std::is_same_v<T, bool>) return PropertyType::BOOL;
-            if constexpr (std::is_same_v<T, float>) return PropertyType::FLOAT;
-            if constexpr (std::is_same_v<T, int>) return PropertyType::INT;
-            if constexpr (std::is_same_v<T, glm::vec2>) return PropertyType::VEC2;
-            if constexpr (std::is_same_v<T, glm::vec3>) return PropertyType::VEC3;
-            if constexpr (std::is_same_v<T, glm::vec4>) return PropertyType::VEC4;
-            if constexpr (std::is_same_v<T, std::string>) return PropertyType::STRING;
-            return PropertyType::FLOAT; // Default
-        }
-
     public:
         ScriptComponent() = default;
 

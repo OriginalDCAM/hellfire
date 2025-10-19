@@ -9,6 +9,8 @@ class SceneHierarchyComponent : public EditorComponent {
 public:
     void render_context_menu();
 
+    void handle_shortcuts();
+
     void render() override;
 private:
     void render_list();

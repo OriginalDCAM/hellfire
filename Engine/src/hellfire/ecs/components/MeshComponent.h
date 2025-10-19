@@ -7,6 +7,11 @@
 #include "hellfire/graphics/Mesh.h"
 
 namespace hellfire {
+    enum class MeshSource {
+        INTERNAL,
+        EXTERNAL
+    };
+    
     class MeshComponent final : public Component {
     public:
         MeshComponent() = default;
@@ -16,7 +21,11 @@ namespace hellfire {
         [[nodiscard]] std::shared_ptr<Mesh> get_mesh() const { return mesh_; }
         [[nodiscard]] bool has_mesh() const { return mesh_ != nullptr; }
 
+        void set_source(const MeshSource source) { source_ = source; }
+        MeshSource get_source() const { return source_;}
     private:
         std::shared_ptr<Mesh> mesh_;
+        MeshSource source_ = MeshSource::EXTERNAL;
+
     };
 }

@@ -12,6 +12,9 @@
 #include "hellfire/graphics/geometry/Sphere.h"
 #include "hellfire/graphics/lighting/DirectionalLight.h"
 #include "hellfire/graphics/lighting/PointLight.h"
+#include "hellfire/core/InputManager.h"
+
+#define H_KEY_DELETE 261
 
 namespace hellfire::editor {
     void SceneHierarchyComponent::render_context_menu() {
@@ -21,11 +24,21 @@ namespace hellfire::editor {
         }
     }
 
+    void SceneHierarchyComponent::handle_shortcuts() {
+        if (!context_->selected_entity_id) return;
+        auto im = ServiceLocator::get_service<InputManager>();
+
+        if (im->is_key_pressed(H_KEY_DELETE)) {
+            entity_to_delete_ = context_->selected_entity_id;
+        }
+    }
+
     void SceneHierarchyComponent::render() {
         const ImVec2 window_size = ImGui::GetContentRegionAvail();
         ImGui::SetNextWindowSize(ImVec2(window_size.x / 3, window_size.y / 3), ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Scene Hierarchy Panel")) {
             if (context_->active_scene) {
+                handle_shortcuts();
                 ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, 6.0f));
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
