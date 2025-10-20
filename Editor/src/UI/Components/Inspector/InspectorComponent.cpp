@@ -74,15 +74,17 @@ namespace hellfire::editor {
 
             ImGui::Indent();
 
-            if (ui::vec3_input("Position", &position, 0.1f)) {
+            float minValue = std::numeric_limits<float>::lowest();
+            float maxValue = std::numeric_limits<float>::max();
+            if (ui::vec3_input("Position", &position, 0.1f, minValue, maxValue)) {
                 transform->set_position(position);
             }
 
-            if (ui::vec3_input("Rotation", &rotation, 0.1f)) {
+            if (ui::vec3_input("Rotation", &rotation, 0.1f, minValue, maxValue)) {
                 transform->set_rotation(rotation);
             }
-            if (ui::vec3_input("Scale", &scale, 0.1f)) {
-                transform->set_scale(scale);
+            if (ui::vec3_input("Scale", &scale, 0.1f, minValue, maxValue)) {
+                transform->set_scale(scale); 
             }
 
             ImGui::Unindent();

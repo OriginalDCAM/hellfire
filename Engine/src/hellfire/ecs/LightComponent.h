@@ -59,20 +59,36 @@ namespace hellfire {
         }
 
         void set_direction(const glm::vec3 &direction) {
-            direction_ = glm::normalize(direction);
+            // if (auto transform_comp = get_owner().transform()) {
+            //     transform_comp->set_rotation(direction);
+            // }
         }
 
-        const glm::vec3& get_direction() const { return direction_; }
+        const glm::vec3& get_direction() {
+            if (const auto transform_comp = get_owner().transform()) {
+                const glm::vec3 rotation_degrees = transform_comp->get_rotation();
+
+                // Convert to radians
+                const glm::vec3 rotation_radians = glm::radians(rotation_degrees);
+
+                // Convert to quaternion
+                const auto quat = glm::quat(rotation_radians);
+
+                // Transform forward vector by rotation
+                const auto forward = glm::vec3(0.0f, 0.0f, -1.0f);
+                direction_ = glm::normalize(quat * forward);
+                return direction_;
+            }
+            return direction_;
+        }
 
         void look_at(float x, float y, float z) {
             look_at(glm::vec3(x, y, z));
         }
 
         void look_at(const glm::vec3 &target) {
-            auto transform = get_owner().get_component<TransformComponent>();
-            
-            if (transform) {
-                const glm::vec3 position = transform->get_position();
+            if (const auto transform_comp = get_owner().get_component<TransformComponent>()) {
+                const glm::vec3 position = transform_comp->get_position();
                 const glm::vec3 new_direction = glm::normalize(target - position);
                 set_direction(new_direction);
             }
@@ -130,7 +146,14 @@ namespace hellfire {
 
     private:
         void upload_directional_to_shader(Shader& shader, int light_index) const {
-            shader.set_directional_light(light_index, direction_, color_, intensity_);
+            // Get Euler angles and convert to direction
+            const glm::vec3 rotation_degrees = get_owner().transform()->get_rotation();
+            const glm::vec3 rotation_radians = glm::radians(rotation_degrees);
+            const auto quat = glm::quat(rotation_radians);
+            const auto forward = glm::vec3(0.0f, 0.0f, -1.0f);
+            const glm::vec3 direction = glm::normalize(quat * forward);
+            
+            shader.set_directional_light(light_index, direction, color_, intensity_);
         }
 
         void upload_point_to_shader(Shader& shader, int light_index) const {

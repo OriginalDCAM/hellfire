@@ -64,17 +64,17 @@ namespace hellfire {
 
     const std::vector<unsigned int> Cube::indices_ = {
         // Front face
-        0,  1,  2,    2,  3,  0,
+        0,  1,  2,    0,  2,  3,
         // Back face  
-        4,  5,  6,    6,  7,  4,
+        5,  4,  7,    5,  7,  6,
         // Left face
-        8,  9,  10,   10, 11, 8,
+        8,  9,  10,   8, 10, 11,
         // Right face
-        12, 13, 14,   14, 15, 12,
+        13, 12, 15,   13, 15, 14,
         // Bottom face
-        16, 17, 18,   18, 19, 16,
+        16, 17, 18,   16, 18, 19,
         // Top face
-        20, 21, 22,   22, 23, 20
+        23, 22, 21,   23, 21, 20
     };
 
     EntityID Cube::create(Scene* scene, const std::string& name, const Config& config) {
