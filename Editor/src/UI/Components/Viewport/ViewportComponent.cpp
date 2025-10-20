@@ -22,7 +22,7 @@ namespace hellfire::editor {
     }
 
     void ViewportComponent::create_editor_camera() {
-        editor_camera_ = new Entity(INVALID_ENTITY, "Editor Camera");
+        editor_camera_ = new Entity(INVALID_ENTITY, "Editor Camera"); // set entityID to 0 
 
         editor_camera_->add_component<TransformComponent>();
 
@@ -184,7 +184,7 @@ namespace hellfire::editor {
             ImGuizmo::SetOrthographic(false);
 
             if (!camera_active_) {
-                if (ImGui::IsKeyPressed(ImGuiKey_T)) {
+                if (ImGui::IsKeyPressed(ImGuiKey_G)) {
                     current_operation = ImGuizmo::TRANSLATE;
                 } else if (ImGui::IsKeyPressed(ImGuiKey_R)) {
                     current_operation = ImGuizmo::ROTATE;

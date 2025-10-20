@@ -18,7 +18,7 @@ class RotateScript : public hellfire::ScriptComponent {
         REGISTER_VAR(rotation_speed, VEC3);
     }
 
-    void on_update(float delta_time) override {
+    void on_update(const float delta_time) override {
         if (should_rotate) {
             auto current = get_transform()->get_rotation();
             current += rotation_speed * delta_time;

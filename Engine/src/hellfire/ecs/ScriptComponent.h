@@ -74,7 +74,7 @@ namespace hellfire {
 
         // Called by the entity system
         void init() { on_init(); }
-        void update(float delta_time) { on_update(delta_time); }
+        void update(const float delta_time) { on_update(delta_time); }
         void remove() { on_remove(); }
 
         void trigger_event(const std::string &event_name, void *data = nullptr) { on_event(event_name, data); }
