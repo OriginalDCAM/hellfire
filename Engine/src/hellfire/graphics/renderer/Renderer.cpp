@@ -234,8 +234,10 @@ namespace hellfire {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glDisable(GL_BLEND);
-
-        glDisable(GL_CULL_FACE);
+        
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
 
         std::sort(opaque_objects_.begin(), opaque_objects_.end(),
                   [](const RenderCommand &a, const RenderCommand &b) {

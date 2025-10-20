@@ -17,8 +17,8 @@ namespace hellfire {
 
     // Elements
     const std::vector<unsigned int> Quad::indices_ = {
-        0, 1, 2, // First triangle
-        2, 3, 1, // Second triangle
+        0, 1, 3, // First triangle
+        0, 3, 2, // Second triangle
     };
 
     // uvs
@@ -72,19 +72,25 @@ namespace hellfire {
         
         vertices.reserve(4);
         indices.assign(indices_.begin(), indices_.end());
-        
+
+        // Extract the four corner positions
+        glm::vec3 p0(vertices_[0], vertices_[1], vertices_[2]);
+        glm::vec3 p1(vertices_[3], vertices_[4], vertices_[5]);
+        glm::vec3 p2(vertices_[6], vertices_[7], vertices_[8]);
+    
+        // Calculate two edge vectors
+        glm::vec3 edge1 = p1 - p0;
+        glm::vec3 edge2 = p2 - p0;
+
+        glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
         // Create vertex data
         for (size_t i = 0; i < 4; ++i) {
             Vertex v;
             v.position = glm::vec3(vertices_[i * 3], vertices_[i * 3 + 1], vertices_[i * 3 + 2]);
             v.color = color;
-            
-            // A quad faces forward (+Z direction)
-            v.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-            
+            v.normal = normal;
             v.texCoords = glm::vec2(uvs_[i * 2], uvs_[i * 2 + 1]);
             vertices.push_back(v);
         }
-
     }
 }

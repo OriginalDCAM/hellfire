@@ -11,7 +11,6 @@
 #include "hellfire/graphics/shader/Shader.h"
 #include "Component.h"
 #include "Entity.h"
-#include "GL/glew.h"
 
 namespace hellfire {
     class LightComponent : public Component {
