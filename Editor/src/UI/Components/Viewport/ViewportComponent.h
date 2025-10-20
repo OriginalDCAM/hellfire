@@ -5,6 +5,7 @@
 #pragma once
 #include <imgui.h>
 
+#include "ImGuizmo.h"
 #include "UI/Components/EditorComponent.h"
 
 namespace hellfire::editor {
@@ -30,20 +31,24 @@ private:
     void update_camera_control();
     void render_viewport_image();
 
-    void render_transform_gizmo() const;
+    void render_transform_gizmo();
 
     Entity* editor_camera_ = nullptr;
     bool camera_active_ = false;
 
     float last_resize_time_ = 0.0f;
 
-    // Viewport position
+    // Viewport position (top-left)
     ImVec2 viewport_pos_;
     // The size of the viewport
     ImVec2 viewport_size_;
     // Whether the viewport is hovered
     bool viewport_hovered_ = false;
     ImVec2 last_mouse_pos_;
+
+    // Gizmo state
+    ImGuizmo::OPERATION current_operation_ = ImGuizmo::TRANSLATE;
+    ImGuizmo::MODE current_mode_ = ImGuizmo::LOCAL; // Space
 };
     
 }

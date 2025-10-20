@@ -160,7 +160,7 @@ namespace hellfire::editor {
     }
 
 
-    void ViewportComponent::render_transform_gizmo() const {
+    void ViewportComponent::render_transform_gizmo() {
         if (auto *selected_entity = context_->active_scene->get_entity(context_->selected_entity_id)) {
             const auto entity_transform = selected_entity->transform();
 
@@ -178,23 +178,20 @@ namespace hellfire::editor {
 
             // Get entity's transform matrix
             glm::mat4 transform_matrix = entity_transform->get_local_matrix();
-
-            static ImGuizmo::OPERATION current_operation = ImGuizmo::TRANSLATE;
-            static ImGuizmo::MODE current_mode = ImGuizmo::LOCAL;
-            ImGuizmo::SetOrthographic(false);
+            
 
             if (!camera_active_) {
                 if (ImGui::IsKeyPressed(ImGuiKey_G)) {
-                    current_operation = ImGuizmo::TRANSLATE;
+                    current_operation_ = ImGuizmo::TRANSLATE;
                 } else if (ImGui::IsKeyPressed(ImGuiKey_R)) {
-                    current_operation = ImGuizmo::ROTATE;
+                    current_operation_ = ImGuizmo::ROTATE;
                 } else if (ImGui::IsKeyPressed(ImGuiKey_S)) {
-                    current_operation = ImGuizmo::SCALE;
+                    current_operation_ = ImGuizmo::SCALE;
                 }
             }
 
-            ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix), current_operation,
-                                 current_mode, glm::value_ptr(transform_matrix));
+            ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix), current_operation_,
+                                 current_mode_, glm::value_ptr(transform_matrix));
 
             // If the gizmo was used, update the entity's transform
             if (ImGuizmo::IsUsing()) {
