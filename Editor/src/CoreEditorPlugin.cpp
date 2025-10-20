@@ -7,6 +7,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui.h"
+#include "ImGuizmo.h"
 #include "UI/Components/EditorComponent.h"
 #include "UI/Components/MenuBarComponent.h"
 #include "UI/Components/SceneHierarchyComponent.h"
@@ -122,6 +123,7 @@ namespace hellfire::editor {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ImGuizmo::BeginFrame();
     }
 
     void CoreEditorPlugin::on_end_frame() {

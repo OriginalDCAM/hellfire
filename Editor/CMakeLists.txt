@@ -6,15 +6,33 @@ file(GLOB_RECURSE APP_SOURCES "src/*.cpp")
 file(GLOB_RECURSE APP_HEADERS "src/*.h" "src/*.hpp")
 add_executable(${APP_NAME} ${APP_SOURCES} ${APP_HEADERS})
 
+
+# Add the imguizmo library
+set(IMGUIZMO_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imguizmo)
+add_library(imguizmo STATIC
+        ${IMGUIZMO_DIR}/ImGuizmo.h
+        ${IMGUIZMO_DIR}/ImGuizmo.cpp
+)
+
+target_link_libraries(imguizmo 
+        PRIVATE imgui
+)
+
+target_include_directories(imguizmo
+        PUBLIC ${IMGUIZMO_DIR}
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui 
+)
+
 target_include_directories(${APP_NAME}
-PRIVATE
-${CMAKE_CURRENT_SOURCE_DIR}/src
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(${APP_NAME}
         PRIVATE
-        HellfireEngine 
+        HellfireEngine
         imgui
+        imguizmo
         glfw
 )
 
@@ -25,7 +43,7 @@ if (WIN32)
             COMMAND cmd /c "mklink /J \"$<TARGET_FILE_DIR:${APP_NAME}>\\assets\" \"${CMAKE_CURRENT_SOURCE_DIR}\\assets\""
             COMMENT "Creating directory junction to assets directory"
     )
-else()
+else ()
     # Unix symlink for assets
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E remove -f "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
@@ -34,7 +52,7 @@ else()
             "$<TARGET_FILE_DIR:${APP_NAME}>/assets"
             COMMENT "Creating symlink to assets directory"
     )
-endif()
+endif ()
 
 target_compile_definitions(${APP_NAME} PRIVATE HELLFIRE_EDITOR_ENABLED)
 
@@ -60,6 +78,6 @@ if (MSVC)
     # Add source grouping
     source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${APP_SOURCES})
     source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Header Files" FILES ${APP_HEADERS})
-endif()
+endif ()
 
 

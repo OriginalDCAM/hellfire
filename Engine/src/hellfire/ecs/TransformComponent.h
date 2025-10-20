@@ -34,7 +34,9 @@ namespace hellfire {
         const glm::mat4& get_local_matrix() const { return transform_.get_local_matrix(); }
         const glm::mat4& get_world_matrix() const { return transform_.get_world_matrix(); }
 
-        const glm::mat4& get_rotation_matrix() const { return transform_.get_rotation_matrix(); }
+        const glm::mat4 get_rotation_matrix() const { return transform_.get_rotation_matrix(); }
+        const glm::mat4 get_translation_matrix() const { return transform_.get_translation_matrix(); }
+        const glm::mat4 get_scale_matrix() const { return transform_.get_scale_matrix(); }
 
         // Delegate all other methods to the internal Transform3D
         void look_at(const glm::vec3& target, const glm::vec3& up = glm::vec3(0,1,0)) {

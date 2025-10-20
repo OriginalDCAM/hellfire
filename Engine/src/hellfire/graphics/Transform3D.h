@@ -76,6 +76,14 @@ namespace hellfire {
             update_local_matrix();
         }
 
+        glm::mat4 get_translation_matrix() const {
+            return translation_matrix_;
+        }
+
+        glm::mat4 get_scale_matrix() const {
+            return scale_matrix_;
+        }
+
         void set_scale_matrix(const glm::mat4 &scale_matrix) {
             scale_matrix_ = scale_matrix;
             use_scale_matrix_ = true;

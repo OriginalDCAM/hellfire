@@ -8,6 +8,7 @@
 #include "hellfire/graphics/renderer/Renderer.h"
 
 #include "imgui.h"
+#include "ImGuizmo.h"
 #include "SceneCameraScript.h"
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
 
@@ -32,7 +33,7 @@ namespace hellfire::editor {
         );
         cam_component->set_aspect_ratio(16.0f / 9.0f);
         cam_component->set_fov(70.0f);
-        cam_component->set_clip_planes(0.1f, 1000.0f);
+        cam_component->set_clip_planes(0.1f, 2000.0f);
         cam_component->set_mouse_sensitivity(0.1f);
 
         // Set initial position and orientation
@@ -73,13 +74,13 @@ namespace hellfire::editor {
         }
 
         // Enable/Disable camera script
-        auto *camera_script = editor_camera_->get_component<SceneCameraScript>();
-        if (camera_script) {
+        if (auto *camera_script = editor_camera_->get_component<SceneCameraScript>()) {
             camera_script->set_enabled(camera_active_);
-        }
 
-        if (camera_script->is_enabled()) {
-            camera_script->update(0.1f);
+            // Check whether the camera script is enabled to call the update method, only when the state camera active is set within this component
+            if (camera_script->is_enabled()) {
+                camera_script->update(0.1f);
+            }
         }
 
         // Hide cursor when camera is active
@@ -118,11 +119,10 @@ namespace hellfire::editor {
 
         // Resize framebuffer if needed
         static ImVec2 last_size = {0, 0};
-        const float current_time = static_cast<float>(ImGui::GetTime());
-        const float RESIZE_DELAY = 0.016f;
+        const auto current_time = static_cast<float>(ImGui::GetTime());
 
-        if ((viewport_size.x != last_size.x || viewport_size.y != last_size.y) &&
-            (current_time - last_resize_time_) > RESIZE_DELAY) {
+        if (constexpr float RESIZE_DELAY = 0.016f; (viewport_size.x != last_size.x || viewport_size.y != last_size.y) &&
+                                                   (current_time - last_resize_time_) > RESIZE_DELAY) {
             renderer->resize_scene_framebuffer(
                 static_cast<uint32_t>(viewport_size.x),
                 static_cast<uint32_t>(viewport_size.y)
@@ -133,8 +133,7 @@ namespace hellfire::editor {
 
             // Update editor camera aspect ratio
             if (editor_camera_) {
-                auto *cam = editor_camera_->get_component<CameraComponent>();
-                if (cam) {
+                if (auto *cam = editor_camera_->get_component<CameraComponent>()) {
                     cam->set_aspect_ratio(viewport_size.x / viewport_size.y);
                 }
             }
@@ -155,11 +154,61 @@ namespace hellfire::editor {
             ));
             ImGui::Text("Editor Camera Missing!");
         } else {
-            ImGui::Image(reinterpret_cast<void *>(static_cast<uintptr_t>(scene_texture)),
+            ImGui::Image(scene_texture,
                          viewport_size, ImVec2(0, 1), ImVec2(1, 0));
         }
     }
 
+
+    void ViewportComponent::render_transform_gizmo() const {
+        if (auto *selected_entity = context_->active_scene->get_entity(context_->selected_entity_id)) {
+            const auto entity_transform = selected_entity->transform();
+
+            // Set ImGuizmo to draw in this window
+            ImGuizmo::SetDrawlist();
+            const ImVec2 image_size = ImGui::GetItemRectSize();
+            const ImVec2 image_pos = ImGui::GetItemRectMin();
+            ImGuizmo::SetRect(image_pos.x, image_pos.y, image_size.x, image_size.y);
+
+            const auto camera = get_editor_camera();
+            const auto camera_comp = camera->get_component<CameraComponent>();
+
+            glm::mat4 view_matrix = camera_comp->get_view_matrix();
+            glm::mat4 projection_matrix = camera_comp->get_projection_matrix();
+
+            // Get entity's transform matrix
+            glm::mat4 transform_matrix = entity_transform->get_local_matrix();
+
+            static ImGuizmo::OPERATION current_operation = ImGuizmo::TRANSLATE;
+            static ImGuizmo::MODE current_mode = ImGuizmo::LOCAL;
+            ImGuizmo::SetOrthographic(false);
+
+            if (!camera_active_) {
+                if (ImGui::IsKeyPressed(ImGuiKey_T)) {
+                    current_operation = ImGuizmo::TRANSLATE;
+                } else if (ImGui::IsKeyPressed(ImGuiKey_R)) {
+                    current_operation = ImGuizmo::ROTATE;
+                } else if (ImGui::IsKeyPressed(ImGuiKey_S)) {
+                    current_operation = ImGuizmo::SCALE;
+                }
+            }
+
+            ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix), current_operation,
+                                 current_mode, glm::value_ptr(transform_matrix));
+
+            // If the gizmo was used, update the entity's transform
+            if (ImGuizmo::IsUsing()) {
+                glm::vec3 translation, rotation, scale;
+                ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform_matrix), glm::value_ptr(translation),
+                                                      glm::value_ptr(rotation), glm::value_ptr(scale));
+
+                // Update entity's transform
+                entity_transform->set_position(translation);
+                entity_transform->set_rotation(rotation); // rotation is in degrees
+                entity_transform->set_scale(scale);
+            }
+        }
+    }
 
     void ViewportComponent::render() {
         const ImGuiViewport *main_viewport = ImGui::GetMainViewport();
@@ -183,7 +232,12 @@ namespace hellfire::editor {
             viewport_size_ = ImGui::GetWindowSize();
             viewport_hovered_ = ImGui::IsWindowHovered();
             last_mouse_pos_ = ImGui::GetMousePos();
+
             render_viewport_image();
+
+
+            render_transform_gizmo();
+
             update_camera_control();
 
             if (viewport_size_.x > 256) {
@@ -192,7 +246,6 @@ namespace hellfire::editor {
         }
         ImGui::End();
     }
-
 
 
     void ViewportComponent::render_viewport_stats_overlay() const {

@@ -13,7 +13,7 @@ class ViewportComponent final : public EditorComponent {
 public:
     ViewportComponent();
     ~ViewportComponent() override;
-    
+
     void render() override;
     void render_viewport_stats_overlay() const;
 
@@ -29,7 +29,9 @@ private:
     void destroy_editor_camera();
     void update_camera_control();
     void render_viewport_image();
-    
+
+    void render_transform_gizmo() const;
+
     Entity* editor_camera_ = nullptr;
     bool camera_active_ = false;
 
