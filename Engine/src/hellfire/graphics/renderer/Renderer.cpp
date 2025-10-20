@@ -40,9 +40,9 @@ namespace hellfire {
     }
 
     void Renderer::render(Scene &scene, Entity* camera_override = nullptr) {
-        Entity* camera_entity = camera_override;
+        const Entity* camera_entity = camera_override;
         if (!camera_entity) {
-            EntityID camera_id = scene.get_active_camera_entity();
+            const EntityID camera_id = scene.get_active_camera_entity();
             camera_entity = scene.get_entity(camera_id);
             
         }
@@ -52,7 +52,7 @@ namespace hellfire {
             return;
         }
 
-        auto camera_comp = camera_entity->get_component<CameraComponent>();
+        const auto camera_comp = camera_entity->get_component<CameraComponent>();
 
         if (!camera_comp) {
             std::cerr << "Camera entity missing CameraComponent" << std::endl;
@@ -106,7 +106,7 @@ namespace hellfire {
         std::vector<Entity *> point_lights;
 
         for (Entity *entity: light_entities) {
-            auto *light = entity->get_component<LightComponent>();
+            const auto *light = entity->get_component<LightComponent>();
             if (!light) continue;
 
             switch (light->get_light_type()) {
@@ -149,7 +149,7 @@ namespace hellfire {
         scene_ = &scene;
 
         // Collect lights
-        std::vector<EntityID> light_entity_ids = scene.find_entities_with_component<LightComponent>();
+        const std::vector<EntityID> light_entity_ids = scene.find_entities_with_component<LightComponent>();
         std::vector<Entity *> light_entities;
         for (const EntityID id: light_entity_ids) {
             if (Entity *e = scene.get_entity(id)) {
@@ -159,17 +159,17 @@ namespace hellfire {
         store_lights_in_context(light_entities, camera);
 
         // Get camera position
-        auto *camera_transform = camera.get_owner().transform();
-        glm::vec3 camera_pos = camera_transform ? camera_transform->get_world_position() : glm::vec3(0.0f);
+        const auto *camera_transform = camera.get_owner().transform();
+        const glm::vec3 camera_pos = camera_transform ? camera_transform->get_world_position() : glm::vec3(0.0f);
 
         // Collect render commands from root entities
-        for (EntityID root_id: scene.get_root_entities()) {
+        for (const EntityID root_id: scene.get_root_entities()) {
             collect_render_commands_recursive(root_id, camera_pos);
         }
 
         // Render
-        glm::mat4 view = camera.get_view_matrix();
-        glm::mat4 projection = camera.get_projection_matrix();
+        const glm::mat4 view = camera.get_view_matrix();
+        const glm::mat4 projection = camera.get_projection_matrix();
 
         render_opaque_pass(view, projection);
         render_skybox_pass(&scene, view, projection, &camera);
@@ -177,25 +177,25 @@ namespace hellfire {
     }
 
     void Renderer::collect_render_commands_recursive(EntityID entity_id, const glm::vec3 &camera_pos) {
-        Entity *entity = scene_->get_entity(entity_id);
+        const Entity *entity = scene_->get_entity(entity_id);
         if (!entity) return;
 
         // Check for renderable + mesh components
-        auto *renderable = entity->get_component<RenderableComponent>();
-        auto *mesh_comp = entity->get_component<MeshComponent>();
-        auto *transform = entity->get_component<TransformComponent>();
+        const auto *renderable = entity->get_component<RenderableComponent>();
+        const auto *mesh_comp = entity->get_component<MeshComponent>();
+        const auto *transform = entity->get_component<TransformComponent>();
 
         // Need all three to render
         if (renderable && mesh_comp && transform) {
-            auto mesh = mesh_comp->get_mesh();
-            auto material = renderable->get_material();
+            const auto mesh = mesh_comp->get_mesh();
+            const auto material = renderable->get_material();
 
             if (mesh && material) {
                 const glm::vec3 object_pos = transform->get_world_position();
                 const float distance = glm::length(camera_pos - object_pos);
                 const bool is_transparent = material->is_transparent();
 
-                RenderCommand cmd = {entity_id, mesh, material, distance, is_transparent};
+                const RenderCommand cmd = {entity_id, mesh, material, distance, is_transparent};
 
                 if (is_transparent) {
                     transparent_objects_.push_back(cmd);
@@ -207,12 +207,12 @@ namespace hellfire {
 
         if (auto *instanced = entity->get_component<InstancedRenderableComponent>()) {
             if (transform && instanced->has_mesh() && instanced->get_instance_count() > 0) {
-                if (auto material = instanced->get_material()) {
-                    glm::vec3 object_pos = transform->get_world_position();
-                    float distance = glm::length(camera_pos - object_pos);
-                    bool is_transparent = material->is_transparent();
+                if (const auto material = instanced->get_material()) {
+                    const glm::vec3 object_pos = transform->get_world_position();
+                    const float distance = glm::length(camera_pos - object_pos);
+                    const bool is_transparent = material->is_transparent();
 
-                    InstancedRenderCommand cmd = {entity_id, instanced, material, distance, is_transparent};
+                    const InstancedRenderCommand cmd = {entity_id, instanced, material, distance, is_transparent};
 
                     if (is_transparent) {
                         transparent_instanced_objects_.push_back(cmd);
@@ -224,7 +224,7 @@ namespace hellfire {
         }
 
         // Recurse through children using scene hierarchy
-        for (EntityID child_id: scene_->get_children(entity_id)) {
+        for (const EntityID child_id: scene_->get_children(entity_id)) {
             collect_render_commands_recursive(child_id, camera_pos);
         }
     }
@@ -276,10 +276,10 @@ namespace hellfire {
     }
 
     void Renderer::draw_render_command(const RenderCommand &cmd, const glm::mat4 &view, const glm::mat4 &projection) {
-        Entity *entity = scene_->get_entity(cmd.entity_id);
+        const Entity *entity = scene_->get_entity(cmd.entity_id);
         if (!entity) return;
 
-        auto *transform = entity->get_component<TransformComponent>();
+        const auto *transform = entity->get_component<TransformComponent>();
         if (!transform) return;
 
         Shader *shader = get_shader_for_material(cmd.material);
@@ -305,7 +305,7 @@ namespace hellfire {
 
     void Renderer::draw_instanced_command(const InstancedRenderCommand &cmd, const glm::mat4 &view,
                                           const glm::mat4 &projection) {
-        Entity *entity = scene_->get_entity(cmd.entity_id);
+        const Entity *entity = scene_->get_entity(cmd.entity_id);
         if (!entity) return;
 
         Shader *shader = get_shader_for_material(cmd.material);
@@ -327,7 +327,7 @@ namespace hellfire {
         // Bind material and draw
         cmd.material->bind();
 
-        auto mesh = cmd.instanced_renderable->get_mesh();
+        const auto mesh = cmd.instanced_renderable->get_mesh();
         if (mesh) {
             mesh->bind();
             cmd.instanced_renderable->bind_instance_buffers();
@@ -352,24 +352,34 @@ namespace hellfire {
     void Renderer::create_scene_framebuffer(uint32_t width, uint32_t height) {
         framebuffer_width_ = width;
         framebuffer_height_ = height;
-        scene_framebuffers_[0] = std::make_unique<Framebuffer>(width, height);
-        scene_framebuffers_[1] = std::make_unique<Framebuffer>(width, height);
+
+        FrameBufferAttachmentSettings settings;
+        settings.width = width;
+        settings.height = height;
+        scene_framebuffers_[0] = std::make_unique<Framebuffer>();
+        scene_framebuffers_[0]->attach_color_texture(settings);
+        scene_framebuffers_[0]->attach_depth_texture(settings);
+        scene_framebuffers_[1] = std::make_unique<Framebuffer>();
+        scene_framebuffers_[1]->attach_color_texture(settings);
+        scene_framebuffers_[1]->attach_depth_texture(settings);
     }
 
     void Renderer::resize_scene_framebuffer(uint32_t width, uint32_t height) {
         framebuffer_width_ = width;
         framebuffer_height_ = height;
 
-        // Resize both buffers
+        // Resize only the current render buffer immediately.
+        // The display buffer will be lazily resized on the next frame
+        // to avoid showing cleared/incomplete frames during a window resize.
         if (scene_framebuffers_[0]) {
             scene_framebuffers_[current_fb_index_]->resize(width, height);
         }
     }
 
     uint32_t Renderer::get_scene_texture() const {
-        int display_index = 1 - current_fb_index_;
+        const int display_index = 1 - current_fb_index_;
         if (scene_framebuffers_[display_index]) {
-            return scene_framebuffers_[display_index]->get_color_texture();
+            return scene_framebuffers_[display_index]->get_color_attachment(0);
         }
         return 0;
     }
@@ -389,7 +399,7 @@ namespace hellfire {
         }
 
         // Check if the OTHER buffer (display buffer) needs resizing
-        int display_index = 1 - current_fb_index_;
+        const int display_index = 1 - current_fb_index_;
         if (scene_framebuffers_[display_index] && 
             (scene_framebuffers_[display_index]->get_width() != framebuffer_width_ ||
              scene_framebuffers_[display_index]->get_height() != framebuffer_height_)) {
@@ -421,7 +431,7 @@ namespace hellfire {
         }
 
         // Check if material has a compiled shader ID
-        uint32_t material_shader_id = material->get_compiled_shader_id();
+        const uint32_t material_shader_id = material->get_compiled_shader_id();
         if (material_shader_id != 0) {
             // Get shader wrapper from the ID
             Shader *material_shader = shader_registry_.get_shader_from_id(material_shader_id);
@@ -433,10 +443,10 @@ namespace hellfire {
         // Check if material needs compilation
         if (material->has_custom_shader()) {
             // Try to compile the material's shader
-            uint32_t compiled_id = compile_material_shader(material);
+            const uint32_t compiled_id = compile_material_shader(material);
             if (compiled_id != 0) {
                 material->set_compiled_shader_id(compiled_id);
-                auto shader =  shader_registry_.get_shader_from_id(compiled_id);
+                const auto shader =  shader_registry_.get_shader_from_id(compiled_id);
                 return shader;
             }
         }
