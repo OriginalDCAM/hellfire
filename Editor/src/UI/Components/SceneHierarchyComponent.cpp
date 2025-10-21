@@ -1,10 +1,13 @@
 ﻿//
 // Created by denzel on 07/10/2025.
 //
+
 #include "SceneHierarchyComponent.h"
 
 #include <imgui.h>
 
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
 #include "IconsFontAwesome6.h"
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/graphics/geometry/Cube.h"
@@ -14,7 +17,6 @@
 #include "hellfire/graphics/lighting/PointLight.h"
 #include "hellfire/core/InputManager.h"
 
-#define H_KEY_DELETE 261
 
 namespace hellfire::editor {
     void SceneHierarchyComponent::render_context_menu() {
@@ -28,7 +30,7 @@ namespace hellfire::editor {
         if (!context_->selected_entity_id) return;
         auto im = ServiceLocator::get_service<InputManager>();
 
-        if (im->is_key_pressed(H_KEY_DELETE)) {
+        if (im->is_key_pressed(GLFW_KEY_DELETE)) {
             entity_to_delete_ = context_->selected_entity_id;
         }
     }
@@ -96,7 +98,7 @@ namespace hellfire::editor {
         }
     }
 
-    void SceneHierarchyComponent::render_add_entity_menu(EntityID parent_id) {
+    void SceneHierarchyComponent::render_add_entity_menu(const EntityID parent_id) {
         const auto active_scene = context_->active_scene;
         bool has_parent = parent_id != 0;
 
@@ -144,7 +146,7 @@ namespace hellfire::editor {
         
     }
 
-    void SceneHierarchyComponent::render_list_item(EntityID entity_id) {
+    void SceneHierarchyComponent::render_list_item(const EntityID entity_id) {
         ImGui::PushID(entity_id); // Push the id onto the stack to guarantee uniqueness for the list items.
 
         const Entity *entity = context_->active_scene->get_entity(entity_id);
@@ -189,6 +191,23 @@ namespace hellfire::editor {
             context_->selected_entity_id = entity_id;
         }
 
+        if (ImGui::BeginDragDropSource()) {
+            ImGui::Text("%s", display_name.c_str());
+            ImGui::SetDragDropPayload("ENTITY_ID", &entity_id, sizeof(EntityID));
+            ImGui::EndDragDropSource();
+        }
+
+        if (ImGui::BeginDragDropTarget()) {
+            ImGuiDragDropFlags target_flags = 0;
+            target_flags |= ImGuiDragDropFlags_AcceptNoDrawDefaultRect;
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_ID", target_flags)) {
+                const EntityID* child_id = static_cast<EntityID*>(payload->Data);
+                context_->active_scene->set_parent(*child_id, entity_id);
+            }
+            ImGui::EndDragDropTarget();
+            
+        }
+
         if (ImGui::BeginPopupContextItem()) {
             render_add_entity_menu(entity_id);
             ImGui::Separator();
@@ -200,7 +219,6 @@ namespace hellfire::editor {
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Delete", "Del")) {
-                context_->active_scene->destroy_entity(entity_id);
                 entity_to_delete_ = entity_id;
                 if (context_->selected_entity_id == entity_id) {
                     context_->selected_entity_id = 0; // Deselect
