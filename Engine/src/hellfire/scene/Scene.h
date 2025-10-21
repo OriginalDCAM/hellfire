@@ -29,6 +29,8 @@ namespace hellfire {
 
         const Entity *get_entity(EntityID id) const;
 
+        bool is_descendant(EntityID potential_descendant, EntityID potential_ancestor);
+
         // Hierarchy management
         void set_parent(EntityID child_id, EntityID parent_id);
 

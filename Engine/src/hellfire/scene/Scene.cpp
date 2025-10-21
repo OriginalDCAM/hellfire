@@ -74,9 +74,26 @@ namespace hellfire {
         return it != entities_.end() ? it->second.get() : nullptr;
     }
 
+    bool Scene::is_descendant(EntityID potential_descendant, EntityID potential_ancestor) {
+        if (potential_descendant == potential_ancestor) return true;
+
+        // Check all children recursively
+        const auto it = children_map_.find(potential_ancestor);
+        if (it == children_map_.end()) return false;
+
+        for (const EntityID child : it->second) {
+            if (is_descendant(potential_descendant, child)) return true;
+        }
+        
+        return false;
+    }
+
     void Scene::set_parent(EntityID child_id, EntityID parent_id) {
         if (entities_.find(child_id) == entities_.end()) return;
         if (parent_id != 0 && entities_.find(parent_id) == entities_.end()) return;
+
+        // Prevent cycles: children cannot become parent of its own ancestor
+        if (parent_id != 0 && is_descendant(parent_id, child_id)) return;
 
         // Remove from current parent
         if (auto it = parent_map_.find(child_id); it != parent_map_.end()) {

@@ -139,7 +139,7 @@ namespace hellfire::editor {
             }
             ImGui::EndMenu();
         }
-        if (new_entity_id != 0) {
+        if (new_entity_id != 0 && active_scene) {
             context_->selected_entity_id = new_entity_id;
             if (has_parent) active_scene->set_parent(new_entity_id, parent_id);
         }
@@ -147,13 +147,13 @@ namespace hellfire::editor {
     }
 
     void SceneHierarchyComponent::render_list_item(const EntityID entity_id) {
-        ImGui::PushID(entity_id); // Push the id onto the stack to guarantee uniqueness for the list items.
+        ImGui::PushID(static_cast<int>(entity_id)); // Push the id onto the stack to guarantee uniqueness for the list items.
 
         const Entity *entity = context_->active_scene->get_entity(entity_id);
-        if (!entity) {
-            ImGui::PopID();
-            return;
-        }
+        // if (!entity) {
+        //     ImGui::PopID();
+        //     return;
+        // }
 
         const std::string &entity_name = entity->get_name();
 
