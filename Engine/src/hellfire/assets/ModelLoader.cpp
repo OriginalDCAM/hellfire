@@ -22,7 +22,7 @@ namespace hellfire::Addons {
     std::unordered_map<std::string, std::shared_ptr<Texture> > ModelLoader::texture_cache;
 
     EntityID ModelLoader::load_model(Scene *scene, const std::filesystem::path &filepath, unsigned int import_flags) {
-        auto start_time = std::chrono::high_resolution_clock::now();
+        const auto start_time = std::chrono::high_resolution_clock::now();
         std::cout << "Loading model: " << filepath << std::endl;
 
         Assimp::Importer importer;
@@ -50,11 +50,11 @@ namespace hellfire::Addons {
         preprocess_materials(ai_scene, filepath.string());
 
         // Process the scene
-        EntityID imported_model = process_node(scene, ai_scene->mRootNode, ai_scene, filepath.string());
+        const EntityID imported_model = process_node(scene, ai_scene->mRootNode, ai_scene, filepath.string());
         scene->update_world_matrices();
 
-        auto end_time = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        const auto end_time = std::chrono::high_resolution_clock::now();
+        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
         std::cout << "Model loaded in: " << duration.count() << "ms" << std::endl;
 
         return imported_model;
@@ -295,8 +295,8 @@ namespace hellfire::Addons {
 
     std::shared_ptr<Mesh> ModelLoader::process_mesh(aiMesh *mesh, const aiScene *scene, const std::string &filepath) {
         // Create mesh key and check cache
-        std::string mesh_key = create_mesh_key(mesh, filepath);
-        auto cached = mesh_cache.find(mesh_key);
+        const std::string mesh_key = create_mesh_key(mesh, filepath);
+        const auto cached = mesh_cache.find(mesh_key);
         if (cached != mesh_cache.end()) {
             std::cout << "Using cached mesh: " << mesh_key << std::endl;
             return cached->second;
@@ -322,7 +322,7 @@ namespace hellfire::Addons {
         // Get material name
         aiString material_name;
         ai_material->Get(AI_MATKEY_NAME, material_name);
-        std::string name = material_name.length > 0 ? material_name.C_Str() : "ImportedMaterial";
+        const std::string name = material_name.length > 0 ? material_name.C_Str() : "ImportedMaterial";
 
         // Create Lambert Material 
         auto material = MaterialBuilder::create(name);
@@ -376,7 +376,7 @@ namespace hellfire::Addons {
     }
 
     std::vector<std::string> ModelLoader::get_texture_search_paths(const std::string &filepath) {
-        std::filesystem::path model_dir = std::filesystem::path(filepath).parent_path();
+        const std::filesystem::path model_dir = std::filesystem::path(filepath).parent_path();
 
         return {
             model_dir.string() + "/textures/",
@@ -399,7 +399,7 @@ namespace hellfire::Addons {
             aiString texture_path;
             if (ai_material->GetTexture(ai_type, 0, &texture_path) != AI_SUCCESS) return;
 
-            std::string path_str = texture_path.C_Str();
+            const std::string path_str = texture_path.C_Str();
 
             // Try embedded texture first
             if (try_load_embedded_texture_unified(path_str, scene, dcr_type, material)) {
@@ -433,7 +433,7 @@ namespace hellfire::Addons {
         }
 
         try {
-            int texture_index = std::stoi(path_str.substr(1));
+            const int texture_index = std::stoi(path_str.substr(1));
 
             if (!scene || texture_index >= static_cast<int>(scene->mNumTextures)) {
                 std::cerr << "Embedded texture index " << texture_index << " is out of range!" << std::endl;
@@ -457,7 +457,7 @@ namespace hellfire::Addons {
                     }
                 }
 
-                std::string temp_filename = "temp_texture_" + std::to_string(texture_index) + "." + extension;
+                const std::string temp_filename = "temp_texture_" + std::to_string(texture_index) + "." + extension;
 
                 std::ofstream temp_file(temp_filename, std::ios::binary);
                 if (!temp_file) {
@@ -498,10 +498,10 @@ namespace hellfire::Addons {
                                                         const std::string &filepath,
                                                         TextureType type, 
                                                         Material &material) {
-        std::string texture_filename = std::filesystem::path(path_str).filename().string();
-        std::filesystem::path model_dir = std::filesystem::path(filepath).parent_path();
+        const std::string texture_filename = std::filesystem::path(path_str).filename().string();
+        const std::filesystem::path model_dir = std::filesystem::path(filepath).parent_path();
 
-        std::vector<std::string> possible_paths = {
+        const std::vector<std::string> possible_paths = {
             path_str,
             model_dir.string() + "/" + path_str,
             model_dir.string() + "/textures/" + texture_filename,
@@ -529,7 +529,7 @@ namespace hellfire::Addons {
     }
 
     std::shared_ptr<Texture> ModelLoader::load_cached_texture(const std::string &path, TextureType type) {
-        auto it = texture_cache.find(path);
+        const auto it = texture_cache.find(path);
         if (it != texture_cache.end()) {
             std::cout << "Using cached texture: " << path << std::endl;
             return it->second;
