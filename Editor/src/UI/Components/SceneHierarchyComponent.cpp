@@ -150,10 +150,10 @@ namespace hellfire::editor {
         ImGui::PushID(static_cast<int>(entity_id)); // Push the id onto the stack to guarantee uniqueness for the list items.
 
         const Entity *entity = context_->active_scene->get_entity(entity_id);
-        // if (!entity) {
-        //     ImGui::PopID();
-        //     return;
-        // }
+        if (!entity) {
+            ImGui::PopID();
+            return;
+        }
 
         const std::string &entity_name = entity->get_name();
 

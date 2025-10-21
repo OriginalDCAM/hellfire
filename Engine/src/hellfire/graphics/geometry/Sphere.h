@@ -43,7 +43,7 @@ namespace hellfire {
     private:
         // Helper method for icosphere generation
         static void subdivide_triangle(std::vector<glm::vec3> &vertices,
-                                       glm::vec3 v1, glm::vec3 v2, glm::vec3 v3,
+                                       const glm::vec3 &v1, const glm::vec3 &v2, const glm::vec3 &v3,
                                        int depth);
     };
 }

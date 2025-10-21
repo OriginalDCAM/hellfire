@@ -6,13 +6,13 @@
 #include "hellfire/graphics/renderer/graphics_api.h"
 
 namespace hellfire {
-    class OpenGLContext : public IGraphicsContext {
+    class OpenGLContext final : public IGraphicsContext {
     public:
         void begin_frame() override;
 
         void end_frame() override;
 
-        void clear(float r, float g, float a) override;
+        void clear(float r, float g, float b) override;
 
         void draw_mesh(uint32_t vertex_array, uint32_t index_count) override;
 

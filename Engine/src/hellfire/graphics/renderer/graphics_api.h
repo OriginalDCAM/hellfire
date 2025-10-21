@@ -44,7 +44,7 @@ namespace hellfire {
         // Frame management
         virtual void begin_frame() = 0;
         virtual void end_frame() = 0;
-        virtual void clear(float r, float g, float a = 1.0) = 0;
+        virtual void clear(float r, float g, float b) = 0;
         
         // Drawing
         virtual void draw_mesh(uint32_t vertex_array, uint32_t index_count) = 0;

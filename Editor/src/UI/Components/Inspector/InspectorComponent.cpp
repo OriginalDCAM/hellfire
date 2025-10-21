@@ -143,28 +143,28 @@ namespace hellfire::editor {
 
             if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
                 // Opacity
-                float opacity = material->get_property<float>(
+                auto opacity = material->get_property<float>(
                     MaterialConstants::OPACITY);
                 if (ui::float_input("Opacity", &opacity, 0.1f, 0.0f, 1.0f)) {
                     material->set_opacity(opacity);
                 }
 
                 // Shininess
-                float shininess = material->get_property<float>(
+                auto shininess = material->get_property<float>(
                     MaterialConstants::SHININESS);
                 if (ui::float_input("Shininess", &shininess, 1.0f, 0.0f, 512.0f)) {
                     material->set_shininess(shininess);
                 }
 
                 // Metallic
-                float metallic = material->get_property<float>(
+                auto metallic = material->get_property<float>(
                     MaterialConstants::METALLIC);
                 if (ui::float_input("Metallic", &metallic, 0.1f, 0.0f, 1.0f)) {
                     material->set_metallic(metallic);
                 }
 
                 // Roughness
-                float roughness = material->get_property<float>(
+                auto roughness = material->get_property<float>(
                     MaterialConstants::ROUGHNESS);
                 if (ui::float_input("Roughness", &roughness, 0.1f, 0.0f, 1.0f)) {
                     material->set_roughness(roughness);
@@ -204,7 +204,7 @@ namespace hellfire::editor {
             const char *light_types[] = {"Directional", "Point"};
             int current_type = light->get_light_type();
 
-            if (ImGui::Combo("Type", &current_type, light_types, 2)) {
+            if (ui::combo_box_int("Light Type", *light_types, &current_type)) {
                 light->set_light_type(static_cast<LightComponent::LightType>(current_type));
             }
 
@@ -241,6 +241,16 @@ namespace hellfire::editor {
 
     void InspectorComponent::render_point_light_component(LightComponent *light) {
         if (ImGui::CollapsingHeader("Light Specific Properties")) {
+
+            float range = light->get_range();
+            if (ui::float_input("Range", &range)) {
+                light->set_range(range);
+            }
+
+            float attenuation = light->get_attenuation();
+            if (ui::float_input("Attenuation", &attenuation)) {
+                light->set_attenuation(attenuation);
+            }
             
         }
     }

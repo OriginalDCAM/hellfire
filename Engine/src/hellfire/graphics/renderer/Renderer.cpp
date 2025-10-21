@@ -239,10 +239,10 @@ namespace hellfire {
         glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
 
-        std::sort(opaque_objects_.begin(), opaque_objects_.end(),
-                  [](const RenderCommand &a, const RenderCommand &b) {
-                      return a.distance_to_camera < b.distance_to_camera;
-                  });
+        std::ranges::sort(opaque_objects_,
+                          [](const RenderCommand &a, const RenderCommand &b) {
+                              return a.distance_to_camera < b.distance_to_camera;
+                          });
 
         for (const auto &cmd: opaque_objects_) {
             draw_render_command(cmd, view, projection);
@@ -261,10 +261,10 @@ namespace hellfire {
 
         glDisable(GL_CULL_FACE);
 
-        std::sort(transparent_objects_.begin(), transparent_objects_.end(),
-                  [](const RenderCommand &a, const RenderCommand &b) {
-                      return a.distance_to_camera > b.distance_to_camera;
-                  });
+        std::ranges::sort(transparent_objects_,
+                          [](const RenderCommand &a, const RenderCommand &b) {
+                              return a.distance_to_camera > b.distance_to_camera;
+                          });
 
         for (const auto &cmd: transparent_objects_) {
             draw_render_command(cmd, view, projection);

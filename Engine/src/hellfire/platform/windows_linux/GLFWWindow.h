@@ -7,7 +7,7 @@
 #include "GLFW/glfw3.h"
 
 namespace hellfire {
-    class GLFWWindow : public IWindow {
+    class GLFWWindow final : public IWindow {
     public:
         bool create(int width, int height, const std::string &title) override;
 

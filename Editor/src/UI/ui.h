@@ -49,6 +49,12 @@ namespace hellfire::editor::ui {
         });
     }
 
+    inline bool combo_box_int(const std::string &label, const char *labels, int* value) {
+        return Property(label, value, [&](const char *id, int* val) {
+            return ImGui::Combo(id, val, labels);
+        });
+    }
+
     inline bool color_picker_rgb_input(const std::string &label, glm::vec3 *value) {
         return Property(label, value, [&](const char *id, glm::vec3 *val) {
             return ImGui::ColorEdit3(id, &(*val)[0]);
