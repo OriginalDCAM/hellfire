@@ -2,7 +2,7 @@
 // Created by denzel on 01/10/2025.
 //
 
-#include "CoreEditorStyles.h"
+#include "EditorStyles.h"
 
 #include "imgui.h"
 

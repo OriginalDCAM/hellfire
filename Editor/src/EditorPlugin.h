@@ -4,7 +4,6 @@
 
 #pragma once
 #include <memory>
-#include <unordered_map>
 
 #include "UI/Components/EditorComponent.h"
 #include "UI/Components/MenuBarComponent.h"
@@ -15,19 +14,21 @@
 #include "UI/Components/Viewport/ViewportComponent.h"
 
 namespace hellfire::editor {
-    class CoreEditorPlugin final : public IApplicationPlugin {
+    class EditorPlugin final : public IApplicationPlugin {
     public:
         void on_initialize(Application &app) override;
 
         void initialize_imgui(IWindow *window);
 
-        ~CoreEditorPlugin() override;
+        ~EditorPlugin() override;
 
         void cleanup_imgui();
 
         void on_begin_frame() override;
 
         void on_end_frame() override;
+
+        void sync_editor_context();
 
         void on_render() override;
 
@@ -53,7 +54,6 @@ namespace hellfire::editor {
         EditorContext editor_context_;
         Application* app_ = nullptr;
         bool imgui_initialized_ = false;
-        bool show_demo_ = false;
         
         // UI Components
         std::unique_ptr<MenuBarComponent> menu_bar_;

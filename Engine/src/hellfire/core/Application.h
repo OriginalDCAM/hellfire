@@ -57,13 +57,6 @@ namespace hellfire {
 
         // Accessors
         [[nodiscard]] AppInfo &get_window_info() { return window_info_; }
-
-        [[nodiscard]] bool is_key_pressed(int keycode) const;
-
-        [[nodiscard]] float get_delta_time() const { return delta_time_; }
-        ShaderManager &get_shader_manager() { return shader_manager_; }
-        Renderer &get_renderer() { return renderer_; }
-
         /// Method for registering plugins
         void register_plugin(std::unique_ptr<IApplicationPlugin> plugin) {
             plugins_.push_back(std::move(plugin));
@@ -103,11 +96,7 @@ namespace hellfire {
         // Window info tracking
         AppInfo window_info_;
 
-        // Timing
-        float last_frame_time_ = 0.0f;
-        float delta_time_ = 0.0f;
-
-        void update_delta_time();
+        void update_delta_time() const;
 
 
         template<typename Func>

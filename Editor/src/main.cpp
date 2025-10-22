@@ -2,22 +2,33 @@
 // Created by denzel on 17/09/2025.
 //
 
-#include "hellfire/core/Application.h"
+#include "EditorPlugin.h"
+#include "hellfire/EntryPoint.h";
 
+namespace {
+    class EditorConfig : public hellfire::IApplicationConfig {
+    public:
+        int get_window_width() override {
+            return 1280;
+        }
+
+        int get_window_height() override {
+            return 720;
+        }
+
+        const std::string &get_title() const override {
+            return "Hellfire Editor";
+        }
+
+        void register_plugins(hellfire::Application &app) override {
 #ifdef HELLFIRE_EDITOR_ENABLED
-#include "CoreEditorPlugin.h"
+            app.register_plugin(std::make_unique<hellfire::editor::EditorPlugin>());
 #endif
+        }
+    };
+}
 
-int main() {
-    hellfire::Application app(1280, 720, "Hellfire Editor");
-
-#ifdef HELLFIRE_EDITOR_ENABLED
-    // Register editor plugin
-    app.register_plugin(std::make_unique<hellfire::editor::CoreEditorPlugin>());
-#endif
-
-    app.initialize();
-    app.run();
-
-    return 0;
+// Engine will call this to get application configuration
+std::unique_ptr<hellfire::IApplicationConfig> create_application_config() {
+    return std::make_unique<EditorConfig>();
 }

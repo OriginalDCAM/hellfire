@@ -199,7 +199,7 @@ namespace hellfire::editor {
 
         if (ImGui::BeginDragDropTarget()) {
             ImGuiDragDropFlags target_flags = 0;
-            target_flags |= ImGuiDragDropFlags_AcceptNoDrawDefaultRect;
+            target_flags |= ImGuiDragDropFlags_None;
             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_ID", target_flags)) {
                 const EntityID* child_id = static_cast<EntityID*>(payload->Data);
                 context_->active_scene->set_parent(*child_id, entity_id);

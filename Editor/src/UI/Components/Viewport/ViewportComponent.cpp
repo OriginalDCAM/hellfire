@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "SceneCameraScript.h"
+#include "hellfire/core/Time.h"
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
 
 namespace hellfire::editor {
@@ -41,7 +42,7 @@ namespace hellfire::editor {
         cam_component->look_at(glm::vec3(0.0f));
 
         // Add Camera Control Script
-        editor_camera_->add_component<SceneCameraScript>(12.5f);
+        editor_camera_->add_component<SceneCameraScript>(40.0f);
         std::cout << "Editor camera created for viewport" << std::endl;
     }
 
@@ -79,7 +80,7 @@ namespace hellfire::editor {
 
             // Check whether the camera script is enabled to call the update method, only when the state camera active is set within this component
             if (camera_script->is_enabled()) {
-                camera_script->update(0.1f);
+                camera_script->update(Time::delta_time);
             }
         }
 
@@ -100,7 +101,7 @@ namespace hellfire::editor {
         const auto text_width = ImGui::CalcTextSize(text.c_str()).x;
         ImGui::SetCursorPos(ImVec2((viewport_size.x - text_width) / 2, viewport_size.y / 2));
         ImGui::SetWindowFontScale(1.5f);
-        ImGui::Text(text.c_str());
+        ImGui::Text("%s", text.c_str());
         ImGui::SetWindowFontScale(1.0f);
     }
 
@@ -220,7 +221,7 @@ namespace hellfire::editor {
         ImGui::SetNextWindowSizeConstraints(ImVec2(320, 180), ImVec2(UINT_MAX, UINT_MAX));
 
         const std::string window_name = context_->active_scene
-                                            ? context_->active_scene->get_name()
+                                            ? ICON_FA_EYE " "  + context_->active_scene->get_name()
                                             : "Viewport";
 
         if (ImGui::Begin(window_name.c_str())) {

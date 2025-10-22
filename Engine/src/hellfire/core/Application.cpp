@@ -1,5 +1,6 @@
 #include "Application.h"
 
+#include "Time.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "../platform/windows_linux/GLFWWindow.h"
 #include "hellfire/scene/Scene.h"
@@ -114,7 +115,7 @@ namespace hellfire {
             input_manager_->update();
 
             // Update scene
-            scene_manager_.update(delta_time_);
+            scene_manager_.update(Time::delta_time);
 
             on_render();
         }
@@ -253,9 +254,9 @@ namespace hellfire {
         window_info_.minimized = minimized;
     }
 
-    void Application::update_delta_time() {
+    void Application::update_delta_time() const {
         const float current_time = window_->get_elapsed_time();
-        delta_time_ = current_time - last_frame_time_;
-        last_frame_time_ = current_time;
+        Time::delta_time = current_time - Time::last_frame_time;
+        Time::last_frame_time = current_time;
     }
 }
