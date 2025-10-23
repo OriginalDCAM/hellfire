@@ -2,7 +2,7 @@
 // Created by denzel on 07/10/2025.
 //
 
-#include "SceneHierarchyComponent.h"
+#include "SceneHierarchyPanel.h"
 
 #include <imgui.h>
 
@@ -19,14 +19,14 @@
 
 
 namespace hellfire::editor {
-    void SceneHierarchyComponent::render_context_menu() {
+    void SceneHierarchyPanel::render_context_menu() {
         if (ImGui::BeginPopupContextWindow("HierarchyContextMenu")) {
             render_add_entity_menu();
             ImGui::EndPopup();
         }
     }
 
-    void SceneHierarchyComponent::handle_shortcuts() {
+    void SceneHierarchyPanel::handle_shortcuts() {
         if (!context_->selected_entity_id) return;
         auto im = ServiceLocator::get_service<InputManager>();
 
@@ -35,7 +35,7 @@ namespace hellfire::editor {
         }
     }
 
-    void SceneHierarchyComponent::render() {
+    void SceneHierarchyPanel::render() {
         const ImVec2 window_size = ImGui::GetContentRegionAvail();
         ImGui::SetNextWindowSize(ImVec2(window_size.x / 3, window_size.y / 3), ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Scene Hierarchy Panel")) {
@@ -79,7 +79,7 @@ namespace hellfire::editor {
         }
     }
 
-    void SceneHierarchyComponent::render_list() {
+    void SceneHierarchyPanel::render_list() {
         const std::string &active_scene_name = context_->active_scene->get_name();
 
         // Set the flags for the tree node
@@ -98,7 +98,7 @@ namespace hellfire::editor {
         }
     }
 
-    void SceneHierarchyComponent::render_add_entity_menu(const EntityID parent_id) {
+    void SceneHierarchyPanel::render_add_entity_menu(const EntityID parent_id) {
         const auto active_scene = context_->active_scene;
         bool has_parent = parent_id != 0;
 
@@ -146,7 +146,7 @@ namespace hellfire::editor {
         
     }
 
-    void SceneHierarchyComponent::render_list_item(const EntityID entity_id) {
+    void SceneHierarchyPanel::render_list_item(const EntityID entity_id) {
         ImGui::PushID(static_cast<int>(entity_id)); // Push the id onto the stack to guarantee uniqueness for the list items.
 
         const Entity *entity = context_->active_scene->get_entity(entity_id);

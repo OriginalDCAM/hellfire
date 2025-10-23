@@ -1,27 +1,27 @@
 ﻿//
 // Created by denzel on 23/09/2025.
 //
-#include "EditorPlugin.h"
+#include "EditorApplication.h"
 
 #include "EditorStyles.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
-#include "UI/Components/EditorComponent.h"
-#include "UI/Components/MenuBarComponent.h"
-#include "UI/Components/SceneHierarchyComponent.h"
+#include "UI/Panels/EditorPanel.h"
+#include "UI/Panels/MenuBar/MenuBarComponent.h"
+#include "UI/Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "hellfire/core/Application.h"
 #include "hellfire/platform/IWindow.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
-#include "UI/Components/Viewport/SceneCameraScript.h"
-#include "UI/Components/Viewport/ViewportComponent.h"
+#include "UI/Panels/Viewport/SceneCameraScript.h"
+#include "UI/Panels/Viewport/ViewportPanel.h"
 #include "IconsFontAwesome6.h"
 #include "Scenes/DefaultScene.h"
 
 namespace hellfire::editor {
-    void EditorPlugin::on_initialize(Application &app) {
+    void EditorApplication::on_initialize(Application &app) {
         app_ = &app;
         app_->get_window_info().should_warp_cursor = false;
 
@@ -42,13 +42,13 @@ namespace hellfire::editor {
         menu_bar_ = std::make_unique<MenuBarComponent>();
         menu_bar_->set_context(&editor_context_);
 
-        scene_hierarchy_ = std::make_unique<SceneHierarchyComponent>();
+        scene_hierarchy_ = std::make_unique<SceneHierarchyPanel>();
         scene_hierarchy_->set_context(&editor_context_);
 
-        scene_viewport_ = std::make_unique<ViewportComponent>();
+        scene_viewport_ = std::make_unique<ViewportPanel>();
         scene_viewport_->set_context(&editor_context_);
 
-        inspector_panel_ = std::make_unique<InspectorComponent>();
+        inspector_panel_ = std::make_unique<InspectorPanel>();
         inspector_panel_->set_context(&editor_context_);
 
         // TEMP:
@@ -58,7 +58,7 @@ namespace hellfire::editor {
         sm->set_active_scene(new_scene, true); // Don't play in editor mode as default
     }
 
-    void EditorPlugin::initialize_imgui(IWindow *window) {
+    void EditorApplication::initialize_imgui(IWindow *window) {
         // Setup ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -104,11 +104,11 @@ namespace hellfire::editor {
         imgui_initialized_ = true;
     }
 
-    EditorPlugin::~EditorPlugin() {
+    EditorApplication::~EditorApplication() {
         cleanup_imgui();
     }
 
-    void EditorPlugin::cleanup_imgui() {
+    void EditorApplication::cleanup_imgui() {
         if (imgui_initialized_) {
             ImGui_ImplOpenGL3_Shutdown();
             ImGui_ImplGlfw_Shutdown();
@@ -117,7 +117,7 @@ namespace hellfire::editor {
         }
     }
 
-    void EditorPlugin::on_begin_frame() {
+    void EditorApplication::on_begin_frame() {
         if (!imgui_initialized_) return;
 
         ImGui_ImplOpenGL3_NewFrame();
@@ -126,7 +126,7 @@ namespace hellfire::editor {
         ImGuizmo::BeginFrame();
     }
 
-    void EditorPlugin::on_end_frame() {
+    void EditorApplication::on_end_frame() {
         if (!imgui_initialized_) return;
 
         ImGui::Render();
@@ -141,13 +141,13 @@ namespace hellfire::editor {
         }
     }
 
-    void EditorPlugin::sync_editor_context() {
+    void EditorApplication::sync_editor_context() {
         if (const auto sm = ServiceLocator::get_service<SceneManager>(); sm && editor_context_.active_scene != sm->get_active_scene()) {
             editor_context_.active_scene = sm->get_active_scene();
         }
     }
 
-    void EditorPlugin::on_render() {
+    void EditorApplication::on_render() {
         if (!imgui_initialized_) return;
 
         // Sync editor context with scene manager
@@ -161,7 +161,7 @@ namespace hellfire::editor {
         scene_hierarchy_->render();
     }
 
-    void EditorPlugin::create_dockspace() {
+    void EditorApplication::create_dockspace() {
         ImGuiViewport *viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
@@ -188,7 +188,7 @@ namespace hellfire::editor {
         ImGui::End();
     }
 
-    bool EditorPlugin::on_key_down(int key) {
+    bool EditorApplication::on_key_down(int key) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureKeyboard) {
             return true; // ImGui consumed the input
@@ -197,7 +197,7 @@ namespace hellfire::editor {
         return false;
     }
 
-    bool EditorPlugin::on_key_up(int key) {
+    bool EditorApplication::on_key_up(int key) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureKeyboard) {
             return true;
@@ -206,7 +206,7 @@ namespace hellfire::editor {
         return false;
     }
 
-    bool EditorPlugin::on_mouse_button(int button, bool pressed) {
+    bool EditorApplication::on_mouse_button(int button, bool pressed) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureMouse) {
             return true;
@@ -215,7 +215,7 @@ namespace hellfire::editor {
         return false;
     }
 
-    bool EditorPlugin::on_mouse_move(float x, float y, float x_offset, float y_offset) {
+    bool EditorApplication::on_mouse_move(float x, float y, float x_offset, float y_offset) {
         if (scene_viewport_->is_editor_camera_active()) {
             // Update camera with offset
             scene_viewport_->get_editor_camera()
@@ -234,7 +234,7 @@ namespace hellfire::editor {
         return false;
     }
 
-    bool EditorPlugin::on_mouse_wheel(float delta) {
+    bool EditorApplication::on_mouse_wheel(float delta) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureMouse) {
             return true;
@@ -243,15 +243,15 @@ namespace hellfire::editor {
         return false;
     }
 
-    void EditorPlugin::on_window_resize(int width, int height) {
+    void EditorApplication::on_window_resize(int width, int height) {
         IApplicationPlugin::on_window_resize(width, height);
     }
 
-    void EditorPlugin::on_window_focus(bool focused) {
+    void EditorApplication::on_window_focus(bool focused) {
         IApplicationPlugin::on_window_focus(focused);
     }
 
-    Entity *EditorPlugin::get_render_camera_override() {
+    Entity *EditorApplication::get_render_camera_override() {
         return scene_viewport_->get_editor_camera();
     }
 }

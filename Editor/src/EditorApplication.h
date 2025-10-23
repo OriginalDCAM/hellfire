@@ -5,22 +5,22 @@
 #pragma once
 #include <memory>
 
-#include "UI/Components/EditorComponent.h"
-#include "UI/Components/MenuBarComponent.h"
-#include "UI/Components/SceneHierarchyComponent.h"
+#include "UI/Panels/EditorPanel.h"
+#include "UI/Panels/MenuBar/MenuBarComponent.h"
+#include "UI/Panels/SceneHierarchy/SceneHierarchyPanel.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
-#include "UI/Components/Inspector/InspectorComponent.h"
-#include "UI/Components/Viewport/ViewportComponent.h"
+#include "UI/Panels/Inspector/InspectorPanel.h"
+#include "UI/Panels/Viewport/ViewportPanel.h"
 
 namespace hellfire::editor {
-    class EditorPlugin final : public IApplicationPlugin {
+    class EditorApplication final : public IApplicationPlugin {
     public:
         void on_initialize(Application &app) override;
 
         void initialize_imgui(IWindow *window);
 
-        ~EditorPlugin() override;
+        ~EditorApplication() override;
 
         void cleanup_imgui();
 
@@ -57,8 +57,8 @@ namespace hellfire::editor {
         
         // UI Components
         std::unique_ptr<MenuBarComponent> menu_bar_;
-        std::unique_ptr<SceneHierarchyComponent> scene_hierarchy_;
-        std::unique_ptr<ViewportComponent> scene_viewport_;
-        std::unique_ptr<InspectorComponent> inspector_panel_;
+        std::unique_ptr<SceneHierarchyPanel> scene_hierarchy_;
+        std::unique_ptr<ViewportPanel> scene_viewport_;
+        std::unique_ptr<InspectorPanel> inspector_panel_;
     };
 }

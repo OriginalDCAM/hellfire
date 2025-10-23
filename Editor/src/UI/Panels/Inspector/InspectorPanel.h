@@ -4,7 +4,7 @@
 
 #pragma once
 #include "hellfire/ecs/components/MeshComponent.h"
-#include "UI/Components/EditorComponent.h"
+#include "UI/Panels/EditorPanel.h"
 
 namespace hellfire {
     class LightComponent;
@@ -12,7 +12,7 @@ namespace hellfire {
 }
 
 namespace hellfire::editor {
-    class InspectorComponent : public EditorComponent {
+    class InspectorPanel : public EditorPanel {
     public:
 
         void render() override;

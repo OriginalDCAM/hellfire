@@ -2,7 +2,7 @@
 // Created by denzel on 14/08/2025.
 //
 
-#include "UI/COmponents/Viewport/SceneCameraScript.h"
+#include "UI/Panels/Viewport/SceneCameraScript.h"
 
 #include "hellfire/core/Application.h"
 #include "hellfire/ecs/CameraComponent.h"

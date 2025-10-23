@@ -2,7 +2,7 @@
 // Created by denzel on 14/10/2025.
 //
 
-#include "InspectorComponent.h"
+#include "InspectorPanel.h"
 
 #include "imgui.h"
 #include "hellfire/ecs/LightComponent.h"
@@ -13,7 +13,7 @@
 #include "UI/ui.h"
 
 namespace hellfire::editor {
-    void InspectorComponent::render() {
+    void InspectorPanel::render() {
         if (!context_->active_scene) return; // Don't show if there's no active scene selected
         auto active_scene = context_->active_scene;
         if (ImGui::Begin("Inspector")) {
@@ -66,7 +66,7 @@ namespace hellfire::editor {
         }
     }
 
-    void InspectorComponent::render_transform_component(TransformComponent *transform) {
+    void InspectorPanel::render_transform_component(TransformComponent *transform) {
         if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
             auto position = transform->get_position();
             auto rotation = transform->get_rotation();
@@ -91,7 +91,7 @@ namespace hellfire::editor {
         }
     }
 
-    void InspectorComponent::render_mesh_component(MeshComponent *mesh) {
+    void InspectorPanel::render_mesh_component(MeshComponent *mesh) {
         if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen)) {
             // TODO: Decide which inputs to use for this component
             // Probably allow for the mesh to be changed?
@@ -102,7 +102,7 @@ namespace hellfire::editor {
     }
 
 
-    void InspectorComponent::render_renderable_component(RenderableComponent *renderable) {
+    void InspectorPanel::render_renderable_component(RenderableComponent *renderable) {
         if (!ImGui::CollapsingHeader("Renderable", ImGuiTreeNodeFlags_DefaultOpen)) {
             return;
         }
@@ -199,12 +199,12 @@ namespace hellfire::editor {
     }
 
 
-    void InspectorComponent::render_light_component(LightComponent *light) {
+    void InspectorPanel::render_light_component(LightComponent *light) {
         if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen)) {
-            const char *light_types[] = {"Directional", "Point"};
+            const auto* light_types_labels = "Directional\0Point\0";
             int current_type = light->get_light_type();
 
-            if (ui::combo_box_int("Light Type", *light_types, &current_type)) {
+            if (ui::combo_box_int("Light Type", light_types_labels, &current_type)) {
                 light->set_light_type(static_cast<LightComponent::LightType>(current_type));
             }
 
@@ -233,13 +233,13 @@ namespace hellfire::editor {
         }
     }
 
-    void InspectorComponent::render_directional_light_component(LightComponent *light) {
+    void InspectorPanel::render_directional_light_component(LightComponent *light) {
         if (ImGui::CollapsingHeader("Light Specific Properties")) {
             
         }
     }
 
-    void InspectorComponent::render_point_light_component(LightComponent *light) {
+    void InspectorPanel::render_point_light_component(LightComponent *light) {
         if (ImGui::CollapsingHeader("Light Specific Properties")) {
 
             float range = light->get_range();
@@ -256,13 +256,13 @@ namespace hellfire::editor {
     }
 
 
-    void InspectorComponent::render_camera_component(CameraComponent *camera) {
+    void InspectorPanel::render_camera_component(CameraComponent *camera) {
         if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
             
         }
     }
 
-    void InspectorComponent::render_script_component(const ScriptComponent *script) {
+    void InspectorPanel::render_script_component(const ScriptComponent *script) {
         if (ImGui::CollapsingHeader(script->get_class_name() , ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::Indent();
             for (const auto &prop: script->get_properties()) {

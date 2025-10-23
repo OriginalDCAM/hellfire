@@ -2,10 +2,10 @@
 // Created by denzel on 07/10/2025.
 //
 #pragma once
-#include "EditorComponent.h"
+#include "../EditorPanel.h"
 
 namespace hellfire::editor {
-class SceneHierarchyComponent : public EditorComponent {
+class SceneHierarchyPanel : public EditorPanel {
 public:
     void render_context_menu();
 

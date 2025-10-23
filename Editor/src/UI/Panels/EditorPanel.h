@@ -26,11 +26,11 @@ namespace hellfire::editor {
         }
     };
     
-    class EditorComponent {
+    class EditorPanel {
     protected:
         EditorContext* context_ = nullptr;
     public:
-        virtual ~EditorComponent() = default;
+        virtual ~EditorPanel() = default;
 
         virtual void set_context(EditorContext* ctx) { context_ = ctx; }
         virtual void render() = 0;

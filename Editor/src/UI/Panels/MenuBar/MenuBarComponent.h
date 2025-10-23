@@ -3,10 +3,10 @@
 //
 
 #pragma once
-#include "EditorComponent.h"
+#include "../EditorPanel.h"
 
 namespace hellfire::editor {
-class MenuBarComponent : public EditorComponent {
+class MenuBarComponent : public EditorPanel {
 public:
     void render() override;
 private:
