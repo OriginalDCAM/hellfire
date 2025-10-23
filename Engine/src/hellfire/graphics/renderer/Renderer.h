@@ -53,7 +53,7 @@ namespace hellfire {
         ~Renderer() = default;
         
         void init();
-        void render(Scene &scene, Entity *camera_override);
+        void render(Scene &scene, const Entity *camera_override);
 
         void reset_framebuffer_data();
 
@@ -68,6 +68,9 @@ namespace hellfire {
         void create_scene_framebuffer(uint32_t width, uint32_t height);
         void set_render_to_framebuffer(bool enable) { render_to_framebuffer_ = enable; }
         uint32_t get_scene_texture() const;
+
+        uint32_t get_object_id_texture() const;
+
         void resize_scene_framebuffer(uint32_t width, uint32_t height);
         void render_to_texture(Scene& scene, CameraComponent& camera, uint32_t width, uint32_t height);
         void render_scene_to_framebuffer(Scene& scene, CameraComponent& camera);
@@ -80,6 +83,11 @@ namespace hellfire {
         ShaderRegistry& get_shader_registry() { return shader_registry_; }
         
     private:
+        enum RendererFboId : uint32_t {
+            SCREEN_TEXTURE_1 = 0,
+            SCREEN_TEXTURE_2 = 1,
+            SHADOW_MAP = 3
+        };
         ShaderManager shader_manager_;
         ShaderRegistry shader_registry_;
         

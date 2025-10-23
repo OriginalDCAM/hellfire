@@ -31,15 +31,14 @@ namespace hellfire {
                                   const GLchar* message, const void* userParam) {
             if (type == GL_DEBUG_TYPE_ERROR) {
                 std::cerr << "GL ERROR: " << message << std::endl;
-                __debugbreak();
-                // Optionally set a breakpoint here
+            __debugbreak();
             }
         }, nullptr);
 
         skybox_renderer_.initialize();
     }
 
-    void Renderer::render(Scene &scene, Entity* camera_override = nullptr) {
+    void Renderer::render(Scene &scene, const Entity* camera_override = nullptr) {
         const Entity* camera_entity = camera_override;
         if (!camera_entity) {
             const EntityID camera_id = scene.get_active_camera_entity();
@@ -69,7 +68,7 @@ namespace hellfire {
 
     void Renderer::reset_framebuffer_data() {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
     void Renderer::clear_drawable_objects_list() {
@@ -130,7 +129,7 @@ namespace hellfire {
         context_->num_directional_lights = static_cast<int>(directional_lights.size());
         context_->num_point_lights = static_cast<int>(point_lights.size());
 
-        // Store light entities (you may need to adapt your context structure)
+        // Store light entities 
         for (int i = 0; i < context_->num_directional_lights; i++) {
             context_->directional_light_entities[i] = directional_lights[i];
         }
@@ -205,6 +204,7 @@ namespace hellfire {
             }
         }
 
+        // If the entity has an Instancing component setup the render commands
         if (auto *instanced = entity->get_component<InstancedRenderableComponent>()) {
             if (transform && instanced->has_mesh() && instanced->get_instance_count() > 0) {
                 if (const auto material = instanced->get_material()) {
@@ -238,6 +238,9 @@ namespace hellfire {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
+
+        glEnable(GL_STENCIL_TEST);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
         std::ranges::sort(opaque_objects_,
                           [](const RenderCommand &a, const RenderCommand &b) {
@@ -287,7 +290,7 @@ namespace hellfire {
         Shader *shader = get_shader_for_material(cmd.material);
         if (!shader) shader = fallback_shader_;
 
-        glUseProgram(shader->get_program_id());
+        shader->use();
 
         // Upload lights
         if (context_) {
@@ -295,6 +298,8 @@ namespace hellfire {
         }
 
         shader->set_vec3("uAmbientLight", scene_->get_ambient_light());
+
+        shader->set_uint("uObjectID", cmd.entity_id);
 
         // Upload default uniforms
         RenderingUtils::set_standard_uniforms(*shader, transform->get_world_matrix(), view, projection);
@@ -313,7 +318,7 @@ namespace hellfire {
         Shader *shader = get_shader_for_material(cmd.material);
         if (!shader) shader = fallback_shader_;
 
-        glUseProgram(shader->get_program_id());
+        shader->use();
 
         // Upload lights
         if (context_) {
@@ -355,15 +360,25 @@ namespace hellfire {
         framebuffer_width_ = width;
         framebuffer_height_ = height;
 
+        // General Settings
         FrameBufferAttachmentSettings settings;
         settings.width = width;
         settings.height = height;
-        scene_framebuffers_[0] = std::make_unique<Framebuffer>();
-        scene_framebuffers_[0]->attach_color_texture(settings);
-        scene_framebuffers_[0]->attach_depth_texture(settings);
-        scene_framebuffers_[1] = std::make_unique<Framebuffer>();
-        scene_framebuffers_[1]->attach_color_texture(settings);
-        scene_framebuffers_[1]->attach_depth_texture(settings);
+
+        // ObjectId specific settings
+        FrameBufferAttachmentSettings object_id_attachment_settings = settings;
+        object_id_attachment_settings.format = GL_RED_INTEGER;
+        object_id_attachment_settings.internal_format = GL_R32UI;
+        object_id_attachment_settings.type = GL_UNSIGNED_INT;
+        scene_framebuffers_[SCREEN_TEXTURE_1] = std::make_unique<Framebuffer>();
+        scene_framebuffers_[SCREEN_TEXTURE_1]->attach_color_texture(settings);
+        scene_framebuffers_[SCREEN_TEXTURE_1]->attach_color_texture(object_id_attachment_settings);
+        scene_framebuffers_[SCREEN_TEXTURE_1]->attach_depth_texture(settings);
+        
+        scene_framebuffers_[SCREEN_TEXTURE_2] = std::make_unique<Framebuffer>();
+        scene_framebuffers_[SCREEN_TEXTURE_2]->attach_color_texture(settings);
+        scene_framebuffers_[SCREEN_TEXTURE_2]->attach_color_texture(object_id_attachment_settings);
+        scene_framebuffers_[SCREEN_TEXTURE_2]->attach_depth_texture(settings);
     }
 
     void Renderer::resize_scene_framebuffer(uint32_t width, uint32_t height) {
@@ -386,8 +401,16 @@ namespace hellfire {
         return 0;
     }
 
+    uint32_t Renderer::get_object_id_texture() const {
+        const int display_index = 1 - current_fb_index_;
+        if (scene_framebuffers_[display_index]->get_color_attachment(1) != 0) {
+            return scene_framebuffers_[display_index]->get_color_attachment(1);
+        }
+        return 0;
+    }
+
     void Renderer::render_to_texture(Scene &scene, CameraComponent &camera, uint32_t width, uint32_t height) {
-        if (!scene_framebuffers_[0] || scene_framebuffers_[current_fb_index_]->get_width() != width || scene_framebuffers_[current_fb_index_]->get_height() !=
+        if (!scene_framebuffers_[SCREEN_TEXTURE_1] || scene_framebuffers_[current_fb_index_]->get_width() != width || scene_framebuffers_[current_fb_index_]->get_height() !=
             height) {
             resize_scene_framebuffer(width, height);
         }
@@ -396,7 +419,7 @@ namespace hellfire {
     }
 
     void Renderer::render_scene_to_framebuffer(Scene &scene, CameraComponent &camera) {
-        if (!scene_framebuffers_[0]) {
+        if (!scene_framebuffers_[SCREEN_TEXTURE_1]) {
             create_scene_framebuffer(framebuffer_width_, framebuffer_height_);
         }
 
@@ -410,7 +433,12 @@ namespace hellfire {
         
         scene_framebuffers_[current_fb_index_]->bind();
         reset_framebuffer_data();
-        glEnable(GL_DEPTH_TEST);
+
+        // Clear the object ID buffer (color attachment 1) to 0
+        constexpr GLuint clear_value = 0;
+        glClearBufferuiv(GL_COLOR, 1, &clear_value);
+        
+        // glEnable(GL_DEPTH_TEST);
         render_internal(scene, camera);
         scene_framebuffers_[current_fb_index_]->unbind();
         glFlush();
@@ -479,4 +507,5 @@ namespace hellfire {
         // Compile using shader manager
         return shader_manager_.load_shader(variant);
     }
+
 }
