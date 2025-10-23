@@ -51,6 +51,12 @@ namespace hellfire {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    void Framebuffer::attach_texture_by_id(const uint32_t texture_id, GLenum attachment = GL_COLOR_ATTACHMENT0, GLenum target = GL_FRAMEBUFFER) {
+        // Attach to framebuffer
+        glFramebufferTexture2D(target, attachment, 
+                  GL_TEXTURE_2D, texture_id, 0);
+    }
+
     void Framebuffer::attach_depth_texture(const FrameBufferAttachmentSettings &settings) {
         if (depth_attachment_ != 0) {
             std::cerr << "Depth attachment already exists!" << std::endl;
@@ -126,30 +132,6 @@ namespace hellfire {
     }
 
 
-    void Framebuffer::create_framebuffer() {
-        glGenFramebuffers(1, &framebuffer_id_);
-    }
-
-    void Framebuffer::cleanup() {
-        if (!color_attachments_.empty()) {
-            glDeleteTextures(static_cast<GLsizei>(color_attachments_.size()), color_attachments_.data());
-            color_attachments_.clear();
-            color_settings_.clear();
-        }
-        if (depth_attachment_) {
-            glDeleteTextures(1, &depth_attachment_);
-            depth_attachment_ = 0;
-        }
-        if (stencil_attachment_) {
-            glDeleteTextures(1, &stencil_attachment_);
-            stencil_attachment_ = 0;
-        }
-        if (framebuffer_id_) {
-            glDeleteFramebuffers(1, &framebuffer_id_);
-            framebuffer_id_ = 0;
-        }
-    }
-
     void Framebuffer::bind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id_);
 
@@ -163,7 +145,7 @@ namespace hellfire {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    void Framebuffer::resize(uint32_t width, uint32_t height) {
+    void Framebuffer::resize(const uint32_t width, const uint32_t height) {
         // Store current settings
         bool had_depth = depth_attachment_ != 0;
         bool had_stencil = stencil_attachment_ != 0;
@@ -201,6 +183,25 @@ namespace hellfire {
             std::cerr << "Framebuffer incomplete after resize!" << std::endl;
         }
     }
+
+    uint32_t Framebuffer::read_pixel_from_texture(const uint32_t texture_id, const int x, const int y) {
+        // Bind the framebuffer
+        bind();
+        // Attach the texture to the framebuffer
+        attach_texture_by_id(texture_id, GL_COLOR_ATTACHMENT0, GL_READ_FRAMEBUFFER);
+
+        // Set the read buffer to where the texture is attached
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+        // Read the pixel data at x, y position
+        uint32_t pixel_data = 0;
+        glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &pixel_data);
+
+        // Unbind the fbo
+        unbind();
+        return pixel_data;
+    }
+    
 
     bool Framebuffer::is_complete() const {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id_);
@@ -241,5 +242,29 @@ namespace hellfire {
 
     uint32_t Framebuffer::get_height() const {
         return !color_settings_.empty() ? color_settings_[0].height : 0;
+    }
+
+    void Framebuffer::create_framebuffer() {
+        glGenFramebuffers(1, &framebuffer_id_);
+    }
+
+    void Framebuffer::cleanup() {
+        if (!color_attachments_.empty()) {
+            glDeleteTextures(static_cast<GLsizei>(color_attachments_.size()), color_attachments_.data());
+            color_attachments_.clear();
+            color_settings_.clear();
+        }
+        if (depth_attachment_) {
+            glDeleteTextures(1, &depth_attachment_);
+            depth_attachment_ = 0;
+        }
+        if (stencil_attachment_) {
+            glDeleteTextures(1, &stencil_attachment_);
+            stencil_attachment_ = 0;
+        }
+        if (framebuffer_id_) {
+            glDeleteFramebuffers(1, &framebuffer_id_);
+            framebuffer_id_ = 0;
+        }
     }
 }

@@ -34,6 +34,8 @@ namespace hellfire {
 
         void attach_color_texture(const FrameBufferAttachmentSettings &settings = {});
 
+        void attach_texture_by_id(uint32_t texture_id, GLenum attachment, GLenum target);
+
         void attach_depth_texture(const FrameBufferAttachmentSettings &settings = {});
 
         void attach_stencil_texture(const FrameBufferAttachmentSettings &settings = {});
@@ -48,6 +50,15 @@ namespace hellfire {
         void unbind();
 
         void resize(uint32_t width, uint32_t height);
+
+        /**
+         * @brief Reads a pixel from an external texture using this framebuffer
+         * @param texture_id Texture to read from
+         * @param x X coordinate
+         * @param y Y coordinate
+         * @return Pixel value as uint32_t
+         */
+        uint32_t read_pixel_from_texture(uint32_t texture_id, int x, int y);
 
         const std::vector<uint32_t> &get_color_attachments() const { return color_attachments_; }
 
