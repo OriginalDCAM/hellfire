@@ -2,8 +2,8 @@
 // Created by denzel on 17/09/2025.
 //
 
-#include "EditorPlugin.h"
-#include "hellfire/EntryPoint.h";
+#include "EditorApplication.h"
+#include "hellfire/EntryPoint.h"
 
 namespace {
     class EditorConfig : public hellfire::IApplicationConfig {
@@ -16,13 +16,13 @@ namespace {
             return 720;
         }
 
-        const std::string &get_title() const override {
+        const std::string get_title() const override {
             return "Hellfire Editor";
         }
 
         void register_plugins(hellfire::Application &app) override {
 #ifdef HELLFIRE_EDITOR_ENABLED
-            app.register_plugin(std::make_unique<hellfire::editor::EditorPlugin>());
+            app.register_plugin(std::make_unique<hellfire::editor::EditorApplication>());
 #endif
         }
     };

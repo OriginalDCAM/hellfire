@@ -31,7 +31,7 @@ namespace hellfire {
         /**
          * @brief Get the application title
          */
-        virtual const std::string &get_title() const = 0;
+        virtual const std::string get_title() const = 0;
 
         /**
          * @brief Register application-specific plugins
