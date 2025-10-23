@@ -6,7 +6,10 @@
 #include "common/texture_utils.glsl"
 #include "lighting/blinn_phong.glsl"
 
-out vec4 fragColor;
+layout(location=0) out vec4 fragColor;
+layout(location=1) out uint objectID;
+
+uniform uint uObjectID;
 
 void main() {
     // Sample base textures
@@ -19,4 +22,5 @@ void main() {
     vec3 result = calculateBlinnPhongLighting(normal, baseColor.rgb, vFragPos);
 
     fragColor = vec4(result, uOpacity);
+    objectID = uObjectID;
 }
