@@ -62,7 +62,7 @@ namespace hellfire {
 
         std::vector<EntityID> get_camera_entities() const;
 
-        int get_entity_count() const { return entities_.size(); }
+        size_t get_entity_count() const { return entities_.size(); }
 
         // Skybox management
         void set_skybox(Skybox *skybox);
