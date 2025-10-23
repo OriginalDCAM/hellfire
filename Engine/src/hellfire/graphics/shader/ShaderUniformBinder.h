@@ -22,19 +22,25 @@ namespace hellfire {
             : shader_program_(shader_program) {}
 
         // Scalar Types 
-        void set_bool(const std::string& name, bool value) const {
+        void set_bool(const std::string& name, const bool value) const {
             if (const GLint location = get_uniform_location(name); location != -1) {
                 glUniform1i(location, value ? 1 : 0);
             }
         }
 
-        void set_int(const std::string& name, int value) const {
+        void set_int(const std::string& name, const int value) const {
             if (const GLint location = get_uniform_location(name); location != -1) {
                 glUniform1i(location, value);
             }
         }
 
-        void set_float(const std::string& name, float value) const {
+        void set_uint(const std::string& name, const uint32_t value) const {
+            if (const GLint location = get_uniform_location(name); location != -1) {
+                glUniform1ui(location, value);
+            }
+        }
+
+        void set_float(const std::string& name, const float value) const {
             if (const GLint location = get_uniform_location(name); location != -1) {
                 glUniform1f(location, value);
             }

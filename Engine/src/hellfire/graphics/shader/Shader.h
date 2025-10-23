@@ -54,6 +54,10 @@ public:
         get_binder().set_int(name, value);
     }
 
+    void set_uint(const std::string &name, const uint32_t value) const {
+        get_binder().set_uint(name, value);
+    }
+
     void set_float(const std::string &name, const float value) const {
         get_binder().set_float(name, value);
     }
