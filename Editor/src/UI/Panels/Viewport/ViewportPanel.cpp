@@ -2,7 +2,7 @@
 // Created by denzel on 13/10/2025.
 //
 
-#include "ViewportComponent.h"
+#include "ViewportPanel.h"
 
 #include "IconsFontAwesome6.h"
 #include "hellfire/graphics/renderer/Renderer.h"
@@ -14,15 +14,19 @@
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
 
 namespace hellfire::editor {
-    ViewportComponent::ViewportComponent() {
+    ViewportPanel::ViewportPanel() {
+        engine_renderer_ = ServiceLocator::get_service<Renderer>();
+        assert(engine_renderer_ != nullptr);
         create_editor_camera();
+        
+        picking_fbo_ = std::make_unique<Framebuffer>();
     }
 
-    ViewportComponent::~ViewportComponent() {
+    ViewportPanel::~ViewportPanel() {
         destroy_editor_camera();
     }
 
-    void ViewportComponent::create_editor_camera() {
+    void ViewportPanel::create_editor_camera() {
         editor_camera_ = new Entity(INVALID_ENTITY, "Editor Camera"); // set entityID to 0 
 
         editor_camera_->add_component<TransformComponent>();
@@ -46,7 +50,7 @@ namespace hellfire::editor {
         std::cout << "Editor camera created for viewport" << std::endl;
     }
 
-    void ViewportComponent::destroy_editor_camera() {
+    void ViewportPanel::destroy_editor_camera() {
         if (editor_camera_) {
             delete editor_camera_;
             editor_camera_ = nullptr;
@@ -54,7 +58,7 @@ namespace hellfire::editor {
         }
     }
 
-    void ViewportComponent::update_camera_control() {
+    void ViewportPanel::update_camera_control() {
         if (!editor_camera_) return;
 
         if (context_->active_scene) {
@@ -105,9 +109,8 @@ namespace hellfire::editor {
         ImGui::SetWindowFontScale(1.0f);
     }
 
-    void ViewportComponent::render_viewport_image() {
-        auto *renderer = ServiceLocator::get_service<Renderer>();
-        if (!renderer) return;
+    void ViewportPanel::render_viewport_image() {
+        if (!engine_renderer_) return;
 
         ImVec2 viewport_size = ImGui::GetContentRegionAvail();
 
@@ -124,7 +127,7 @@ namespace hellfire::editor {
 
         if (constexpr float RESIZE_DELAY = 0.016f; (viewport_size.x != last_size.x || viewport_size.y != last_size.y) &&
                                                    (current_time - last_resize_time_) > RESIZE_DELAY) {
-            renderer->resize_scene_framebuffer(
+            engine_renderer_->resize_scene_framebuffer(
                 static_cast<uint32_t>(viewport_size.x),
                 static_cast<uint32_t>(viewport_size.y)
             );
@@ -140,7 +143,7 @@ namespace hellfire::editor {
             }
         }
         // Render using editor camera
-        const uint32_t scene_texture = renderer->get_scene_texture();
+        const uint32_t scene_texture = engine_renderer_->get_scene_texture();
 
         if (!context_->active_scene) {
             ImGui::SetCursorPos(ImVec2(
@@ -161,7 +164,7 @@ namespace hellfire::editor {
     }
 
 
-    void ViewportComponent::render_transform_gizmo() {
+    void ViewportPanel::render_transform_gizmo() {
         if (auto *selected_entity = context_->active_scene->get_entity(context_->selected_entity_id)) {
             const auto entity_transform = selected_entity->transform();
 
@@ -195,7 +198,7 @@ namespace hellfire::editor {
                                  current_mode_, glm::value_ptr(transform_matrix));
 
             // If the gizmo was used, update the entity's transform
-            if (ImGuizmo::IsUsing()) {
+            if (is_using_gizmo_ = ImGuizmo::IsUsing(); is_using_gizmo_) {
                 glm::vec3 translation, rotation, scale;
                 ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform_matrix), glm::value_ptr(translation),
                                                       glm::value_ptr(rotation), glm::value_ptr(scale));
@@ -208,7 +211,22 @@ namespace hellfire::editor {
         }
     }
 
-    void ViewportComponent::render() {
+    void ViewportPanel::handle_object_picking() const {
+        if (!context_->active_scene) return;
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !is_using_gizmo_) {
+            const ImVec2 mouse_pos = ImGui::GetMousePos();
+            const ImVec2 viewport_pos = ImGui::GetItemRectMin();
+        
+            // Convert to viewport-relative coordinates
+            const int mouse_x = static_cast<int>(mouse_pos.x - viewport_pos.x);
+            const int mouse_y = static_cast<int>(mouse_pos.y - viewport_pos.y);
+
+            const uint32_t picked_entity_id = pick_object_at_mouse(mouse_x, mouse_y);
+            context_->selected_entity_id = picked_entity_id;
+        }
+    }
+
+    void ViewportPanel::render() {
         const ImGuiViewport *main_viewport = ImGui::GetMainViewport();
         const ImVec2 default_size = ImVec2(main_viewport->Size.x / 1.5f, main_viewport->Size.y / 1.5f);
         const ImVec2 default_pos = ImVec2(
@@ -218,7 +236,7 @@ namespace hellfire::editor {
 
         ImGui::SetNextWindowSize(default_size, ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowPos(default_pos, ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowSizeConstraints(ImVec2(320, 180), ImVec2(UINT_MAX, UINT_MAX));
+        ImGui::SetNextWindowSizeConstraints(ImVec2(320, 180), ImVec2(FLT_MAX, FLT_MAX));
 
         const std::string window_name = context_->active_scene
                                             ? ICON_FA_EYE " "  + context_->active_scene->get_name()
@@ -229,12 +247,10 @@ namespace hellfire::editor {
             viewport_pos_ = ImGui::GetWindowPos();
             viewport_size_ = ImGui::GetWindowSize();
             viewport_hovered_ = ImGui::IsWindowHovered();
-            last_mouse_pos_ = ImGui::GetMousePos();
 
             render_viewport_image();
-
-
             render_transform_gizmo();
+            handle_object_picking();
 
             update_camera_control();
 
@@ -246,7 +262,7 @@ namespace hellfire::editor {
     }
 
 
-    void ViewportComponent::render_viewport_stats_overlay() const {
+    void ViewportPanel::render_viewport_stats_overlay() const {
         // Position overlay in top-left corner with padding
         constexpr float padding = 10.0f;
         ImGui::SetNextWindowPos(ImVec2(viewport_pos_.x + padding, viewport_pos_.y + padding + ImGui::GetFrameHeight()));
@@ -264,12 +280,6 @@ namespace hellfire::editor {
             ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
             ImGui::Text("Frame Time: %.2f ms", 1000.0f / ImGui::GetIO().Framerate);
 
-            if (camera_active_) {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 1.0f, 0.2f, 1.0f));
-                ImGui::Text("Camera Active");
-                ImGui::PopStyleColor();
-            }
-
             if (context_->active_scene) {
                 ImGui::Separator();
                 ImGui::Text("Entities: %zu", context_->active_scene->get_entity_count());
@@ -283,4 +293,25 @@ namespace hellfire::editor {
         }
         ImGui::End();
     }
-}
+
+    uint32_t ViewportPanel::pick_object_at_mouse(const int mouse_x, const int mouse_y) const {
+        const uint32_t object_id_texture = engine_renderer_->get_object_id_texture();
+        if (object_id_texture == 0) return 0;
+
+            // Get viewport dimensions
+            const ImVec2 viewport_size = viewport_size_;
+
+            const int tex_x = mouse_x;
+            const int tex_y = static_cast<int>(viewport_size.y) - mouse_y - 1;
+    
+            // Bounds check
+            if (tex_x < 0 || tex_x >= static_cast<int>(viewport_size.x) ||
+                tex_y < 0 || tex_y >= static_cast<int>(viewport_size.y)) {
+                return 0;
+                }
+
+            const uint32_t pixel_data = picking_fbo_->read_pixel_from_texture(object_id_texture, tex_x, tex_y);
+        
+            return pixel_data;
+    }
+};
