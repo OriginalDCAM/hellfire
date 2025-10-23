@@ -7,7 +7,11 @@
     float diff = max(dot(normal, lightDir), 0.0);
 
     // Specular shading (Blinn-Phong)
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), uShininess);
+    float spec = 0.0f;
+    if (diff > 0.0f) {
+       float shininess = max(uShininess, 8.0);
+        spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+    }
 
     // Combine results
     vec3 diffuseResult = light.color * light.intensity * diff * diffuse;
@@ -30,7 +34,11 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse, v
     float diff = max(dot(normal, lightDir), 0.0);
 
     // Specular shading (Blinn-Phong)
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), uShininess);
+    float spec = 0.0f;
+    if (diff > 0.0f) {
+        float shininess = max(uShininess, 8.0);
+        spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+    }
 
     // Attenuation
     float attenuation = clamp(1.0 - (distance * distance) / (light.range * light.range), 0.0, 1.0);
