@@ -363,7 +363,7 @@ namespace hellfire::Addons {
         }
 
         if (ai_material->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS) {
-            material.set_shininess(value);
+            material.set_shininess(std::max(value, 1.0f));
         }
 
         if (ai_material->Get(AI_MATKEY_METALLIC_FACTOR, value) == AI_SUCCESS) {

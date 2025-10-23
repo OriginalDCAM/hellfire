@@ -59,7 +59,7 @@ namespace hellfire {
         material->set_specular_color(glm::vec3(0.5f));
 
         // Set default material properties
-        material->set_shininess(32.0f);
+        material->set_shininess(8.0f);
         material->set_opacity(1.0f);
         material->set_metallic(0.0f);
         material->set_roughness(0.5f);

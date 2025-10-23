@@ -33,8 +33,7 @@ namespace hellfire::Addons {
             // For editor preview - preserve hierarchy, minimal processing
             static constexpr unsigned int PREVIEW =
                     aiProcess_Triangulate |
-                    aiProcess_FlipUVs |  // CRITICAL for correct textures
-                    aiProcess_GenSmoothNormals |  // Generate if missing
+                    aiProcess_GenSmoothNormals |  
                     aiProcess_CalcTangentSpace |
                     aiProcess_JoinIdenticalVertices |
                     aiProcess_ValidateDataStructure;
@@ -42,7 +41,6 @@ namespace hellfire::Addons {
             // For runtime use - preserve hierarchy but optimize vertices
             static constexpr unsigned int RUNTIME =
                     aiProcess_Triangulate |
-                    aiProcess_FlipUVs |  // CRITICAL
                     aiProcess_GenSmoothNormals |
                     aiProcess_CalcTangentSpace |
                     aiProcess_JoinIdenticalVertices |
