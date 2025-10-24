@@ -36,8 +36,8 @@ namespace hellfire {
         // Cleanup scripts first
         it->second->cleanup_scripts();
 
-        if (id == active_camera_entity_id_) {
-            active_camera_entity_id_ = 0;
+        if (id == default_camera_entity_id_) {
+            default_camera_entity_id_ = 0;
         }
 
         // Recursively destroy children
@@ -160,16 +160,16 @@ namespace hellfire {
         return nullptr;
     }
 
-    void Scene::set_active_camera(const EntityID camera_id) {
+    void Scene::set_default_camera(const EntityID camera_id) {
         Entity *entity = get_entity(camera_id);
         if (entity && entity->has_component<CameraComponent>()) {
-            active_camera_entity_id_ = camera_id;
+            default_camera_entity_id_ = camera_id;
         }
     }
 
-    CameraComponent *Scene::get_active_camera() const {
-        if (active_camera_entity_id_ == 0) return nullptr;
-        const Entity *entity = const_cast<Scene *>(this)->get_entity(active_camera_entity_id_);
+    CameraComponent *Scene::get_default_camera() const {
+        if (default_camera_entity_id_ == 0) return nullptr;
+        const Entity *entity = const_cast<Scene *>(this)->get_entity(default_camera_entity_id_);
         return entity ? entity->get_component<CameraComponent>() : nullptr;
     }
 

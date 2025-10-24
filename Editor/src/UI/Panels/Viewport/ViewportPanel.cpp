@@ -62,7 +62,7 @@ namespace hellfire::editor {
         if (!editor_camera_) return;
 
         if (context_->active_scene) {
-            context_->active_scene->set_active_camera(editor_camera_->get_id());
+            context_->active_scene->set_default_camera(editor_camera_->get_id());
         }
 
         // Camera is active when right-clicking viewport

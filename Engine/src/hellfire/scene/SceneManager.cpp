@@ -124,13 +124,13 @@ namespace hellfire {
 
     void SceneManager::set_active_camera(EntityID camera_id) const {
         if (active_scene_) {
-            active_scene_->set_active_camera(camera_id);
+            active_scene_->set_default_camera(camera_id);
         }
     }
 
     CameraComponent *SceneManager::get_active_camera() const {
         if (active_scene_) {
-            return active_scene_->get_active_camera();
+            return active_scene_->get_default_camera();
         }
         return nullptr;
     }

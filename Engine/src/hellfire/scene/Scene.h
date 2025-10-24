@@ -54,11 +54,11 @@ namespace hellfire {
         std::vector<EntityID> find_entities_with_component();
 
         // Camera management
-        void set_active_camera(EntityID camera_id);
+        void set_default_camera(EntityID camera_id);
 
-        EntityID get_active_camera_entity() const { return active_camera_entity_id_; }
+        EntityID get_default_camera_entity_id() const { return default_camera_entity_id_; }
 
-        CameraComponent *get_active_camera() const;
+        CameraComponent *get_default_camera() const;
 
         std::vector<EntityID> get_camera_entities() const;
 
@@ -96,7 +96,7 @@ namespace hellfire {
 
         // Scene state
         EntityID next_id_ = 1;
-        EntityID active_camera_entity_id_ = 0;
+        EntityID default_camera_entity_id_ = 0;
         std::string name_;
         bool is_playing_;
         std::string source_filename_;

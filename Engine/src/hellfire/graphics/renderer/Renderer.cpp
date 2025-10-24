@@ -41,7 +41,7 @@ namespace hellfire {
     void Renderer::render(Scene &scene, const Entity* camera_override = nullptr) {
         const Entity* camera_entity = camera_override;
         if (!camera_entity) {
-            const EntityID camera_id = scene.get_active_camera_entity();
+            const EntityID camera_id = scene.get_default_camera_entity_id();
             camera_entity = scene.get_entity(camera_id);
             
         }

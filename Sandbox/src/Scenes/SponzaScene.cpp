@@ -36,7 +36,7 @@ hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
     );
     hellfire::Entity *camera = scene->get_entity(camera_id);
     camera->add_component<SceneCameraScript>(10.0f);
-    scene->set_active_camera(camera_id);
+    scene->set_default_camera(camera_id);
 
     auto *skybox = new hellfire::Skybox();
     skybox->set_cubemap_faces({
