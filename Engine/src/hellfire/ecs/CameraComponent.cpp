@@ -90,8 +90,8 @@ namespace hellfire {
         if (!transform) return;
 
         target_ = target;
-        glm::vec3 position = transform->get_position();
-        glm::vec3 direction = glm::normalize(target - position);
+        const glm::vec3 position = transform->get_position();
+        const glm::vec3 direction = glm::normalize(target - position);
 
         camera_data_.pitch = glm::degrees(asin(direction.y));
         camera_data_.yaw = glm::degrees(atan2(direction.z, direction.x));
@@ -114,8 +114,8 @@ namespace hellfire {
     CameraComponent * CameraComponent::
     create_orthographic(float size, float aspect, float near_plane, float far_plane) {
         auto* camera = new CameraComponent(CameraType::ORTHOGRAPHIC);
-        float half_width = size * aspect * 0.5f;
-        float half_height = size * 0.5f;
+        const float half_width = size * aspect * 0.5f;
+        const float half_height = size * 0.5f;
         camera->set_orthographic(-half_width, half_width, -half_height, half_height, near_plane, far_plane);
         return camera;
     }
@@ -141,7 +141,7 @@ namespace hellfire {
             return;
         }
 
-        glm::vec3 position = transform->get_position();
+        const glm::vec3 position = transform->get_position();
         view_matrix_ = glm::lookAt(position, position + front_, up_);
         view_dirty_ = false;
     }
@@ -156,8 +156,8 @@ namespace hellfire {
     }
 
     void CameraComponent::update_orthographic_bounds() {
-        float half_width = ortho_size_ * aspect_ratio_ * 0.5f;
-        float half_height = ortho_size_ * 0.5f;
+        const float half_width = ortho_size_ * aspect_ratio_ * 0.5f;
+        const float half_height = ortho_size_ * 0.5f;
         ortho_left_ = -half_width;
         ortho_right_ = half_width;
         ortho_bottom_ = -half_height;
