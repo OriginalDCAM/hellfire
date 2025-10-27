@@ -16,6 +16,7 @@
 #include "hellfire/graphics/lighting/DirectionalLight.h"
 #include "hellfire/graphics/lighting/PointLight.h"
 #include "hellfire/core/InputManager.h"
+#include "hellfire/scene/CameraFactory.h"
 
 
 namespace hellfire::editor {
@@ -138,6 +139,16 @@ namespace hellfire::editor {
             if (ImGui::MenuItem("Spot", nullptr, false, false)) {
             }
             ImGui::EndMenu();
+        }
+            if (ImGui::BeginMenu("Cameras")) {
+                if (ImGui::MenuItem("Perspective")) {
+                    new_entity_id = OrthographicCamera::create(active_scene, "Orthographic Camera", 1.0, 16.0f/9.0f);
+                }
+                if (ImGui::MenuItem("Orthographic")) {
+                    new_entity_id = PerspectiveCamera::create(active_scene, "Perspective Camera");
+                    
+                }
+                ImGui::EndMenu();
         }
         if (new_entity_id != 0 && active_scene) {
             context_->selected_entity_id = new_entity_id;
