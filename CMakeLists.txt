@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14...3.29)
-project(CustomEngine VERSION 1.1)
+project(Hellfire VERSION 1.1)
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -117,6 +117,20 @@ set_target_properties(GLM::GLM PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm"
 )
 
+enable_testing()
+
+# Set up Catch2
+Include(FetchContent)
+FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v3.4.0)
+FetchContent_MakeAvailable(Catch2)
+
+# Include Catch2's CTest integration
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(Catch)
+
 # Add the vendor directory to the include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
@@ -164,9 +178,10 @@ endif()
 
 
 
-add_subdirectory(Editor)
-add_subdirectory(Engine)
-add_subdirectory(Sandbox)
+add_subdirectory(editor)
+add_subdirectory(engine)
+#add_subdirectory(sandbox)
+add_subdirectory(tests)
 
 # Configure release build optimizations after target creation
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
