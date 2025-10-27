@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include "hellfire/ecs/TransformComponent.h"
-#include "../../../Engine/src/hellfire/ecs/Entity.h"
+#include "../../../engine/src/hellfire/ecs/Entity.h"
 #include "Utils/AnimationInputHandler.h"
 
 void OrbitController::on_init() {

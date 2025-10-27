@@ -1,6 +1,6 @@
 ﻿#include <utility>
 
-#include "../../../Engine/src/hellfire/scene/CameraFactory.h"
+#include "../../../engine/src/hellfire/scene/CameraFactory.h"
 #include "hellfire/assets/Asset.h"
 #include "hellfire/graphics/lighting/DirectionalLight.h"
 #include "Scenes/SolarSystemScene.h"

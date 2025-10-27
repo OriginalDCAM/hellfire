@@ -11,15 +11,11 @@
 #include "UI/Panels/Viewport/SceneCameraScript.h"
 
 inline void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
-    hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(
+    hellfire::DirectionalLight::create(
         scene, "Sol Light", glm::vec3(-0.22f, 1.0f, 0.22f), glm::vec3(0.0f, 0.4f, 0.5f), 1.0f);
 
-    unsigned int test_flags =
-        aiProcess_Triangulate |
-        aiProcess_CalcTangentSpace |
-        aiProcess_GenSmoothNormals;
 
-    hellfire::EntityID cube_id = hellfire::Cube::create(scene,"Rotating cube", {});
+    hellfire::EntityID cube_id = hellfire::Cube::create(scene, "Rotating cube", {});
     auto cube_entity = scene->get_entity(cube_id);
     cube_entity->add_component<RotateScript>();
 
@@ -52,5 +48,3 @@ inline void create_default_scene() {
     //     sm->set_active_scene(new_scene);
     // }
 }
-
-

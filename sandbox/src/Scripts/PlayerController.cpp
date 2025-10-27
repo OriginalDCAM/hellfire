@@ -4,7 +4,7 @@
 
 #include "Scripts/PlayerController.h"
 
-#include "../../../Engine/src/hellfire/core/Application.h"
+#include "../../../engine/src/hellfire/core/Application.h"
 #include "hellfire/ecs/CameraComponent.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "GLFW/glfw3.h"

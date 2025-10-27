@@ -4,7 +4,7 @@
 
 #pragma once
 
-    template<typename T, typename... Args>
+    template<ComponentType T, typename... Args>
     T *Entity::add_component(Args &&... args) {
         auto component = std::make_unique<T>(std::forward<Args>(args)...);
         T *component_ptr = component.get();
@@ -23,7 +23,7 @@
         return component_ptr;
     }
 
-    template<typename T>
+    template<ComponentType T>
     T *Entity::get_component() const {
         if (const auto it = components_.find(std::type_index(typeid(T))); it != components_.end()) {
             return static_cast<T *>(it->second.get());
@@ -31,7 +31,7 @@
         return nullptr;
     }
 
-    template<typename T>
+    template<ComponentType T>
     bool Entity::remove_component() {
         const auto it = components_.find(std::type_index(typeid(T)));
         if (it != components_.end()) {
@@ -56,7 +56,7 @@
         return false;
     }
 
-    template<typename T>
+    template<ScriptComponentType T>
     void Entity::send_event_to_script(const std::string &event_name, void *data) {
         static_assert(std::is_base_of_v<ScriptComponent, T>, "T must derive from ScriptComponent");
         if (auto *script = get_component<T>()) {

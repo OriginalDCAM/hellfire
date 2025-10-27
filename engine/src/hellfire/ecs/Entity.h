@@ -23,13 +23,22 @@ class Test {
 
 namespace hellfire {
     using EntityID = uint32_t;
+
+    template<typename T>
+    concept ComponentType = std::derived_from<T, Component>;
+
+    template<typename T>
+    concept ScriptComponentType = std::derived_from<T, ScriptComponent>;
     
     class Entity {
     public:
         virtual ~Entity() = default;
 
-        explicit Entity(EntityID id, const std::string &name)
+        explicit Entity(const EntityID id, const std::string &name)
             : id_(id), name_(name) {
+        }
+
+        explicit Entity(const std::string &name) : id_(0), name_(name) {
         }
 
         // Identification
@@ -38,18 +47,20 @@ namespace hellfire {
         void set_name(const std::string &name) { name_ = name; }
 
         // Component management
-        template<typename T, typename... Args>
+
+        
+        template<ComponentType T, typename... Args>
         T *add_component(Args &&... args);
 
-        template<typename T>
+        template<ComponentType T>
         [[nodiscard]] T *get_component() const;
 
-        template<typename T>
-        bool has_component() {
-            return components_.find(std::type_index(typeid(T))) != components_.end();
+        template<ComponentType T>
+        bool has_component() const {
+            return components_.contains(std::type_index(typeid(T)));
         }
 
-        template<typename T>
+        template<ComponentType T>
         bool remove_component();
 
         // Script management
@@ -64,7 +75,7 @@ namespace hellfire {
         // Event system (non-recursive)
         void broadcast_event(const std::string &event_name, void *data = nullptr) const;
 
-        template<typename T>
+        template<ScriptComponentType T>
         void send_event_to_script(const std::string &event_name, void *data = nullptr);
 
         // Convenience methods
