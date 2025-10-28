@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "hellfire/ecs/RenderableComponent.h"
+#include "hellfire/ecs/TransformComponent.h"
 #include "hellfire/ecs/components/MeshComponent.h"
 #include "hellfire/graphics/Mesh.h"
 #include "hellfire/scene/Scene.h"

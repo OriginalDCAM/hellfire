@@ -88,7 +88,7 @@ namespace hellfire {
         scale_buffer_ = 0;
     }
 
-    void InstancedRenderableComponent::update_gpu_buffer() {
+    void InstancedRenderableComponent::update_gpu_buffer() const {
         if (instances_.empty()) return;
 
         std::vector<glm::mat4> transforms;

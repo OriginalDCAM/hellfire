@@ -81,7 +81,7 @@ namespace hellfire {
 
         void setup_instance_buffers();
         void cleanup_buffers();
-        void update_gpu_buffer();
+        void update_gpu_buffer() const;
         void setup_instanced_vertex_attributes();
         void enable_instance_attributes();
         void disable_instance_attributes();

@@ -11,6 +11,13 @@ namespace hellfire {
         INTERNAL,
         EXTERNAL
     };
+
+    enum class MeshInternalType : uint8_t {
+        NONE = 0,
+        CUBE = 1,
+        SPHERE = 2,
+        QUAD = 3
+    };
     
     class MeshComponent final : public Component {
     public:
@@ -21,11 +28,14 @@ namespace hellfire {
         [[nodiscard]] std::shared_ptr<Mesh> get_mesh() const { return mesh_; }
         [[nodiscard]] bool has_mesh() const { return mesh_ != nullptr; }
 
-        void set_source(const MeshSource source) { source_ = source; }
+        void set_source(const MeshSource source, MeshInternalType type = MeshInternalType::NONE) {
+            source_ = source;
+            internal_type = type;
+        }
         MeshSource get_source() const { return source_;}
     private:
         std::shared_ptr<Mesh> mesh_;
         MeshSource source_ = MeshSource::EXTERNAL;
-
+        MeshInternalType internal_type = MeshInternalType::NONE;
     };
 }

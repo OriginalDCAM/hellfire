@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 
+#include "RendererContext.h"
 #include "hellfire/ecs/Entity.h"
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/graphics/backends/opengl/Framebuffer.h"

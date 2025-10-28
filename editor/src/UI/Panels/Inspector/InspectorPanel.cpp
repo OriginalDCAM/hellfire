@@ -9,7 +9,10 @@
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/ecs/ScriptComponent.h"
 #include "hellfire/ecs/TransformComponent.h"
+#include "hellfire/ecs/CameraComponent.h"
 #include "hellfire/ecs/components/MeshComponent.h"
+#include "hellfire/graphics/geometry/Cube.h"
+#include "hellfire/graphics/geometry/Sphere.h"
 #include "UI/ui.h"
 
 namespace hellfire::editor {
@@ -97,6 +100,12 @@ namespace hellfire::editor {
             // Probably allow for the mesh to be changed?
             if (mesh->get_source() == MeshSource::INTERNAL) {
                 ImGui::Text("Internal Mesh Source");
+            const auto* mesh_types_labels = "Cube\0Sphere\0Quad\0";
+            auto current_type = 0; 
+
+            if (ui::combo_box_int("Mesh", mesh_types_labels, &current_type)) {
+            }
+                
             }
         }
     }

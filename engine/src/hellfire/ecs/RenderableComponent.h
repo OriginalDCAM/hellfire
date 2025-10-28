@@ -1,12 +1,8 @@
 ﻿#pragma once
 #include <memory>
-#include <utility>
 
 #include "Component.h"
-#include "hellfire/ecs/TransformComponent.h"
-#include "hellfire/graphics/Mesh.h"
 #include "hellfire/graphics/managers/MaterialManager.h"
-#include "../graphics/renderer/RenderingUtils.h"
 
 namespace hellfire {
     /// Renderable Component used for single mesh rendering

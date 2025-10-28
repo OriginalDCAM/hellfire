@@ -23,4 +23,9 @@ public:
 	{
 		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), data.data(), GL_STATIC_DRAW);
 	}
+
+	template<typename T>
+	void pass_dynamic_data(const std::vector<T>& data) const {
+		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), data.data(), GL_DYNAMIC_DRAW);
+	}
 };

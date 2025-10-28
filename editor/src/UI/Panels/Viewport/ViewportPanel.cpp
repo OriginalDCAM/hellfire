@@ -181,8 +181,7 @@ namespace hellfire::editor {
             glm::mat4 projection_matrix = camera_comp->get_projection_matrix();
 
             // Get entity's transform matrix
-            glm::mat4 transform_matrix = entity_transform->get_local_matrix();
-            
+            glm::mat4 transform_matrix = entity_transform->get_world_matrix();
 
             if (!camera_active_) {
                 if (ImGui::IsKeyPressed(ImGuiKey_G)) {
@@ -194,7 +193,7 @@ namespace hellfire::editor {
                 }
             }
 
-            ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix), current_operation_,
+            Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix), current_operation_,
                                  current_mode_, glm::value_ptr(transform_matrix));
 
             // If the gizmo was used, update the entity's transform

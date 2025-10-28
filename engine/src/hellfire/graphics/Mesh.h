@@ -11,8 +11,6 @@ namespace hellfire {
         Mesh();
         Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices);
 
-        ~Mesh();
-
         void cleanup();
 
         void bind() const;
@@ -27,14 +25,14 @@ namespace hellfire {
 
         void draw() const;
 
-        void draw_instanced(size_t amount);
+        void draw_instanced(size_t amount) const;
 
-        int get_index_count();
+        int get_index_count() const;
 
     private:
-        VA *vao_;
-        VB *vbo_;
-        IB *ibo_;
+        std::unique_ptr<VA> vao_;
+        std::unique_ptr<VB> vbo_;
+        std::unique_ptr<IB> ibo_;
 
         int index_count_;
 

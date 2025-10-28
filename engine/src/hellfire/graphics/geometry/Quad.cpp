@@ -4,6 +4,7 @@
 
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/ecs/Entity.h"
+#include "hellfire/ecs/TransformComponent.h"
 #include "hellfire/ecs/components/MeshComponent.h"
 #include "hellfire/scene/Scene.h"
 
