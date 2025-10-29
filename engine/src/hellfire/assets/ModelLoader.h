@@ -74,8 +74,6 @@ namespace hellfire::Addons {
             PBR
         };
 
-
-
         // Node processing
         static EntityID process_node(Scene* scene,aiNode *node, const aiScene *ai_scene, const std::string &filepath,EntityID parent_id = 0);
 

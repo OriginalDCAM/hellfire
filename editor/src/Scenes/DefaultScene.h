@@ -3,12 +3,10 @@
 //
 
 #include "RotateScript.h"
-#include "hellfire/assets/Asset.h"
 #include "hellfire/graphics/Skybox.h"
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Sphere.h"
 #include "hellfire/graphics/lighting/DirectionalLight.h"
-#include "UI/Panels/Viewport/SceneCameraScript.h"
 
 inline void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
     hellfire::DirectionalLight::create(

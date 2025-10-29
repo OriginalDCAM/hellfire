@@ -178,7 +178,7 @@ endif()
 
 
 
-add_subdirectory(editor)
+add_subdirectory(Editor)
 add_subdirectory(engine)
 #add_subdirectory(sandbox)
 add_subdirectory(tests)
