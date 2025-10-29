@@ -14,6 +14,7 @@ namespace hellfire {
 namespace hellfire::editor {
     class InspectorPanel : public EditorPanel {
     public:
+        void render_add_component_context_menu(Entity *selected_entity);
 
         void render() override;
         /// Transform specific properties, position (translation), rotation, scale

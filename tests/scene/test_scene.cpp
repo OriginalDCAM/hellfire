@@ -24,10 +24,10 @@ TEST_CASE("Scenes can be created and destroyed") {
         REQUIRE(test_scene->get_entity_count() == 1);
 
         test_scene->destroy_entity(entity_to_delete_id);
-        const hellfire::Entity *deleted_entity = test_scene->get_entity(entity_to_delete_id);
+        const hellfire::Entity *deleted_entity_ptr = test_scene->get_entity(entity_to_delete_id);
 
         REQUIRE(test_scene->get_entity_count() == 0);
-        REQUIRE(deleted_entity == nullptr);
+        REQUIRE(deleted_entity_ptr == nullptr);
     }
 }
 

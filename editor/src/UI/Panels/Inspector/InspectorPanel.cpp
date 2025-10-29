@@ -13,9 +13,49 @@
 #include "hellfire/ecs/components/MeshComponent.h"
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Sphere.h"
+#include "Scenes/RotateScript.h"
 #include "UI/ui.h"
 
 namespace hellfire::editor {
+    void InspectorPanel::render_add_component_context_menu(Entity *selected_entity) {
+        if (ImGui::BeginPopupContextWindow("AddComponentPopup")) {
+            if (ImGui::MenuItem("Light")) {
+                if (selected_entity->has_component<LightComponent>()) {
+                } else {
+                    selected_entity->add_component<LightComponent>();
+                }
+            }
+            if (ImGui::MenuItem("Renderable")) {
+                if (selected_entity->has_component<RenderableComponent>()) {
+                } else {
+                    selected_entity->add_component<RenderableComponent>();
+                }
+            }
+            if (ImGui::BeginMenu("Script")) {
+                if (ImGui::MenuItem("Rotate Script")) {
+                    if (selected_entity->has_component<RotateScript>()) {
+                    } else {
+                        selected_entity->add_component<RotateScript>();
+                    }
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::MenuItem("Mesh")) {
+                if (selected_entity->has_component<MeshComponent>()) {
+                } else {
+                    selected_entity->add_component<MeshComponent>();
+                }
+            }
+            if (ImGui::MenuItem("Camera")) {
+                if (selected_entity->has_component<CameraComponent>()) {
+                } else {
+                    selected_entity->add_component<CameraComponent>();
+                }
+            }
+            ImGui::EndPopup();
+        }
+    }
+
     void InspectorPanel::render() {
         if (!context_->active_scene) return; // Don't show if there's no active scene selected
         auto active_scene = context_->active_scene;
@@ -28,6 +68,7 @@ namespace hellfire::editor {
                 return;
             }
 
+
             // Entity name
             static char name_buffer[256];
             strncpy_s(name_buffer, selected_entity->get_name().c_str(), 255);
@@ -38,7 +79,6 @@ namespace hellfire::editor {
                 selected_entity->set_name(name_buffer);
             }
 
-            ImGui::Separator();
 
             // Transform Component (always present)
             if (auto transform = selected_entity->transform()) {
@@ -65,6 +105,16 @@ namespace hellfire::editor {
                 render_script_component(script);
             }
 
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::BeginGroup();
+            ImGui::SameLine(120, 1);
+            render_add_component_context_menu(selected_entity);
+            if (ImGui::Button("Add Component", ImVec2(320, 20))) {
+                ImGui::OpenPopup("AddComponentPopup");
+            }
+            ImGui::EndGroup();
+
             ImGui::End();
         }
     }
@@ -87,7 +137,7 @@ namespace hellfire::editor {
                 transform->set_rotation(rotation);
             }
             if (ui::vec3_input("Scale", &scale, 0.1f, minValue, maxValue)) {
-                transform->set_scale(scale); 
+                transform->set_scale(scale);
             }
 
             ImGui::Unindent();
@@ -100,12 +150,11 @@ namespace hellfire::editor {
             // Probably allow for the mesh to be changed?
             if (mesh->get_source() == MeshSource::INTERNAL) {
                 ImGui::Text("Internal Mesh Source");
-            const auto* mesh_types_labels = "Cube\0Sphere\0Quad\0";
-            auto current_type = 0; 
+                const auto *mesh_types_labels = "Cube\0Sphere\0Quad\0";
+                auto current_type = 0;
 
-            if (ui::combo_box_int("Mesh", mesh_types_labels, &current_type)) {
-            }
-                
+                if (ui::combo_box_int("Mesh", mesh_types_labels, &current_type)) {
+                }
             }
         }
     }
@@ -210,7 +259,7 @@ namespace hellfire::editor {
 
     void InspectorPanel::render_light_component(LightComponent *light) {
         if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen)) {
-            const auto* light_types_labels = "Directional\0Point\0";
+            const auto *light_types_labels = "Directional\0Point\0";
             int current_type = light->get_light_type();
 
             if (ui::combo_box_int("Light Type", light_types_labels, &current_type)) {
@@ -244,13 +293,11 @@ namespace hellfire::editor {
 
     void InspectorPanel::render_directional_light_component(LightComponent *light) {
         if (ImGui::CollapsingHeader("Light Specific Properties")) {
-            
         }
     }
 
     void InspectorPanel::render_point_light_component(LightComponent *light) {
         if (ImGui::CollapsingHeader("Light Specific Properties")) {
-
             float range = light->get_range();
             if (ui::float_input("Range", &range)) {
                 light->set_range(range);
@@ -260,19 +307,17 @@ namespace hellfire::editor {
             if (ui::float_input("Attenuation", &attenuation)) {
                 light->set_attenuation(attenuation);
             }
-            
         }
     }
 
 
     void InspectorPanel::render_camera_component(CameraComponent *camera) {
         if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-            
         }
     }
 
     void InspectorPanel::render_script_component(const ScriptComponent *script) {
-        if (ImGui::CollapsingHeader(script->get_class_name() , ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::CollapsingHeader(script->get_class_name(), ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::Indent();
             for (const auto &prop: script->get_properties()) {
                 if (prop.type == ScriptComponent::PropertyType::BOOL) {
@@ -281,7 +326,7 @@ namespace hellfire::editor {
                 }
 
                 if (prop.type == ScriptComponent::PropertyType::VEC3) {
-                    auto *vec3_value = static_cast<glm::vec3*>(prop.data_ptr);
+                    auto *vec3_value = static_cast<glm::vec3 *>(prop.data_ptr);
                     ui::vec3_input(prop.name, vec3_value);
                 }
             }
