@@ -90,7 +90,9 @@ namespace hellfire {
         ServiceLocator::register_service<IWindow>(window_.get());
         ServiceLocator::register_service<SceneManager>(&scene_manager_);
 
+
         // Initialize engine systems
+        Time::init();
         renderer_.init();
 
         // Create fallback shader
@@ -109,9 +111,11 @@ namespace hellfire {
                 continue;
             }
 
+            // Poll the window for events (mouse inputs, keys, window stuff, etc.)
             window_->poll_events();
-            update_delta_time();
-
+            // Make sure the timer is updated
+            Time::update();
+            
             input_manager_->update();
 
             // Update scene
@@ -252,11 +256,5 @@ namespace hellfire {
 
     void Application::on_window_minimize(bool minimized) {
         window_info_.minimized = minimized;
-    }
-
-    void Application::update_delta_time() const {
-        const float current_time = window_->get_elapsed_time();
-        Time::delta_time = current_time - Time::last_frame_time;
-        Time::last_frame_time = current_time;
     }
 }

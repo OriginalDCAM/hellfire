@@ -77,7 +77,7 @@ namespace hellfire {
         void render_scene_to_framebuffer(Scene& scene, CameraComponent& camera);
 
         void set_fallback_shader(Shader &fallback_shader);
-        Shader *get_shader_for_material(std::shared_ptr<Material> material);
+        Shader& get_shader_for_material(const std::shared_ptr<Material> &material);
         uint32_t compile_material_shader(std::shared_ptr<Material> material);
 
         ShaderManager& get_shader_manager() { return shader_manager_; }

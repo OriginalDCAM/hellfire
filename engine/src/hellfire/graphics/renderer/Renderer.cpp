@@ -7,6 +7,7 @@
 
 
 #include "hellfire/core/Application.h"
+#include "hellfire/core/Time.h"
 #include "hellfire/ecs/CameraComponent.h"
 #include "hellfire/ecs/InstancedRenderableComponent.h"
 #include "hellfire/ecs/LightComponent.h"
@@ -287,22 +288,20 @@ namespace hellfire {
         const auto *transform = entity->get_component<TransformComponent>();
         if (!transform) return;
 
-        Shader *shader = get_shader_for_material(cmd.material);
-        if (!shader) shader = fallback_shader_;
-
-        shader->use();
+        Shader& shader = get_shader_for_material(cmd.material);
+        shader.use();
 
         // Upload lights
         if (context_) {
-            RenderingUtils::upload_lights_to_shader(*shader, *context_);
+            RenderingUtils::upload_lights_to_shader(shader, *context_);
         }
 
-        shader->set_vec3("uAmbientLight", scene_->get_ambient_light());
+        shader.set_vec3("uAmbientLight", scene_->get_ambient_light());
 
-        shader->set_uint("uObjectID", cmd.entity_id);
+        shader.set_uint("uObjectID", cmd.entity_id);
 
         // Upload default uniforms
-        RenderingUtils::set_standard_uniforms(*shader, transform->get_world_matrix(), view, projection);
+        RenderingUtils::set_standard_uniforms(shader, transform->get_world_matrix(), view, projection);
 
         // Bind material and draw mesh
         cmd.material->bind();
@@ -312,21 +311,18 @@ namespace hellfire {
 
     void Renderer::draw_instanced_command(const InstancedRenderCommand &cmd, const glm::mat4 &view,
                                           const glm::mat4 &projection) {
-        const Entity *entity = scene_->get_entity(cmd.entity_id);
-        if (!entity) return;
+        if (const Entity *entity = scene_->get_entity(cmd.entity_id); !entity) return;
 
-        Shader *shader = get_shader_for_material(cmd.material);
-        if (!shader) shader = fallback_shader_;
+        Shader& shader = get_shader_for_material(cmd.material);
+        shader.use();
 
-        shader->use();
-
-        // Upload lights
+        // Upload light data as uniforms to shader
         if (context_) {
-            RenderingUtils::upload_lights_to_shader(*shader, *context_);
+            RenderingUtils::upload_lights_to_shader(shader, *context_);
         }
 
-        // Upload uniforms
-        RenderingUtils::set_standard_uniforms(*shader, glm::mat4(1.0f), view, projection);
+        // Upload the standard uniform data to the shader (Model, View, Projection, Time)
+        RenderingUtils::set_standard_uniforms(shader, glm::mat4(1.0f), view, projection, Time::current_time);
 
         // Prepare instanced data
         cmd.instanced_renderable->prepare_for_draw();
@@ -455,34 +451,31 @@ namespace hellfire {
         }
     }
 
-    Shader *Renderer::get_shader_for_material(std::shared_ptr<Material> material) {
+    Shader& Renderer::get_shader_for_material(const std::shared_ptr<Material> &material) {
         if (!material) {
-            return fallback_shader_;
+            return *fallback_shader_;
         }
 
         // Check if material has a compiled shader ID
-        const uint32_t material_shader_id = material->get_compiled_shader_id();
-        if (material_shader_id != 0) {
+        if (const uint32_t material_shader_id = material->get_compiled_shader_id(); material_shader_id != 0) {
             // Get shader wrapper from the ID
-            Shader *material_shader = shader_registry_.get_shader_from_id(material_shader_id);
-            if (material_shader) {
-                return material_shader;
+            if (Shader *material_shader = shader_registry_.get_shader_from_id(material_shader_id)) {
+                return *material_shader;
             }
         }
 
         // Check if material needs compilation
         if (material->has_custom_shader()) {
             // Try to compile the material's shader
-            const uint32_t compiled_id = compile_material_shader(material);
-            if (compiled_id != 0) {
+            if (const uint32_t compiled_id = compile_material_shader(material); compiled_id != 0) {
                 material->set_compiled_shader_id(compiled_id);
                 const auto shader =  shader_registry_.get_shader_from_id(compiled_id);
-                return shader;
+                return *shader;
             }
         }
 
         // Fall back to default shader
-        return fallback_shader_;
+        return *fallback_shader_;
     }
 
     uint32_t Renderer::compile_material_shader(std::shared_ptr<Material> material) {

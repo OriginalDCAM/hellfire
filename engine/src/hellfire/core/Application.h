@@ -96,9 +96,6 @@ namespace hellfire {
         // Window info tracking
         AppInfo window_info_;
 
-        void update_delta_time() const;
-
-
         template<typename Func>
         void call_plugins(Func &&func) {
             for (auto &plugin: plugins_) {
