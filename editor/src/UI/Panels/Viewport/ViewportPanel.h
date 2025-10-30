@@ -92,7 +92,7 @@ namespace hellfire::editor {
 
         // Gizmo state
         ImGuizmo::OPERATION current_operation_ = ImGuizmo::TRANSLATE; 
-        ImGuizmo::MODE current_mode_ = ImGuizmo::WORLD; 
+        ImGuizmo::MODE current_mode_ = ImGuizmo::LOCAL; 
         bool is_using_gizmo_ = false; 
 
         // Rendering resources (not owned)

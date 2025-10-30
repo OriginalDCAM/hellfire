@@ -1,4 +1,4 @@
-#version 430 core
+    #version 430 core
 
 // Uniform inputs
 uniform mat4 MVP;       // Combined model-view-projection matrix

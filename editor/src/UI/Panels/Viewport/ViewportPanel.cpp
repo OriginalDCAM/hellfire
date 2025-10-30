@@ -181,9 +181,9 @@ namespace hellfire::editor {
             glm::mat4 projection_matrix = camera_comp->get_projection_matrix();
 
             // Get entity's transform matrix
-            glm::mat4 transform_matrix = entity_transform->get_world_matrix();
+            glm::mat4 transform_matrix = entity_transform->get_local_matrix();
 
-            if (!camera_active_) {
+            if (!camera_active_ && !is_using_gizmo_) {
                 if (ImGui::IsKeyPressed(ImGuiKey_G)) {
                     current_operation_ = ImGuizmo::TRANSLATE;
                 } else if (ImGui::IsKeyPressed(ImGuiKey_R)) {
@@ -199,6 +199,10 @@ namespace hellfire::editor {
             // If the gizmo was used, update the entity's transform
             if (is_using_gizmo_ = ImGuizmo::IsUsing(); is_using_gizmo_) {
                 glm::vec3 translation, rotation, scale;
+
+                if (context_->active_scene->has_parent(context_->selected_entity_id)) {
+                    
+                }
                 ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform_matrix), glm::value_ptr(translation),
                                                       glm::value_ptr(rotation), glm::value_ptr(scale));
 

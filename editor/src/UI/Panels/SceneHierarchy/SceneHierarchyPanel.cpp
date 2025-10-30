@@ -195,6 +195,7 @@ namespace hellfire::editor {
         // Render the tree node
         std::string display_name = ICON_FA_CUBES " " + entity_name;
         bool node_open = ImGui::TreeNodeEx(display_name.c_str(), flags);
+        
 
         ImGui::PopStyleVar(2);
 
@@ -216,7 +217,6 @@ namespace hellfire::editor {
                 context_->active_scene->set_parent(*child_id, entity_id);
             }
             ImGui::EndDragDropTarget();
-            
         }
 
         if (ImGui::BeginPopupContextItem()) {
@@ -225,8 +225,8 @@ namespace hellfire::editor {
             if (ImGui::MenuItem("Duplicate", "Ctrl+D", false, false)) {
                 // TODO: Implement duplicate
             }
-            if (ImGui::MenuItem("Rename", "F2", false, false)) {
-                // TODO: Open rename dialog
+            if (ImGui::MenuItem("Rename", "F2", false, true)) {
+                ImGui::OpenPopup("RenameModal");
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Delete", "Del")) {

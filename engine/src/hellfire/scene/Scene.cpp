@@ -126,6 +126,11 @@ namespace hellfire {
         return it != parent_map_.end() ? it->second : 0;
     }
 
+    bool Scene::has_parent(EntityID entity_id) const {
+        const auto it = parent_map_.find(entity_id);
+        return it != parent_map_.end();
+    }
+
     std::vector<EntityID> Scene::get_children(EntityID parent_id) const {
         const auto it = children_map_.find(parent_id);
         return it != children_map_.end() ? it->second : std::vector<EntityID>{};

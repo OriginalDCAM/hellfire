@@ -15,11 +15,11 @@ SceneCameraScript::SceneCameraScript(float movement_speed, float mouse_sensitivi
 }
 
 void SceneCameraScript::on_init() {
-    std::cout << "PlayerController initialized for entity: " << get_owner().get_name() << std::endl;
+    std::cout << "SceneCameraScript initialized for entity: " << get_owner().get_name() << std::endl;
     REGISTER_VAR(look_speed, FLOAT);
 
     // Initialize camera orientation
-    yaw_ = -90.0f;
+    yaw_ = -80.0f;
     pitch_ = 0.0f;
 }
 

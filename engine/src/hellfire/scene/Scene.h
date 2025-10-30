@@ -38,6 +38,8 @@ namespace hellfire {
 
         EntityID get_parent(EntityID entity_id) const;
 
+        bool has_parent(EntityID entity_id) const;
+
         std::vector<EntityID> get_children(EntityID parent_id) const;
 
         const std::vector<EntityID> &get_root_entities() const { return root_entities_; }

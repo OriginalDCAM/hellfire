@@ -22,7 +22,7 @@ class RotateScript : public hellfire::ScriptComponent {
         if (should_rotate) {
             auto current = get_transform()->get_rotation();
             current += rotation_speed * delta_time;
-            get_transform()->set_rotation(glm::mod(current, glm::vec3(360.0f)));
+            get_transform()->set_rotation(mod(current, glm::vec3(360.0f)));
         }
     }
 };

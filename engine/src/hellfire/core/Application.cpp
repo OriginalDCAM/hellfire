@@ -101,7 +101,7 @@ namespace hellfire {
 
         call_plugins([this](IApplicationPlugin &plugin) {
             plugin.on_initialize(*this);
-        });
+        }); 
     }
 
     void Application::run() {
