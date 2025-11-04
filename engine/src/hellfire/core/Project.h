@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <memory>
 
+#include "hellfire/assets/AssetRegistry.h"
 #include "hellfire/scene/SceneManager.h"
 
 namespace hellfire {
@@ -41,7 +42,8 @@ namespace hellfire {
         // Getters/setters
         const std::string &get_name() const { return name_; }
         const std::string &get_version() const { return version_; }
-        hellfire::SceneManager *get_scene_manager() const { return scene_manager_.get(); }
+        SceneManager *get_scene_manager() const { return scene_manager_.get(); }
+        AssetRegistry *get_asset_registry() const { return asset_registry_.get(); }
 
     private:
         std::string name_;
@@ -53,6 +55,7 @@ namespace hellfire {
         std::filesystem::path project_file_path_;
 
         std::unique_ptr<hellfire::SceneManager> scene_manager_ = nullptr;
+        std::unique_ptr<hellfire::AssetRegistry> asset_registry_ = nullptr;
         std::vector<std::filesystem::path> recent_scenes_;
 
     private:

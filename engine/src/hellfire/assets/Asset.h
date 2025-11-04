@@ -13,6 +13,7 @@ namespace hellfire {
     public:
         Asset() = default;
         
+        
         static EntityID load(Scene* scene, const std::filesystem::path& file_path, const unsigned int import_flags = 0) {
             return Addons::ModelLoader::load_model(scene, file_path, import_flags);
         }
