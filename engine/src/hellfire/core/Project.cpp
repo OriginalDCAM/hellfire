@@ -32,7 +32,7 @@ namespace hellfire {
 
         // Save project file
         project->serialize();
-        
+
         return project;
     }
 
@@ -47,17 +47,24 @@ namespace hellfire {
             nlohmann::json j;
             file >> j;
 
-            if (j.contains("name")) {
-                auto project = std::make_unique<Project>(j["name"].get<std::string>());
-
-                if (j.contains("version")) {
-                    project->version_ = j["version"].get<std::string>();
-                }
-
-                if (j.contains("engine_version")) {
-                    project->engine_version_ = j["engine_version"].get<std::string>();
-                }
+            if (!j.contains("name")) {
+                std::cerr << "ERROR::PROJECT::LOAD:: Project file 'name' serialization is invalid" << std::endl;
+                return nullptr;
             }
+
+            auto project = std::make_unique<Project>(j["name"].get<std::string>());
+            // auto asset_registry = std::make_unique<AssetRegistry>();
+            // auto scene_manager = std::make_unique<SceneManager>();
+
+            if (j.contains("version")) {
+                project->version_ = j["version"].get<std::string>();
+            }
+
+            if (j.contains("engine_version")) {
+                project->engine_version_ = j["engine_version"].get<std::string>();
+            }
+        } catch (const std::exception &e) {
+            std::cout << e.what() << std::endl;
         }
     }
 
@@ -85,7 +92,7 @@ namespace hellfire {
     }
 
     bool Project::serialize() const {
-        return false; 
+        return false;
     }
 
     bool Project::deserialize() {
@@ -93,6 +100,7 @@ namespace hellfire {
     }
 
     void Project::create_directory_structure() {
+        
     }
 
     void Project::initialize_default_assets() {
