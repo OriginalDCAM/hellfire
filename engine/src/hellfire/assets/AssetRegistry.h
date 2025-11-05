@@ -60,7 +60,7 @@ namespace hellfire {
         std::vector<AssetID> get_modified_assets() const;
 
         // Serialization
-        void save() const;
+        void save();
         bool load();
 
         // Utility methods

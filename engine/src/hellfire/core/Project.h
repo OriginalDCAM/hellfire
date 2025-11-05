@@ -63,7 +63,7 @@ namespace hellfire {
 
         bool deserialize();
 
-        void create_directory_structure();
+        void create_directory_structure() const;
 
         void initialize_default_assets();
     };

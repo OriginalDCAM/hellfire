@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include "imgui.h"
+#include "hellfire/core/Project.h"
 #include "hellfire/scene/CameraFactory.h"
 #include "hellfire/scene/Scene.h"
 #include "hellfire/scene/SceneManager.h"
@@ -24,6 +25,7 @@ namespace hellfire::editor {
     void MenuBarComponent::render_file_menu() {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("New Project")) {
+                Project::create("Test", "G:\\Dev\\Games");
                 std::cout << "Clicked on button New Project" << std::endl;
             }
             ImGui::EndMenu();

@@ -20,13 +20,12 @@ namespace hellfire {
         save();
     }
 
-    uint64_t AssetRegistry::register_asset(const std::filesystem::path &filepath) {
+    AssetID AssetRegistry::register_asset(const std::filesystem::path &filepath) {
         AssetType type = get_type_from_extension(filepath);
         return register_asset(filepath, type);
-        
     }
 
-    uint64_t AssetRegistry::register_asset(const std::filesystem::path &filepath, AssetType type) {
+    AssetID AssetRegistry::register_asset(const std::filesystem::path &filepath, AssetType type) {
         auto absolute_path = std::filesystem::absolute(filepath);
 
         // Check if already registered
@@ -171,11 +170,20 @@ namespace hellfire {
         return modified;
     }
 
-    void AssetRegistry::save() const {
+    void AssetRegistry::save() {
         nlohmann::json j;
         j["version"] = "1.0";
-        j["project_root"] = project_root_.string();
+        // j["project_root"] = project_root_.string();
         j["assets"] = nlohmann::json::array();
+
+        register_asset(project_root_ / "test_scene.hfscene");
+        register_asset(project_root_ / "test_texture.png");
+        register_asset(project_root_ / "test_texture.jpg");
+        register_asset(project_root_ / "test_shader.vert");
+        register_asset(project_root_ / "test_shader.frag");
+        register_asset(project_root_ / "test_model.obj");
+        register_asset(project_root_ / "test_model.fbx");
+        register_asset(project_root_ / "test_model.gltf");
 
         for (const auto &metadata: assets_ | std::views::values) {
             nlohmann::json asset_json;
@@ -253,7 +261,7 @@ namespace hellfire {
         return  (it != extension_map.end()) ? it->second : AssetType::UNKNOWN;
     }
 
-    uint64_t AssetRegistry::generate_uuid(const std::filesystem::path& filepath) {
+    AssetID AssetRegistry::generate_uuid(const std::filesystem::path& filepath) {
         std::hash<std::string> hasher;
         uint64_t id = hasher(filepath.string());
         return (id == INVALID_ASSET_ID) ? 1 : id;
@@ -274,7 +282,7 @@ namespace hellfire {
         }
     }
 
-    uint64_t AssetRegistry::get_file_last_modified(const std::filesystem::path &filepath) const {
+    AssetID AssetRegistry::get_file_last_modified(const std::filesystem::path &filepath) const {
         if (std::filesystem::exists(filepath)) {
             const auto ftime = std::filesystem::last_write_time(filepath);
             return ftime.time_since_epoch().count();

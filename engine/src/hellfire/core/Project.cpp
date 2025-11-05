@@ -10,7 +10,7 @@
 #include "json.hpp"
 
 namespace hellfire {
-    Project::Project(const std::string &name) {
+    Project::Project(const std::string &name) : name_(name) {
     }
 
     std::unique_ptr<Project> Project::create(const std::string &name, const std::filesystem::path &location) {
@@ -22,7 +22,7 @@ namespace hellfire {
         project->create_directory_structure();
 
         // Initialize managers with project root context
-        auto registry_path = project->project_root_path_ / "assetregistry.json";
+        auto registry_path = project->project_root_path_ / "settings/assetregistry.json";
         project->asset_registry_ = std::make_unique<AssetRegistry>(registry_path, project->project_root_path_);
 
         project->scene_manager_ = std::make_unique<SceneManager>();
@@ -37,7 +37,7 @@ namespace hellfire {
     }
 
     std::unique_ptr<Project> Project::load(const std::filesystem::path &project_file) {
-        if (!std::filesystem::exists(project_file)) {
+        if (!exists(project_file)) {
             std::cerr << "ERROR::PROJECT::LOAD:: Project file doesnt exist at " << project_file.string() << std::endl;
             return nullptr;
         }
@@ -80,15 +80,15 @@ namespace hellfire {
     }
 
     std::filesystem::path Project::get_assets_path() const {
-        return {};
+        return project_root_path_ / "settings/assetregistry.json";
     }
 
     std::filesystem::path Project::get_scenes_path() const {
-        return {};
+        return project_root_path_ / "settings/scenes.json";
     }
 
     std::filesystem::path Project::get_scripts_path() const {
-        return {};
+        return project_root_path_ / "settings/scriptregistry.json";
     }
 
     bool Project::serialize() const {
@@ -99,7 +99,10 @@ namespace hellfire {
         return false;
     }
 
-    void Project::create_directory_structure() {
+    void Project::create_directory_structure() const {
+        std::filesystem::create_directories(project_root_path_/ "settings");
+        std::filesystem::create_directories(project_root_path_/ "assets");
+        std::filesystem::create_directories(project_root_path_/ "shared");
         
     }
 

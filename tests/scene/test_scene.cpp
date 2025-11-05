@@ -4,7 +4,6 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "hellfire/graphics/geometry/Cube.h"
-#include "hellfire/graphics/geometry/Quad.h"
 #include "hellfire/graphics/geometry/Sphere.h"
 #include "hellfire/scene/Scene.h"
 
@@ -38,7 +37,6 @@ TEST_CASE("Scenes can be renamed") {
     test_scene->set_name("Better Name V2");
     REQUIRE(test_scene->get_name() == "Better Name V2");
 }
-
 
 TEST_CASE("Scenes can have multiple entities") {
     const auto test_scene = new hellfire::Scene("Test Scene"); // Needs to be a raw pointer
