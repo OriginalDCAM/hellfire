@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14...3.29)
-project(CustomEngine VERSION 1.1)
+project(Hellfire VERSION 1.1)
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -117,6 +117,20 @@ set_target_properties(GLM::GLM PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm"
 )
 
+enable_testing()
+
+# Set up Catch2
+Include(FetchContent)
+FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v3.4.0)
+FetchContent_MakeAvailable(Catch2)
+
+# Include Catch2's CTest integration
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(Catch)
+
 # Add the vendor directory to the include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
@@ -145,7 +159,6 @@ target_include_directories(imgui PUBLIC
         ${IMGUI_DIR}
         ${IMGUI_DIR}/backends
         ${glew_SOURCE_DIR}/include # GLEW headers
-        ${freeglut_SOURCE_DIR}/include # FreeGLUT headers
 )
 
 # Link against OpenGL, GLEW, and GLUT using the fetched libraries
@@ -166,15 +179,14 @@ endif()
 
 
 add_subdirectory(Editor)
-add_subdirectory(Engine)
-add_subdirectory(Sandbox)
+add_subdirectory(engine)
+#add_subdirectory(sandbox)
+add_subdirectory(tests)
 
 # Configure release build optimizations after target creation
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    # Apply IPO to your main targets
+    # Apply IPO to main targets
     set_property(TARGET imgui PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-    # Add other targets as needed:
-    # set_property(TARGET YourMainTarget PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
 if (MSVC)
@@ -184,8 +196,8 @@ if (MSVC)
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Sandbox/Debug")
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Sandbox/Release")
 
-    # Create dummy exe to prevent VS errors (you'll need to define APP_NAME)
-    set(APP_NAME "CustomEngine") # Define this or pass it from somewhere
+    # Create dummy exe to prevent VS errors 
+    set(APP_NAME "CustomEngine")
     set(DUMMY_EXE "${CMAKE_BINARY_DIR}/Sandbox/Debug/${APP_NAME}.exe")
     if(NOT EXISTS ${DUMMY_EXE})
         file(WRITE "${DUMMY_EXE}.temp" "")

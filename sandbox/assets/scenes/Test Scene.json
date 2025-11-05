@@ -1,0 +1,1029 @@
+{
+    "name": "Test Scene V2",
+    "objects": [
+        {
+            "children": [
+                {
+                    "color": [
+                        0.9627329111099243,
+                        0.8311793208122253,
+                        0.6996257901191711
+                    ],
+                    "direction": [
+                        -0.48507124185562134,
+                        -0.7276068925857544,
+                        -0.48507124185562134
+                    ],
+                    "intensity": 1.2999999523162842,
+                    "light_type": "DirectionalLight",
+                    "name": "Sun",
+                    "transform": {
+                        "position": [
+                            20.0,
+                            30.0,
+                            20.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Light"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "diffuse": [
+                    0.0,
+                    0.0,
+                    0.800000011920929
+                ],
+                "name": "PlasticBlue",
+                "shininess": 128.0,
+                "specular": [
+                    0.8999999761581421,
+                    0.8999999761581421,
+                    0.8999999761581421
+                ],
+                "textures": [
+                    {
+                        "path": "assets/textures/plastic_blue.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "phong"
+            },
+            "name": "Sun Light Visual",
+            "transform": {
+                "position": [
+                    20.0,
+                    30.0,
+                    20.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "children": [
+                {
+                    "attenuation": 1.0,
+                    "color": [
+                        0.20000000298023224,
+                        0.4000000059604645,
+                        1.0
+                    ],
+                    "intensity": 5.0,
+                    "light_type": "PointLight",
+                    "name": "Blue Light",
+                    "range": 20.0,
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Light"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "diffuse": [
+                    0.0,
+                    0.0,
+                    0.800000011920929
+                ],
+                "name": "PlasticBlue",
+                "shininess": 128.0,
+                "specular": [
+                    0.8999999761581421,
+                    0.8999999761581421,
+                    0.8999999761581421
+                ],
+                "textures": [
+                    {
+                        "path": "assets/textures/plastic_blue.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "phong"
+            },
+            "name": "Blue cube",
+            "transform": {
+                "position": [
+                    -5.0,
+                    1.0,
+                    -5.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    0.20000000298023224
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "children": [
+                {
+                    "attenuation": 1.0,
+                    "color": [
+                        0.20000000298023224,
+                        1.0,
+                        0.10000000149011612
+                    ],
+                    "intensity": 1.5,
+                    "light_type": "PointLight",
+                    "name": "Red Light",
+                    "range": 15.0,
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Light"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.0,
+                    0.10000000149011612,
+                    0.0
+                ],
+                "diffuse": [
+                    0.0,
+                    0.800000011920929,
+                    0.0
+                ],
+                "name": "PlasticGreen",
+                "shininess": 64.0,
+                "specular": [
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929
+                ],
+                "textures": [
+                    {
+                        "path": "assets/textures/plastic_green.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "phong"
+            },
+            "name": "Green cube",
+            "transform": {
+                "position": [
+                    5.0,
+                    2.0,
+                    5.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    0.20000000298023224
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "aspect_ratio": 1.7777777910232544,
+            "camera_type": "perspective",
+            "far_plane": 400.0,
+            "fov": 70.0,
+            "front": [
+                0.29737573862075806,
+                -0.3354697823524475,
+                0.8938835263252258
+            ],
+            "mouse_sensitivity": 0.10000000149011612,
+            "movement_speed": 5.0,
+            "name": "Main Camera",
+            "near_plane": 0.10000000149011612,
+            "pitch": -19.60110855102539,
+            "right": [
+                -0.9488695859909058,
+                0.0,
+                0.31566840410232544
+            ],
+            "target": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "transform": {
+                "position": [
+                    -0.31143686175346375,
+                    5.989962577819824,
+                    21.60487174987793
+                ],
+                "rotation": [
+                    -18.561180114746094,
+                    19.450298309326172,
+                    6.4137701988220215
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "type": "Camera",
+            "up": [
+                0.1058972105383873,
+                0.9420509934425354,
+                0.31831708550453186
+            ],
+            "world_up": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "yaw": -648.4011840820313
+        },
+        {
+            "aspect_ratio": 1.7777777910232544,
+            "camera_type": "perspective",
+            "far_plane": 400.0,
+            "fov": 70.0,
+            "front": [
+                -0.34815531969070435,
+                -0.8703882694244385,
+                -0.34815531969070435
+            ],
+            "mouse_sensitivity": 0.10000000149011612,
+            "movement_speed": 5.0,
+            "name": "Drone Camera",
+            "near_plane": 0.10000000149011612,
+            "pitch": -60.50379180908203,
+            "right": [
+                0.7071067690849304,
+                0.0,
+                -0.7071067690849304
+            ],
+            "target": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "transform": {
+                "position": [
+                    10.0,
+                    25.0,
+                    10.0
+                ],
+                "rotation": [
+                    37.98516845703125,
+                    -116.21407318115234,
+                    -51.34019088745117
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "type": "Camera",
+            "up": [
+                -0.6154574751853943,
+                0.4923660159111023,
+                -0.6154574751853943
+            ],
+            "world_up": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "yaw": -135.0
+        },
+        {
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ],
+                "diffuse": [
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929
+                ],
+                "name": "Mossy",
+                "textures": [
+                    {
+                        "path": "assets/textures/mossy_brick.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "lambert"
+            },
+            "name": "Cool cube",
+            "transform": {
+                "position": [
+                    0.0,
+                    4.0,
+                    0.0
+                ],
+                "rotation": [
+                    90.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "geometry": "plane",
+            "material": {
+                "ambient": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ],
+                "diffuse": [
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929
+                ],
+                "name": "Pavement",
+                "textures": [
+                    {
+                        "path": "assets/textures/brick_pavement.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "lambert"
+            },
+            "name": "Floor Quad",
+            "transform": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    -90.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    100.0,
+                    100.0,
+                    100.0
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "children": [
+                {
+                    "geometry": "cube",
+                    "material": {
+                        "ambient": [
+                            0.0,
+                            0.10000000149011612,
+                            0.0
+                        ],
+                        "diffuse": [
+                            0.0,
+                            0.800000011920929,
+                            0.0
+                        ],
+                        "name": "PlasticGreen",
+                        "shininess": 64.0,
+                        "specular": [
+                            0.800000011920929,
+                            0.800000011920929,
+                            0.800000011920929
+                        ],
+                        "textures": [
+                            {
+                                "path": "assets/textures/plastic_green.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "phong"
+                    },
+                    "name": "Main Camera Direction",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.05000000074505806,
+                            0.05000000074505806,
+                            0.5
+                        ]
+                    },
+                    "type": "Shape3D"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ],
+                "diffuse": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "name": "Miquel",
+                "textures": [
+                    {
+                        "path": "assets/textures/miquel.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "lambert"
+            },
+            "name": "Main Camera Visual",
+            "transform": {
+                "position": [
+                    -0.31143686175346375,
+                    5.989962577819824,
+                    21.60487174987793
+                ],
+                "rotation": [
+                    -18.561180114746094,
+                    19.450298309326172,
+                    6.4137701988220215
+                ],
+                "scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "children": [
+                {
+                    "geometry": "cube",
+                    "material": {
+                        "ambient": [
+                            0.0,
+                            0.10000000149011612,
+                            0.0
+                        ],
+                        "diffuse": [
+                            0.0,
+                            0.800000011920929,
+                            0.0
+                        ],
+                        "name": "PlasticGreen",
+                        "shininess": 64.0,
+                        "specular": [
+                            0.800000011920929,
+                            0.800000011920929,
+                            0.800000011920929
+                        ],
+                        "textures": [
+                            {
+                                "path": "assets/textures/plastic_green.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "phong"
+                    },
+                    "name": "Drone Camera Direction",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.05000000074505806,
+                            0.05000000074505806,
+                            0.5
+                        ]
+                    },
+                    "type": "Shape3D"
+                }
+            ],
+            "geometry": "cube",
+            "material": {
+                "ambient": [
+                    0.10000000149011612,
+                    0.10000000149011612,
+                    0.10000000149011612
+                ],
+                "diffuse": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "name": "Eljto",
+                "textures": [
+                    {
+                        "path": "assets/textures/eltjo.jpg",
+                        "type": 0
+                    }
+                ],
+                "type": "lambert"
+            },
+            "name": "Drone Camera Visual",
+            "transform": {
+                "position": [
+                    10.0,
+                    25.0,
+                    10.0
+                ],
+                "rotation": [
+                    37.98516845703125,
+                    -116.21407318115234,
+                    -51.34019088745117
+                ],
+                "scale": [
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    0.30000001192092896
+                ]
+            },
+            "type": "Shape3D"
+        },
+        {
+            "children": [
+                {
+                    "material": {
+                        "ambient": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "diffuse": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "name": "Material",
+                        "textures": [
+                            {
+                                "path": "assets\\textures\\mossy_brick.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "lambert"
+                    },
+                    "name": "Base_Layer_Mesh",
+                    "path": "",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Model"
+                },
+                {
+                    "material": {
+                        "ambient": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "diffuse": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "name": "Material",
+                        "textures": [
+                            {
+                                "path": "assets\\textures\\mossy_brick.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "lambert"
+                    },
+                    "name": "Second_Layer_Mesh",
+                    "path": "",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Model"
+                },
+                {
+                    "material": {
+                        "ambient": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "diffuse": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "name": "Material",
+                        "textures": [
+                            {
+                                "path": "assets\\textures\\mossy_brick.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "lambert"
+                    },
+                    "name": "Third_Layer_Mesh",
+                    "path": "",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Model"
+                },
+                {
+                    "material": {
+                        "ambient": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "diffuse": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "name": "Material",
+                        "textures": [
+                            {
+                                "path": "assets\\textures\\mossy_brick.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "lambert"
+                    },
+                    "name": "Final_Layer_Mesh",
+                    "path": "",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Model"
+                },
+                {
+                    "material": {
+                        "ambient": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "diffuse": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "name": "Material",
+                        "textures": [
+                            {
+                                "path": "assets\\textures\\bark_willow_02_diff_2k.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "lambert"
+                    },
+                    "name": "Pillar_Support_Mesh",
+                    "path": "",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Model"
+                },
+                {
+                    "material": {
+                        "ambient": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "diffuse": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "name": "Material",
+                        "textures": [
+                            {
+                                "path": "assets\\textures\\bark_willow_02_diff_2k.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "lambert"
+                    },
+                    "name": "Pillar_Support_2_Mesh",
+                    "path": "",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Model"
+                },
+                {
+                    "material": {
+                        "ambient": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "diffuse": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "name": "Material",
+                        "textures": [
+                            {
+                                "path": "assets\\textures\\bark_willow_02_diff_2k.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "lambert"
+                    },
+                    "name": "Top_Support_Mesh",
+                    "path": "",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Model"
+                },
+                {
+                    "material": {
+                        "ambient": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "diffuse": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "name": "Material",
+                        "textures": [
+                            {
+                                "path": "assets\\textures\\bark_willow_02_diff_2k.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "lambert"
+                    },
+                    "name": "Cube.007_Mesh",
+                    "path": "",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Model"
+                },
+                {
+                    "material": {
+                        "ambient": [
+                            0.10000000149011612,
+                            0.10000000149011612,
+                            0.10000000149011612
+                        ],
+                        "diffuse": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "name": "Material",
+                        "textures": [
+                            {
+                                "path": "assets\\textures\\bark_willow_02_diff_2k.jpg",
+                                "type": 0
+                            }
+                        ],
+                        "type": "lambert"
+                    },
+                    "name": "Cube.008_Mesh",
+                    "path": "",
+                    "transform": {
+                        "position": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "type": "Model"
+                }
+            ],
+            "name": "low_poly_well.obj",
+            "path": "assets\\models\\low_poly_well.obj",
+            "transform": {
+                "position": [
+                    2.0,
+                    1.0,
+                    32.099998474121094
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "type": "Model"
+        }
+    ],
+    "version": "1.0"
+}
