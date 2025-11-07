@@ -77,8 +77,8 @@ namespace hellfire {
         void set_name(const std::string &name) { name_ = name; }
         bool is_playing() const { return is_playing_; }
         void set_playing(bool active) { is_playing_ = active; }
-        void set_source_filename(const std::string &filename) { source_filename_ = filename; }
-        const std::string &get_source_filename() const { return source_filename_; }
+        void set_source_filename(const std::filesystem::path &filename) { source_filename_ = filename; }
+        const std::filesystem::path &get_source_filename() const { return source_filename_; }
         bool was_loaded_from_file() const { return !source_filename_.empty(); }
         std::string generate_unique_name(const std::string& base_name);
 
@@ -86,6 +86,8 @@ namespace hellfire {
             ambient_light_ = glm::vec3(intensity);
         }
         glm::vec3 get_ambient_light() const { return ambient_light_; }
+
+        void save();
 
     private:
         // All entities owned by scene
@@ -101,7 +103,7 @@ namespace hellfire {
         EntityID default_camera_entity_id_ = 0;
         std::string name_;
         bool is_playing_;
-        std::string source_filename_;
+        std::filesystem::path source_filename_;
         std::unordered_map<std::string, int> name_counters_;
 
         

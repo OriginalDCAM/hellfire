@@ -159,6 +159,8 @@ namespace hellfire::editor {
         inspector_panel_->render();
         scene_viewport_->render();
         scene_hierarchy_->render();
+
+
     }
 
     void EditorApplication::create_dockspace() {

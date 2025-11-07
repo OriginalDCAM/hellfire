@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <memory>
 
-#include "../../../../cmake-build-release/_deps/assimp-src/code/Common/Win32DebugLogStream.h"
 #include "hellfire/assets/AssetRegistry.h"
 #include "hellfire/scene/SceneManager.h"
 
@@ -59,7 +58,6 @@ namespace hellfire {
 
     private:
         bool serialize() const;
-        bool deserialize();
         void create_directory_structure() const;
         void initialize_default_assets();
         void initialize_managers();

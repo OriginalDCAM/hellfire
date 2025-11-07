@@ -6,6 +6,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "json.hpp"
 
@@ -129,13 +130,42 @@ namespace hellfire {
             std::cout << "ERROR::PROJECT::LOAD:: Exception: " << e.what() << std::endl;
             return nullptr;
         }
+        return nullptr;
     }
 
     bool Project::save() {
-        return false;
+        // Update last_opened timestamp
+        metadata_.last_opened = get_current_timestamp();
+        
+        // Serialize project file
+        if (!serialize()) {
+            std::cerr << "ERROR::PROJECT::SAVE:: Failed to serialize project" << std::endl;
+            return false;
+        }
+
+        // Save asset registry
+        if (asset_registry_) {
+            asset_registry_->save();
+        }
+
+        // Save current scene if loaded
+        if (scene_manager_ && scene_manager_->has_active_scene()) {
+            scene_manager_->save_current_scene();
+        }
+
+        return true;
     }
 
     void Project::close() {
+        save();
+        
+        if (scene_manager_) {
+            scene_manager_->clear();
+        }
+        
+        if (asset_registry_) {
+            asset_registry_->clear();
+        }
     }
 
     std::filesystem::path Project::get_project_root() const {
@@ -155,15 +185,45 @@ namespace hellfire {
     }
 
     bool Project::serialize() const {
-    }
+        try {
+            nlohmann::json j;
+            
+            // Serialize metadata
+            j["name"] = metadata_.name;
+            j["version"] = metadata_.version;
+            j["engine_version"] = metadata_.engine_version;
+            j["created"] = metadata_.created_at;
+            j["last_opened"] = metadata_.last_opened;
+            
+            if (!metadata_.last_scene.empty()) {
+                j["last_scene"] = metadata_.last_scene.string();
+            }
 
-    bool Project::deserialize() {
+            // Serialize settings
+            j["settings"] = {
+                {"default_scene", metadata_.default_scene.string()},
+                {"renderer_settings", metadata_.renderer_settings.string()}
+            };
+
+            // Write to file
+            std::ofstream file(project_file_path_);
+            if (!file.is_open()) {
+                return false;
+            }
+
+            file << j.dump(4); // Pretty print
+            return true;
+
+        } catch (const std::exception& e) {
+            std::cerr << "ERROR::PROJECT::SERIALIZE:: " << e.what() << std::endl;
+            return false;
+        }
     }
 
     void Project::create_directory_structure() const {
-        std::filesystem::create_directories(project_root_path_/ "settings");
-        std::filesystem::create_directories(project_root_path_/ "assets");
-        std::filesystem::create_directories(project_root_path_/ "shared");
+        create_directories(project_root_path_/ "settings");
+        create_directories(project_root_path_/ "assets");
+        create_directories(project_root_path_/ "shared");
         
     }
 
@@ -177,9 +237,13 @@ namespace hellfire {
         asset_registry_ = std::make_unique<AssetRegistry>(registry_path, project_root_path_);
 
         scene_manager_ = std::make_unique<SceneManager>();
-
     }
 
     std::string Project::get_current_timestamp() const {
+        auto now = std::chrono::system_clock::now();
+        auto time_t_now = std::chrono::system_clock::to_time_t(now);
+        std::stringstream ss;
+        ss << std::put_time(std::gmtime(&time_t_now), "%Y-%m-%dT%H:%M:%SZ");
+        return ss.str();
     }
 }

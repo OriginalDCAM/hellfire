@@ -173,7 +173,6 @@ namespace hellfire {
     void AssetRegistry::save() {
         nlohmann::json j;
         j["version"] = "1.0";
-        // j["project_root"] = project_root_.string();
         j["assets"] = nlohmann::json::array();
 
         register_asset(project_root_ / "test_scene.hfscene");
