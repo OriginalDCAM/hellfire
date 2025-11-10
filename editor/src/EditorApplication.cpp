@@ -52,7 +52,7 @@ namespace hellfire::editor {
         inspector_panel_->set_context(&editor_context_);
 
         // TEMP:
-    const auto sm = ServiceLocator::get_service<SceneManager>();
+        const auto sm = ServiceLocator::get_service<SceneManager>();
         const auto new_scene = sm->create_scene("Test");
         setup_default_scene_with_default_entities(new_scene);
         sm->set_active_scene(new_scene, true); // Don't play in editor mode as default
@@ -66,14 +66,15 @@ namespace hellfire::editor {
 
         // Load default font
         io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
-        static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+        static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
         ImFontConfig icons_config;
         icons_config.MergeMode = true;
         icons_config.PixelSnapH = true;
         icons_config.GlyphMinAdvanceX = 16.0f;
         icons_config.GlyphOffset = ImVec2(0, 0);
 
-        io.Fonts->AddFontFromFileTTF("assets/fonts/Font Awesome 7 Free-Solid-900.otf", 16.0f, &icons_config, icons_ranges);
+        io.Fonts->AddFontFromFileTTF("assets/fonts/Font Awesome 7 Free-Solid-900.otf", 16.0f, &icons_config,
+                                     icons_ranges);
 
         // Enable docking and multi-viewport
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -134,7 +135,7 @@ namespace hellfire::editor {
 
         // Handle multi-viewport
         if (const ImGuiIO &io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            IWindow* window = ServiceLocator::get_service<IWindow>();
+            IWindow *window = ServiceLocator::get_service<IWindow>();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
             window->make_current();
@@ -142,7 +143,8 @@ namespace hellfire::editor {
     }
 
     void EditorApplication::sync_editor_context() {
-        if (const auto sm = ServiceLocator::get_service<SceneManager>(); sm && editor_context_.active_scene != sm->get_active_scene()) {
+        if (const auto sm = ServiceLocator::get_service<SceneManager>();
+            sm && editor_context_.active_scene != sm->get_active_scene()) {
             editor_context_.active_scene = sm->get_active_scene();
         }
     }
@@ -159,8 +161,6 @@ namespace hellfire::editor {
         inspector_panel_->render();
         scene_viewport_->render();
         scene_hierarchy_->render();
-
-
     }
 
     void EditorApplication::create_dockspace() {
@@ -221,12 +221,12 @@ namespace hellfire::editor {
         if (scene_viewport_->is_editor_camera_active()) {
             // Update camera with offset
             scene_viewport_->get_editor_camera()
-                ->get_component<SceneCameraScript>()
-                ->handle_mouse_movement(x_offset, y_offset);
-        
-        return true; // consumed
+                    ->get_component<SceneCameraScript>()
+                    ->handle_mouse_movement(x_offset, y_offset);
+
+            return true; // consumed
         }
- 
+
 
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureMouse) {

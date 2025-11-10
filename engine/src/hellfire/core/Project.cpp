@@ -17,7 +17,7 @@ namespace hellfire {
         metadata_.engine_version = "0.1.0";
         metadata_.created_at = get_current_timestamp();
         metadata_.last_opened = metadata_.created_at;
-        metadata_.default_scene = "default_scene.hfscene";
+        metadata_.default_scene = "assets/default_scene.hfscene";
         metadata_.renderer_settings = "settings/renderer.json";
     }
 
@@ -121,7 +121,7 @@ namespace hellfire {
                 }
             }
 
-            std::cout << "Succesfully loaded project:" << metadata.name << std::endl;
+            std::cout << "Successfully loaded project: " << metadata.name << std::endl;
             return project;
         } catch (const nlohmann::json::parse_error& e) {
             std::cerr << "ERROR::PROJECT::LOAD:: JSON parse error: " << e.what() << std::endl;

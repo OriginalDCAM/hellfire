@@ -18,7 +18,7 @@ namespace hellfire::editor {
         engine_renderer_ = ServiceLocator::get_service<Renderer>();
         assert(engine_renderer_ != nullptr);
         create_editor_camera();
-        
+
         picking_fbo_ = std::make_unique<Framebuffer>();
     }
 
@@ -181,7 +181,10 @@ namespace hellfire::editor {
             glm::mat4 projection_matrix = camera_comp->get_projection_matrix();
 
             // Get entity's transform matrix
-            glm::mat4 transform_matrix = entity_transform->get_local_matrix();
+            glm::mat4 transform_matrix = context_->active_scene->has_parent(selected_entity->get_id())
+                                             ? entity_transform->get_world_matrix()
+                                             : entity_transform->get_local_matrix();
+
 
             if (!camera_active_ && !is_using_gizmo_) {
                 if (ImGui::IsKeyPressed(ImGuiKey_G)) {
@@ -191,20 +194,30 @@ namespace hellfire::editor {
                 } else if (ImGui::IsKeyPressed(ImGuiKey_S)) {
                     current_operation_ = ImGuizmo::SCALE;
                 }
+                current_mode_ = context_->active_scene->has_parent(selected_entity->get_id())
+                                    ? ImGuizmo::WORLD
+                                    : ImGuizmo::LOCAL;
             }
 
             Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(projection_matrix), current_operation_,
-                                 current_mode_, glm::value_ptr(transform_matrix));
+                       current_mode_, glm::value_ptr(transform_matrix));
 
             // If the gizmo was used, update the entity's transform
             if (is_using_gizmo_ = ImGuizmo::IsUsing(); is_using_gizmo_) {
                 glm::vec3 translation, rotation, scale;
 
                 if (context_->active_scene->has_parent(context_->selected_entity_id)) {
-                    
+                    auto parent_entity_id = context_->active_scene->get_parent(context_->selected_entity_id);
+                    auto parent_entity = context_->active_scene->get_entity(parent_entity_id);
+                    glm::mat4 parent_world_matrix = parent_entity->transform()->get_world_matrix();
+                    glm::mat4 local_matrix = glm::inverse(parent_world_matrix) * transform_matrix;
+
+                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(local_matrix), glm::value_ptr(translation),
+                                                          glm::value_ptr(rotation), glm::value_ptr(scale));
+                } else {
+                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform_matrix), glm::value_ptr(translation),
+                                                          glm::value_ptr(rotation), glm::value_ptr(scale));
                 }
-                ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform_matrix), glm::value_ptr(translation),
-                                                      glm::value_ptr(rotation), glm::value_ptr(scale));
 
                 // Update entity's transform
                 entity_transform->set_position(translation);
@@ -219,7 +232,7 @@ namespace hellfire::editor {
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !is_using_gizmo_) {
             const ImVec2 mouse_pos = ImGui::GetMousePos();
             const ImVec2 viewport_pos = ImGui::GetItemRectMin();
-        
+
             // Convert to viewport-relative coordinates
             const int mouse_x = static_cast<int>(mouse_pos.x - viewport_pos.x);
             const int mouse_y = static_cast<int>(mouse_pos.y - viewport_pos.y);
@@ -242,7 +255,7 @@ namespace hellfire::editor {
         ImGui::SetNextWindowSizeConstraints(ImVec2(320, 180), ImVec2(FLT_MAX, FLT_MAX));
 
         const std::string window_name = context_->active_scene
-                                            ? ICON_FA_EYE " "  + context_->active_scene->get_name()
+                                            ? ICON_FA_EYE " " + context_->active_scene->get_name()
                                             : "Viewport";
 
         if (ImGui::Begin(window_name.c_str())) {
@@ -301,20 +314,20 @@ namespace hellfire::editor {
         const uint32_t object_id_texture = engine_renderer_->get_object_id_texture();
         if (object_id_texture == 0) return 0;
 
-            // Get viewport dimensions
-            const ImVec2 viewport_size = viewport_size_;
+        // Get viewport dimensions
+        const ImVec2 viewport_size = viewport_size_;
 
-            const int tex_x = mouse_x;
-            const int tex_y = static_cast<int>(viewport_size.y) - mouse_y - 1;
-    
-            // Bounds check
-            if (tex_x < 0 || tex_x >= static_cast<int>(viewport_size.x) ||
-                tex_y < 0 || tex_y >= static_cast<int>(viewport_size.y)) {
-                return 0;
-                }
+        const int tex_x = mouse_x;
+        const int tex_y = static_cast<int>(viewport_size.y) - mouse_y - 1;
 
-            const uint32_t pixel_data = picking_fbo_->read_pixel_from_texture(object_id_texture, tex_x, tex_y);
-        
-            return pixel_data;
+        // Bounds check
+        if (tex_x < 0 || tex_x >= static_cast<int>(viewport_size.x) ||
+            tex_y < 0 || tex_y >= static_cast<int>(viewport_size.y)) {
+            return 0;
+        }
+
+        const uint32_t pixel_data = picking_fbo_->read_pixel_from_texture(object_id_texture, tex_x, tex_y);
+
+        return pixel_data;
     }
 };

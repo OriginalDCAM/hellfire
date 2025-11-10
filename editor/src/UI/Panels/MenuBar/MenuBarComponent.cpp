@@ -70,8 +70,8 @@ namespace hellfire::editor {
     }
 
     void MenuBarComponent::render_scene_list() {
-        auto sm = ServiceLocator::get_service<SceneManager>();
-        for (auto element: sm->get_scenes()) {
+        const auto sm = ServiceLocator::get_service<SceneManager>();
+        for (const auto element: sm->get_scenes()) {
             const bool is_selected = element == sm->get_active_scene();
             if (ImGui::MenuItem(element->get_name().c_str(), nullptr, is_selected)) {
                 if (!is_selected) {
