@@ -154,7 +154,7 @@ namespace hellfire {
     std::string ShaderManager::clean_shader_content(const std::string &content, const std::string &filepath) {
         std::string cleaned = content;
 
-        // UTF-8 BOM is EF BB BF (shows as ï»¿ in text)
+        // UTF-8 BOM (Byte Order Mask) is EF BB BF (shows as ï»¿ in text)
         std::string bom = "\xEF\xBB\xBF";
 
         // Remove ALL occurrences of BOM, not just at the beginning
