@@ -222,7 +222,7 @@ namespace hellfire::editor {
         if (ImGui::BeginPopupContextItem()) {
             render_add_entity_menu(entity_id);
             ImGui::Separator();
-            if (ImGui::MenuItem("Duplicate", "Ctrl+D", false, false)) {
+            if (ImGui::MenuItem("Copy", "Ctrl+C", false, false)) {
                 // TODO: Implement duplicate
             }
             if (ImGui::MenuItem("Rename", "F2", false, true)) {
