@@ -20,5 +20,7 @@ private:
     void render_list_item(EntityID entity_id);
 
     EntityID entity_to_delete_ = {};
+
+    EntityID entity_to_rename_ = {};
 };
 }
