@@ -160,7 +160,7 @@ namespace hellfire::editor {
     void SceneHierarchyPanel::render_list_item(const EntityID entity_id) {
         ImGui::PushID(static_cast<int>(entity_id)); // Push the id onto the stack to guarantee uniqueness for the list items.
 
-        const Entity *entity = context_->active_scene->get_entity(entity_id);
+        Entity *entity = context_->active_scene->get_entity(entity_id);
         if (!entity) {
             ImGui::PopID();
             return;
