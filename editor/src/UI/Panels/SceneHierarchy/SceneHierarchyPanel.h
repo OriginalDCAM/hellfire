@@ -20,5 +20,9 @@ private:
     void render_list_item(EntityID entity_id);
 
     EntityID entity_to_delete_ = {};
+
+    std::unordered_map<EntityID, bool> entity_id_to_opened_nodes_;
+
+    EntityID entity_to_rename_ = {};
 };
 }
