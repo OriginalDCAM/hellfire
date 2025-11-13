@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include "imgui.h"
+#include "hellfire/core/Project.h"
 #include "hellfire/scene/CameraFactory.h"
 #include "hellfire/scene/Scene.h"
 #include "hellfire/scene/SceneManager.h"
@@ -24,6 +25,7 @@ namespace hellfire::editor {
     void MenuBarComponent::render_file_menu() {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("New Project")) {
+                Project::create("Test", "G:\\Dev\\Games");
                 std::cout << "Clicked on button New Project" << std::endl;
             }
             ImGui::EndMenu();
@@ -68,8 +70,8 @@ namespace hellfire::editor {
     }
 
     void MenuBarComponent::render_scene_list() {
-        auto sm = ServiceLocator::get_service<SceneManager>();
-        for (auto element: sm->get_scenes()) {
+        const auto sm = ServiceLocator::get_service<SceneManager>();
+        for (const auto element: sm->get_scenes()) {
             const bool is_selected = element == sm->get_active_scene();
             if (ImGui::MenuItem(element->get_name().c_str(), nullptr, is_selected)) {
                 if (!is_selected) {

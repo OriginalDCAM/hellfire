@@ -229,6 +229,9 @@ namespace hellfire {
         return unique_name;
     }
 
+    void Scene::save() {
+    }
+
     void Scene::update_hierarchy(EntityID entity_id, float delta_time) {
         Entity *entity = get_entity(entity_id);
         if (!entity) return;

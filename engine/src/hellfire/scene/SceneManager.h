@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <string>
@@ -24,6 +25,8 @@ namespace hellfire {
 
         std::vector<Scene*> get_scenes();
 
+        void save_current_scene() const;
+
         // Setup callback for when a scene is activated
         using SceneActivatedCallback = std::function<void(Scene *)>;
 
@@ -34,7 +37,7 @@ namespace hellfire {
         // Scene creation and loading
         void create_default_scene();
 
-        Scene *load_scene(const std::string &filename);
+        Scene *load_scene(const std::filesystem::path &filename);
 
         bool save_scene(const std::string &filename, Scene *scene) const;
 
@@ -62,6 +65,10 @@ namespace hellfire {
         Scene *get_active_scene() const {
             if (!active_scene_) return nullptr;
 
+            return active_scene_;
+        }
+
+        bool has_active_scene() const {
             return active_scene_;
         }
 

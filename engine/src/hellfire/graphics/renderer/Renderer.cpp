@@ -235,6 +235,7 @@ namespace hellfire {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glDisable(GL_BLEND);
+
         
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -258,7 +259,8 @@ namespace hellfire {
     }
 
     void Renderer::render_transparent_pass(const glm::mat4 &view, const glm::mat4 &projection) {
-        glEnable(GL_BLEND);
+        glEnablei(GL_BLEND, 0);  // Enable blending for fragColor (location 0)
+        glDisablei(GL_BLEND, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
@@ -434,7 +436,6 @@ namespace hellfire {
         constexpr GLuint clear_value = 0;
         glClearBufferuiv(GL_COLOR, 1, &clear_value);
         
-        // glEnable(GL_DEPTH_TEST);
         render_internal(scene, camera);
         scene_framebuffers_[current_fb_index_]->unbind();
         glFlush();

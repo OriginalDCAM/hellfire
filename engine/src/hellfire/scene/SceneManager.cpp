@@ -17,13 +17,17 @@ namespace hellfire {
         return scenes_;
     }
 
+    void SceneManager::save_current_scene() const {
+        active_scene_->save();
+    }
+
     Scene *SceneManager::create_scene(const std::string &name) {
         auto *scene = new Scene(name);
         scenes_.push_back(scene);
         return scene;
     }
 
-    Scene *SceneManager::load_scene(const std::string &filename) {
+    Scene *SceneManager::load_scene(const std::filesystem::path &filename) {
         // Check if already loaded
         for (Scene *scene: scenes_) {
             if (scene->get_source_filename() == filename) {
