@@ -134,5 +134,6 @@ Material *MaterialSerializer::deserialize_material(const json &data) {
 //
 //     return material;
     // TODO: FIX this soon
+    int* test;
     return nullptr;
 }
