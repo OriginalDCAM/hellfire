@@ -208,16 +208,22 @@ void SceneHierarchyPanel::render_list_item(const EntityID entity_id) {
     std::string display_name = ICON_FA_CUBES " " + entity_name;
     bool node_open = false;
 
-    if (entity_to_rename_ == entity_id) {
+      if (entity_id_to_opened_nodes_[entity_id] == true) {
         flags |= ImGuiTreeNodeFlags_DefaultOpen;
+      } 
+
+    if (entity_to_rename_ == entity_id) {
+
         flags |= ImGuiTreeNodeFlags_AllowOverlap;
 
-        ImGui::SetNextItemOpen(true, ImGuiCond_Always);
 
         // Unique treenode for this entity (no visible label)
+        const auto unique_label_id = "##entity_" + std::to_string(entity_id);
         node_open = ImGui::TreeNodeEx(
-            (std::string("##entity_") + std::to_string(entity_id)).c_str(),
+            unique_label_id.c_str(),
             flags);
+
+        // ImGui::SetNextItemOpen(true, ImGuiCond_Always);
 
         // Inputfield on the same line as the treenode
         ImGui::SameLine();
@@ -245,6 +251,8 @@ void SceneHierarchyPanel::render_list_item(const EntityID entity_id) {
     } else {
         node_open = ImGui::TreeNodeEx(display_name.c_str(), flags);
     }
+  
+  entity_id_to_opened_nodes_[entity_id] = node_open;
 
     ImGui::PopStyleVar(2);
 
