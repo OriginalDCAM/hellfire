@@ -125,7 +125,7 @@ void SceneHierarchyPanel::render_add_entity_menu(const EntityID parent_id) {
             new_entity_id = Cube::create(active_scene, "Cube", {});
         }
         if (ImGui::MenuItem("Sphere")) {
-            new_entity_id = Sphere::create(active_scene, "Sphere", {});
+            new_entity_id = Sphere::create(active_scene, "Sphere", {.rings = 64, .sectors = 64});
         }
         if (ImGui::MenuItem("Quad")) {
             new_entity_id = Quad::create(active_scene, "Quad");

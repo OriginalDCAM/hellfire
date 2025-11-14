@@ -278,7 +278,10 @@ namespace hellfire {
             // Pass 1: Draw back faces, to depth buffer
             glCullFace(GL_FRONT);
             glDepthMask(GL_TRUE);
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(2.0f, 2.0f);
             draw_render_command(cmd, view, projection);
+            glDisable(GL_POLYGON_OFFSET_FILL);
 
             // Pass 2: Draw front faces, don't write to depth buffer
             glCullFace(GL_BACK);

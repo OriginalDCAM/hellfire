@@ -42,7 +42,7 @@ namespace hellfire {
         TextureWrap wrap_s = TextureWrap::REPEAT;
         TextureWrap wrap_t = TextureWrap::REPEAT;
         bool generate_mipmaps = true;
-        bool flip_vertically = true;
+        bool flip_vertically = false;
 
         int max_size = -1;
 
