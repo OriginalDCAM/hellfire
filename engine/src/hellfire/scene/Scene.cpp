@@ -1,11 +1,14 @@
 #include "Scene.h"
 
+#include <utility>
+
 #include "../graphics/Skybox.h"
 #include "hellfire/assets/AnimationSystem.h"
 #include "hellfire/ecs/CameraComponent.h"
 
 namespace hellfire {
-    Scene::Scene(const std::string &name) : name_(name), is_playing_(false) {
+    Scene::Scene(std::string name) : name_(std::move(name)), is_playing_(false) {
+        environment_ = std::make_unique<SceneEnvironment>();
     }
 
     Scene::~Scene() {
@@ -188,9 +191,7 @@ namespace hellfire {
         return cameras;
     }
 
-    void Scene::set_skybox(Skybox *skybox) {
-        skybox_.reset(skybox);
-    }
+
 
     std::string Scene::generate_unique_name(const std::string &base_name) {
         // Check if base name exists

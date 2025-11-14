@@ -93,8 +93,8 @@ namespace hellfire {
             "assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
     }
 
-    void SkyboxRenderer::render(const Skybox *skybox, const CameraComponent *camera) const {
-        if (!skybox || !skybox->is_loaded()) return;
+    void SkyboxRenderer::render(const Skybox &skybox, const CameraComponent *camera) const {
+        if (!skybox.is_loaded()) return;
 
         // Save current depth state
         glDepthFunc(GL_LEQUAL);
@@ -109,12 +109,12 @@ namespace hellfire {
         glUniformMatrix4fv(glGetUniformLocation(skybox_shader_, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         // Set tint and exposure
-        glUniform3fv(glGetUniformLocation(skybox_shader_, "tint"), 1, glm::value_ptr(skybox->get_tint()));
-        glUniform1f(glGetUniformLocation(skybox_shader_, "exposure"), skybox->get_exposure());
+        glUniform3fv(glGetUniformLocation(skybox_shader_, "tint"), 1, glm::value_ptr(skybox.get_tint()));
+        glUniform1f(glGetUniformLocation(skybox_shader_, "exposure"), skybox.get_exposure());
 
         // Bind cubemap
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->get_cubemap());
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_cubemap());
         glUniform1i(glGetUniformLocation(skybox_shader_, "skyboxes"), 0);
 
         // Draw skyboxes cube

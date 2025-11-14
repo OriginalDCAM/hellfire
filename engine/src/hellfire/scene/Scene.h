@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
+#include "SceneEnvironment.h"
 #include "../ecs/Entity.h"
 #include "glm/mat4x4.hpp"
 #include "glm/detail/type_vec3.hpp"
@@ -10,13 +11,12 @@ static constexpr hellfire::EntityID INVALID_ENTITY = 0;
 
 namespace hellfire {
     class CameraComponent;
-    class Skybox;
 
     using EntityID = uint32_t;
 
     class Scene {
     public:
-        Scene(const std::string &name = "Unnamed");
+        Scene(std::string name = "Unnamed");
 
         virtual ~Scene();
 
@@ -66,11 +66,7 @@ namespace hellfire {
 
         size_t get_entity_count() const { return entities_.size(); }
 
-        // Skybox management
-        void set_skybox(Skybox *skybox);
 
-        Skybox *get_skybox() const { return skybox_.get(); }
-        bool has_skybox() const { return skybox_ != nullptr; }
 
         // Scene properties
         const std::string &get_name() const { return name_; }
@@ -82,13 +78,9 @@ namespace hellfire {
         bool was_loaded_from_file() const { return !source_filename_.empty(); }
         std::string generate_unique_name(const std::string& base_name);
 
-        void set_ambient_light(float intensity) {
-            ambient_light_ = glm::vec3(intensity);
-        }
-        glm::vec3 get_ambient_light() const { return ambient_light_; }
-
         void save();
 
+        SceneEnvironment* environment() const { return environment_.get(); }
     private:
         // All entities owned by scene
         std::unordered_map<EntityID, std::unique_ptr<Entity> > entities_;
@@ -106,9 +98,7 @@ namespace hellfire {
         std::filesystem::path source_filename_;
         std::unordered_map<std::string, int> name_counters_;
 
-        
-        std::unique_ptr<Skybox> skybox_;
-        glm::vec3 ambient_light_ =  glm::vec3(0.4f);
+        std::unique_ptr<SceneEnvironment> environment_;
 
         // Helper methods
         void update_hierarchy(EntityID entity_id, float delta_time);
