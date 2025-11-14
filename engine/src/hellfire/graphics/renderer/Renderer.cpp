@@ -167,6 +167,7 @@ namespace hellfire {
             collect_render_commands_recursive(root_id, camera_pos);
         }
 
+        // create_shadow_map();
         // Render
         const glm::mat4 view = camera.get_view_matrix();
         const glm::mat4 projection = camera.get_projection_matrix();
@@ -259,27 +260,46 @@ namespace hellfire {
     }
 
     void Renderer::render_transparent_pass(const glm::mat4 &view, const glm::mat4 &projection) {
+        // Configure blending: enable for color input, disable for object ID output
         glEnablei(GL_BLEND, 0);  // Enable blending for fragColor (location 0)
-        glDisablei(GL_BLEND, 1);
+        glDisablei(GL_BLEND, 1); // Disable blending for objectID (location 1)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
 
-        glDisable(GL_CULL_FACE);
-
+        // Sort the transparent objects from back-to-front relative to camera
+        // This ensures proper blending order between different objects
         std::ranges::sort(transparent_objects_,
                           [](const RenderCommand &a, const RenderCommand &b) {
                               return a.distance_to_camera > b.distance_to_camera;
                           });
 
+        // Render non-instanced transparent objects with two-pass rendering
+        glDisable(GL_CULL_FACE);
         for (const auto &cmd: transparent_objects_) {
+            // Pass 1: Draw back faces, to depth buffer
+            glCullFace(GL_FRONT);
+            glDepthMask(GL_TRUE);
+            draw_render_command(cmd, view, projection);
+
+            // Pass 2: Draw front faces, don't write to depth buffer
+            glCullFace(GL_BACK);
+            glDepthMask(GL_FALSE);
             draw_render_command(cmd, view, projection);
         }
 
+        // Render instanced transparent objects with two-pass rendering
         for (const auto &cmd: transparent_instanced_objects_) {
+            // Pass 1: Draw back faces, to depth buffer
+            glCullFace(GL_FRONT);
+            glDepthMask(GL_TRUE);
+            draw_instanced_command(cmd, view, projection);
+
+            // Pass 2: Draw front faces, don't write to depth buffer
+            glCullFace(GL_BACK);
+            glDepthMask(GL_FALSE);
             draw_instanced_command(cmd, view, projection);
         }
 
+        // Restore depth writing
         glDepthMask(GL_TRUE);
     }
 
@@ -298,7 +318,7 @@ namespace hellfire {
             RenderingUtils::upload_lights_to_shader(shader, *context_);
         }
 
-        shader.set_vec3("uAmbientLight", scene_->get_ambient_light());
+        shader.set_vec3("uAmbientLight", scene_->environment()->get_ambient_light());
 
         shader.set_uint("uObjectID", cmd.entity_id);
 
@@ -345,12 +365,12 @@ namespace hellfire {
 
 
     void Renderer::render_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection, CameraComponent* camera_comp) const {
-        if (!scene || !scene->has_skybox()) return;
+        if (!scene || !scene->environment()->has_skybox()) return;
 
         glDisable(GL_CULL_FACE);
 
         if (camera_comp) {
-            skybox_renderer_.render(scene->get_skybox(), camera_comp);
+            skybox_renderer_.render(*scene->environment()->get_skybox(), camera_comp);
         }
     }
 
