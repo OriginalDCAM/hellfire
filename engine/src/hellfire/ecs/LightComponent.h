@@ -38,13 +38,15 @@ namespace hellfire {
         float inner_cone_angle_ = 30.0f;
         float outer_cone_angle_ = 45.0f;
 
+        // Shadowmapping properties
+        bool cast_shadows_ = true;
     public:
-        explicit LightComponent(LightType type = DIRECTIONAL) : type_(type) {
+        explicit LightComponent(const LightType type = DIRECTIONAL) : type_(type) {
         }
 
         // Type management
         LightType get_light_type() const { return type_; }
-        void set_light_type(LightType type) { type_ = type; }
+        void set_light_type(const LightType type) { type_ = type; }
 
         // Common properties
         void set_color(const glm::vec3 &color) { color_ = color; }
@@ -54,7 +56,7 @@ namespace hellfire {
         const float &get_intensity() const { return intensity_; }
 
         // Directional light methods
-        void set_direction(float x, float y, float z) {
+        void set_direction(const float x, const float y, const float z) {
             set_direction(glm::vec3(x, y, z));
         }
 
@@ -82,7 +84,7 @@ namespace hellfire {
             return direction_;
         }
 
-        void look_at(float x, float y, float z) {
+        void look_at(const float x, const float y, const float z) {
             look_at(glm::vec3(x, y, z));
         }
 
@@ -95,21 +97,21 @@ namespace hellfire {
         }
 
         // Point light methods
-        void set_range(float range) { range_ = range; }
+        void set_range(const float range) { range_ = range; }
         float get_range() const { return range_; }
 
-        void set_attenuation(float attenuation) { attenuation_ = attenuation; }
+        void set_attenuation(const float attenuation) { attenuation_ = attenuation; }
         float get_attenuation() const { return attenuation_; }
 
         // Spotlight methods
-        void set_inner_cone_angle(float angle) { inner_cone_angle_ = angle; }
+        void set_inner_cone_angle(const float angle) { inner_cone_angle_ = angle; }
         float get_inner_cone_angle() const { return inner_cone_angle_; }
 
-        void set_outer_cone_angle(float angle) { outer_cone_angle_ = angle; }
+        void set_outer_cone_angle(const float angle) { outer_cone_angle_ = angle; }
         float get_outer_cone_angle() const { return outer_cone_angle_; }
 
         // Shader upload method
-        void upload_to_shader(Shader& shader, int light_index) const {
+        void upload_to_shader(Shader& shader, const int light_index) const {
             switch (type_) {
                 case DIRECTIONAL:
                     upload_directional_to_shader(shader, light_index);
@@ -130,14 +132,14 @@ namespace hellfire {
             return light;
         }
 
-        static LightComponent *create_point(float range = 10.0f, float attenuation = 1.0f) {
+        static LightComponent *create_point(const float range = 10.0f, const float attenuation = 1.0f) {
             auto *light = new LightComponent(POINT);
             light->set_range(range);
             light->set_attenuation(attenuation);
             return light;
         }
 
-        static LightComponent *create_spot(float inner_angle = 30.0f, float outer_angle = 45.0f) {
+        static LightComponent *create_spot(const float inner_angle = 30.0f, const float outer_angle = 45.0f) {
             auto *light = new LightComponent(SPOT);
             light->set_inner_cone_angle(inner_angle);
             light->set_outer_cone_angle(outer_angle);
@@ -145,7 +147,7 @@ namespace hellfire {
         }
 
     private:
-        void upload_directional_to_shader(Shader& shader, int light_index) const {
+        void upload_directional_to_shader(Shader& shader, const int light_index) const {
             // Get Euler angles and convert to direction
             const glm::vec3 rotation_degrees = get_owner().transform()->get_rotation();
             const glm::vec3 rotation_radians = glm::radians(rotation_degrees);
@@ -156,7 +158,7 @@ namespace hellfire {
             shader.set_directional_light(light_index, direction, color_, intensity_);
         }
 
-        void upload_point_to_shader(Shader& shader, int light_index) const {
+        void upload_point_to_shader(Shader& shader, const int light_index) const {
 
             // Get world position from transform
             glm::vec3 position(0.0f);
