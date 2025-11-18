@@ -141,9 +141,9 @@ namespace hellfire {
         void load_texture_data();
 
 
-        GLenum get_gl_wrap_mode(TextureWrap wrap) const;
+        GLint get_gl_wrap_mode(TextureWrap wrap) const;
 
-        GLenum get_gl_filter_mode(TextureFilter filter) const;
+        GLint get_gl_filter_mode(TextureFilter filter) const;
     };
 
     class TextureCache {

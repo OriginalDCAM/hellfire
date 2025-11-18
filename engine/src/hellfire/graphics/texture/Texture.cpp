@@ -238,7 +238,7 @@ namespace hellfire {
         }
     }
 
-    GLenum Texture::get_gl_wrap_mode(TextureWrap wrap) const {
+    GLint Texture::get_gl_wrap_mode(const TextureWrap wrap) const {
         switch (wrap) {
             case TextureWrap::REPEAT: return GL_REPEAT;
             case TextureWrap::CLAMP_TO_EDGE: return GL_CLAMP_TO_EDGE;
@@ -248,7 +248,7 @@ namespace hellfire {
         }
     }
 
-    GLenum Texture::get_gl_filter_mode(TextureFilter filter) const {
+    GLint Texture::get_gl_filter_mode(TextureFilter filter) const {
         switch (filter) {
             case TextureFilter::NEAREST: return GL_NEAREST;
             case TextureFilter::LINEAR: return GL_LINEAR;
@@ -261,14 +261,13 @@ namespace hellfire {
     std::shared_ptr<Texture> TextureCache::load(const std::string &path, TextureType type,
                                                 const TextureSettings &settings) {
         std::string cache_key = path + "_" + std::to_string(static_cast<int>(type));
-        auto it = cache_.find(cache_key);
+        const auto it = cache_.find(cache_key);
         if (it != cache_.end()) {
             auto shared_texture = it->second.lock();
             if (shared_texture) {
                 return shared_texture;
-            } else {
-                cache_.erase(it);
             }
+            cache_.erase(it);
         }
 
         // Create new texture
@@ -349,7 +348,7 @@ namespace hellfire {
 
     void MaterialTextureSet::bind_all() const {
         int texture_unit = 0;
-        for (const auto &[type, texture]: textures_) {
+        for (const auto &texture: textures_ | std::views::values) {
             if (texture && texture->is_valid()) {
                 texture->bind(texture_unit);
                 texture_unit++;
