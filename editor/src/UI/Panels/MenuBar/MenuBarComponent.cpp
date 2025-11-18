@@ -50,7 +50,7 @@ namespace hellfire::editor {
         }
     }
 
-    void MenuBarComponent::handle_open_scene() {
+    void MenuBarComponent::handle_open_scene() const {
         if (ImGui::MenuItem("Open Scene")) {
             const auto sm = ServiceLocator::get_service<SceneManager>();
             Utility::FileFilter scene_ext_filter = {"Hellfire Scene", "*.hfscene"};
@@ -69,7 +69,7 @@ namespace hellfire::editor {
         }
     }
 
-    void MenuBarComponent::render_scene_list() {
+    void MenuBarComponent::render_scene_list() const {
         const auto sm = ServiceLocator::get_service<SceneManager>();
         for (const auto element: sm->get_scenes()) {
             const bool is_selected = element == sm->get_active_scene();

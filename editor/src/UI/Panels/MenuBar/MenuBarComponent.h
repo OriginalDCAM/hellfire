@@ -13,7 +13,7 @@ private:
     void render_file_menu();
     void render_scene_menu();
     void handle_new_scene();
-    void handle_open_scene();
-    void render_scene_list();
+    void handle_open_scene() const;
+    void render_scene_list() const;
 };
 }
