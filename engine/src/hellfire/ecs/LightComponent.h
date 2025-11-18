@@ -38,7 +38,7 @@ namespace hellfire {
         float inner_cone_angle_ = 30.0f;
         float outer_cone_angle_ = 45.0f;
 
-        // Shadowmapping properties
+        // Shadow mapping properties
         bool cast_shadows_ = true;
     public:
         explicit LightComponent(const LightType type = DIRECTIONAL) : type_(type) {
@@ -65,6 +65,10 @@ namespace hellfire {
             //     transform_comp->set_rotation(direction);
             // }
         }
+
+        void set_cast_shadows(const bool cast_shadows) { cast_shadows_ = cast_shadows; }
+
+        bool should_cast_shadows() const { return cast_shadows_; }
 
         const glm::vec3& get_direction() {
             if (const auto transform_comp = get_owner().transform()) {
