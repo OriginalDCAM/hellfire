@@ -111,6 +111,8 @@ set(ASSIMP_BUILD_PCH ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(assimp)
 
+
+
 # Create GLM target from vendor directory
 add_library(GLM::GLM INTERFACE IMPORTED)
 set_target_properties(GLM::GLM PROPERTIES
@@ -182,6 +184,34 @@ add_subdirectory(Editor)
 add_subdirectory(engine)
 #add_subdirectory(sandbox)
 add_subdirectory(tests)
+
+# Try to find the package Doxygen
+find_package(Doxygen)
+
+# Doxygen config
+if(Doxygen_FOUND)
+    set(DOXYGEN_GENERATE_HTML YES)
+    set(DOXYGEN_GENERATE_MAN YES)
+    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+
+    set(DOXYGEN_RECURSIVE YES)
+    set(DOXYGEN_EXTRACT_ALL YES)
+    set(DOXYGEN_EXTRACT_PRIVATE YES)
+    set(DOXYGEN_EXTRACT_STATIC YES)
+    set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
+    set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${CMAKE_CURRENT_SOURCE_DIR}/README.md)
+    
+    doxygen_add_docs(
+            project_docs
+            ${CMAKE_CURRENT_SOURCE_DIR}/Editor
+            ${CMAKE_CURRENT_SOURCE_DIR}/engine
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests
+            COMMENT "Generating documentation with Doxygen"
+    )
+    message(STATUS "Doxygen found: Documentation target 'project_docs' available")
+else()
+    message(STATUS "Doxygen not found: Documentation will not be built")
+endif()
 
 # Configure release build optimizations after target creation
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
