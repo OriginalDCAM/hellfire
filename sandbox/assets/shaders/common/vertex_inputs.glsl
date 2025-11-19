@@ -1,6 +1,7 @@
-in vec3 vColor;
-in vec2 vTexCoords;
-in vec3 vNormal;
-in vec3 vFragPos;
-in mat3 vTBN;
-
+in VS_OUT {
+    vec3 Color;
+    vec2 TexCoords;
+    vec3 Normal;
+    vec3 FragPos;
+    mat3 TBN;
+} fs_in;

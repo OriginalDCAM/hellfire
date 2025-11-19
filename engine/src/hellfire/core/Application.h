@@ -35,7 +35,7 @@ namespace hellfire {
         bool first_mouse = true;
 
         MousePos mouse_pos;
-        bool should_warp_cursor = true;
+        bool should_warp_cursor = false;
         bool minimized = false;
         std::string title = "Hellfire Engine";
     };

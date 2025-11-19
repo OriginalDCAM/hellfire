@@ -5,9 +5,9 @@
 #include "hellfire/ecs/ScriptComponent.h"
 #include <glm/detail/type_vec3.hpp>
 
-class SceneCameraScript final : public hellfire::ScriptComponent {
+class PlayerController final : public hellfire::ScriptComponent {
 public:
-    explicit SceneCameraScript(float movement_speed = 5.0f, float mouse_sensitivity = 0.1f);
+    explicit PlayerController(float movement_speed = 5.0f, float mouse_sensitivity = 0.1f);
 
     void on_init() override;
     void handle_drone_mode(float delta_time);

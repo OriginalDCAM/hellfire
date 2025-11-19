@@ -9,11 +9,11 @@
 #include "hellfire/utilities/ServiceLocator.h"
 #include "GLFW/glfw3.h"
 
-SceneCameraScript::SceneCameraScript(float movement_speed, float mouse_sensitivity) 
+PlayerController::PlayerController(float movement_speed, float mouse_sensitivity) 
     : movement_speed_(movement_speed), mouse_sensitivity_(mouse_sensitivity) {
 }
 
-void SceneCameraScript::on_init() {
+void PlayerController::on_init() {
     std::cout << "PlayerController initialized for entity: " << get_owner().get_name() << std::endl;
 
     last_known_player_position = get_transform()->get_position();
@@ -23,12 +23,12 @@ void SceneCameraScript::on_init() {
     pitch_ = 0.0f;
 }
 
-void SceneCameraScript::on_update(float delta_time) {
+void PlayerController::on_update(float delta_time) {
     handle_drone_mode(delta_time);
     handle_movement(delta_time);
 }
 
-void SceneCameraScript::handle_drone_mode(float delta_time) {
+void PlayerController::handle_drone_mode(float delta_time) {
     static float time_since_last_v_press = 0.2f; 
     
     time_since_last_v_press += delta_time;
@@ -52,7 +52,7 @@ void SceneCameraScript::handle_drone_mode(float delta_time) {
     handle_keyboard_look(delta_time);
 }
 
-void SceneCameraScript::save_free_flight_position() {
+void PlayerController::save_free_flight_position() {
     const auto* transform = get_transform();
     if (!transform) return;
     
@@ -62,7 +62,7 @@ void SceneCameraScript::save_free_flight_position() {
     saved_pitch_ = pitch_;
 }
 
-void SceneCameraScript::restore_free_flight_position() {
+void PlayerController::restore_free_flight_position() {
     auto* transform = get_transform();
     auto* camera = get_component<hellfire::CameraComponent>();
     if (!transform || !camera) return;
@@ -73,7 +73,7 @@ void SceneCameraScript::restore_free_flight_position() {
     update_camera_orientation();
 }
 
-void SceneCameraScript::set_drone_overview_position() {
+void PlayerController::set_drone_overview_position() {
     auto* transform = get_transform();
     auto* camera = get_component<hellfire::CameraComponent>();
     if (!transform || !camera) return;
@@ -91,32 +91,12 @@ void SceneCameraScript::set_drone_overview_position() {
     
 }
 
-void SceneCameraScript::handle_keyboard_look(float delta_time) {
-    auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
-
-    set_float("look_speed", 45.0f);
-    
-    if (input_manager->is_key_pressed(GLFW_KEY_J)) { // Look left
-        yaw_ -= get_float("look_speed") * delta_time;
-    }
-    if (input_manager->is_key_pressed(GLFW_KEY_L)) { // Look right
-        yaw_ += get_float("look_speed") * delta_time;
-    }
-    if (input_manager->is_key_pressed(GLFW_KEY_I)) { // Look up
-        pitch_ += get_float("look_speed") * delta_time;
-    }
-    if (input_manager->is_key_pressed(GLFW_KEY_K)) { // Look down
-        pitch_ -= get_float("look_speed") * delta_time;
-    }
-    
-    // Constrain pitch
-    pitch_ = glm::clamp(pitch_, -89.0f, 89.0f);
-    
+void PlayerController::handle_keyboard_look(float delta_time) {
     // Update camera
     update_camera_orientation();
 }
 
-void SceneCameraScript::handle_movement(float delta_time) const {
+void PlayerController::handle_movement(float delta_time) const {
     auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
     auto *camera = get_component<hellfire::CameraComponent>();
     if (!camera) return;
@@ -165,11 +145,11 @@ void SceneCameraScript::handle_movement(float delta_time) const {
     }
 }
 
-void SceneCameraScript::on_remove() {
+void PlayerController::on_remove() {
     std::cout << "PlayerController removed from entity: " << get_owner().get_name() << std::endl;
 }
 
-void SceneCameraScript::handle_mouse_movement(float x_offset, float y_offset) {
+void PlayerController::handle_mouse_movement(float x_offset, float y_offset) {
     // Apply mouse sensitivity
     x_offset *= mouse_sensitivity_;
     y_offset *= mouse_sensitivity_;
@@ -185,7 +165,7 @@ void SceneCameraScript::handle_mouse_movement(float x_offset, float y_offset) {
     update_camera_orientation();
 }
 
-void SceneCameraScript::update_camera_orientation() const {
+void PlayerController::update_camera_orientation() const {
     auto *camera = get_component<hellfire::CameraComponent>();
     if (!camera) return;
 
@@ -194,7 +174,7 @@ void SceneCameraScript::update_camera_orientation() const {
     camera->set_pitch(pitch_);
 }
 
-void SceneCameraScript::on_interact() {
+void PlayerController::on_interact() {
     // TODO: raycast from cursor to object for object information (planet name, orbit speed, avg temperature, etc.)
     std::cout << "Player interacted!" << std::endl;
 }

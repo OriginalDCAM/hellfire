@@ -22,7 +22,7 @@ namespace hellfire::Addons {
     class ModelLoader {
     public:
         // Updated method signatures to include ShaderManager
-        static EntityID load_model(Scene* scene, const std::filesystem::path &filepath, unsigned int import_flags = 0);
+        static EntityID load_model(Scene *scene, const std::filesystem::path &filepath, unsigned int import_flags = 0);
 
         static void clear_cache();
 
@@ -33,7 +33,7 @@ namespace hellfire::Addons {
             // For editor preview - preserve hierarchy, minimal processing
             static constexpr unsigned int PREVIEW =
                     aiProcess_Triangulate |
-                    aiProcess_GenSmoothNormals |  
+                    aiProcess_GenSmoothNormals |
                     aiProcess_CalcTangentSpace |
                     aiProcess_JoinIdenticalVertices |
                     aiProcess_ValidateDataStructure;
@@ -48,7 +48,8 @@ namespace hellfire::Addons {
                     aiProcess_RemoveRedundantMaterials |
                     aiProcess_SortByPType |
                     aiProcess_FindInvalidData |
-                    aiProcess_ValidateDataStructure;
+                    aiProcess_ValidateDataStructure |
+                    aiProcess_FlipUVs;
 
             // For high quality/production builds
             static constexpr unsigned int HIGH_QUALITY =
@@ -56,14 +57,14 @@ namespace hellfire::Addons {
                     aiProcess_GenUVCoords |
                     aiProcess_TransformUVCoords |
                     aiProcess_FindInstances |
-                    aiProcess_OptimizeMeshes |  
+                    aiProcess_OptimizeMeshes |
                     aiProcess_Debone;
-            
+
             // For baked/optimized static meshes 
             static constexpr unsigned int OPTIMIZED =
                     RUNTIME |
-                    aiProcess_OptimizeMeshes |     // Merge meshes
-                    aiProcess_OptimizeGraph |      // Flatten hierarchy
+                    aiProcess_OptimizeMeshes | // Merge meshes
+                    aiProcess_OptimizeGraph | // Flatten hierarchy
                     aiProcess_PreTransformVertices; // Bake transforms
         };
 
@@ -75,7 +76,8 @@ namespace hellfire::Addons {
         };
 
         // Node processing
-        static EntityID process_node(Scene* scene,aiNode *node, const aiScene *ai_scene, const std::string &filepath,EntityID parent_id = 0);
+        static EntityID process_node(Scene *scene, aiNode *node, const aiScene *ai_scene, const std::string &filepath,
+                                     EntityID parent_id = 0);
 
         static bool is_identity_transform(const aiMatrix4x4 &matrix);
 
@@ -96,7 +98,8 @@ namespace hellfire::Addons {
         static void load_material_textures(const aiMaterial *ai_material, Material &material, const aiScene *scene,
                                            const std::string &filepath);
 
-        static bool try_load_embedded_texture_unified(const std::string &path_str, const aiScene *scene, TextureType type,
+        static bool try_load_embedded_texture_unified(const std::string &path_str, const aiScene *scene,
+                                                      TextureType type,
                                                       Material &material);
 
         static bool try_load_external_texture_unified(const std::string &path_str, const std::string &filepath,

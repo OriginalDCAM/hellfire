@@ -1,4 +1,4 @@
-#version 430 core
+    #version 430 core
 
 // Uniform inputs
 uniform mat4 MVP;       // Combined model-view-projection matrix
@@ -13,16 +13,18 @@ layout(location = 4) in vec3 aTangent;
 layout(location = 5) in vec3 aBitangent;
 
 // Outputs
-out vec3 vColor;
-out vec2 vTexCoords;
-out vec3 vNormal;
-out vec3 vFragPos;
-out mat3 vTBN;
+    out VS_OUT {
+        vec3 Color;
+        vec2 TexCoords;
+        vec3 Normal;
+        vec3 FragPos;
+        mat3 TBN;
+    } vs_out;
 
 void main()
 {
-    vColor = aColor;
-    vTexCoords = aTexCoords;
+    vs_out.Color = aColor;
+    vs_out.TexCoords = aTexCoords;
 
     mat3 normalMatrix = transpose(inverse(mat3(model)));
     vec3 N = normalize(normalMatrix * aNormal);
@@ -30,12 +32,12 @@ void main()
     vec3 B = normalize(cross(N, T));
     
     // (Tangent, Bitangent, Normal)
-    vTBN = mat3(T, B, N);
+    vs_out.TBN = mat3(T, B, N);
     
-    vNormal = N; 
+    vs_out.Normal = N; 
 
     // Transform vertex position to world space for lighting calculations
-    vFragPos = vec3(model * vec4(aPosition, 1.0));
+    vs_out.FragPos = vec3(model * vec4(aPosition, 1.0));
 
     gl_Position = MVP * vec4(aPosition, 1.0);
 }

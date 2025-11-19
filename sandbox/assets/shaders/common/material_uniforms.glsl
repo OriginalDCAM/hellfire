@@ -17,10 +17,12 @@ uniform bool useUAOTexture;
 uniform bool useUEmissiveTexture;
 
 // Material properties
-uniform vec3 uAmbientColor;
 uniform vec3 uDiffuseColor;
 uniform vec3 uSpecularColor; 
 uniform float uShininess;
+
+// Lighting uniforms
+uniform vec3 uAmbientLight;
 
 // Camera position for specular calculations
 uniform vec3 viewPos;
@@ -32,8 +34,5 @@ uniform float uvRotation;
 uniform int textureWrapMode;
 
 // Transparency uniforms
-uniform float uAlpha;
-uniform float uTransparency;
-uniform bool useTransparency;
-uniform bool useLuminanceAsAlpha;
+uniform float uOpacity;
 

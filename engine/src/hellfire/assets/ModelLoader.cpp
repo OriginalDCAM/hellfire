@@ -30,7 +30,7 @@ namespace hellfire::Addons {
 
         // Use provided flags or default to runtime
         if (import_flags == 0) {
-            import_flags = ImportFlags::RUNTIME;
+            import_flags = ImportFlags::HIGH_QUALITY;
         }
 
         // Parse model file

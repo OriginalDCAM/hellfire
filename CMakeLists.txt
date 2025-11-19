@@ -180,9 +180,9 @@ endif()
 
 
 
-add_subdirectory(Editor)
+add_subdirectory(editor)
 add_subdirectory(engine)
-#add_subdirectory(sandbox)
+add_subdirectory(sandbox)
 add_subdirectory(tests)
 
 find_package(Doxygen)
@@ -225,6 +225,7 @@ if(Doxygen_FOUND)
             "${AWESOME_CSS_DIR}/doxygen-awesome-darkmode-toggle.js"
             "${AWESOME_CSS_DIR}/doxygen-awesome-fragment-copy-button.js"
             "${AWESOME_CSS_DIR}/doxygen-awesome-paragraph-link.js"
+            
             "${AWESOME_CSS_DIR}/doxygen-awesome-interactive-toc.js"
     )
 
@@ -232,7 +233,7 @@ if(Doxygen_FOUND)
   
     # Enhanced HTML output settings for better appearance
     set(DOXYGEN_HTML_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/doc/header.html" CACHE STRING "" FORCE)
-    set(DOXYGEN_PROJECT_NAME "🔥 Hellfire Game Engine")
+    set(DOXYGEN_PROJECT_NAME "Hellfire Game Engine")
     set(DOXYGEN_PROJECT_BRIEF "A modern C++ game engine built with OpenGL")
     set(DOXYGEN_PROJECT_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/images/H.png") 
 

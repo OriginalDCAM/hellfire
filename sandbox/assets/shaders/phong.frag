@@ -6,21 +6,21 @@
 #include "common/texture_utils.glsl"
 #include "lighting/blinn_phong.glsl"
 
-out vec4 fragColor;
+layout(location=0) out vec4 fragColor;
+layout(location=1) out uint objectID;
+
+uniform uint uObjectID;
 
 void main() {
     // Sample base textures
-    vec4 diffuseValue = sampleDiffuseTexture(vTexCoords);
-    vec4 baseColor = applyVertexColors(diffuseValue, vColor);
+    vec4 diffuseValue = sampleDiffuseTexture(fs_in.TexCoords);
+    vec4 baseColor = applyVertexColors(diffuseValue, fs_in.Color);
 
     // Calculate surface normal
-    vec3 normal = normalize(vNormal);
-
+    vec3 normal = calculateSurfaceNormal(fs_in.TexCoords, fs_in.Normal, fs_in.TBN);
     // Calculate lighting
-    vec3 result = calculateBlinnPhongLighting(normal, baseColor.rgb, vFragPos);
+    vec3 result = calculateBlinnPhongLighting(normal, baseColor.rgb, fs_in.FragPos);
 
-    // Apply transparency
-    float finalAlpha = calculateFinalAlpha(baseColor.a);
-
-    fragColor = vec4(result, finalAlpha);
+    fragColor = vec4(result, uOpacity);
+    objectID = uObjectID;
 }

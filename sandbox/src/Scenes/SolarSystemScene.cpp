@@ -1,12 +1,13 @@
 ﻿#include <utility>
 
-#include "../../../engine/src/hellfire/scene/CameraFactory.h"
+#include "hellfire/scene/CameraFactory.h"
 #include "hellfire/assets/Asset.h"
-#include "hellfire/graphics/lighting/DirectionalLight.h"
 #include "Scenes/SolarSystemScene.h"
 
 #include "hellfire/ecs/InstancedRenderableComponent.h"
 #include "hellfire/graphics/Geometry/Sphere.h"
+#include "hellfire/graphics/lighting/PointLight.h"
+#include "hellfire/graphics/lighting/SpotLight.h"
 #include "Scripts/OrbitController.h"
 #include "Scripts/PlayerController.h"
 #include "Utils/AsteroidBeltFactory.h"
@@ -37,8 +38,8 @@ MaterialMap load_material_map() {
     auto dynamic_earth_material = hellfire::MaterialBuilder::create_custom(
         "Dynamic Earth Material", "assets/shaders/custom/earth_day_night.vert",
         "assets/shaders/custom/earth_day_night.frag");
-    dynamic_earth_material->add_texture(planet_surface_dir + "earth_daymap.jpg", "uDayTexture", 0);
-    dynamic_earth_material->add_texture(planet_surface_dir + "earth_nightmap.jpg", "uNightTexture", 1);
+    // dynamic_earth_material->set_property(planet_surface_dir + "earth_daymap.jpg", "uDayTexture", 0);
+    // dynamic_earth_material->add_texture(planet_surface_dir + "earth_nightmap.jpg", "uNightTexture", 1);
     materials["DYNAMIC_EARTH_MATERIAL"] = dynamic_earth_material;
 
 
@@ -83,7 +84,7 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
     hellfire::EntityID world_id = scene->create_entity("Solar System World");
 
     // Sun light
-    hellfire::EntityID sunlight_id = hellfire::DirectionalLight::create(scene, "Sol Light");
+    hellfire::EntityID sunlight_id = hellfire::PointLight::create(scene, "Sol Light");
     scene->set_parent(sunlight_id, world_id);
 
     // Sun visual
@@ -173,7 +174,7 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
     );
     hellfire::Entity *camera = scene->get_entity(camera_id);
     camera->get_component<hellfire::CameraComponent>()->look_at(glm::vec3(0.0f));
-    camera->add_component<SceneCameraScript>(12.5f);
+    camera->add_component<PlayerController>(12.5f);
     scene->set_parent(camera_id, world_id);
     scene->set_default_camera(camera_id);
 
@@ -182,12 +183,12 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
     skybox->set_cubemap_faces({
         "assets/skyboxes/space_right.png",
         "assets/skyboxes/space_left.png",
-        "assets/skyboxes/space_bottom.png",
         "assets/skyboxes/space_top.png",
+        "assets/skyboxes/space_bottom.png",
         "assets/skyboxes/space_front.png",
         "assets/skyboxes/space_back.png"
     });
-    scene->set_skybox(skybox);
+    scene->environment()->set_skybox(*skybox);
 
     return scene;
 }

@@ -10,11 +10,11 @@
 #include "GLFW/glfw3.h"
 #include "hellfire/scene/Scene.h"
 
-SceneCameraScript::SceneCameraScript(float movement_speed, float mouse_sensitivity) 
+PlayerController::PlayerController(float movement_speed, float mouse_sensitivity) 
     : movement_speed_(movement_speed), mouse_sensitivity_(mouse_sensitivity) {
 }
 
-void SceneCameraScript::on_init() {
+void PlayerController::on_init() {
     std::cout << "SceneCameraScript initialized for entity: " << get_owner().get_name() << std::endl;
     REGISTER_VAR(look_speed, FLOAT);
 
@@ -23,12 +23,12 @@ void SceneCameraScript::on_init() {
     pitch_ = 0.0f;
 }
 
-void SceneCameraScript::on_update(float delta_time) {
+void PlayerController::on_update(float delta_time) {
     handle_keyboard_look(delta_time);
     handle_movement(delta_time);
 }
 
-void SceneCameraScript::handle_keyboard_look(float delta_time) {
+void PlayerController::handle_keyboard_look(float delta_time) {
     auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
     
     if (input_manager->is_key_pressed(GLFW_KEY_J)) { // Look left
@@ -51,7 +51,7 @@ void SceneCameraScript::handle_keyboard_look(float delta_time) {
     update_camera_orientation();
 }
 
-void SceneCameraScript::handle_movement(float delta_time) const {
+void PlayerController::handle_movement(float delta_time) const {
     auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
     auto *camera = get_component<hellfire::CameraComponent>();
     if (!camera) return;
@@ -94,11 +94,11 @@ void SceneCameraScript::handle_movement(float delta_time) const {
     }
 }
 
-void SceneCameraScript::on_remove() {
+void PlayerController::on_remove() {
     std::cout << "SceneCameraScript removed from entity: " << get_owner().get_name() << std::endl;
 }
 
-void SceneCameraScript::handle_mouse_movement(float x_offset, float y_offset) {
+void PlayerController::handle_mouse_movement(float x_offset, float y_offset) {
     // Apply mouse sensitivity
     x_offset *= mouse_sensitivity_;
     y_offset *= mouse_sensitivity_;
@@ -114,7 +114,7 @@ void SceneCameraScript::handle_mouse_movement(float x_offset, float y_offset) {
     update_camera_orientation();
 }
 
-void SceneCameraScript::update_camera_orientation() const {
+void PlayerController::update_camera_orientation() const {
     auto *camera = get_component<hellfire::CameraComponent>();
     if (!camera) return;
 

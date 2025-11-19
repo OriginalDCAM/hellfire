@@ -12,7 +12,7 @@
 
 void GamePlugin::on_initialize(hellfire::Application &app) {
     auto im = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
-    im->set_cursor_mode(hellfire::HIDDEN);
+    im->set_cursor_mode(hellfire::DISABLED);
     
     app_info_ = &app.get_window_info();
     scene_manager_ = hellfire::ServiceLocator::get_service<hellfire::SceneManager>();
@@ -60,7 +60,7 @@ void GamePlugin::process_mouse_movement(float x_offset, float y_offset) const {
 
     // Look for the "Main Camera" entity 
     if (const auto *camera_entity = active_scene->find_entity_by_name("Main Camera")) {
-        if (auto *player_controller = camera_entity->get_component<SceneCameraScript>()) {
+        if (auto *player_controller = camera_entity->get_component<PlayerController>()) {
             player_controller->handle_mouse_movement(x_offset, y_offset);
         }
     }

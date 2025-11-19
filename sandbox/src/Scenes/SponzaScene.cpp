@@ -35,20 +35,20 @@ hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
         glm::vec3(10.0f, 5.0f, 0.0f)
     );
     hellfire::Entity *camera = scene->get_entity(camera_id);
-    camera->add_component<SceneCameraScript>(10.0f);
+    camera->add_component<PlayerController>(10.0f);
     scene->set_default_camera(camera_id);
 
     auto *skybox = new hellfire::Skybox();
     skybox->set_cubemap_faces({
         "assets/skyboxes/px.png", // +X
         "assets/skyboxes/nx.png", // -X
-        "assets/skyboxes/ny.png", // +Y
-        "assets/skyboxes/py.png", // -Y
+        "assets/skyboxes/py.png", // +Y
+        "assets/skyboxes/ny.png", // -Y
         "assets/skyboxes/pz.png", // +Z
         "assets/skyboxes/nz.png" // -Z
     });
 
-    scene->set_skybox(skybox);
+    scene->environment()->set_skybox(*skybox);
 
     return scene;
 }

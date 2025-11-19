@@ -8,7 +8,7 @@ uniform vec3 tint = vec3(1.0);
 uniform float exposure = 1.0;
 
 void main() {
-    vec3 flipped_coords = -TexCoords;
+    vec3 flipped_coords = TexCoords;
     
     vec3 color = texture(skybox, flipped_coords).rgb;
     // Apply tint and exposure
