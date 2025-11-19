@@ -234,7 +234,7 @@ if(Doxygen_FOUND)
     set(DOXYGEN_HTML_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/doc/header.html" CACHE STRING "" FORCE)
     set(DOXYGEN_PROJECT_NAME "🔥 Hellfire Game Engine")
     set(DOXYGEN_PROJECT_BRIEF "A modern C++ game engine built with OpenGL")
-#    set(DOXYGEN_PROJECT_LOGO "") # Add path to your logo if you have one
+    set(DOXYGEN_PROJECT_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/images/H.png") 
 
     # Better code highlighting
     set(DOXYGEN_SOURCE_BROWSER YES)
