@@ -185,30 +185,87 @@ add_subdirectory(engine)
 #add_subdirectory(sandbox)
 add_subdirectory(tests)
 
-# Try to find the package Doxygen
 find_package(Doxygen)
 
-# Doxygen config
 if(Doxygen_FOUND)
+    # Fetch doxygen-awesome-css
+    include(FetchContent)
+    FetchContent_Declare(
+            doxygen-awesome-css
+            URL https://github.com/jothepro/doxygen-awesome-css/archive/refs/heads/main.zip
+    )
+    FetchContent_MakeAvailable(doxygen-awesome-css)
+    FetchContent_GetProperties(doxygen-awesome-css SOURCE_DIR AWESOME_CSS_DIR)
+
+    # Doxygen config
     set(DOXYGEN_GENERATE_HTML YES)
-    set(DOXYGEN_GENERATE_MAN YES)
+    set(DOXYGEN_GENERATE_MAN NO)
     set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
 
+    # Basic settings
     set(DOXYGEN_RECURSIVE YES)
     set(DOXYGEN_EXTRACT_ALL YES)
     set(DOXYGEN_EXTRACT_PRIVATE YES)
     set(DOXYGEN_EXTRACT_STATIC YES)
     set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${CMAKE_CURRENT_SOURCE_DIR}/README.md)
-    
+
+    # Doxygen Awesome CSS Configuration
+    set(DOXYGEN_GENERATE_TREEVIEW YES)  # Required for sidebar
+    set(DOXYGEN_DISABLE_INDEX NO)
+    set(DOXYGEN_FULL_SIDEBAR NO)
+    set(DOXYGEN_HTML_COLORSTYLE "LIGHT")
+    set(DOXYGEN_HTML_EXTRA_STYLESHEET
+            "${AWESOME_CSS_DIR}/doxygen-awesome.css"
+            "${AWESOME_CSS_DIR}/doxygen-awesome-sidebar-only.css"
+            "${AWESOME_CSS_DIR}/doxygen-awesome-sidebar-only-darkmode-toggle.css"
+            "${CMAKE_CURRENT_SOURCE_DIR}/doc/custom.css"
+    )
+    set(DOXYGEN_HTML_EXTRA_FILES
+            "${AWESOME_CSS_DIR}/doxygen-awesome-darkmode-toggle.js"
+            "${AWESOME_CSS_DIR}/doxygen-awesome-fragment-copy-button.js"
+            "${AWESOME_CSS_DIR}/doxygen-awesome-paragraph-link.js"
+            "${AWESOME_CSS_DIR}/doxygen-awesome-interactive-toc.js"
+    )
+
+    set(DOXYGEN_IMAGE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/images)
+  
+    # Enhanced HTML output settings for better appearance
+    set(DOXYGEN_HTML_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/doc/header.html" CACHE STRING "" FORCE)
+    set(DOXYGEN_PROJECT_NAME "🔥 Hellfire Game Engine")
+    set(DOXYGEN_PROJECT_BRIEF "A modern C++ game engine built with OpenGL")
+#    set(DOXYGEN_PROJECT_LOGO "") # Add path to your logo if you have one
+
+    # Better code highlighting
+    set(DOXYGEN_SOURCE_BROWSER YES)
+    set(DOXYGEN_VERBATIM_HEADERS YES)
+    set(DOXYGEN_CLANG_ASSISTED_PARSING YES)
+    set(DOXYGEN_CLANG_DATABASE_PATH "${CMAKE_BINARY_DIR}")
+
+    # Class diagrams and graphs
+    set(DOXYGEN_HAVE_DOT YES)
+    set(DOXYGEN_CLASS_GRAPH YES)
+    set(DOXYGEN_COLLABORATION_GRAPH YES)
+    set(DOXYGEN_UML_LOOK YES)
+    set(DOXYGEN_TEMPLATE_RELATIONS YES)
+    set(DOXYGEN_DOT_IMAGE_FORMAT svg)
+    set(DOXYGEN_INTERACTIVE_SVG YES)
+
+    # Modern navigation
+    set(DOXYGEN_SEARCHENGINE YES)
+    set(DOXYGEN_SERVER_BASED_SEARCH NO)
+
     doxygen_add_docs(
             project_docs
+            ${CMAKE_CURRENT_SOURCE_DIR}/README.md
             ${CMAKE_CURRENT_SOURCE_DIR}/Editor
             ${CMAKE_CURRENT_SOURCE_DIR}/engine
             ${CMAKE_CURRENT_SOURCE_DIR}/tests
             COMMENT "Generating documentation with Doxygen"
     )
+
     message(STATUS "Doxygen found: Documentation target 'project_docs' available")
+    message(STATUS "Doxygen Awesome CSS: ${AWESOME_CSS_DIR}")
 else()
     message(STATUS "Doxygen not found: Documentation will not be built")
 endif()

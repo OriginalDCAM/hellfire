@@ -1,0 +1,83 @@
+﻿/* Hellfire Engine Documentation Custom Styles */
+
+/* Game engine theme colors */
+:root {
+    --primary-color: #ff4500;
+    --primary-dark-color: #cc3700;
+    --primary-light-color: #ff6347;
+    --accent-color: #ffa500;
+
+    /* Override doxygen-awesome defaults */
+    --primary-color: #ff4500 !important;
+    --primary-dark-color: #cc3700 !important;
+    --page-background-color: #ffffff;
+    --page-foreground-color: #2c3e50;
+    --separator-color: #dedede;
+}
+
+html.dark-mode {
+    --primary-color: #ff6347 !important;
+    --primary-dark-color: #ff4500 !important;
+    --page-background-color: #1a1a1a;
+    --page-foreground-color: #e8e8e8;
+    --separator-color: #2a2a2a;
+}
+
+/* Fancy code blocks */
+.fragment {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+html.dark-mode .fragment {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Better class headers */
+.memitem {
+    border-left: 3px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.memitem:hover {
+    box-shadow: 0 2px 12px rgba(255, 69, 0, 0.1);
+}
+
+/* Styled badges for public/private/protected */
+.mlabel {
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85em;
+    padding: 2px 8px;
+}
+
+/* Navigation improvements */
+#nav-tree {
+    box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+}
+
+html.dark-mode #nav-tree {
+    box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+}
+
+/* Better tables */
+table.markdownTable {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table.markdownTable th {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Improved search box */
+#MSearchBox {
+    border-radius: 20px;
+    border: 2px solid var(--separator-color);
+}
+
+#MSearchBox:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
+}
