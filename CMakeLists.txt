@@ -187,9 +187,8 @@ if (NOT BUILD_DOCS_ONLY)
     add_subdirectory(sandbox)
     add_subdirectory(tests)
 
-    find_package(Doxygen)
 endif ()
-
+find_package(Doxygen)
 if (Doxygen_FOUND)
     # Fetch doxygen-awesome-css
     include(FetchContent)
