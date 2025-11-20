@@ -5,9 +5,9 @@
 #include "hellfire/ecs/ScriptComponent.h"
 #include <glm/detail/type_vec3.hpp>
 
-class PlayerController final : public hellfire::ScriptComponent {
+class SceneCameraScript final : public hellfire::ScriptComponent {
     SCRIPT_CLASS(SceneCameraScript);
-    explicit PlayerController(float movement_speed = 5.0f, float mouse_sensitivity = 0.1f);
+    explicit SceneCameraScript(float movement_speed = 5.0f, float mouse_sensitivity = 0.1f);
 
     SCRIPT_VAR(float, look_speed, 45.0f);
 
