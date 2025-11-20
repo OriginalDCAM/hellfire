@@ -3,7 +3,7 @@
 on:
   push:
     branches:
-      - engine/shadows
+      - [main, development]
   workflow_dispatch:
 
 permissions:
