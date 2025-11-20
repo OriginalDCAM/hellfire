@@ -30,7 +30,7 @@ The constructor initializes the SceneManager with no active scene. The destructo
 
 ### Scene Creation and Loading
 
-#### `create_scene`
+#### create_scene
 
 ```cpp
 Scene* create_scene(const std::string& name = "GameScene");
@@ -57,7 +57,7 @@ Scene* game_scene = scene_manager.create_scene("Level1");
 
 ---
 
-#### `load_scene`
+#### load_scene
 
 ```cpp
 Scene* load_scene(const std::string& filename);
@@ -86,7 +86,7 @@ Scene* same_scene = scene_manager.load_scene("assets/scenes/level1.json");
 
 ---
 
-#### `save_scene`
+#### save_scene
 
 ```cpp
 bool save_scene(const std::string& filename, Scene* scene = nullptr) const;
@@ -118,7 +118,7 @@ if (success) {
 
 ### Scene Management
 
-#### `set_active_scene`
+#### set_active_scene
 
 ```cpp
 void set_active_scene(Scene* scene);
@@ -143,7 +143,7 @@ scene_manager.set_active_scene(game);
 
 ---
 
-#### `get_active_scene`
+#### get_active_scene
 
 ```cpp
 Scene* get_active_scene() const;
@@ -163,7 +163,7 @@ if (current) {
 
 ---
 
-#### `get_scenes`
+#### get_scenes
 
 ```cpp
 std::vector<Scene*> get_scenes();
@@ -183,7 +183,7 @@ for (Scene* scene : all_scenes) {
 
 ---
 
-#### `update`
+#### update
 
 ```cpp
 void update(float delta_time);
@@ -205,7 +205,7 @@ while (running) {
 
 ---
 
-#### `clear`
+#### clear
 
 ```cpp
 void clear();
@@ -223,7 +223,7 @@ scene_manager.clear();
 
 ### Camera Management
 
-#### `set_active_camera`
+#### set_active_camera
 
 ```cpp
 void set_active_camera(EntityID camera) const;
@@ -244,7 +244,7 @@ scene_manager.set_active_camera(camera_entity);
 
 ---
 
-#### `get_active_camera`
+#### get_active_camera
 
 ```cpp
 CameraComponent* get_active_camera() const;
@@ -264,7 +264,7 @@ if (camera) {
 
 ---
 
-#### `get_camera_entities`
+#### get_camera_entities
 
 ```cpp
 std::vector<EntityID> get_camera_entities() const;
@@ -289,7 +289,7 @@ for (EntityID cam_id : cameras) {
 
 ### Entity Management
 
-#### `find_entity_by_name`
+#### find_entity_by_name
 
 ```cpp
 EntityID find_entity_by_name(const std::string& name);
@@ -316,7 +316,7 @@ if (player != 0) {
 
 ### Callbacks
 
-#### `set_scene_activated_callback`
+#### set_scene_activated_callback
 
 ```cpp
 using SceneActivatedCallback = std::function<void(Scene*)>;
