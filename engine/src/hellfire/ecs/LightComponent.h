@@ -11,8 +11,14 @@
 #include "hellfire/graphics/shader/Shader.h"
 #include "Component.h"
 #include "Entity.h"
+#include "hellfire/graphics/backends/opengl/Framebuffer.h"
 
 namespace hellfire {
+    struct ShadowMapData {
+        std::unique_ptr<Framebuffer> framebuffer;
+        glm::mat4 light_view_proj;
+    };
+    
     class LightComponent : public Component {
     public:
         enum LightType {
@@ -37,6 +43,8 @@ namespace hellfire {
         // Spotlight properties
         float inner_cone_angle_ = 30.0f;
         float outer_cone_angle_ = 45.0f;
+
+        glm::mat4 light_view_proj_matrix = glm::mat4(1.0f);
 
         // Shadow mapping properties
         bool cast_shadows_ = true;
@@ -129,10 +137,60 @@ namespace hellfire {
             }
         }
 
+        const glm::mat4& get_light_view_proj_matrix() const { return light_view_proj_matrix; }
+        void set_light_view_proj_matrix(const glm::mat4& lvpm) { light_view_proj_matrix = lvpm; }
+
+        void compute_directional_light_matrix() {
+            // For directional lights, use orthographic projection
+            // covering the scene bounds
+            const float ortho_size = 10.0f;
+            const float near_plane = 0.1f;
+            const float far_plane = 512.0f;
+
+            glm::mat4 light_projection = glm::ortho(-ortho_size, ortho_size,
+                -ortho_size, ortho_size, near_plane, far_plane);
+
+            glm::vec3 light_pos = -get_direction() * 10.0f; // Position light "backwards" along direction
+            glm::vec3 target = glm::vec3(0.0f); // Look at scene center
+            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+            // If direction is too close to up vector, use different up
+            if (glm::abs(glm::dot(glm::normalize(get_direction()), up)) > 0.99f) {
+                up = glm::vec3(1.0f, 0.0f, 0.0f);
+            }
+
+            glm::mat4 light_view = glm::lookAt(light_pos, target, up);
+
+            light_view_proj_matrix = light_projection * light_view;
+        }
+
         // Factory methods for convenience
         static LightComponent *create_directional(const glm::vec3 &direction = glm::vec3(0.0f, -1.0f, 0.0f)) {
-            auto *light = new LightComponent(DIRECTIONAL);
+            auto* light = new LightComponent(DIRECTIONAL);
             light->set_direction(direction);
+    
+            // Much larger coverage to include your plane
+            float ortho_size = 50.0f;  // Increased from 10 to 50
+            float near_plane = 0.1f;
+            float far_plane = 100.0f;  // Increased from 7.5 to 100
+    
+            glm::mat4 light_projection = glm::ortho(
+                -ortho_size, ortho_size,
+                -ortho_size, ortho_size,
+                near_plane, far_plane
+            );
+    
+            // Position light higher and further back to see more of the scene
+            glm::vec3 light_pos = glm::vec3(0.0f, 20.0f, 10.0f);
+            glm::vec3 look_at = glm::vec3(0.0f, 0.0f, 0.0f);
+    
+            glm::mat4 light_view = glm::lookAt(
+                light_pos,
+                look_at,
+                glm::vec3(0.0f, 0.0f, -1.0f)  // Up vector
+            );
+    
+            light->light_view_proj_matrix = light_projection * light_view;
             return light;
         }
 

@@ -27,24 +27,28 @@ namespace hellfire {
         // Enable debugging for OpenGL
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // Makes errors appear immediately
-        glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, 
-                                  GLenum severity, GLsizei length, 
-                                  const GLchar* message, const void* userParam) {
+        glDebugMessageCallback([](GLenum source, GLenum type, GLuint id,
+                                  GLenum severity, GLsizei length,
+                                  const GLchar *message, const void *userParam) {
             if (type == GL_DEBUG_TYPE_ERROR) {
                 std::cerr << "GL ERROR: " << message << std::endl;
-            __debugbreak();
+                __debugbreak();
             }
         }, nullptr);
+
+
+        // Setup shadow pass shader
+        shadow_material_ = MaterialBuilder::create_custom("Shadow Material", "assets/shaders/shadow.vert",
+                                                          "assets/shaders/shadow.frag");
 
         skybox_renderer_.initialize();
     }
 
-    void Renderer::render(Scene &scene, const Entity* camera_override = nullptr) {
-        const Entity* camera_entity = camera_override;
+    void Renderer::render(Scene &scene, const Entity *camera_override = nullptr) {
+        const Entity *camera_entity = camera_override;
         if (!camera_entity) {
             const EntityID camera_id = scene.get_default_camera_entity_id();
             camera_entity = scene.get_entity(camera_id);
-            
         }
 
         if (!camera_entity) {
@@ -58,13 +62,7 @@ namespace hellfire {
             std::cerr << "Camera entity missing CameraComponent" << std::endl;
         }
 
-        if (render_to_framebuffer_) {
-            render_scene_to_framebuffer(scene, *camera_comp);
-        } else {
-            begin_frame();
-            render_internal(scene, *camera_comp);
-            end_frame();
-        }
+        render_frame(scene, *camera_comp);
     }
 
     void Renderer::reset_framebuffer_data() {
@@ -72,7 +70,7 @@ namespace hellfire {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
-    void Renderer::clear_drawable_objects_list() {
+    void Renderer::clear_draw_list() {
         opaque_objects_.clear();
         transparent_objects_.clear();
         opaque_instanced_objects_.clear();
@@ -86,19 +84,14 @@ namespace hellfire {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
 
-        clear_drawable_objects_list();
+        clear_draw_list();
     }
 
     void Renderer::end_frame() {
         glFlush();
     }
 
-    Shader *Renderer::get_default_shader() const {
-        return fallback_shader_;
-    }
-
-
-    void Renderer::store_lights_in_context(const std::vector<Entity *> &light_entities, CameraComponent &camera) const {
+    void Renderer::store_lights_in_context(const std::vector<Entity *> &light_entities, CameraComponent &camera) {
         if (!context_) return;
 
         // Separate lights by type
@@ -109,6 +102,7 @@ namespace hellfire {
             const auto *light = entity->get_component<LightComponent>();
             if (!light) continue;
 
+            // Sort lights into their respective vectors
             switch (light->get_light_type()) {
                 case LightComponent::LightType::DIRECTIONAL:
                     if (directional_lights.size() < 4) {
@@ -143,38 +137,10 @@ namespace hellfire {
         context_->camera_component = &camera;
     }
 
-    void Renderer::render_internal(Scene &scene, CameraComponent &camera) {
-        clear_drawable_objects_list();
-        // Store this for collect methods
-        scene_ = &scene;
-
-        // Collect lights
-        const std::vector<EntityID> light_entity_ids = scene.find_entities_with_component<LightComponent>();
-        std::vector<Entity *> light_entities;
-        for (const EntityID id: light_entity_ids) {
-            if (Entity *e = scene.get_entity(id)) {
-                light_entities.push_back(e);
-            }
-        }
-        store_lights_in_context(light_entities, camera);
-
-        // Get camera position
-        const auto *camera_transform = camera.get_owner().transform();
-        const glm::vec3 camera_pos = camera_transform ? camera_transform->get_world_position() : glm::vec3(0.0f);
-
-        // Collect render commands from root entities
+    void Renderer::collect_geometry_from_scene(Scene &scene, const glm::vec3 camera_pos) {
         for (const EntityID root_id: scene.get_root_entities()) {
             collect_render_commands_recursive(root_id, camera_pos);
         }
-
-        // create_shadow_map();
-        // Render
-        const glm::mat4 view = camera.get_view_matrix();
-        const glm::mat4 projection = camera.get_projection_matrix();
-
-        render_opaque_pass(view, projection);
-        render_skybox_pass(&scene, view, projection, &camera);
-        render_transparent_pass(view, projection);
     }
 
     void Renderer::collect_render_commands_recursive(EntityID entity_id, const glm::vec3 &camera_pos) {
@@ -231,79 +197,25 @@ namespace hellfire {
         }
     }
 
-    void Renderer::render_opaque_pass(const glm::mat4 &view, const glm::mat4 &projection) {
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_TRUE);
-        glDepthFunc(GL_LESS);
-        glDisable(GL_BLEND);
+    void Renderer::ensure_shadow_map(Entity *light_entity, const LightComponent &light) {
+        if (!shadow_maps_.contains(light_entity)) {
+            auto shadow_map = std::make_unique<Framebuffer>();
+            FrameBufferAttachmentSettings settings;
+            settings.width = 1024;
+            settings.height = 1024;
 
-        
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
+            settings.min_filter = GL_NEAREST;
+            settings.mag_filter = GL_NEAREST;
+            settings.wrap_s = GL_CLAMP_TO_BORDER;
+            settings.wrap_t = GL_CLAMP_TO_BORDER;
+            shadow_map->attach_depth_texture(settings);
 
-        glEnable(GL_STENCIL_TEST);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
-        std::ranges::sort(opaque_objects_,
-                          [](const RenderCommand &a, const RenderCommand &b) {
-                              return a.distance_to_camera < b.distance_to_camera;
-                          });
-
-        for (const auto &cmd: opaque_objects_) {
-            draw_render_command(cmd, view, projection);
+            glBindTexture(GL_TEXTURE_2D, shadow_map->get_depth_attachment());
+            float border_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            shadow_maps_[light_entity] = {std::move(shadow_map), glm::mat4(1.0f)};
         }
-
-        for (const auto &cmd: opaque_instanced_objects_) {
-            draw_instanced_command(cmd, view, projection);
-        }
-    }
-
-    void Renderer::render_transparent_pass(const glm::mat4 &view, const glm::mat4 &projection) {
-        // Configure blending: enable for color input, disable for object ID output
-        glEnablei(GL_BLEND, 0);  // Enable blending for fragColor (location 0)
-        glDisablei(GL_BLEND, 1); // Disable blending for objectID (location 1)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // Sort the transparent objects from back-to-front relative to camera
-        // This ensures proper blending order between different objects
-        std::ranges::sort(transparent_objects_,
-                          [](const RenderCommand &a, const RenderCommand &b) {
-                              return a.distance_to_camera > b.distance_to_camera;
-                          });
-
-        // Render non-instanced transparent objects with two-pass rendering
-        glDisable(GL_CULL_FACE);
-        for (const auto &cmd: transparent_objects_) {
-            // Pass 1: Draw back faces, to depth buffer
-            glCullFace(GL_FRONT);
-            glDepthMask(GL_TRUE);
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(2.0f, 2.0f);
-            draw_render_command(cmd, view, projection);
-            glDisable(GL_POLYGON_OFFSET_FILL);
-
-            // Pass 2: Draw front faces, don't write to depth buffer
-            glCullFace(GL_BACK);
-            glDepthMask(GL_FALSE);
-            draw_render_command(cmd, view, projection);
-        }
-
-        // Render instanced transparent objects with two-pass rendering
-        for (const auto &cmd: transparent_instanced_objects_) {
-            // Pass 1: Draw back faces, to depth buffer
-            glCullFace(GL_FRONT);
-            glDepthMask(GL_TRUE);
-            draw_instanced_command(cmd, view, projection);
-
-            // Pass 2: Draw front faces, don't write to depth buffer
-            glCullFace(GL_BACK);
-            glDepthMask(GL_FALSE);
-            draw_instanced_command(cmd, view, projection);
-        }
-
-        // Restore depth writing
-        glDepthMask(GL_TRUE);
     }
 
     void Renderer::draw_render_command(const RenderCommand &cmd, const glm::mat4 &view, const glm::mat4 &projection) {
@@ -313,12 +225,30 @@ namespace hellfire {
         const auto *transform = entity->get_component<TransformComponent>();
         if (!transform) return;
 
-        Shader& shader = get_shader_for_material(cmd.material);
+        Shader &shader = get_shader_for_material(cmd.material);
         shader.use();
 
         // Upload lights
         if (context_) {
             RenderingUtils::upload_lights_to_shader(shader, *context_);
+
+            // Bind shadow maps for directional lights
+            for (int i = 0; i < context_->num_directional_lights; i++) {
+                Entity* light_entity = context_->directional_light_entities[i];
+
+                if (shadow_maps_.contains(light_entity)) {
+                    auto& shadow_data = shadow_maps_[light_entity];
+
+                    // Bind depth texture to texture unit
+                    int texture_unit = 10 + i; // Start at unit 10 to avoid conflicts
+                    glActiveTexture(GL_TEXTURE0 + texture_unit);
+                    glBindTexture(GL_TEXTURE_2D, shadow_data.framebuffer->get_depth_attachment());
+
+                    // Set shader uniforms
+                    shader.set_int("uShadowMap[" + std::to_string(i) + "]", texture_unit);
+                    shader.set_mat4("uLightSpaceMatrix[" + std::to_string(i) + "]", shadow_data.light_view_proj);
+                }
+            }
         }
 
         shader.set_vec3("uAmbientLight", scene_->environment()->get_ambient_light());
@@ -338,7 +268,7 @@ namespace hellfire {
                                           const glm::mat4 &projection) {
         if (const Entity *entity = scene_->get_entity(cmd.entity_id); !entity) return;
 
-        Shader& shader = get_shader_for_material(cmd.material);
+        Shader &shader = get_shader_for_material(cmd.material);
         shader.use();
 
         // Upload light data as uniforms to shader
@@ -366,8 +296,8 @@ namespace hellfire {
         cmd.material->unbind();
     }
 
-
-    void Renderer::render_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection, CameraComponent* camera_comp) const {
+    void Renderer::execute_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection,
+                                       CameraComponent *camera_comp) const {
         if (!scene || !scene->environment()->has_skybox()) return;
 
         glDisable(GL_CULL_FACE);
@@ -377,7 +307,191 @@ namespace hellfire {
         }
     }
 
-    void Renderer::create_scene_framebuffer(uint32_t width, uint32_t height) {
+
+    void Renderer::collect_lights_from_scene(Scene &scene, CameraComponent &camera) {
+        const std::vector<EntityID> light_entity_ids = scene.find_entities_with_component<LightComponent>();
+        std::vector<Entity *> light_entities;
+        for (const EntityID id: light_entity_ids) {
+            if (Entity *e = scene.get_entity(id)) {
+                light_entities.push_back(e);
+            }
+        }
+        store_lights_in_context(light_entities, camera);
+    }
+
+    void Renderer::execute_main_pass(Scene &scene, CameraComponent &camera) {
+        clear_draw_list();
+        scene_ = &scene;
+
+
+        // Gather lights and geometry
+        collect_lights_from_scene(scene, camera);
+        collect_geometry_from_scene(scene, camera.get_owner().transform()->get_position());
+
+        // Execute rendering passes
+        const glm::mat4 view = camera.get_view_matrix();
+        const glm::mat4 projection = camera.get_projection_matrix();
+
+        execute_geometry_pass(view, projection);
+        execute_skybox_pass(&scene, view, projection, &camera);
+        execute_transparency_pass(view, projection);
+    }
+
+
+
+    void Renderer::execute_shadow_passes(Scene &scene) {
+         // Gather all lights that cast shadows
+        const std::vector<EntityID> light_entity_ids = scene.find_entities_with_component<LightComponent>();
+
+        std::vector<Entity*> shadow_casting_lights;
+        for (const EntityID id : light_entity_ids) {
+            Entity* entity = scene.get_entity(id);
+            if (!entity) continue;
+
+            const auto* light = entity->get_component<LightComponent>();
+            if (light && light->should_cast_shadows()) {
+                shadow_casting_lights.push_back(entity);
+            }
+        }
+
+        clear_draw_list();
+        scene_ = &scene;
+        const glm::vec3 dummy_camera_pos(0.0f); // Distance doesn't matter for shadows
+        for (const EntityID root_id : scene.get_root_entities()) {
+            collect_render_commands_recursive(root_id, dummy_camera_pos);
+        }
+
+        // Render each light's shadow map
+        for (Entity* light_entity : shadow_casting_lights) {
+            const auto* light = light_entity->get_component<LightComponent>();
+            if (!light) continue;
+
+            ensure_shadow_map(light_entity, *light);
+
+            auto& shadow_data = shadow_maps_[light_entity];
+            shadow_data.framebuffer->bind();
+
+            glViewport(0, 0, 1024, 1024);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
+
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+
+            // Use light's view-projection matrix
+            const glm::mat4 light_view_proj = light->get_light_view_proj_matrix();
+            shadow_data.light_view_proj = light_view_proj; // Store for main pass
+
+            // Render geometry to depth texture
+            draw_shadow_geometry(light_view_proj);
+
+            shadow_data.framebuffer->unbind();
+
+            glCullFace(GL_BACK);
+        }
+            glViewport(0, 0, framebuffer_width_, framebuffer_height_);            
+    }
+
+    void Renderer::draw_shadow_geometry(const glm::mat4 &light_view_proj) {
+        Shader& shadow_shader = get_shader_for_material(shadow_material_);
+        shadow_shader.use();
+        shadow_shader.set_mat4("uLightViewProjMatrix", light_view_proj);
+
+        shadow_material_->bind();
+
+        for (const auto &cmd : opaque_objects_) {
+            const Entity *entity = scene_->get_entity(cmd.entity_id);
+            if (!entity) continue;
+
+            const auto* transform = entity->get_component<TransformComponent>();
+            if (!transform) continue;
+
+            // Set model matrix for this object
+            shadow_shader.set_mat4("uModelMatrix", transform->get_world_matrix());
+
+            cmd.mesh->draw();
+        }
+
+        shadow_material_->unbind();
+    }
+
+    void Renderer::execute_geometry_pass(const glm::mat4 &view, const glm::mat4 &proj) {
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+        glDisable(GL_BLEND);
+
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
+
+        glEnable(GL_STENCIL_TEST);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+        std::ranges::sort(opaque_objects_,
+                          [](const RenderCommand &a, const RenderCommand &b) {
+                              return a.distance_to_camera < b.distance_to_camera;
+                          });
+
+        for (const auto &cmd: opaque_objects_) {
+            draw_render_command(cmd, view, proj);
+        }
+
+        for (const auto &cmd: opaque_instanced_objects_) {
+            draw_instanced_command(cmd, view, proj);
+        }
+    }
+
+    void Renderer::execute_transparency_pass(const glm::mat4 &view, const glm::mat4 &proj) {
+        // Configure blending: enable for color input, disable for object ID output
+        glEnablei(GL_BLEND, 0); // Enable blending for fragColor (location 0)
+        glDisablei(GL_BLEND, 1); // Disable blending for objectID (location 1)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Sort the transparent objects from back-to-front relative to camera
+        // This ensures proper blending order between different objects
+        std::ranges::sort(transparent_objects_,
+                          [](const RenderCommand &a, const RenderCommand &b) {
+                              return a.distance_to_camera > b.distance_to_camera;
+                          });
+
+        // Render non-instanced transparent objects with two-pass rendering
+        glDisable(GL_CULL_FACE);
+        for (const auto &cmd: transparent_objects_) {
+            // Pass 1: Draw back faces, to depth buffer
+            glCullFace(GL_FRONT);
+            glDepthMask(GL_TRUE);
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(2.0f, 2.0f);
+            draw_render_command(cmd, view, proj);
+            glDisable(GL_POLYGON_OFFSET_FILL);
+
+            // Pass 2: Draw front faces, don't write to depth buffer
+            glCullFace(GL_BACK);
+            glDepthMask(GL_FALSE);
+            draw_render_command(cmd, view, proj);
+        }
+
+        // Render instanced transparent objects with two-pass rendering
+        for (const auto &cmd: transparent_instanced_objects_) {
+            // Pass 1: Draw back faces, to depth buffer
+            glCullFace(GL_FRONT);
+            glDepthMask(GL_TRUE);
+            draw_instanced_command(cmd, view, proj);
+
+            // Pass 2: Draw front faces, don't write to depth buffer
+            glCullFace(GL_BACK);
+            glDepthMask(GL_FALSE);
+            draw_instanced_command(cmd, view, proj);
+        }
+
+        // Restore depth writing
+        glDepthMask(GL_TRUE);
+    }
+
+    void Renderer::create_main_framebuffer(uint32_t width, uint32_t height) {
         framebuffer_width_ = width;
         framebuffer_height_ = height;
 
@@ -395,14 +509,14 @@ namespace hellfire {
         scene_framebuffers_[SCREEN_TEXTURE_1]->attach_color_texture(settings);
         scene_framebuffers_[SCREEN_TEXTURE_1]->attach_color_texture(object_id_attachment_settings);
         scene_framebuffers_[SCREEN_TEXTURE_1]->attach_depth_texture(settings);
-        
+
         scene_framebuffers_[SCREEN_TEXTURE_2] = std::make_unique<Framebuffer>();
         scene_framebuffers_[SCREEN_TEXTURE_2]->attach_color_texture(settings);
         scene_framebuffers_[SCREEN_TEXTURE_2]->attach_color_texture(object_id_attachment_settings);
         scene_framebuffers_[SCREEN_TEXTURE_2]->attach_depth_texture(settings);
     }
 
-    void Renderer::resize_scene_framebuffer(uint32_t width, uint32_t height) {
+    void Renderer::resize_main_framebuffer(uint32_t width, uint32_t height) {
         framebuffer_width_ = width;
         framebuffer_height_ = height;
 
@@ -414,7 +528,7 @@ namespace hellfire {
         }
     }
 
-    uint32_t Renderer::get_scene_texture() const {
+    uint32_t Renderer::get_main_output_texture() const {
         const int display_index = 1 - current_fb_index_;
         if (scene_framebuffers_[display_index]) {
             return scene_framebuffers_[display_index]->get_color_attachment(0);
@@ -430,36 +544,29 @@ namespace hellfire {
         return 0;
     }
 
-    void Renderer::render_to_texture(Scene &scene, CameraComponent &camera, uint32_t width, uint32_t height) {
-        if (!scene_framebuffers_[SCREEN_TEXTURE_1] || scene_framebuffers_[current_fb_index_]->get_width() != width || scene_framebuffers_[current_fb_index_]->get_height() !=
-            height) {
-            resize_scene_framebuffer(width, height);
-        }
-
-        render_scene_to_framebuffer(scene, camera);
-    }
-
-    void Renderer::render_scene_to_framebuffer(Scene &scene, CameraComponent &camera) {
+    void Renderer::render_frame(Scene &scene, CameraComponent &camera) {
         if (!scene_framebuffers_[SCREEN_TEXTURE_1]) {
-            create_scene_framebuffer(framebuffer_width_, framebuffer_height_);
+            create_main_framebuffer(framebuffer_width_, framebuffer_height_);
         }
 
         // Check if the OTHER buffer (display buffer) needs resizing
         const int display_index = 1 - current_fb_index_;
-        if (scene_framebuffers_[display_index] && 
+        if (scene_framebuffers_[display_index] &&
             (scene_framebuffers_[display_index]->get_width() != framebuffer_width_ ||
              scene_framebuffers_[display_index]->get_height() != framebuffer_height_)) {
             scene_framebuffers_[display_index]->resize(framebuffer_width_, framebuffer_height_);
-             }
-        
+        }
+
+        execute_shadow_passes(scene);
+
         scene_framebuffers_[current_fb_index_]->bind();
         reset_framebuffer_data();
 
         // Clear the object ID buffer (color attachment 1) to 0
         constexpr GLuint clear_value = 0;
         glClearBufferuiv(GL_COLOR, 1, &clear_value);
-        
-        render_internal(scene, camera);
+
+        execute_main_pass(scene, camera);
         scene_framebuffers_[current_fb_index_]->unbind();
         glFlush();
 
@@ -475,7 +582,7 @@ namespace hellfire {
         }
     }
 
-    Shader& Renderer::get_shader_for_material(const std::shared_ptr<Material> &material) {
+    Shader &Renderer::get_shader_for_material(const std::shared_ptr<Material> &material) {
         if (!material) {
             return *fallback_shader_;
         }
@@ -493,7 +600,7 @@ namespace hellfire {
             // Try to compile the material's shader
             if (const uint32_t compiled_id = compile_material_shader(material); compiled_id != 0) {
                 material->set_compiled_shader_id(compiled_id);
-                const auto shader =  shader_registry_.get_shader_from_id(compiled_id);
+                const auto shader = shader_registry_.get_shader_from_id(compiled_id);
                 return *shader;
             }
         }
@@ -524,5 +631,4 @@ namespace hellfire {
         // Compile using shader manager
         return shader_manager_.load_shader(variant);
     }
-
 }
