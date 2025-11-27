@@ -11,8 +11,11 @@
 #include "hellfire/utilities/FileDialog.h"
 
 inline void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
-    hellfire::DirectionalLight::create(
+    auto light_id = hellfire::DirectionalLight::create(
         scene, "Sol Light", glm::vec3(-0.22f, 1.0f, 0.22f), glm::vec3(0.0f, 0.4f, 0.5f), 1.0f);
+    const auto light_entity = scene->get_entity(light_id);
+    light_entity->transform()->set_rotation(-35, -28, 0);
+    
 
 
     const hellfire::EntityID cube_id = hellfire::Cube::create(scene, "Rotating cube", {});

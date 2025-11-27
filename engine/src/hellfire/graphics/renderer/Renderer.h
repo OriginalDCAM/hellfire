@@ -135,10 +135,10 @@ namespace hellfire {
         void collect_geometry_from_scene(Scene &scene, const glm::vec3 camera_pos);
 
         void execute_main_pass(Scene& scene, CameraComponent& camera);
-
+        glm::mat4 calculate_light_view_proj(Entity *light_entity, LightComponent *light, const CameraComponent &camera);
         void draw_shadow_geometry(const glm::mat4& light_view_proj);
 
-        void execute_shadow_passes(Scene& scene);
+        void execute_shadow_passes(Scene &scene, CameraComponent &camera);
         void execute_geometry_pass(const glm::mat4 &view, const glm::mat4 &proj);
         void execute_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection,
                                 CameraComponent *camera_comp) const;

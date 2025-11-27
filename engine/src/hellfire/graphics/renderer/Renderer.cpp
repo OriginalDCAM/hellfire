@@ -201,8 +201,8 @@ namespace hellfire {
         if (!shadow_maps_.contains(light_entity)) {
             auto shadow_map = std::make_unique<Framebuffer>();
             FrameBufferAttachmentSettings settings;
-            settings.width = 1024;
-            settings.height = 1024;
+            settings.width = 4096;
+            settings.height = 4096;
 
             settings.min_filter = GL_NEAREST;
             settings.mag_filter = GL_NEAREST;
@@ -339,7 +339,7 @@ namespace hellfire {
 
 
 
-    void Renderer::execute_shadow_passes(Scene &scene) {
+    void Renderer::execute_shadow_passes(Scene &scene, CameraComponent& camera) {
          // Gather all lights that cast shadows
         const std::vector<EntityID> light_entity_ids = scene.find_entities_with_component<LightComponent>();
 
@@ -363,7 +363,7 @@ namespace hellfire {
 
         // Render each light's shadow map
         for (Entity* light_entity : shadow_casting_lights) {
-            const auto* light = light_entity->get_component<LightComponent>();
+            auto* light = light_entity->get_component<LightComponent>();
             if (!light) continue;
 
             ensure_shadow_map(light_entity, *light);
@@ -371,7 +371,7 @@ namespace hellfire {
             auto& shadow_data = shadow_maps_[light_entity];
             shadow_data.framebuffer->bind();
 
-            glViewport(0, 0, 1024, 1024);
+            glViewport(0, 0, 4096, 4096);
             glClear(GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
@@ -380,17 +380,19 @@ namespace hellfire {
             glCullFace(GL_FRONT);
 
             // Use light's view-projection matrix
-            const glm::mat4 light_view_proj = light->get_light_view_proj_matrix();
-            shadow_data.light_view_proj = light_view_proj; // Store for main pass
+            shadow_data.light_view_proj =  calculate_light_view_proj(light_entity, light, camera); // Store for main pass
+
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(1.5f, 2.0f);
 
             // Render geometry to depth texture
-            draw_shadow_geometry(light_view_proj);
+            draw_shadow_geometry(shadow_data.light_view_proj);
 
             shadow_data.framebuffer->unbind();
-
-            glCullFace(GL_BACK);
         }
-            glViewport(0, 0, framebuffer_width_, framebuffer_height_);            
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glCullFace(GL_BACK);
+        glViewport(0, 0, framebuffer_width_, framebuffer_height_);            
     }
 
     void Renderer::draw_shadow_geometry(const glm::mat4 &light_view_proj) {
@@ -414,6 +416,37 @@ namespace hellfire {
         }
 
         shadow_material_->unbind();
+    }
+
+    glm::mat4 Renderer::calculate_light_view_proj(Entity *light_entity, LightComponent *light, const CameraComponent &camera) {
+        glm::vec3 light_dir = glm::normalize(light->get_direction());
+
+        // Center shadow map on camera position
+        glm::vec3 camera_pos = camera.get_owner().transform()->get_position();
+        
+        float ortho_size = 100.0f;
+        float texel_size = (ortho_size * 2.0f) / 4096.0f;
+
+        glm::vec3 look_at;
+        look_at.x = floor(camera_pos.x / texel_size) * texel_size;
+        look_at.y = 0.0f;
+        look_at.z = float(camera_pos.z / texel_size) * texel_size;
+        
+        glm::vec3 light_pos = look_at - light_dir * 30.0f;
+
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        if (glm::abs(glm::dot(light_dir, up)) > 0.99f) {
+            up = glm::vec3(1.0f, 0.0f, 0.0f);
+        }
+
+        glm::mat4 light_projection = glm::ortho(
+            -ortho_size, ortho_size,
+            -ortho_size, ortho_size,
+            1.0f, 60.0f);
+
+        glm::mat4 light_view = glm::lookAt(light_pos, look_at, up);
+        
+        return light_projection * light_view;
     }
 
     void Renderer::execute_geometry_pass(const glm::mat4 &view, const glm::mat4 &proj) {
@@ -557,7 +590,7 @@ namespace hellfire {
             scene_framebuffers_[display_index]->resize(framebuffer_width_, framebuffer_height_);
         }
 
-        execute_shadow_passes(scene);
+        execute_shadow_passes(scene, camera);
 
         scene_framebuffers_[current_fb_index_]->bind();
         reset_framebuffer_data();

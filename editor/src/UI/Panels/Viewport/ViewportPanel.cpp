@@ -42,7 +42,7 @@ namespace hellfire::editor {
         cam_component->set_mouse_sensitivity(0.1f);
 
         // Set initial position and orientation
-        editor_camera_->transform()->set_position(20.0f, 30.0f, 200.0f);
+        editor_camera_->transform()->set_position(20.0f, 30.0f, 50.0f);
         cam_component->look_at(glm::vec3(0.0f));
 
         // Add Camera Control Script
