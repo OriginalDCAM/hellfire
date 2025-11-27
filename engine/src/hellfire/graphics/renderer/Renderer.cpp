@@ -247,6 +247,7 @@ namespace hellfire {
                     // Set shader uniforms
                     shader.set_int("uShadowMap[" + std::to_string(i) + "]", texture_unit);
                     shader.set_mat4("uLightSpaceMatrix[" + std::to_string(i) + "]", shadow_data.light_view_proj);
+                    shader.set_float("uShadowBias", shadow_settings_.bias);
                 }
             }
         }
@@ -382,15 +383,15 @@ namespace hellfire {
             // Use light's view-projection matrix
             shadow_data.light_view_proj =  calculate_light_view_proj(light_entity, light, camera); // Store for main pass
 
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(1.5f, 2.0f);
+            // glEnable(GL_POLYGON_OFFSET_FILL);
+            // glPolygonOffset(1.5f, 2.0f);
 
             // Render geometry to depth texture
             draw_shadow_geometry(shadow_data.light_view_proj);
 
             shadow_data.framebuffer->unbind();
         }
-        glDisable(GL_POLYGON_OFFSET_FILL);
+        // glDisable(GL_POLYGON_OFFSET_FILL);
         glCullFace(GL_BACK);
         glViewport(0, 0, framebuffer_width_, framebuffer_height_);            
     }

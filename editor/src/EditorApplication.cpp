@@ -19,11 +19,11 @@
 #include "UI/Panels/Viewport/ViewportPanel.h"
 #include "IconsFontAwesome6.h"
 #include "Scenes/DefaultScene.h"
+#include "UI/Panels/Settings/Renderer/RendererSettingsPanel.h"
 
 namespace hellfire::editor {
     void EditorApplication::on_initialize(Application &app) {
-        app_ = &app;
-        app_->get_window_info().should_warp_cursor = false;
+        app.get_window_info().should_warp_cursor = false;
 
         auto *window = ServiceLocator::get_service<IWindow>();
         if (!window) {
@@ -51,11 +51,14 @@ namespace hellfire::editor {
         inspector_panel_ = std::make_unique<InspectorPanel>();
         inspector_panel_->set_context(&editor_context_);
 
+        renderer_settings_panel_ = std::make_unique<RendererSettingsPanel>();
+        renderer_settings_panel_->set_context(&editor_context_);
+
         // TEMP:
         const auto sm = ServiceLocator::get_service<SceneManager>();
         const auto new_scene = sm->create_scene("Test");
         setup_default_scene_with_default_entities(new_scene);
-        sm->set_active_scene(new_scene, true); // Don't play in editor mode as default
+        sm->set_active_scene(new_scene, false); // Don't play in editor mode as default
     }
 
     void EditorApplication::initialize_imgui(IWindow *window) {
@@ -159,6 +162,7 @@ namespace hellfire::editor {
         create_dockspace();
 
         inspector_panel_->render();
+        renderer_settings_panel_->render();
         scene_viewport_->render();
         scene_hierarchy_->render();
     }
@@ -220,13 +224,13 @@ namespace hellfire::editor {
     bool EditorApplication::on_mouse_move(float x, float y, float x_offset, float y_offset) {
         if (scene_viewport_->is_editor_camera_active()) {
             // Update camera with offset
-            scene_viewport_->get_editor_camera()
-                    ->get_component<SceneCameraScript>()
-                    ->handle_mouse_movement(x_offset, y_offset);
-
+            if (const auto *camera = scene_viewport_->get_editor_camera()) {
+                if (auto *script = camera->get_component<SceneCameraScript>()) {
+                    script->handle_mouse_movement(x_offset, y_offset);
+                }
+            }
             return true; // consumed
         }
-
 
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureMouse) {

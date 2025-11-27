@@ -14,10 +14,7 @@
 #include "hellfire/graphics/backends/opengl/Framebuffer.h"
 
 namespace hellfire {
-    struct ShadowMapData {
-        std::unique_ptr<Framebuffer> framebuffer;
-        glm::mat4 light_view_proj;
-    };
+
     
     class LightComponent : public Component {
     public:

@@ -53,8 +53,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse, v
 }
 
 vec3 calculateBlinnPhongLighting(vec3 normal, vec3 baseColor, vec3 fragPos) {
-    vec3 result = uAmbientLight * baseColor;
-
+    vec3 result = vec3(0.0);
     vec3 materialDiffuse = uDiffuseColor * baseColor;
     // Add directional lights
     for (int i = 0; i < min(numDirectionalLights, MAX_DIRECTIONAL_LIGHTS); i++) {

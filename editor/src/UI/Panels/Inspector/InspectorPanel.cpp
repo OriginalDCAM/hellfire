@@ -19,17 +19,13 @@
 namespace hellfire::editor {
     void InspectorPanel::render_add_component_context_menu(Entity *selected_entity) {
         if (ImGui::BeginPopupContextWindow("AddComponentPopup")) {
-            if (ImGui::MenuItem("Light")) {
-                if (selected_entity->has_component<LightComponent>()) {
-                } else {
-                    selected_entity->add_component<LightComponent>();
-                }
+            const bool has_light = selected_entity->has_component<LightComponent>();
+            if (ImGui::MenuItem("Light", nullptr, false, !has_light)) {
+                selected_entity->add_component<LightComponent>();
             }
-            if (ImGui::MenuItem("Renderable")) {
-                if (selected_entity->has_component<RenderableComponent>()) {
-                } else {
-                    selected_entity->add_component<RenderableComponent>();
-                }
+            const bool has_renderable = selected_entity->has_component<RenderableComponent>();
+            if (ImGui::MenuItem("Renderable", nullptr, false, !has_renderable)) {
+                selected_entity->add_component<RenderableComponent>();
             }
             if (ImGui::BeginMenu("Script")) {
                 if (ImGui::MenuItem("Rotate Script")) {
@@ -40,17 +36,13 @@ namespace hellfire::editor {
                 }
                 ImGui::EndMenu();
             }
-            if (ImGui::MenuItem("Mesh")) {
-                if (selected_entity->has_component<MeshComponent>()) {
-                } else {
-                    selected_entity->add_component<MeshComponent>();
-                }
+            bool has_mesh = selected_entity->has_component<MeshComponent>();
+            if (ImGui::MenuItem("Mesh", nullptr, false, !has_mesh)) {
+                selected_entity->add_component<MeshComponent>();
             }
-            if (ImGui::MenuItem("Camera")) {
-                if (selected_entity->has_component<CameraComponent>()) {
-                } else {
-                    selected_entity->add_component<CameraComponent>();
-                }
+            bool has_camera = selected_entity->has_component<CameraComponent>();
+            if (ImGui::MenuItem("Camera", nullptr, false, !has_camera)) {
+                selected_entity->add_component<CameraComponent>();
             }
             ImGui::EndPopup();
         }
@@ -174,7 +166,6 @@ namespace hellfire::editor {
         }
 
         // Show material name and type
-        ImGui::Text("Material: %s", material->get_name().c_str());
         if (material->has_custom_shader()) {
             ImGui::SameLine();
             ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "[Custom]");

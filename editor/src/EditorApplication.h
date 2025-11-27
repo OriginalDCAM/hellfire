@@ -11,6 +11,7 @@
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
 #include "UI/Panels/Inspector/InspectorPanel.h"
+#include "UI/Panels/Settings/Renderer/RendererSettingsPanel.h"
 #include "UI/Panels/Viewport/ViewportPanel.h"
 
 namespace hellfire::editor {
@@ -52,7 +53,6 @@ namespace hellfire::editor {
 
     private:
         EditorContext editor_context_;
-        Application* app_ = nullptr;
         bool imgui_initialized_ = false;
         
         // UI Components
@@ -60,5 +60,6 @@ namespace hellfire::editor {
         std::unique_ptr<SceneHierarchyPanel> scene_hierarchy_;
         std::unique_ptr<ViewportPanel> scene_viewport_;
         std::unique_ptr<InspectorPanel> inspector_panel_;
+        std::unique_ptr<RendererSettingsPanel> renderer_settings_panel_;
     };
 }

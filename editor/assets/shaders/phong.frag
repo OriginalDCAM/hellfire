@@ -10,6 +10,7 @@ layout(location=0) out vec4 fragColor;
 layout(location=1) out uint objectID;
 
 uniform uint uObjectID;
+uniform float uShadowBias;
 
 float calculate_shadow(int light_index, vec3 frag_pos, vec3 normal, vec3 light_dir) {
     vec4 frag_pos_light_space = uLightSpaceMatrix[light_index] * vec4(frag_pos, 1.0);
@@ -19,7 +20,6 @@ float calculate_shadow(int light_index, vec3 frag_pos, vec3 normal, vec3 light_d
     if (proj_coords.z > 1.0) return 0.0;
 
     float current_depth = proj_coords.z;
-    float bias = 0.005;
 
     // PCF: sample a 3x3 area
     float shadow = 0.0;
@@ -28,7 +28,7 @@ float calculate_shadow(int light_index, vec3 frag_pos, vec3 normal, vec3 light_d
     for (int x = -1; x <= 1; ++x) {
         for (int y = -1; y <= 1; ++y) {
             float pcf_depth = texture(uShadowMap[light_index], proj_coords.xy + vec2(x, y) * texel_size).r;
-            shadow += current_depth - bias > pcf_depth ? 1.0 : 0.0;
+            shadow += current_depth - uShadowBias > pcf_depth ? 1.0 : 0.0;
         }
     }
 
