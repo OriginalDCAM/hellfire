@@ -15,6 +15,7 @@ uniform float uShadowBias;
 float calculate_shadow(int light_index, vec3 frag_pos, vec3 normal, vec3 light_dir) {
     vec4 frag_pos_light_space = uLightSpaceMatrix[light_index] * vec4(frag_pos, 1.0);
     vec3 proj_coords = frag_pos_light_space.xyz / frag_pos_light_space.w;
+    // project coords into a [0, 1] space
     proj_coords = proj_coords * 0.5 + 0.5;
 
     if (proj_coords.z > 1.0) return 0.0;
