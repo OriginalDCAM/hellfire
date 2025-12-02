@@ -4,6 +4,7 @@ project(Hellfire VERSION 1.1)
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 # Build the documentation only option
 option(BUILD_DOCS_ONLY "Only build documentation" OFF)
