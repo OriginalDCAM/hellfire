@@ -46,6 +46,8 @@ namespace hellfire {
 
         void clear();
 
+        void destroy_scene(Scene *scene);
+
         // Object management
 
         Scene *create_scene(const std::string &name = "GameScene");

@@ -5,6 +5,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "hellfire/serialization/SceneSerializer.h"
+
 namespace hellfire {
     SceneManager::SceneManager() : active_scene_(nullptr) {
     }
@@ -42,28 +44,14 @@ namespace hellfire {
             return nullptr;
         }
 
-        nlohmann::json scene_data;
-        try {
-            file >> scene_data;
-        } catch (const std::exception &e) {
-            std::cerr << "Failed to parse scene file: " << e.what() << std::endl;
+        Scene* new_scene = create_scene();
+        if (!Serializer<Scene>::deserialize(file, new_scene)) {
+            std::cerr << "Failed to deserialize scene: " << filename << std::endl;
+            destroy_scene(new_scene);
             return nullptr;
         }
 
-        // Validate scene data
-        if (!scene_data.contains("name") || !scene_data.contains("version")) {
-            std::cerr << "Invalid scene file format" << std::endl;
-            return nullptr;
-        }
-
-        Scene *new_scene = create_scene(scene_data["name"]);
         new_scene->set_source_filename(filename);
-
-        // TODO: Deserialize entities from scene_data["entities"]
-        if (scene_data.contains("entities") && !scene_data["entities"].empty()) {
-            // Deserialize entities here when implemented
-            std::cout << "TODO: Deserialize " << scene_data["entities"].size() << " entities\n";
-        }
         return new_scene;
     }
 
@@ -71,37 +59,19 @@ namespace hellfire {
         if (!scene) scene = get_active_scene();
         if (!scene) return false;
 
-        try {
-            json scene_data;
-            scene_data["name"] = scene->get_name();
-            scene_data["version"] = "1.0";
-
-            json entities_array = json::array();
-
-            // TODO: Iterate through scene entities
-            // for (EntityID id : scene->get_all_entity_ids()) {
-            //     Entity* entity = scene->get_entity(id);
-            //     json entity_data = serialize_entity(entity);
-            //     entities_array.push_back(entity_data);
-            // }
-
-            scene_data["entities"] = entities_array;
-
-            std::ofstream file(filepath);
-            if (!file.is_open()) {
-                std::cerr << "Failed to open file for writing: " << filepath << std::endl;
-                return false;
-            }
-
-            file << std::setw(4) << scene_data << std::endl;
-
-            scene->set_source_filename(filepath);
-
-            return true;
-        } catch (const std::exception &e) {
-            std::cerr << "Error saving scene: " << e.what() << std::endl;
+        std::ofstream file(filepath);
+        if (!file.is_open()) {
+            std::cerr << "Failed to open file for writing: " << filepath << std::endl;
             return false;
         }
+
+        if (!Serializer<Scene>::serialize(file, scene)) {
+            std::cerr << "Failed to serialize scene: " << filepath << std::endl;
+            return false;
+        }
+
+        scene->set_source_filename(filepath);
+        return true;
     }
 
     void SceneManager::update(float delta_time) {
@@ -117,6 +87,12 @@ namespace hellfire {
         scenes_.clear();
         active_scene_ = nullptr;
     }
+
+    void SceneManager::destroy_scene(Scene* scene) {
+        // TO
+        
+    }
+
 
     EntityID SceneManager::find_entity_by_name(const std::string &name) {
         if (active_scene_) {
