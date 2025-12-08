@@ -211,7 +211,7 @@ namespace hellfire {
             shadow_map->attach_depth_texture(settings);
 
             glBindTexture(GL_TEXTURE_2D, shadow_map->get_depth_attachment());
-            float border_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+            const float border_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
             glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
             glBindTexture(GL_TEXTURE_2D, 0);
             shadow_maps_[light_entity] = {std::move(shadow_map), glm::mat4(1.0f)};
@@ -240,7 +240,7 @@ namespace hellfire {
                     auto& shadow_data = shadow_maps_[light_entity];
 
                     // Bind depth texture to texture unit
-                    int texture_unit = 10 + i; // Start at unit 10 to avoid conflicts
+                    const int texture_unit = 10 + i; // Start at unit 10 to avoid conflicts
                     glActiveTexture(GL_TEXTURE0 + texture_unit);
                     glBindTexture(GL_TEXTURE_2D, shadow_data.framebuffer->get_depth_attachment());
 
@@ -397,7 +397,7 @@ namespace hellfire {
     }
 
     void Renderer::draw_shadow_geometry(const glm::mat4 &light_view_proj) {
-        Shader& shadow_shader = get_shader_for_material(shadow_material_);
+        const Shader& shadow_shader = get_shader_for_material(shadow_material_);
         shadow_shader.use();
         shadow_shader.set_mat4("uLightViewProjMatrix", light_view_proj);
 
@@ -420,32 +420,32 @@ namespace hellfire {
     }
 
     glm::mat4 Renderer::calculate_light_view_proj(Entity *light_entity, LightComponent *light, const CameraComponent &camera) {
-        glm::vec3 light_dir = glm::normalize(light->get_direction());
+        const glm::vec3 light_dir = glm::normalize(light->get_direction());
 
         // Center shadow map on camera position
-        glm::vec3 camera_pos = camera.get_owner().transform()->get_position();
-        
-        float ortho_size = 100.0f;
-        float texel_size = (ortho_size * 2.0f) / 4096.0f;
+        const glm::vec3 camera_pos = camera.get_owner().transform()->get_position();
+
+        const float ortho_size = 100.0f;
+        const float texel_size = (ortho_size * 2.0f) / 4096.0f;
 
         glm::vec3 look_at;
         look_at.x = floor(camera_pos.x / texel_size) * texel_size;
         look_at.y = 0.0f;
         look_at.z = float(camera_pos.z / texel_size) * texel_size;
-        
-        glm::vec3 light_pos = look_at - light_dir * 30.0f;
+
+        const glm::vec3 light_pos = look_at - light_dir * 30.0f;
 
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
         if (glm::abs(glm::dot(light_dir, up)) > 0.99f) {
             up = glm::vec3(1.0f, 0.0f, 0.0f);
         }
 
-        glm::mat4 light_projection = glm::ortho(
+        const glm::mat4 light_projection = glm::ortho(
             -ortho_size, ortho_size,
             -ortho_size, ortho_size,
             1.0f, 60.0f);
 
-        glm::mat4 light_view = glm::lookAt(light_pos, look_at, up);
+        const glm::mat4 light_view = glm::lookAt(light_pos, look_at, up);
         
         return light_projection * light_view;
     }

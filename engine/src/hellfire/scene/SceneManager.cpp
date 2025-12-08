@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "hellfire/ecs/ComponentRegistration.h"
-#include "hellfire/serialization/SceneSerializer.h"
+#include "hellfire/serializers/SceneSerializer.h"
 
 namespace hellfire {
     SceneManager::SceneManager() : active_scene_(nullptr) {

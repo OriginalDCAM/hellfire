@@ -5,10 +5,10 @@
 #pragma once
 
 #include "StateManager.h"
-#include "../UI/Panels/EditorPanel.h"
+#include "../ui/Panels/EditorPanel.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
-#include "../UI/Panels/Inspector/InspectorPanel.h"
+#include "../ui/Panels/Inspector/InspectorPanel.h"
 
 namespace hellfire::editor {
     class EditorApplication final : public IApplicationPlugin {

@@ -7,7 +7,7 @@
 #include <typeindex>
 
 #include "Entity.h"
-#include "hellfire/serialization/Serializer.h"
+#include "hellfire/serializers/Serializer.h"
 #include "nlohmann/json.hpp"
 
 namespace hellfire {

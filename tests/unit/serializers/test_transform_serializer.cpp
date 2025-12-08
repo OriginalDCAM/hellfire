@@ -4,7 +4,7 @@
 
 
 #include <catch2/catch_test_macros.hpp>
-#include "hellfire/serialization/Serializer.h"
+#include "hellfire/serializers/Serializer.h"
 #include <glm/gtc/epsilon.hpp>
 #include <sstream>
 
