@@ -88,8 +88,6 @@ namespace hellfire {
         ServiceLocator::register_service<InputManager>(input_manager_.get());
         ServiceLocator::register_service<ShaderManager>(&shader_manager_);
         ServiceLocator::register_service<IWindow>(window_.get());
-        ServiceLocator::register_service<SceneManager>(&scene_manager_);
-
 
         // Initialize engine systems
         Time::init();
@@ -101,7 +99,7 @@ namespace hellfire {
 
         call_plugins([this](IApplicationPlugin &plugin) {
             plugin.on_initialize(*this);
-        }); 
+        });
     }
 
     void Application::run() {
@@ -115,11 +113,13 @@ namespace hellfire {
             window_->poll_events();
             // Make sure the timer is updated
             Time::update();
-            
+
             input_manager_->update();
 
             // Update scene
-            scene_manager_.update(Time::delta_time);
+            if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+                sm->update(Time::delta_time);
+            }
 
             on_render();
         }
@@ -132,17 +132,19 @@ namespace hellfire {
             plugin.on_begin_frame();
         });
         renderer_.begin_frame();
+        
+        if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+            if (auto *active_scene = sm->get_active_scene()) {
+                Entity *camera_override = nullptr;
 
-        if (auto *active_scene = scene_manager_.get_active_scene()) {
-            Entity *camera_override = nullptr;
+                call_plugins([&camera_override](IApplicationPlugin &plugin) {
+                    if (!camera_override) {
+                        camera_override = plugin.get_render_camera_override();
+                    }
+                });
 
-            call_plugins([&camera_override](IApplicationPlugin &plugin) {
-                if (!camera_override) {
-                    camera_override = plugin.get_render_camera_override();
-                }
-            });
-
-            renderer_.render(*active_scene, camera_override);
+                renderer_.render(*active_scene, camera_override);
+            }
         }
 
         // Plugin render
@@ -150,8 +152,8 @@ namespace hellfire {
             plugin.on_render();
         });
 
-        renderer_.end_frame();
-
+        
+            renderer_.end_frame();
         // Plugin end_frame
         call_plugins([](IApplicationPlugin &plugin) {
             plugin.on_end_frame();
@@ -240,11 +242,14 @@ namespace hellfire {
         glViewport(0, 0, width, height);
 
         // Update cameras
-        if (Scene *active_scene = scene_manager_.get_active_scene()) {
-            for (const EntityID camera_id: scene_manager_.get_camera_entities()) {
-                if (const Entity *camera_entity = active_scene->get_entity(camera_id)) {
-                    if (auto *camera_comp = camera_entity->get_component<CameraComponent>()) {
-                        camera_comp->set_aspect_ratio(window_info_.aspect_ratio); }
+        if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+            if (Scene *active_scene = sm->get_active_scene()) {
+                for (const EntityID camera_id: sm->get_camera_entities()) {
+                    if (const Entity *camera_entity = active_scene->get_entity(camera_id)) {
+                        if (auto *camera_comp = camera_entity->get_component<CameraComponent>()) {
+                            camera_comp->set_aspect_ratio(window_info_.aspect_ratio);
+                        }
+                    }
                 }
             }
         }
