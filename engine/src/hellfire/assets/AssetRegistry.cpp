@@ -238,10 +238,14 @@ namespace hellfire {
             {".gltf", AssetType::MODEL},
             {".glb", AssetType::MODEL},
             {".fbx", AssetType::MODEL},
+            {".hfmodel", AssetType::MODEL},
             {".hfmat", AssetType::MATERIAL},
+            {".hfmesh", AssetType::MESH},
             {".hfscene", AssetType::SCENE},
             {".frag", AssetType::SHADER},
             {".vert", AssetType::SHADER},
+            {".glsl", AssetType::SHADER},
+            {".shader", AssetType::SHADER}
         };
 
         auto extension = filepath.extension().string();
