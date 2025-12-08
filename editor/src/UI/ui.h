@@ -13,6 +13,7 @@
 #include "glm/detail/type_vec4.hpp"
 #include "hellfire/utilities/FileDialog.h"
 
+/// Inputs
 namespace hellfire::editor::ui {
     /**
      * @brief Method for generating UI Id's
@@ -41,8 +42,8 @@ namespace hellfire::editor::ui {
      * @param max Maximum allowed value (default: FLT_MAX)
      * @return True if the value was modified
      */
-    inline bool float_input(const std::string &label, float *value, float speed = 1.0f, float min = 0.0f,
-                            float max = FLT_MAX) {
+    inline bool float_input(const std::string &label, float *value, const float speed = 1.0f, const float min = 0.0f,
+                            const float max = FLT_MAX) {
         return Property(label, value, [&](const char *id, float *val) {
             return ImGui::DragFloat(id, val, speed, min, max);
         });
@@ -57,8 +58,8 @@ namespace hellfire::editor::ui {
      * @param max Maximum allowed value (default: FLT_MAX)
      * @return True if the value was modified
      */
-    inline bool vec2_input(const std::string &label, glm::vec2 *value, float speed = 1.0f, float min = 0.0f,
-                           float max = FLT_MAX) {
+    inline bool vec2_input(const std::string &label, glm::vec2 *value, const float speed = 1.0f, const float min = 0.0f,
+                           const float max = FLT_MAX) {
         return Property(label, value, [&](const char *id, glm::vec2 *val) {
             return ImGui::DragFloat2(id, &(*val)[0], speed, min, max);
         });
@@ -74,8 +75,8 @@ namespace hellfire::editor::ui {
      * @param max Maximum allowed value (default: FLT_MAX)
      * @return True if the value was modified
      */
-    inline bool vec3_input(const std::string &label, glm::vec3 *value, float speed = 1.0f, float min = 0.0f,
-                           float max = FLT_MAX) {
+    inline bool vec3_input(const std::string &label, glm::vec3 *value, const float speed = 1.0f, const float min = 0.0f,
+                           const float max = FLT_MAX) {
         return Property(label, value, [&](const char *id, glm::vec3 *val) {
             return ImGui::DragFloat3(id, &(*val)[0], speed, min, max);
         });
@@ -215,4 +216,45 @@ namespace hellfire::editor::ui {
         ImGui::PopID();
         return changed;
     }
+}
+
+/// Windows
+namespace hellfire::editor::ui {
+    class Window {
+    public:
+        Window(const char* name, bool* p_open = nullptr, const ImGuiWindowFlags flags = 0) : visible_(ImGui::Begin(name, p_open, flags)) {}
+        Window(const std::string& name, bool* p_open = nullptr, const ImGuiWindowFlags flags = 0) : visible_(ImGui::Begin(name.c_str(), p_open, flags)) {}
+
+        ~Window() { ImGui::End(); }
+
+        // Returns true if window content should be rendered
+        explicit operator bool() const { return visible_; }
+
+        // Disable move and copying
+        Window(const Window&) = delete;
+        Window& operator=(const Window&) = delete;
+        Window(Window&&) = delete;
+        Window& operator=(Window&&) = delete;
+    private:
+        bool visible_;
+    };
+
+    
+    class ChildWindow {
+    public:
+        ChildWindow(const char* name, const ImVec2 size = {}, const ImGuiWindowFlags child_flags = 0, const ImGuiWindowFlags window_flags = 0) : visible_(ImGui::BeginChild(name, size, child_flags, window_flags)) {}
+
+        ~ChildWindow() { ImGui::EndChild(); }
+
+        // Returns true if window content should be rendered
+        explicit operator bool() const { return visible_; }
+
+        // Disable move and copying
+        ChildWindow(const ChildWindow&) = delete;
+        ChildWindow& operator=(const ChildWindow&) = delete;
+        ChildWindow(ChildWindow&&) = delete;
+        ChildWindow& operator=(ChildWindow&&) = delete;
+    private:
+        bool visible_;
+    };
 }
