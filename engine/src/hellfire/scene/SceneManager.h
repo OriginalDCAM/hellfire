@@ -2,9 +2,10 @@
 
 #include <filesystem>
 #include <functional>
-#include <memory>
 #include <string>
 #include <vector>
+
+#include "hellfire/assets/AssetRegistry.h"
 
 
 // Forward declarations
@@ -39,6 +40,12 @@ namespace hellfire {
 
         Scene *load_scene(const std::filesystem::path &filename);
 
+        Scene *load_scene(AssetID asset_id, const std::filesystem::path &filename);
+
+        std::optional<AssetID> get_scene_asset_id(Scene* scene) const;
+        std::optional<AssetID> get_active_scene_asset_id() const;
+        void set_scene_asset_id(Scene* scene, AssetID id);
+
         bool save_scene(const std::string &filename, Scene *scene) const;
 
         // Scene management
@@ -60,8 +67,6 @@ namespace hellfire {
 
         void set_active_scene(Scene *scene, bool should_play = true);
 
-        void set_active_scene(const std::shared_ptr<Scene> &scene);
-
         std::vector<EntityID> get_camera_entities() const;
 
         Scene *get_active_scene() const {
@@ -77,6 +82,7 @@ namespace hellfire {
     private:
         std::vector<Scene*> scenes_;
         Scene *active_scene_;
+        std::unordered_map<Scene*, AssetID> scene_asset_ids_;
 
         // Helper methods
         SceneActivatedCallback scene_activated_callback_;

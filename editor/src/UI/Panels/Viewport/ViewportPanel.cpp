@@ -12,14 +12,20 @@
 #include "SceneCameraScript.h"
 #include "hellfire/core/Time.h"
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
+#include "UI/ui.h"
 
 namespace hellfire::editor {
     ViewportPanel::ViewportPanel() {
         engine_renderer_ = ServiceLocator::get_service<Renderer>();
         assert(engine_renderer_ != nullptr);
         create_editor_camera();
+    }
 
-        picking_fbo_ = std::make_unique<Framebuffer>();
+    Framebuffer* ViewportPanel::get_picking_fbo() {
+        if (!picking_fbo_) {
+            picking_fbo_ = std::make_unique<Framebuffer>();
+        }
+        return picking_fbo_.get();
     }
 
     ViewportPanel::~ViewportPanel() {
@@ -227,8 +233,10 @@ namespace hellfire::editor {
         }
     }
 
-    void ViewportPanel::handle_object_picking() const {
+    void ViewportPanel::handle_object_picking() {
         if (!context_->active_scene) return;
+        if (!engine_renderer_) return;
+        
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !is_using_gizmo_) {
             const ImVec2 mouse_pos = ImGui::GetMousePos();
             const ImVec2 viewport_pos = ImGui::GetItemRectMin();
@@ -258,7 +266,8 @@ namespace hellfire::editor {
                                             ? ICON_FA_EYE " " + context_->active_scene->get_name()
                                             : "Viewport";
 
-        if (ImGui::Begin(window_name.c_str())) {
+        if (ui::Window window{window_name}) {
+            if (!context_->active_scene) return;
             // Store the viewport bound for outside usage
             viewport_pos_ = ImGui::GetWindowPos();
             viewport_size_ = ImGui::GetWindowSize();
@@ -274,7 +283,6 @@ namespace hellfire::editor {
                 render_viewport_stats_overlay();
             }
         }
-        ImGui::End();
     }
 
 
@@ -310,7 +318,9 @@ namespace hellfire::editor {
         ImGui::End();
     }
 
-    uint32_t ViewportPanel::pick_object_at_mouse(const int mouse_x, const int mouse_y) const {
+    uint32_t ViewportPanel::pick_object_at_mouse(const int mouse_x, const int mouse_y) {
+        if (!engine_renderer_) return 0;
+        
         const uint32_t object_id_texture = engine_renderer_->get_object_id_texture();
         if (object_id_texture == 0) return 0;
 
@@ -326,7 +336,7 @@ namespace hellfire::editor {
             return 0;
         }
 
-        const uint32_t pixel_data = picking_fbo_->read_pixel_from_texture(object_id_texture, tex_x, tex_y);
+        const uint32_t pixel_data = get_picking_fbo()->read_pixel_from_texture(object_id_texture, tex_x, tex_y);
 
         return pixel_data;
     }

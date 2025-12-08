@@ -13,6 +13,7 @@
 #include "hellfire/utilities/FileDialog.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "Scenes/DefaultScene.h"
+#include "Events/WindowEvents.h"
 
 namespace hellfire::editor {
     void MenuBarComponent::render() {
@@ -26,12 +27,10 @@ namespace hellfire::editor {
     void MenuBarComponent::render_file_menu() {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("New Project")) {
-                Project::create("Test", "G:\\Dev\\Games");
-                std::cout << "Clicked on button New Project" << std::endl;
+                context_->event_bus.dispatch<OpenNewProjectWindowEvent>();
             }
             if (ImGui::MenuItem("Save Project")) {
-                register_all_components();
-                ServiceLocator::get_service<SceneManager>()->save_scene("G:\\Dev\\Games\\Test\\assets\\cool_scene.hfscene", context_->active_scene);
+                context_->project_manager->get_current_project()->save();
             }
             ImGui::EndMenu();
         }
@@ -62,9 +61,6 @@ namespace hellfire::editor {
             const std::string filepath = Utility::FileDialog::open_file({scene_ext_filter});
             if (!filepath.empty()) {
                 const auto scene = sm->load_scene(filepath);
-
-                setup_default_scene_with_default_entities(scene);
-                
                 sm->set_active_scene(scene);
 
                 if (context_) {

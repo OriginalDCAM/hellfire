@@ -5,10 +5,13 @@
 #include <fstream>
 #include <iostream>
 
+#include "hellfire/ecs/ComponentRegistration.h"
 #include "hellfire/serialization/SceneSerializer.h"
 
 namespace hellfire {
     SceneManager::SceneManager() : active_scene_(nullptr) {
+        // Serialization of scene components
+        register_all_components();
     }
 
     SceneManager::~SceneManager() {
@@ -20,7 +23,7 @@ namespace hellfire {
     }
 
     void SceneManager::save_current_scene() const {
-        active_scene_->save();
+        save_scene(active_scene_->get_source_filename().string(), active_scene_);
     }
 
     Scene *SceneManager::create_scene(const std::string &name) {
@@ -55,6 +58,26 @@ namespace hellfire {
         return new_scene;
     }
 
+    Scene* SceneManager::load_scene(AssetID asset_id, const std::filesystem::path& filename) {
+        Scene* scene = load_scene(filename);
+        if (scene) {
+            scene_asset_ids_[scene] = asset_id;
+        }
+        return scene;
+    }
+
+    std::optional<AssetID> SceneManager::get_scene_asset_id(Scene* scene) const {
+        auto it = scene_asset_ids_.find(scene);
+        if (it != scene_asset_ids_.end()) {
+            return it->second;
+        }
+        return std::nullopt;
+    }
+
+    std::optional<AssetID> SceneManager::get_active_scene_asset_id() const {
+        return get_scene_asset_id(active_scene_);
+    }
+
     bool SceneManager::save_scene(const std::string &filepath, Scene *scene) const {
         if (!scene) scene = get_active_scene();
         if (!scene) return false;
@@ -81,16 +104,32 @@ namespace hellfire {
     }
 
     void SceneManager::clear() {
-        for (Scene *scene: scenes_) {
+        for (Scene* scene : scenes_) {
             delete scene;
         }
         scenes_.clear();
+        scene_asset_ids_.clear(); 
         active_scene_ = nullptr;
     }
 
     void SceneManager::destroy_scene(Scene* scene) {
-        // TO
-        
+        if (!scene) return;
+    
+        // Remove from asset ID map
+        scene_asset_ids_.erase(scene);
+    
+        // Remove from scenes vector
+        auto it = std::find(scenes_.begin(), scenes_.end(), scene);
+        if (it != scenes_.end()) {
+            scenes_.erase(it);
+        }
+    
+        // Clear active if this was it
+        if (active_scene_ == scene) {
+            active_scene_ = nullptr;
+        }
+    
+        delete scene;
     }
 
 
