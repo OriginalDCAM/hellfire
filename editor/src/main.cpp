@@ -2,7 +2,7 @@
 // Created by denzel on 17/09/2025.
 //
 
-#include "EditorApplication.h"
+#include "core/EditorApplication.h"
 #include "hellfire/EntryPoint.h"
 
 namespace {

@@ -3,16 +3,12 @@
 //
 
 #pragma once
-#include <memory>
 
-#include "UI/Panels/EditorPanel.h"
-#include "UI/Panels/MenuBar/MenuBarComponent.h"
-#include "UI/Panels/SceneHierarchy/SceneHierarchyPanel.h"
+#include "StateManager.h"
+#include "../UI/Panels/EditorPanel.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
-#include "UI/Panels/Inspector/InspectorPanel.h"
-#include "UI/Panels/Settings/Renderer/RendererSettingsPanel.h"
-#include "UI/Panels/Viewport/ViewportPanel.h"
+#include "../UI/Panels/Inspector/InspectorPanel.h"
 
 namespace hellfire::editor {
     class EditorApplication final : public IApplicationPlugin {
@@ -33,8 +29,6 @@ namespace hellfire::editor {
 
         void on_render() override;
 
-        void create_dockspace();
-
         bool on_key_down(int key) override;
 
         bool on_key_up(int key) override;
@@ -54,12 +48,7 @@ namespace hellfire::editor {
     private:
         EditorContext editor_context_;
         bool imgui_initialized_ = false;
-        
-        // UI Components
-        std::unique_ptr<MenuBarComponent> menu_bar_;
-        std::unique_ptr<SceneHierarchyPanel> scene_hierarchy_;
-        std::unique_ptr<ViewportPanel> scene_viewport_;
-        std::unique_ptr<InspectorPanel> inspector_panel_;
-        std::unique_ptr<RendererSettingsPanel> renderer_settings_panel_;
+
+       StateManager state_manager_; 
     };
 }

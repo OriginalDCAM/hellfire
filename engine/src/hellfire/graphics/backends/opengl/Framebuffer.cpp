@@ -185,6 +185,9 @@ namespace hellfire {
     }
 
     uint32_t Framebuffer::read_pixel_from_texture(const uint32_t texture_id, const int x, const int y) {
+        std::cout << "FBO ID: " << framebuffer_id_<< ", is valid: " << (glIsFramebuffer(framebuffer_id_) ? "yes" : "no") << std::endl;
+        std::cout << "Texture ID: " << texture_id << ", is valid: " << (glIsTexture(texture_id) ? "yes" : "no") << std::endl;
+    
         // Bind the framebuffer
         bind();
         // Attach the texture to the framebuffer

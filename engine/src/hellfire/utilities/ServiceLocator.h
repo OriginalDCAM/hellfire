@@ -13,9 +13,6 @@ namespace hellfire {
     class InputManager;
 
     class ServiceLocator {
-    private:
-        static std::unordered_map<std::type_index, void *> services_;
-
     public:
         template<typename T>
         static void register_service(T *service) {
@@ -30,5 +27,13 @@ namespace hellfire {
             }
             return nullptr;
         }
+
+        template<typename T>
+        static void unregister_service() {
+            services_.erase(typeid(T));
+        }
+
+    private:
+        static std::unordered_map<std::type_index, void *> services_;
     };
 }

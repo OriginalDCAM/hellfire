@@ -51,12 +51,11 @@ namespace hellfire::editor {
     void InspectorPanel::render() {
         if (!context_->active_scene) return; // Don't show if there's no active scene selected
         auto active_scene = context_->active_scene;
-        if (ImGui::Begin("Inspector")) {
+        if (ui::Window window{"Inspector"}) {
             auto *selected_entity = active_scene->get_entity(context_->selected_entity_id);
 
             if (!selected_entity) {
                 ImGui::TextDisabled("No entity selected");
-                ImGui::End();
                 return;
             }
 
@@ -106,8 +105,6 @@ namespace hellfire::editor {
                 ImGui::OpenPopup("AddComponentPopup");
             }
             ImGui::EndGroup();
-
-            ImGui::End();
         }
     }
 
