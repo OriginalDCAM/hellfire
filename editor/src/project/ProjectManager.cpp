@@ -69,7 +69,7 @@ namespace hellfire::editor {
                 emit_progress("[ERROR] Failed to load project", 1.0f);
                 return;
             }
-
+            
             emit_progress("[INFO] Done!", 1.0f);
 
             context_.queue_main_thread([this, p = std::move(project), project_file]() mutable {

@@ -21,6 +21,10 @@ namespace hellfire {
         vao_->unbind();
     }
 
+    void Mesh::build() {
+        create_mesh();
+    }
+
     void Mesh::create_mesh() {
         vao_ = std::make_unique<VA>();
         vbo_ = std::make_unique<VB>();

@@ -26,6 +26,7 @@ namespace hellfire {
      * this runs once during asset import, NOT at runtime!
      */
     class ModelImporter {
+    public:
         ModelImporter(AssetRegistry& registry, const std::filesystem::path& output_dir);
 
         ImportResult import(const std::filesystem::path& source_path, const ImportSettings& settings = {});

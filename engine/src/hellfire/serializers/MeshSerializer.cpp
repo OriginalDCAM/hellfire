@@ -65,6 +65,7 @@ namespace hellfire {
             return nullptr;
         }
 
+        mesh->build();
         return mesh;
     }
 

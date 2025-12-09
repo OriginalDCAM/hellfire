@@ -46,8 +46,8 @@ inline void create_default_scene() {
         const auto new_scene = sm->create_scene(scene_name);
     
         setup_default_scene_with_default_entities(new_scene);
-    
-        sm->save_scene(save_path, new_scene);
+        
+        sm->save_scene_as(save_path, new_scene);
         sm->set_active_scene(new_scene);
     }
 }

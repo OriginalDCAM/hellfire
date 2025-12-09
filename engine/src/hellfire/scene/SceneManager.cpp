@@ -5,8 +5,10 @@
 #include <fstream>
 #include <iostream>
 
+#include "hellfire/assets/SceneAssetResolver.h"
 #include "hellfire/ecs/ComponentRegistration.h"
 #include "hellfire/serializers/SceneSerializer.h"
+#include "hellfire/utilities/ServiceLocator.h"
 
 namespace hellfire {
     SceneManager::SceneManager() : active_scene_(nullptr) {
@@ -22,8 +24,8 @@ namespace hellfire {
         return scenes_;
     }
 
-    void SceneManager::save_current_scene() const {
-        save_scene(active_scene_->get_source_filename().string(), active_scene_);
+    void SceneManager::save_current_scene() {
+        save_scene_as(active_scene_->get_source_filename().string(), active_scene_);
     }
 
     Scene *SceneManager::create_scene(const std::string &name) {
@@ -41,17 +43,36 @@ namespace hellfire {
             }
         }
 
+        // Open the file for reading
         std::ifstream file(filename);
         if (!file.is_open()) {
             std::cerr << "Failed to open scene file: " << filename << std::endl;
             return nullptr;
         }
 
+        // Create and empty scene and deserialize components
         Scene* new_scene = create_scene();
         if (!Serializer<Scene>::deserialize(file, new_scene)) {
             std::cerr << "Failed to deserialize scene: " << filename << std::endl;
             destroy_scene(new_scene);
             return nullptr;
+        }
+
+        
+        // Resolve asset references
+        if (auto* asset_manager = ServiceLocator::get_service<AssetManager>()) {
+            SceneAssetResolver resolver(*asset_manager);
+            resolver.resolve(*new_scene);
+        } else {
+            std::cerr << "Warning: No AssetManager available, assets not resolved for scene: " 
+                      << filename << std::endl;
+        }
+
+        // Track scene asset ID for hot-reload / saving
+        if (auto* asset_registry = ServiceLocator::get_service<AssetRegistry>()) {
+            if (const auto scene_uuid = asset_registry->get_uuid_by_path(filename)) {
+                scene_asset_ids_[new_scene] = *scene_uuid;
+            }
         }
 
         new_scene->set_source_filename(filename);
@@ -78,25 +99,48 @@ namespace hellfire {
         return get_scene_asset_id(active_scene_);
     }
 
-    bool SceneManager::save_scene(const std::string &filepath, Scene *scene) const {
+    bool SceneManager::save_scene(Scene* scene) {
+        if (!scene) return false;
+
+        std::filesystem::path filepath = scene->get_source_filename();
+        if (filepath.empty()) {
+            std::cerr << "Scene has no source filename, use save_scene_as()" << std::endl;
+            return false;
+        }
+
+        return save_scene_as(filepath.string(), scene);
+    }
+
+    bool SceneManager::save_scene_as(const std::string &filename, Scene *scene) {
         if (!scene) scene = get_active_scene();
         if (!scene) return false;
 
-        std::ofstream file(filepath);
+        std::ofstream file(filename);
         if (!file.is_open()) {
-            std::cerr << "Failed to open file for writing: " << filepath << std::endl;
+            std::cerr << "Failed to open file for writing: " << filename << std::endl;
             return false;
         }
 
         if (!Serializer<Scene>::serialize(file, scene)) {
-            std::cerr << "Failed to serialize scene: " << filepath << std::endl;
+            std::cerr << "Failed to serialize scene: " << filename << std::endl;
             return false;
         }
 
-        scene->set_source_filename(filepath);
+        scene->set_source_filename(filename);
+
+        // Register with asset registry if not already
+        if (auto* asset_registry = ServiceLocator::get_service<AssetRegistry>()) {
+            if (!asset_registry->get_uuid_by_path(filename)) {
+                AssetID new_id = asset_registry->register_asset(filename, AssetType::SCENE);
+                scene_asset_ids_[scene] = new_id;
+            }
+        }
+
+        std::cout << "Scene saved: " << filename << std::endl;
         return true;
     }
 
+    
     void SceneManager::update(float delta_time) {
         if (active_scene_) {
             active_scene_->update(delta_time);

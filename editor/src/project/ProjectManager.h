@@ -38,8 +38,8 @@ namespace hellfire::editor {
         explicit ProjectManager(EventBus &event_bus, EditorContext &context);
 
         // Current project
-        Project *get_current_project() const { return current_project_.get(); }
-        bool has_project() const { return current_project_ != nullptr; }
+        [[nodiscard]] Project *get_current_project() const { return current_project_.get(); }
+        [[nodiscard]] bool has_project() const { return current_project_ != nullptr; }
 
         // Project create/open/close
         void create_project_async(const std::string &name,
@@ -51,7 +51,7 @@ namespace hellfire::editor {
         void close_project();
 
         // Recent projects
-        std::vector<RecentProject> get_recent_projects() const;
+        [[nodiscard]] std::vector<RecentProject> get_recent_projects() const;
         void clear_recent_projects();
         void remove_from_recent(const std::filesystem::path& path);
         std::filesystem::path get_recent_projects_path() const {
@@ -59,7 +59,7 @@ namespace hellfire::editor {
         }
 
         // Templates
-        std::vector<ProjectTemplate> get_templates() const;
+        [[nodiscard]] std::vector<ProjectTemplate> get_templates() const;
 
     private:
         void add_to_recent(const std::string& name, const std::filesystem::path& path);

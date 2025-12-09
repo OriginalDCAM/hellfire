@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "Component.h"
+#include "hellfire/assets/AssetRegistry.h"
 #include "hellfire/graphics/managers/MaterialManager.h"
 
 namespace hellfire {
@@ -12,17 +13,27 @@ namespace hellfire {
 
         // Material management
         void set_material(const std::shared_ptr<Material>& material) { material_ = material; }
+        void set_material_asset(AssetID id) { material_asset_id_ = id; }
+        
         [[nodiscard]] std::shared_ptr<Material> get_material() const { return material_; }
+        AssetID get_material_asset() const { return material_asset_id_; }
         [[nodiscard]] bool has_material() const { return material_ != nullptr; }
 
         // Rendering settings
-        void set_cast_shadows(bool cast) { cast_shadows_ = cast; }
-        void set_receive_shadows(bool receive) { receive_shadows_ = receive; }
-        [[nodiscard]] bool get_cast_shadows() const { return cast_shadows_; }
-        [[nodiscard]] bool get_receive_shadows() const { return receive_shadows_; }
+        void set_cast_shadows(bool cast) { cast_shadows = cast; }
+        void set_receive_shadows(bool receive) { receive_shadows = receive; }
+        [[nodiscard]] bool get_cast_shadows() const { return cast_shadows; }
+        [[nodiscard]] bool get_receive_shadows() const { return receive_shadows; }
+
+        // Render settings
+        bool cast_shadows = true;
+        bool receive_shadows = true;
+        bool visible = true;
+        uint32_t render_layer = 0;
     private:
         std::shared_ptr<Material> material_;
-        bool cast_shadows_ = true;
-        bool receive_shadows_ = true;
+        AssetID material_asset_id_ = INVALID_ASSET_ID;
+        
+
     };
 }

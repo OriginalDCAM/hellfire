@@ -23,7 +23,7 @@ namespace hellfire {
     ModelImporter::ModelImporter(AssetRegistry &registry,
                                  const std::filesystem::path &output_dir) : registry_(registry),
                                                                             output_dir_(output_dir) {
-        std::filesystem::create_directories(output_dir_);
+        create_directories(output_dir_);
     }
 
     ImportResult ModelImporter::import(const std::filesystem::path &source_path, const ImportSettings &settings) {
@@ -126,8 +126,8 @@ namespace hellfire {
         glm::vec4 perspective;
         glm::quat rotation;
 
-        glm::decompose(transform, result.scale, rotation, result.position, skew, perspective);
-        result.rotation = glm::eulerAngles(rotation);
+        decompose(transform, result.scale, rotation, result.position, skew, perspective);
+        result.rotation = eulerAngles(rotation);
 
         return result;
     }
@@ -315,8 +315,8 @@ namespace hellfire {
         };
 
         for (const auto &path: search_paths) {
-            if (std::filesystem::exists(path)) {
-                return std::filesystem::canonical(path);
+            if (exists(path)) {
+                return canonical(path);
             }
         }
 
