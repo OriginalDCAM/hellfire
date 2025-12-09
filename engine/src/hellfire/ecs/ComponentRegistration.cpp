@@ -13,5 +13,6 @@ namespace hellfire {
         reg.register_component<TransformComponent>("TransformComponent");
         reg.register_component<MeshComponent>("MeshComponent");
         reg.register_component<RenderableComponent>("RenderableComponent");
+        reg.register_component<LightComponent>("LightComponent");
     }
 }

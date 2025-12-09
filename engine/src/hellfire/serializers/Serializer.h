@@ -5,6 +5,7 @@
 
 #include <iosfwd>
 
+#include "hellfire/ecs/LightComponent.h"
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/ecs/TransformComponent.h"
 #include "hellfire/ecs/components/MeshComponent.h"
@@ -66,7 +67,7 @@ namespace hellfire {
             nlohmann::json j = {
                 {"mesh_asset", obj->get_mesh_asset()},
                 {"is_wireframe", obj->is_wireframe}
-                
+
             };
 
             output << j.dump(4);
@@ -119,6 +120,52 @@ namespace hellfire {
                 obj->receive_shadows = j.value("receive_shadows", true);
                 obj->visible = j.value("visible", true);
                 obj->render_layer = j.value("render_layer", 0u);
+
+                return true;
+            } catch (...) {
+                return false;
+            }
+        }
+    };
+
+    template<>
+    struct Serializer<LightComponent> {
+        static bool serialize(std::ostream &output, const LightComponent *obj) {
+            if (!obj) return false;
+
+            nlohmann::json j = {
+                {"light_type", obj->get_light_type()},
+                {"color", obj->get_color()},
+                {"intensity", obj->get_intensity()},
+                {"should_cast_shadows", obj->should_cast_shadows()},
+            };
+
+            if (obj->get_light_type() == LightComponent::POINT) {
+                j["range"] = obj->get_range();
+                j["attenuation"] = obj->get_attenuation();
+            }
+
+            output << j.dump(2);
+
+            return output.good();
+        }
+
+        static bool deserialize(std::istream &input, LightComponent *obj) {
+            if (!obj) return false;
+
+            try {
+                nlohmann::json j;
+                input >> j;
+
+                obj->set_light_type(j.value("light_type", LightComponent::POINT));
+                obj->set_color(j.value("color", glm::vec3(0)));
+                obj->set_intensity(j.value("intensity", 1.0f));
+                obj->set_cast_shadows(j.value("should_cast_shadows", false));
+
+                if (obj->get_light_type() == LightComponent::POINT) {
+                    obj->set_range(j.value("range", 0.0f));
+                    obj->set_attenuation(j.value("attenuation", 0.0f));
+                }
 
                 return true;
             } catch (...) {
