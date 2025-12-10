@@ -103,26 +103,28 @@ namespace hellfire {
     }
 
     void Application::run() {
-        while (!window_->should_close()) {
-            if (window_info_.minimized) {
-                window_->wait_for_events();
-                continue;
+        // while (!should_exit()) {
+            while (!window_->should_close()) {
+                if (window_info_.minimized) {
+                    window_->wait_for_events();
+                    continue;
+                }
+
+                // Poll the window for events (mouse inputs, keys, window stuff, etc.)
+                window_->poll_events();
+                // Make sure the timer is updated
+                Time::update();
+
+                input_manager_->update();
+
+                // Update scene
+                if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+                    sm->update(Time::delta_time);
+                }
+
+                on_render();
             }
-
-            // Poll the window for events (mouse inputs, keys, window stuff, etc.)
-            window_->poll_events();
-            // Make sure the timer is updated
-            Time::update();
-
-            input_manager_->update();
-
-            // Update scene
-            if (auto sm = ServiceLocator::get_service<SceneManager>()) {
-                sm->update(Time::delta_time);
-            }
-
-            on_render();
-        }
+        // }
     }
 
 
@@ -261,5 +263,19 @@ namespace hellfire {
 
     void Application::on_window_minimize(bool minimized) {
         window_info_.minimized = minimized;
+    }
+
+    void Application::set_exit_condition(std::function<bool()> condition) {
+        exit_condition_ = std::move(condition);
+    }
+    
+    void Application::request_exit() {
+        should_exit_ = true;
+    }
+    
+    bool Application::should_exit() const {
+        if (should_exit_) return true;
+        if (exit_condition_ && exit_condition_()) return true;
+        return false;
     }
 }
