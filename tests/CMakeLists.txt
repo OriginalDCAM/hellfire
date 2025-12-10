@@ -81,9 +81,7 @@ if(HELLFIRE_UI_TESTS)
         target_link_libraries(imgui_with_test_engine PUBLIC GL)
     endif ()
 
-    # ============================================
     # ImGuizmo with Test Engine
-    # ============================================
     add_library(imguizmo_test STATIC
             ${IMGUIZMO_DIR}/ImGuizmo.h
             ${IMGUIZMO_DIR}/ImGuizmo.cpp
@@ -92,9 +90,7 @@ if(HELLFIRE_UI_TESTS)
     target_link_libraries(imguizmo_test PRIVATE imgui_with_test_engine)
     target_include_directories(imguizmo_test PUBLIC ${IMGUIZMO_DIR})
 
-    # ============================================
-    # Engine Library for Testing (links against test-enabled imgui)
-    # ============================================
+    # Engine Library for Testing 
     file(GLOB_RECURSE ENGINE_LIB_SOURCES "${CMAKE_SOURCE_DIR}/engine/src/*.cpp")
     file(GLOB_RECURSE ENGINE_LIB_HEADERS "${CMAKE_SOURCE_DIR}/engine/src/*.h" "${CMAKE_SOURCE_DIR}/engine/src/*.hpp")
 
@@ -107,7 +103,6 @@ if(HELLFIRE_UI_TESTS)
 
     find_package(OpenGL REQUIRED)
 
-    # Copy the same link libraries as HellfireEngine, but swap imgui for imgui_with_test_engine
     target_link_libraries(HellfireEngine_Test
             PUBLIC
             libglew_static
@@ -121,9 +116,7 @@ if(HELLFIRE_UI_TESTS)
             json
     )
 
-    # ============================================
     # Editor Library for Testing
-    # ============================================
     file(GLOB_RECURSE EDITOR_LIB_SOURCES "${CMAKE_SOURCE_DIR}/editor/src/*.cpp")
     file(GLOB_RECURSE EDITOR_LIB_HEADERS "${CMAKE_SOURCE_DIR}/editor/src/*.h" "${CMAKE_SOURCE_DIR}/editor/src/*.hpp")
     list(FILTER EDITOR_LIB_SOURCES EXCLUDE REGEX ".*main\\.cpp$")
@@ -147,9 +140,7 @@ if(HELLFIRE_UI_TESTS)
             glfw
     )
 
-    # ============================================
     # UI Test Executable
-    # ============================================
     file(GLOB_RECURSE UI_TEST_SOURCES "ui/*.cpp")
     file(GLOB_RECURSE UI_TEST_HEADERS "ui/*.h" "ui/*.hpp")
 
