@@ -42,31 +42,31 @@ namespace hellfire::editor {
         state_manager_.set_context(&editor_context_);
         editor_context_.project_manager = std::make_unique<ProjectManager>(editor_context_.event_bus, editor_context_);
 
-        auto* pm = editor_context_.project_manager.get();
+        auto *pm = editor_context_.project_manager.get();
         // Subscribe to state transitions
-        editor_context_.event_bus.subscribe<OpenProjectCreatorEvent>([this](const auto&) {
+        editor_context_.event_bus.subscribe<OpenProjectCreatorEvent>([this](const auto &) {
             state_manager_.switch_to<ProjectCreatorState>();
         });
-    
-        editor_context_.event_bus.subscribe<CancelProjectCreatorEvent>([this](const auto&) {
+
+        editor_context_.event_bus.subscribe<CancelProjectCreatorEvent>([this](const auto &) {
             state_manager_.switch_to<ProjectHubState>();
         });
-    
-        editor_context_.event_bus.subscribe<CreateProjectEvent>([this, pm](const CreateProjectEvent& e) {
+
+        editor_context_.event_bus.subscribe<CreateProjectEvent>([this, pm](const CreateProjectEvent &e) {
             state_manager_.switch_to<ProjectLoadingState>();
             pm->create_project_async(e.name, e.location, e.template_id);
         });
-    
-        editor_context_.event_bus.subscribe<OpenProjectEvent>([this, pm](const OpenProjectEvent& e) {
+
+        editor_context_.event_bus.subscribe<OpenProjectEvent>([this, pm](const OpenProjectEvent &e) {
             state_manager_.switch_to<ProjectLoadingState>();
             pm->open_project_async(e.path);
         });
-    
-        editor_context_.event_bus.subscribe<ProjectLoadCompleteEvent>([this](const auto&) {
+
+        editor_context_.event_bus.subscribe<ProjectLoadCompleteEvent>([this](const auto &) {
             state_manager_.switch_to<EditorState>();
         });
-    
-        editor_context_.event_bus.subscribe<CloseProjectEvent>([this, pm](const auto&) {
+
+        editor_context_.event_bus.subscribe<CloseProjectEvent>([this, pm](const auto &) {
             pm->close_project();
             state_manager_.switch_to<ProjectHubState>();
         });
@@ -75,11 +75,23 @@ namespace hellfire::editor {
         state_manager_.switch_to<ProjectHubState>();
     }
 
+    void EditorApplication::load_editor_ui_config(ImGuiIO& io) {
+        io.IniFilename = nullptr;
+        
+        if (std::filesystem::exists("imgui.ini")) {
+            ImGui::LoadIniSettingsFromDisk("imgui.ini");
+        } else {
+            ImGui::LoadIniSettingsFromDisk("assets/layouts/default.ini");
+        }
+    }
+
     void EditorApplication::initialize_imgui(IWindow *window) {
         // Setup ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
+
+        load_editor_ui_config(io);
 
         // Load default font
         io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
@@ -100,7 +112,7 @@ namespace hellfire::editor {
         io.ConfigViewportsNoDecoration = false;
         io.ConfigViewportsNoTaskBarIcon = false;
         io.ConfigViewportsNoAutoMerge = false;
-        
+
         io.ConfigErrorRecoveryEnableAssert = true;
 
         // Setup style

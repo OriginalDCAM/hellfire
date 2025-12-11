@@ -12,6 +12,7 @@
 #include "json.hpp"
 #include "hellfire/assets/AssetManager.h"
 #include "hellfire/assets/importers/AssetImportManager.h"
+#include "hellfire/graphics/renderer/Renderer.h"
 #include "hellfire/scene/Scene.h"
 #include "hellfire/serializers/ProjectSerializer.h"
 #include "hellfire/utilities/ServiceLocator.h"
@@ -160,6 +161,7 @@ namespace hellfire {
     void Project::initialize_managers() {
         ServiceLocator::unregister_service<SceneManager>();
         ServiceLocator::unregister_service<AssetRegistry>();
+        ServiceLocator::unregister_service<Renderer>();
         
         // Initialize managers with project root context
         auto registry_path = project_root_path_ / "settings/assetregistry.json";
@@ -169,6 +171,10 @@ namespace hellfire {
 
         asset_manager_ = std::make_unique<AssetManager>(*asset_registry_.get());
         ServiceLocator::register_service<AssetManager>(asset_manager_.get());
+
+        scene_renderer_ = std::make_unique<Renderer>();
+        scene_renderer_->init(); // Make sure OpenGL is initialized!
+        ServiceLocator::register_service<Renderer>(scene_renderer_.get());
 
         AssetImportManager import_manager(*asset_registry_, *asset_manager_, project_root_path_);
         import_manager.import_all_pending();

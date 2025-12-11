@@ -4,6 +4,11 @@
 
 #include "ProjectHubState.h"
 
+#if WIN32
+#include <windows.h>
+#include <shellapi.h>
+#endif
+
 #include "IconsFontAwesome6.h"
 #include "imgui.h"
 #include "events/StateEvents.h"
@@ -74,6 +79,11 @@ namespace hellfire::editor {
                     if (ImGui::MenuItem("Remove from recent projects...")) {
                         context_->project_manager->remove_from_recent(project.path);
                         recent_projects_ = context_->project_manager->get_recent_projects();
+                    }
+                    if (ImGui::MenuItem("Open in Explorer")) {
+#if WIN32
+                        ShellExecuteW(NULL, L"open", project.path.parent_path().c_str(), NULL, NULL, SW_SHOW);
+#endif
                     }
                     ImGui::EndPopup();
                 }

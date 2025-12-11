@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "imgui.h"
 #include "StateManager.h"
 #include "../ui/Panels/EditorPanel.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
@@ -14,6 +15,8 @@ namespace hellfire::editor {
     class EditorApplication : public IApplicationPlugin {
     public:
         void on_initialize(Application &app) override;
+
+        void load_editor_ui_config(ImGuiIO &io);
 
         void initialize_imgui(IWindow *window);
 

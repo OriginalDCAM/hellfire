@@ -9,7 +9,12 @@ namespace hellfire {
     class Mesh {
     public:
         Mesh();
+
         Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices);
+
+        Mesh(const std::vector<Vertex> &vertices,
+             const std::vector<unsigned int> &indices,
+             bool defer_build);
 
         void cleanup();
 
@@ -18,6 +23,7 @@ namespace hellfire {
         void unbind() const;
 
         void build();
+        bool is_built() const { return  vao_ != nullptr; }
 
         // mesh data
         std::vector<Vertex> vertices;
@@ -32,9 +38,9 @@ namespace hellfire {
         int get_index_count() const;
 
     private:
-        std::unique_ptr<VA> vao_;
-        std::unique_ptr<VB> vbo_;
-        std::unique_ptr<IB> ibo_;
+        std::unique_ptr<VA> vao_ = nullptr;
+        std::unique_ptr<VB> vbo_ = nullptr;
+        std::unique_ptr<IB> ibo_ = nullptr;
 
         int index_count_;
 

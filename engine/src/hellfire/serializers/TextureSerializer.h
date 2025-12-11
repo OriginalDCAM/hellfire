@@ -20,7 +20,7 @@ namespace hellfire {
 
         // Filtering
         enum class FilterMode { NEAREST, LINEAR, TRILINEAR };
-        FilterMode filter = FilterMode::TRILINEAR;
+        FilterMode filter = FilterMode::LINEAR;
 
         // Wrapping
         enum class WrapMode { REPEAT, CLAMP, MIRROR };

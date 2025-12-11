@@ -35,6 +35,10 @@ namespace hellfire::editor {
             }
         }
 
+        void remove_all_panels() {
+            panels_.clear();
+        }
+
     private:
         std::vector<std::unique_ptr<EditorPanel>> panels_;
     };
