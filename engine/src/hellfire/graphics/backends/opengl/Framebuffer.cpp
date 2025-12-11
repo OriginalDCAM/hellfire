@@ -70,7 +70,7 @@ namespace hellfire {
 
         // Override format settings for depth texture
         const GLenum internal_format = settings.internal_format == GL_RGBA8
-                                           ? GL_DEPTH_COMPONENT24
+                                           ? GL_DEPTH_COMPONENT32F
                                            : settings.internal_format;
         constexpr GLenum format = GL_DEPTH_COMPONENT;
         const GLenum type = settings.type == GL_UNSIGNED_BYTE ? GL_FLOAT : settings.type;
@@ -185,6 +185,9 @@ namespace hellfire {
     }
 
     uint32_t Framebuffer::read_pixel_from_texture(const uint32_t texture_id, const int x, const int y) {
+        std::cout << "FBO ID: " << framebuffer_id_<< ", is valid: " << (glIsFramebuffer(framebuffer_id_) ? "yes" : "no") << std::endl;
+        std::cout << "Texture ID: " << texture_id << ", is valid: " << (glIsTexture(texture_id) ? "yes" : "no") << std::endl;
+    
         // Bind the framebuffer
         bind();
         // Attach the texture to the framebuffer

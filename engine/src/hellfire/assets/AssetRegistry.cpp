@@ -94,7 +94,7 @@ namespace hellfire {
         }
     }
 
-    std::optional<AssetMetadata> AssetRegistry::get_asset(uint32_t uuid) const {
+    std::optional<AssetMetadata> AssetRegistry::get_asset(AssetID uuid) const {
         const auto it = assets_.find(uuid);
         if (it != assets_.end()) {
             return it->second;
@@ -175,15 +175,6 @@ namespace hellfire {
         j["version"] = "1.0";
         j["assets"] = nlohmann::json::array();
 
-        register_asset(project_root_ / "test_scene.hfscene");
-        register_asset(project_root_ / "test_texture.png");
-        register_asset(project_root_ / "test_texture.jpg");
-        register_asset(project_root_ / "test_shader.vert");
-        register_asset(project_root_ / "test_shader.frag");
-        register_asset(project_root_ / "test_model.obj");
-        register_asset(project_root_ / "test_model.fbx");
-        register_asset(project_root_ / "test_model.gltf");
-
         for (const auto &metadata: assets_ | std::views::values) {
             nlohmann::json asset_json;
             asset_json["uuid"] = metadata.uuid;
@@ -247,10 +238,14 @@ namespace hellfire {
             {".gltf", AssetType::MODEL},
             {".glb", AssetType::MODEL},
             {".fbx", AssetType::MODEL},
+            {".hfmodel", AssetType::MODEL},
             {".hfmat", AssetType::MATERIAL},
+            {".hfmesh", AssetType::MESH},
             {".hfscene", AssetType::SCENE},
             {".frag", AssetType::SHADER},
             {".vert", AssetType::SHADER},
+            {".glsl", AssetType::SHADER},
+            {".shader", AssetType::SHADER}
         };
 
         auto extension = filepath.extension().string();

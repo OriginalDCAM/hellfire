@@ -84,27 +84,25 @@ namespace hellfire {
         }
 
         // Register services
-        ServiceLocator::register_service<Renderer>(&renderer_);
         ServiceLocator::register_service<InputManager>(input_manager_.get());
         ServiceLocator::register_service<ShaderManager>(&shader_manager_);
         ServiceLocator::register_service<IWindow>(window_.get());
-        ServiceLocator::register_service<SceneManager>(&scene_manager_);
-
 
         // Initialize engine systems
         Time::init();
-        renderer_.init();
+        // renderer_.init();
 
         // Create fallback shader
-        Shader *fallback = ensure_fallback_shader();
-        renderer_.set_fallback_shader(*fallback);
+        // Shader *fallback = ensure_fallback_shader();
+        // renderer_.set_fallback_shader(*fallback);
 
         call_plugins([this](IApplicationPlugin &plugin) {
             plugin.on_initialize(*this);
-        }); 
+        });
     }
 
     void Application::run() {
+        // while (!should_exit()) {
         while (!window_->should_close()) {
             if (window_info_.minimized) {
                 window_->wait_for_events();
@@ -115,14 +113,17 @@ namespace hellfire {
             window_->poll_events();
             // Make sure the timer is updated
             Time::update();
-            
+
             input_manager_->update();
 
             // Update scene
-            scene_manager_.update(Time::delta_time);
+            if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+                sm->update(Time::delta_time);
+            }
 
             on_render();
         }
+        // }
     }
 
 
@@ -131,27 +132,33 @@ namespace hellfire {
         call_plugins([](IApplicationPlugin &plugin) {
             plugin.on_begin_frame();
         });
-        renderer_.begin_frame();
+        if (auto renderer = ServiceLocator::get_service<Renderer>()) {
+            renderer->begin_frame();
 
-        if (auto *active_scene = scene_manager_.get_active_scene()) {
-            Entity *camera_override = nullptr;
+            if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+                if (auto *active_scene = sm->get_active_scene()) {
+                    Entity *camera_override = nullptr;
 
-            call_plugins([&camera_override](IApplicationPlugin &plugin) {
-                if (!camera_override) {
-                    camera_override = plugin.get_render_camera_override();
+                    call_plugins([&camera_override](IApplicationPlugin &plugin) {
+                        if (!camera_override) {
+                            camera_override = plugin.get_render_camera_override();
+                        }
+                    });
+
+                    renderer->render(*active_scene, camera_override);
                 }
-            });
-
-            renderer_.render(*active_scene, camera_override);
+            }
         }
+
 
         // Plugin render
         call_plugins([](IApplicationPlugin &plugin) {
             plugin.on_render();
         });
 
-        renderer_.end_frame();
-
+        if (auto renderer = ServiceLocator::get_service<Renderer>()) {
+            renderer->end_frame();
+        }
         // Plugin end_frame
         call_plugins([](IApplicationPlugin &plugin) {
             plugin.on_end_frame();
@@ -240,11 +247,14 @@ namespace hellfire {
         glViewport(0, 0, width, height);
 
         // Update cameras
-        if (Scene *active_scene = scene_manager_.get_active_scene()) {
-            for (const EntityID camera_id: scene_manager_.get_camera_entities()) {
-                if (const Entity *camera_entity = active_scene->get_entity(camera_id)) {
-                    if (auto *camera_comp = camera_entity->get_component<CameraComponent>()) {
-                        camera_comp->set_aspect_ratio(window_info_.aspect_ratio); }
+        if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+            if (Scene *active_scene = sm->get_active_scene()) {
+                for (const EntityID camera_id: sm->get_camera_entities()) {
+                    if (const Entity *camera_entity = active_scene->get_entity(camera_id)) {
+                        if (auto *camera_comp = camera_entity->get_component<CameraComponent>()) {
+                            camera_comp->set_aspect_ratio(window_info_.aspect_ratio);
+                        }
+                    }
                 }
             }
         }
@@ -256,5 +266,19 @@ namespace hellfire {
 
     void Application::on_window_minimize(bool minimized) {
         window_info_.minimized = minimized;
+    }
+
+    void Application::set_exit_condition(std::function<bool()> condition) {
+        exit_condition_ = std::move(condition);
+    }
+
+    void Application::request_exit() {
+        should_exit_ = true;
+    }
+
+    bool Application::should_exit() const {
+        if (should_exit_) return true;
+        if (exit_condition_ && exit_condition_()) return true;
+        return false;
     }
 }

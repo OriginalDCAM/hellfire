@@ -47,8 +47,6 @@ namespace hellfire {
         void set_name(const std::string &name) { name_ = name; }
 
         // Component management
-
-        
         template<ComponentType T, typename... Args>
         T *add_component(Args &&... args);
 

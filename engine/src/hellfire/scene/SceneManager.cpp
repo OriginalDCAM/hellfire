@@ -5,8 +5,15 @@
 #include <fstream>
 #include <iostream>
 
+#include "hellfire/assets/SceneAssetResolver.h"
+#include "hellfire/ecs/ComponentRegistration.h"
+#include "hellfire/serializers/SceneSerializer.h"
+#include "hellfire/utilities/ServiceLocator.h"
+
 namespace hellfire {
     SceneManager::SceneManager() : active_scene_(nullptr) {
+        // Serialization of scene components
+        register_all_components();
     }
 
     SceneManager::~SceneManager() {
@@ -17,8 +24,8 @@ namespace hellfire {
         return scenes_;
     }
 
-    void SceneManager::save_current_scene() const {
-        active_scene_->save();
+    void SceneManager::save_current_scene() {
+        save_scene_as(active_scene_->get_source_filename().string(), active_scene_);
     }
 
     Scene *SceneManager::create_scene(const std::string &name) {
@@ -36,74 +43,104 @@ namespace hellfire {
             }
         }
 
+        // Open the file for reading
         std::ifstream file(filename);
         if (!file.is_open()) {
             std::cerr << "Failed to open scene file: " << filename << std::endl;
             return nullptr;
         }
 
-        nlohmann::json scene_data;
-        try {
-            file >> scene_data;
-        } catch (const std::exception &e) {
-            std::cerr << "Failed to parse scene file: " << e.what() << std::endl;
+        // Create and empty scene and deserialize components
+        Scene* new_scene = create_scene();
+        if (!Serializer<Scene>::deserialize(file, new_scene)) {
+            std::cerr << "Failed to deserialize scene: " << filename << std::endl;
+            destroy_scene(new_scene);
             return nullptr;
         }
 
-        // Validate scene data
-        if (!scene_data.contains("name") || !scene_data.contains("version")) {
-            std::cerr << "Invalid scene file format" << std::endl;
-            return nullptr;
+        
+        // Resolve asset references
+        if (auto* asset_manager = ServiceLocator::get_service<AssetManager>()) {
+            SceneAssetResolver resolver(*asset_manager);
+            resolver.resolve(*new_scene);
+        } else {
+            std::cerr << "Warning: No AssetManager available, assets not resolved for scene: " 
+                      << filename << std::endl;
         }
 
-        Scene *new_scene = create_scene(scene_data["name"]);
+        // Track scene asset ID for hot-reload / saving
+        if (auto* asset_registry = ServiceLocator::get_service<AssetRegistry>()) {
+            if (const auto scene_uuid = asset_registry->get_uuid_by_path(filename)) {
+                scene_asset_ids_[new_scene] = *scene_uuid;
+            }
+        }
+
         new_scene->set_source_filename(filename);
-
-        // TODO: Deserialize entities from scene_data["entities"]
-        if (scene_data.contains("entities") && !scene_data["entities"].empty()) {
-            // Deserialize entities here when implemented
-            std::cout << "TODO: Deserialize " << scene_data["entities"].size() << " entities\n";
-        }
         return new_scene;
     }
 
-    bool SceneManager::save_scene(const std::string &filepath, Scene *scene) const {
+    Scene* SceneManager::load_scene(AssetID asset_id, const std::filesystem::path& filename) {
+        Scene* scene = load_scene(filename);
+        if (scene) {
+            scene_asset_ids_[scene] = asset_id;
+        }
+        return scene;
+    }
+
+    std::optional<AssetID> SceneManager::get_scene_asset_id(Scene* scene) const {
+        auto it = scene_asset_ids_.find(scene);
+        if (it != scene_asset_ids_.end()) {
+            return it->second;
+        }
+        return std::nullopt;
+    }
+
+    std::optional<AssetID> SceneManager::get_active_scene_asset_id() const {
+        return get_scene_asset_id(active_scene_);
+    }
+
+    bool SceneManager::save_scene(Scene* scene) {
+        if (!scene) return false;
+
+        std::filesystem::path filepath = scene->get_source_filename();
+        if (filepath.empty()) {
+            std::cerr << "Scene has no source filename, use save_scene_as()" << std::endl;
+            return false;
+        }
+
+        return save_scene_as(filepath.string(), scene);
+    }
+
+    bool SceneManager::save_scene_as(const std::string &filename, Scene *scene) {
         if (!scene) scene = get_active_scene();
         if (!scene) return false;
 
-        try {
-            json scene_data;
-            scene_data["name"] = scene->get_name();
-            scene_data["version"] = "1.0";
-
-            json entities_array = json::array();
-
-            // TODO: Iterate through scene entities
-            // for (EntityID id : scene->get_all_entity_ids()) {
-            //     Entity* entity = scene->get_entity(id);
-            //     json entity_data = serialize_entity(entity);
-            //     entities_array.push_back(entity_data);
-            // }
-
-            scene_data["entities"] = entities_array;
-
-            std::ofstream file(filepath);
-            if (!file.is_open()) {
-                std::cerr << "Failed to open file for writing: " << filepath << std::endl;
-                return false;
-            }
-
-            file << std::setw(4) << scene_data << std::endl;
-
-            scene->set_source_filename(filepath);
-
-            return true;
-        } catch (const std::exception &e) {
-            std::cerr << "Error saving scene: " << e.what() << std::endl;
+        std::ofstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Failed to open file for writing: " << filename << std::endl;
             return false;
         }
+
+        if (!Serializer<Scene>::serialize(file, scene)) {
+            std::cerr << "Failed to serialize scene: " << filename << std::endl;
+            return false;
+        }
+
+        scene->set_source_filename(filename);
+
+        // Register with asset registry if not already
+        if (auto* asset_registry = ServiceLocator::get_service<AssetRegistry>()) {
+            if (!asset_registry->get_uuid_by_path(filename)) {
+                AssetID new_id = asset_registry->register_asset(filename, AssetType::SCENE);
+                scene_asset_ids_[scene] = new_id;
+            }
+        }
+
+        std::cout << "Scene saved: " << filename << std::endl;
+        return true;
     }
 
+    
     void SceneManager::update(float delta_time) {
         if (active_scene_) {
             active_scene_->update(delta_time);
@@ -111,12 +148,34 @@ namespace hellfire {
     }
 
     void SceneManager::clear() {
-        for (Scene *scene: scenes_) {
+        for (Scene* scene : scenes_) {
             delete scene;
         }
         scenes_.clear();
+        scene_asset_ids_.clear(); 
         active_scene_ = nullptr;
     }
+
+    void SceneManager::destroy_scene(Scene* scene) {
+        if (!scene) return;
+    
+        // Remove from asset ID map
+        scene_asset_ids_.erase(scene);
+    
+        // Remove from scenes vector
+        auto it = std::find(scenes_.begin(), scenes_.end(), scene);
+        if (it != scenes_.end()) {
+            scenes_.erase(it);
+        }
+    
+        // Clear active if this was it
+        if (active_scene_ == scene) {
+            active_scene_ = nullptr;
+        }
+    
+        delete scene;
+    }
+
 
     EntityID SceneManager::find_entity_by_name(const std::string &name) {
         if (active_scene_) {

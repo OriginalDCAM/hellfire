@@ -8,7 +8,14 @@
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "imgui_internal.h"
 #include "json.hpp"
+#include "hellfire/assets/AssetManager.h"
+#include "hellfire/assets/importers/AssetImportManager.h"
+#include "hellfire/graphics/renderer/Renderer.h"
+#include "hellfire/scene/Scene.h"
+#include "hellfire/serializers/ProjectSerializer.h"
+#include "hellfire/utilities/ServiceLocator.h"
 
 namespace hellfire {
     Project::Project(const std::string &name) {
@@ -23,31 +30,35 @@ namespace hellfire {
 
     Project::Project(const ProjectMetadata &metadata) : metadata_(metadata) {}
 
+    Project::~Project() {
+        cleanup_managers();
+    }
+
     std::unique_ptr<Project> Project::create(const std::string &name, const std::filesystem::path &location) {
-        auto project = std::make_unique<Project>(name);
-        
+        ProjectMetadata metadata;
+        metadata.name = name;
+        metadata.version = "1.0.0";
+        metadata.engine_version = "0.1.0";
+    
+        // Get timestamp
+        metadata.created_at = get_current_timestamp();
+        metadata.last_opened = metadata.created_at;
+    
+        auto project = std::make_unique<Project>(metadata);
         project->project_root_path_ = location / name;
         project->project_file_path_ = project->project_root_path_ / "project.hfproj";
-
-        // Create directory structure
+    
         project->create_directory_structure();
-
-        project->initialize_managers();
-
-        // Initialize default assets
-        project->initialize_default_assets();
-
-        // Save project file
-        if (!project->serialize()) {
-            std::cerr << "ERROR::PROJECT::CREATE:: Failed to save project file" << std::endl;
+    
+        if (!project->save()) {
+            std::cerr << "Failed to save new project" << std::endl;
             return nullptr;
         }
-
-        std::cout << "Succesfully create project:" << name << std::endl;
+    
         return project;
     }
 
-    std::unique_ptr<Project> Project::load(const std::filesystem::path &project_file) {
+    std::unique_ptr<Project> Project::load_data(const std::filesystem::path &project_file) {
         if (!exists(project_file)) {
             std::cerr << "ERROR::PROJECT::LOAD:: Project file doesnt exist at " << project_file.string() << std::endl;
             return nullptr;
@@ -59,50 +70,11 @@ namespace hellfire {
                 std::cerr << "ERROR::PROJECT::LOAD:: Failed to open project file" << std::endl;
                 return nullptr;
             }
-
-            // Parse file content as json
-            nlohmann::json j;
-            file >> j;
-
-            if (!j.contains("name")) {
-                std::cerr << "ERROR::PROJECT::LOAD:: Missing required 'name' field" << std::endl;
-                return nullptr;
-            }
-
-            // Deserialize metadata
+            
             ProjectMetadata metadata;
-
-
-            if (j.contains("version")) {
-                metadata.version = j["version"].get<std::string>();
-            }
-
-            if (j.contains("engine_version")) {
-                metadata.engine_version = j["engine_version"].get<std::string>();
-            }
-            
-            if (j.contains("created")) {
-                metadata.created_at = j["created"].get<std::string>();
-            }
-            
-            if (j.contains("last_opened")) {
-                metadata.last_opened= j["last_opened"].get<std::string>();
-            }
-            
-            if (j.contains("last_scene")) {
-                metadata.last_scene = j["last_scene"].get<std::string>();
-            }
-            
-            if (j.contains("settings")) {
-                const auto& settings = j["settings"];
-
-                if (settings.contains("default_scene")) {
-                    metadata.default_scene = settings["default_scene"].get<std::string>();
-                }
-
-                if (settings.contains("renderer_settings")) {
-                    metadata.renderer_settings = settings["renderer_settings"].get<std::string>();
-                }
+            if (!Serializer<ProjectMetadata>::deserialize(file, &metadata)) {
+                std::cerr << "Failed to deserialize project metadata" << std::endl;
+                return nullptr;
             }
 
             // Create project with metadata
@@ -110,18 +82,6 @@ namespace hellfire {
             project->project_file_path_ = project_file;
             project->project_root_path_ = project_file.parent_path();
 
-            // Initialize managers
-            project->initialize_managers();
-
-            // Load the last opened scene if it exists
-            if (!metadata.last_scene.empty()) {
-                auto scene_path = project->project_root_path_ / metadata.last_scene;
-                if (std::filesystem::exists(scene_path)) {
-                    project->scene_manager_->load_scene(scene_path);
-                }
-            }
-
-            std::cout << "Successfully loaded project: " << metadata.name << std::endl;
             return project;
         } catch (const nlohmann::json::parse_error& e) {
             std::cerr << "ERROR::PROJECT::LOAD:: JSON parse error: " << e.what() << std::endl;
@@ -136,12 +96,9 @@ namespace hellfire {
     bool Project::save() {
         // Update last_opened timestamp
         metadata_.last_opened = get_current_timestamp();
-        
-        // Serialize project file
-        if (!serialize()) {
-            std::cerr << "ERROR::PROJECT::SAVE:: Failed to serialize project" << std::endl;
-            return false;
-        }
+
+        std::ofstream file(project_file_path_);
+        if (!file.is_open()) return false;
 
         // Save asset registry
         if (asset_registry_) {
@@ -151,9 +108,11 @@ namespace hellfire {
         // Save current scene if loaded
         if (scene_manager_ && scene_manager_->has_active_scene()) {
             scene_manager_->save_current_scene();
+            metadata_.last_scene = scene_manager_->get_active_scene_asset_id();
         }
 
-        return true;
+
+        return Serializer<ProjectMetadata>::serialize(file, &metadata_);
     }
 
     void Project::close() {
@@ -166,6 +125,8 @@ namespace hellfire {
         if (asset_registry_) {
             asset_registry_->clear();
         }
+
+        cleanup_managers();
     }
 
     std::filesystem::path Project::get_project_root() const {
@@ -184,47 +145,13 @@ namespace hellfire {
         return project_root_path_ / "settings";
     }
 
-    bool Project::serialize() const {
-        try {
-            nlohmann::json j;
-            
-            // Serialize metadata
-            j["name"] = metadata_.name;
-            j["version"] = metadata_.version;
-            j["engine_version"] = metadata_.engine_version;
-            j["created"] = metadata_.created_at;
-            j["last_opened"] = metadata_.last_opened;
-            
-            if (!metadata_.last_scene.empty()) {
-                j["last_scene"] = metadata_.last_scene.string();
-            }
-
-            // Serialize settings
-            j["settings"] = {
-                {"default_scene", metadata_.default_scene.string()},
-                {"renderer_settings", metadata_.renderer_settings.string()}
-            };
-
-            // Write to file
-            std::ofstream file(project_file_path_);
-            if (!file.is_open()) {
-                return false;
-            }
-
-            file << j.dump(4); // Pretty print
-            return true;
-
-        } catch (const std::exception& e) {
-            std::cerr << "ERROR::PROJECT::SERIALIZE:: " << e.what() << std::endl;
-            return false;
-        }
-    }
-
     void Project::create_directory_structure() const {
-        create_directories(project_root_path_/ "settings");
-        create_directories(project_root_path_/ "assets");
-        create_directories(project_root_path_/ "shared");
-        
+        create_directories(project_root_path_ / "settings");
+        create_directories(project_root_path_ / "assets");
+        create_directories(project_root_path_ / "assets" / "scenes");
+        create_directories(project_root_path_ / "assets" / "textures");
+        create_directories(project_root_path_ / "assets" / "models");
+        create_directories(project_root_path_ / "assets" / "scripts");
     }
 
     void Project::initialize_default_assets() {
@@ -232,14 +159,49 @@ namespace hellfire {
 
 
     void Project::initialize_managers() {
+        ServiceLocator::unregister_service<SceneManager>();
+        ServiceLocator::unregister_service<AssetRegistry>();
+        ServiceLocator::unregister_service<Renderer>();
+        
         // Initialize managers with project root context
         auto registry_path = project_root_path_ / "settings/assetregistry.json";
         asset_registry_ = std::make_unique<AssetRegistry>(registry_path, project_root_path_);
+        ServiceLocator::register_service<AssetRegistry>(asset_registry_.get());
+        asset_registry_->register_directory(get_assets_path(), true);
+
+        asset_manager_ = std::make_unique<AssetManager>(*asset_registry_.get());
+        ServiceLocator::register_service<AssetManager>(asset_manager_.get());
+
+        scene_renderer_ = std::make_unique<Renderer>();
+        scene_renderer_->init(); // Make sure OpenGL is initialized!
+        ServiceLocator::register_service<Renderer>(scene_renderer_.get());
+
+        AssetImportManager import_manager(*asset_registry_, *asset_manager_, project_root_path_);
+        import_manager.import_all_pending();
+        asset_registry_->save();
 
         scene_manager_ = std::make_unique<SceneManager>();
+        ServiceLocator::register_service<SceneManager>(scene_manager_.get());
+
+        // Load last scene if exists
+        if (metadata_.last_scene) {
+            if (auto asset_info = asset_registry_->get_asset(metadata_.last_scene.value())) {
+                auto path = asset_registry_->get_absolute_path(asset_info->uuid);
+                auto scene = scene_manager_->load_scene(asset_info->uuid, path);
+                scene_manager_->set_active_scene(scene);
+            }
+        }
     }
 
-    std::string Project::get_current_timestamp() const {
+    void Project::cleanup_managers() {
+        ServiceLocator::unregister_service<SceneManager>();
+        ServiceLocator::unregister_service<AssetRegistry>();
+        ServiceLocator::unregister_service<AssetManager>();
+        scene_manager_.reset();
+        asset_registry_.reset();
+    }
+
+    std::string Project::get_current_timestamp() {
         auto now = std::chrono::system_clock::now();
         auto time_t_now = std::chrono::system_clock::to_time_t(now);
         std::stringstream ss;

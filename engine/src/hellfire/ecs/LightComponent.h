@@ -11,8 +11,11 @@
 #include "hellfire/graphics/shader/Shader.h"
 #include "Component.h"
 #include "Entity.h"
+#include "hellfire/graphics/backends/opengl/Framebuffer.h"
 
 namespace hellfire {
+
+    
     class LightComponent : public Component {
     public:
         enum LightType {
@@ -37,6 +40,8 @@ namespace hellfire {
         // Spotlight properties
         float inner_cone_angle_ = 30.0f;
         float outer_cone_angle_ = 45.0f;
+
+        glm::mat4 light_view_proj_matrix = glm::mat4(1.0f);
 
         // Shadow mapping properties
         bool cast_shadows_ = true;
@@ -129,26 +134,8 @@ namespace hellfire {
             }
         }
 
-        // Factory methods for convenience
-        static LightComponent *create_directional(const glm::vec3 &direction = glm::vec3(0.0f, -1.0f, 0.0f)) {
-            auto *light = new LightComponent(DIRECTIONAL);
-            light->set_direction(direction);
-            return light;
-        }
-
-        static LightComponent *create_point(const float range = 10.0f, const float attenuation = 1.0f) {
-            auto *light = new LightComponent(POINT);
-            light->set_range(range);
-            light->set_attenuation(attenuation);
-            return light;
-        }
-
-        static LightComponent *create_spot(const float inner_angle = 30.0f, const float outer_angle = 45.0f) {
-            auto *light = new LightComponent(SPOT);
-            light->set_inner_cone_angle(inner_angle);
-            light->set_outer_cone_angle(outer_angle);
-            return light;
-        }
+        const glm::mat4& get_light_view_proj_matrix() const { return light_view_proj_matrix; }
+        void set_light_view_proj_matrix(const glm::mat4& lvpm) { light_view_proj_matrix = lvpm; }
 
     private:
         void upload_directional_to_shader(Shader& shader, const int light_index) const {

@@ -4,7 +4,7 @@
 #include "GLFWWindow.h"
 
 namespace hellfire {
-    bool GLFWWindow::create(int width, int height, const std::string &title) {
+    bool GLFWWindow::create(const int width, const int height, const std::string &title) {
         if (!initialized_) {
             if (!glfwInit()) {
                 return false;
@@ -71,7 +71,7 @@ namespace hellfire {
         }
     }
 
-    void GLFWWindow::set_size(int width, int height) {
+    void GLFWWindow::set_size(const int width, const int height) {
         window_info_.width = width;
         window_info_.height = height;
         if (window_) {
@@ -100,7 +100,7 @@ namespace hellfire {
         return {0, 0};
     }
 
-    bool GLFWWindow::is_key_pressed(int keycode) const {
+    bool GLFWWindow::is_key_pressed(const int keycode) const {
         if (window_) {
             return glfwGetKey(window_, keycode) == GLFW_PRESS;
         }
@@ -113,6 +113,7 @@ namespace hellfire {
             glfwGetCursorPos(window_, &x, &y);
             return {static_cast<float>(x), static_cast<float>(y)};
         }
+        return {0, 0};
     }
 
     void GLFWWindow::make_current() {
@@ -121,7 +122,7 @@ namespace hellfire {
         }
     }
 
-    void GLFWWindow::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    void GLFWWindow::key_callback(GLFWwindow *window, const int key, int scancode, const int action, int mods) {
         if (const auto *instance = static_cast<GLFWWindow *>(glfwGetWindowUserPointer(window));
             instance && instance->event_handler_) {
             if (action == GLFW_PRESS) {
@@ -132,7 +133,7 @@ namespace hellfire {
         }
     }
 
-    void GLFWWindow::mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
+    void GLFWWindow::mouse_button_callback(GLFWwindow *window, const int button, const int action, int mods) {
         if (const auto *instance = static_cast<GLFWWindow *>(glfwGetWindowUserPointer(window));
             instance && instance->event_handler_) {
             if (action == GLFW_PRESS) {
@@ -143,14 +144,14 @@ namespace hellfire {
         }
     }
 
-    void GLFWWindow::cursor_position_callback(GLFWwindow *window, double x, double y) {
+    void GLFWWindow::cursor_position_callback(GLFWwindow *window, const double x, const double y) {
         if (const auto *instance = static_cast<GLFWWindow *>(glfwGetWindowUserPointer(window));
             instance && instance->event_handler_) {
             instance->event_handler_->on_mouse_move(static_cast<float>(x), static_cast<float>(y));
         }
     }
 
-    void GLFWWindow::window_size_callback(GLFWwindow *window, int width, int height) {
+    void GLFWWindow::window_size_callback(GLFWwindow *window, const int width, const int height) {
         if (auto *instance = static_cast<GLFWWindow *>(glfwGetWindowUserPointer(window))) {
             instance->window_info_.width = width;
             instance->window_info_.height = height;
@@ -175,14 +176,14 @@ namespace hellfire {
     }
 
     float GLFWWindow::get_elapsed_time() {
-        return glfwGetTime();
+        return static_cast<float>(glfwGetTime());
     }
 
-    void GLFWWindow::warp_cursor(double x, double y) {
+    void GLFWWindow::warp_cursor(const double x, const double y) {
         glfwSetCursorPos(window_, x, y);
     }
 
-    void GLFWWindow::set_cursor_mode(CursorMode mode) {
+    void GLFWWindow::set_cursor_mode(const CursorMode mode) {
         switch (mode) {
             case HIDDEN:
                 glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
