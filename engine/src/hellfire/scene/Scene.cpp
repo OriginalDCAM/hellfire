@@ -8,6 +8,18 @@
 namespace hellfire {
     Scene::Scene(std::string name) : name_(std::move(name)), is_playing_(false) {
         environment_ = std::make_unique<SceneEnvironment>();
+
+    auto *skybox = new Skybox();
+    skybox->set_cubemap_faces({
+        "assets/skyboxes/px.png", // +X
+        "assets/skyboxes/nx.png", // -X
+        "assets/skyboxes/py.png", // +Y
+        "assets/skyboxes/ny.png", // -Y
+        "assets/skyboxes/pz.png", // +Z
+        "assets/skyboxes/nz.png" // -Z
+    });
+
+    environment_->set_skybox(*skybox);
     }
 
     Scene::~Scene() {
