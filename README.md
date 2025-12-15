@@ -2,25 +2,32 @@
 
 A lightweight, experimental 3D game engine built with modern C++ and OpenGL, featuring an integrated editor and entity-component architecture.
 
+
+
 ## Features
 
-**Rendering**
+### Rendering
 - Modern OpenGL 4.3+ pipeline with custom shader support
 - PBR materials with multi-texturing
 - Instanced rendering for large-scale scenes
 - Directional and spot lighting
 - Skybox support
 
-**Scene Management**
+### Scene Management
 - Entity-component system for flexible object composition
 - Hierarchical scene graph with transform inheritance
 - Model importing (OBJ, FBX, glTF via Assimp)
 - Built-in geometry primitives
 
-**Editor**
+### Editor
 - ImGui based interface
 - Gizmo manipulation tools
 - Real-time viewport preview
+- Project Manager
+
+![test](images/Hellfire-Editor.png)
+
+
 
 Note: The editor is in early development and doesn't yet expose all engine features.
 
