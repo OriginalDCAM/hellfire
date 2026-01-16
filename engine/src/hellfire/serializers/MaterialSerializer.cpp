@@ -109,6 +109,11 @@ namespace hellfire {
 
             mat.texture_assets[static_cast<TextureType>(type_raw)] = asset_id;
         }
+        
+        std::cout << "Loaded material from: " << filepath << std::endl;
+        for (const auto& [type, asset_id] : mat.texture_assets) {
+            std::cout << "  " << static_cast<int>(type) << " -> " << asset_id << std::endl;
+        }
 
         return mat;
     }

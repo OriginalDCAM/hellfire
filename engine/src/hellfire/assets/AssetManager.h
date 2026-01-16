@@ -14,7 +14,7 @@ namespace hellfire {
         // Typed asset loading with caching
         std::shared_ptr<Mesh> get_mesh(AssetID id);
         std::shared_ptr<Material> get_material(AssetID id);
-        std::shared_ptr<Texture> get_texture(AssetID id);
+        std::shared_ptr<Texture> get_texture(AssetID id, TextureType type);
 
         // Cache management
         void unload(AssetID id);

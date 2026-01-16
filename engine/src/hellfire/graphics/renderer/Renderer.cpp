@@ -71,10 +71,10 @@ namespace hellfire {
     }
 
     void Renderer::clear_draw_list() {
-        opaque_objects_.clear();
-        transparent_objects_.clear();
-        opaque_instanced_objects_.clear();
-        transparent_instanced_objects_.clear();
+        if (!opaque_objects_.empty()) opaque_objects_.clear();
+        if (!transparent_objects_.empty()) transparent_objects_.clear();
+        if (!opaque_instanced_objects_.empty()) opaque_instanced_objects_.clear();
+        if (!transparent_instanced_objects_.empty()) transparent_instanced_objects_.clear();
     }
 
     void Renderer::begin_frame() {
@@ -324,7 +324,6 @@ namespace hellfire {
         clear_draw_list();
         scene_ = &scene;
 
-
         // Gather lights and geometry
         collect_lights_from_scene(scene, camera);
         collect_geometry_from_scene(scene, camera.get_owner().transform()->get_position());
@@ -433,7 +432,7 @@ namespace hellfire {
         look_at.y = 0.0f;
         look_at.z = float(camera_pos.z / texel_size) * texel_size;
 
-        const glm::vec3 light_pos = look_at - light_dir * 30.0f;
+        const glm::vec3 light_pos = look_at - light_dir * 100.0f;
 
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
         if (glm::abs(glm::dot(light_dir, up)) > 0.99f) {
@@ -443,7 +442,7 @@ namespace hellfire {
         const glm::mat4 light_projection = glm::ortho(
             -ortho_size, ortho_size,
             -ortho_size, ortho_size,
-            1.0f, 60.0f);
+            1.0f, 1000.0f);
 
         const glm::mat4 light_view = glm::lookAt(light_pos, look_at, up);
         

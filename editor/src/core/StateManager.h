@@ -62,6 +62,10 @@ namespace hellfire::editor {
         bool on_key_up(const int key) const {
             return current_state_ ? current_state_->on_key_up(key) : false;
         }
+        
+        bool on_window_resize(int width, int height) {
+            return current_state_ ? current_state_->on_window_resize(width, height) : false;
+        }
     
         Entity* get_render_camera_override() const {
             return current_state_ ? current_state_->get_render_camera_override() : nullptr;

@@ -18,6 +18,7 @@
 #include "hellfire/graphics/material/MaterialData.h"
 #include "hellfire/serializers/MaterialSerializer.h"
 #include "hellfire/serializers/MeshSerializer.h"
+#include "hellfire/serializers/TextureSerializer.h"
 
 namespace hellfire {
     ModelImporter::ModelImporter(AssetRegistry &registry,
@@ -246,11 +247,16 @@ namespace hellfire {
             data.roughness = value;
 
         // Textures
-        auto try_load_texture = [&](aiTextureType ai_type, TextureType hf_type) {
-            if (ai_mat->GetTextureCount(ai_type) == 0) return;
+        auto try_load_texture = [&](aiTextureType ai_type, TextureType hf_type,  const char* type_name) {
+            unsigned int count = ai_mat->GetTextureCount(ai_type);
+            if (count == 0) return;
 
+            std::cout << "  Found " << count << " texture(s) for type: " << type_name << std::endl;
+            
             aiString tex_path;
             if (ai_mat->GetTexture(ai_type, 0, &tex_path) != AI_SUCCESS) return;
+            
+            std::cout << "    -> Path: " << tex_path.C_Str() << std::endl;
 
             AssetID tex_asset = process_texture(tex_path.C_Str(), hf_type);
             if (tex_asset != INVALID_ASSET_ID) {
@@ -258,13 +264,16 @@ namespace hellfire {
             }
         };
 
-        try_load_texture(aiTextureType_DIFFUSE, TextureType::DIFFUSE);
-        try_load_texture(aiTextureType_NORMALS, TextureType::NORMAL);
-        try_load_texture(aiTextureType_SPECULAR, TextureType::SPECULAR);
-        try_load_texture(aiTextureType_METALNESS, TextureType::METALNESS);
-        try_load_texture(aiTextureType_DIFFUSE_ROUGHNESS, TextureType::ROUGHNESS);
-        try_load_texture(aiTextureType_AMBIENT_OCCLUSION, TextureType::AMBIENT_OCCLUSION);
-        try_load_texture(aiTextureType_EMISSIVE, TextureType::EMISSIVE);
+        try_load_texture(aiTextureType_DIFFUSE, TextureType::DIFFUSE, "DIFFUSE");
+        try_load_texture(aiTextureType_NORMALS, TextureType::NORMAL, "NORMALS");
+        try_load_texture(aiTextureType_SPECULAR, TextureType::SPECULAR, "SPECULAR");
+        try_load_texture(aiTextureType_METALNESS, TextureType::METALNESS, "METALNESS");
+        try_load_texture(aiTextureType_DIFFUSE_ROUGHNESS, TextureType::ROUGHNESS, "ROUGHNESS");
+        try_load_texture(aiTextureType_AMBIENT_OCCLUSION, TextureType::AMBIENT_OCCLUSION, "AO");
+        try_load_texture(aiTextureType_EMISSIVE, TextureType::EMISSIVE, "EMISSIVE");
+        
+        try_load_texture(aiTextureType_BASE_COLOR, TextureType::DIFFUSE, "BASE_COLOR (glTF)");
+        try_load_texture(aiTextureType_NORMAL_CAMERA, TextureType::NORMAL, "NORMAL_CAMERA");
 
         // Serialize
         const std::string filename = data.name + ".hfmat";
@@ -292,9 +301,16 @@ namespace hellfire {
             }
             resolved_path = *path_opt;
         }
+        
+        TextureMetadata tex_meta;
+        tex_meta.type = type;
+        tex_meta.generate_mipmaps = true;
+        tex_meta.srgb = (type == TextureType::DIFFUSE || type == TextureType::EMISSIVE);
+        
+        TextureSerializer::save_metadata(resolved_path, tex_meta);
 
         // Check if already registered
-        if (auto existing = registry_.get_uuid_by_path(resolved_path)) {
+        if (const auto existing = registry_.get_uuid_by_path(resolved_path)) {
             return *existing;
         }
 

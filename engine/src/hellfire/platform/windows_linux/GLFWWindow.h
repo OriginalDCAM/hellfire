@@ -65,5 +65,7 @@ namespace hellfire {
         void set_cursor_mode(CursorMode mode) override;
 
         void enable_vsync(bool vsync) override;
+
+        void maximize(bool should_maximize) override;
     };
 }

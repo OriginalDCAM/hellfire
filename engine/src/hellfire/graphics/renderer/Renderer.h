@@ -55,7 +55,7 @@ namespace hellfire {
     };
 
     struct ShadowSettings {
-        float bias = 0.005f;
+        float bias = 0.0f;
     };
 
     class Renderer {

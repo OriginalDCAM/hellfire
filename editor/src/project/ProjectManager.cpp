@@ -7,6 +7,7 @@
 #include <fstream>
 #include <thread>
 
+#include "core/EditorApplication.h"
 #include "events/StateEvents.h"
 #include "hellfire/core/Time.h"
 #include "serializers/ProjectManagerSerializer.h"
@@ -14,15 +15,6 @@
 
 namespace hellfire::editor {
     ProjectManager::ProjectManager(EventBus &event_bus, EditorContext &context) : event_bus_(event_bus), context_(context) {
-
-        // Platform-specific config path
-#ifdef _WIN32
-        config_path_ = std::filesystem::path(getenv("APPDATA")) / "Hellfire";
-#else
-        config_path_ = std::filesystem::path(getenv("HOME")) / ".config" / "hellfire";
-#endif
-
-        std::filesystem::create_directories(config_path_);
         load_recent_projects();
     }
 

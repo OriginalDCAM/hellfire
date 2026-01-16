@@ -18,7 +18,7 @@ namespace hellfire::editor {
     private:
         void render_sidebar();
         void render_project_list();
-        void render_buttons();
+        void render_buttons() const;
 
         std::vector<RecentProject> recent_projects_;
         int selected_tab_ = 0;
