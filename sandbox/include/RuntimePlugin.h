@@ -7,7 +7,7 @@
 
 #include <hellfire-core.h>
 
-class GamePlugin : public hellfire::IApplicationPlugin {
+class RuntimePlugin : public hellfire::IApplicationPlugin {
 public:
     // Input handler
     void handle_input();
@@ -18,9 +18,6 @@ private:
     hellfire::SceneManager *scene_manager_;
     std::unordered_map<std::string, hellfire::Scene *> scenes_;
     const hellfire::AppInfo* app_info_ = nullptr; 
-
-    void on_scene_activated(hellfire::Scene *scene);
-
 public:
     void on_initialize(hellfire::Application &app) override;
 

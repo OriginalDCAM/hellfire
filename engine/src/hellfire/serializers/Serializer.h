@@ -104,7 +104,7 @@ namespace hellfire {
                 {"visible", obj->visible},
                 {"render_layer", obj->render_layer}
             };
-
+            
             output << j.dump(4);
             return output.good();
         }

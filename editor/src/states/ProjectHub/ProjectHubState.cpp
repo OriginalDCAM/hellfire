@@ -19,7 +19,7 @@ namespace hellfire::editor {
         recent_projects_ = context_->project_manager->get_recent_projects();
         
         auto *window = ServiceLocator::get_service<IWindow>();
-        window->set_size(800, 600);
+        window->set_size(1280, 720);
     }
 
     void ProjectHubState::render() {
@@ -74,7 +74,7 @@ namespace hellfire::editor {
             
                 ImGui::SameLine();
                 ImGui::Text("%s", project.name.c_str());
-                ImGui::SameLine(120);
+                ImGui::SameLine(240);
                 ImGui::Text("%s", project.path.string().c_str());
 
                 if (ImGui::BeginPopupContextItem(("##" + project.path.string()).c_str())) {
@@ -84,7 +84,7 @@ namespace hellfire::editor {
                     }
                     if (ImGui::MenuItem("Open in Explorer")) {
 #if WIN32
-                        ShellExecuteW(NULL, L"open", project.path.parent_path().c_str(), NULL, NULL, SW_SHOW);
+                        ShellExecuteW(nullptr, L"open", project.path.parent_path().c_str(), NULL, NULL, SW_SHOW);
 #endif
                     }
                     ImGui::EndPopup();
