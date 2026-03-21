@@ -29,9 +29,6 @@ namespace hellfire {
         void load_skybox_shader();
         
         uint32_t skybox_shader_id_ = 0;
-        uint32_t skybox_vao_ = 0;
-        uint32_t skybox_vbo_ = 0;
-
         bool initialized_ = false;
         Shader skybox_shader_;
         std::shared_ptr<Mesh> skybox_mesh_;

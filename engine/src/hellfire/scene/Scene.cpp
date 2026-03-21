@@ -9,17 +9,26 @@ namespace hellfire {
     Scene::Scene(std::string name) : name_(std::move(name)), is_playing_(false) {
         environment_ = std::make_unique<SceneEnvironment>();
 
-    auto *skybox = new Skybox();
-    skybox->set_cubemap_faces({
-        "assets/skyboxes/px.png", // +X
-        "assets/skyboxes/nx.png", // -X
-        "assets/skyboxes/py.png", // +Y
-        "assets/skyboxes/ny.png", // -Y
-        "assets/skyboxes/pz.png", // +Z
-        "assets/skyboxes/nz.png" // -Z
-    });
+        auto *skybox = new Skybox();
+        // skybox->set_cubemap_faces({
+        //     "assets/skyboxes/px.png", // +X
+        //     "assets/skyboxes/nx.png", // -X
+        //     "assets/skyboxes/py.png", // +Y
+        //     "assets/skyboxes/ny.png", // -Y
+        //     "assets/skyboxes/pz.png", // +Z
+        //     "assets/skyboxes/nz.png" // -Z
+        // });
 
-    environment_->set_skybox(*skybox);
+        skybox->set_cubemap_faces({
+            "assets/skyboxes/space_right.png",
+            "assets/skyboxes/space_left.png",
+            "assets/skyboxes/space_top.png",
+            "assets/skyboxes/space_bottom.png",
+            "assets/skyboxes/space_front.png",
+            "assets/skyboxes/space_back.png"
+        });
+
+        environment_->set_skybox(*skybox);
     }
 
     Scene::~Scene() {
@@ -95,10 +104,10 @@ namespace hellfire {
         const auto it = children_map_.find(potential_ancestor);
         if (it == children_map_.end()) return false;
 
-        for (const EntityID child : it->second) {
+        for (const EntityID child: it->second) {
             if (is_descendant(potential_descendant, child)) return true;
         }
-        
+
         return false;
     }
 
@@ -201,7 +210,6 @@ namespace hellfire {
         }
         return cameras;
     }
-
 
 
     std::string Scene::generate_unique_name(const std::string &base_name) {
