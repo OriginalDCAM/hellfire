@@ -4,9 +4,11 @@
 
 #include "EditorState.h"
 
+#include <fstream>
+
+#include "hellfire/core/Application.h"
 #include "hellfire/graphics/renderer/Renderer.h"
-#include "hellfire/scene/SceneManager.h"
-#include "scenes/DefaultScene.h"
+#include "serializers/EditorSerializer.h"
 #include "ui/Panels/AssetExplorer/AssetExplorer.h"
 #include "ui/Panels/Inspector/InspectorPanel.h"
 #include "ui/Panels/MenuBar/MenuBarComponent.h"
@@ -16,6 +18,14 @@
 #include "ui/Panels/Viewport/ViewportPanel.h"
 
 namespace hellfire::editor {
+    bool EditorState::load_last_settings() {
+        if (!std::filesystem::exists(get_editor_settings_path())) return false;
+        
+        std::ifstream file(get_editor_settings_path());
+        if (!file.is_open()) return false;
+        
+        return Serializer<AppInfo>::deserialize(file, &editor_settings_);
+    }
     void EditorState::on_enter() {
         // Make sure the renderer render's the scene to a framebuffer
         ServiceLocator::get_service<Renderer>()->set_render_to_framebuffer(true);
@@ -28,19 +38,28 @@ namespace hellfire::editor {
         panel_manager_.add_panel<AssetExplorer>();
         viewport_panel_ = panel_manager_.add_panel<ViewportPanel>();
         
+        auto *window = ServiceLocator::get_service<IWindow>();
+        window->maximize(true);
+        
         panel_manager_.set_context(context_);
+    }
+    
+    
+    void EditorState::save_application_state() {
+        std::ofstream file(get_editor_settings_path());
+        if (!file.is_open()) return;
+        
+        Serializer<AppInfo>::serialize(file, &editor_settings_);
     }
 
     void EditorState::on_exit() {
         ApplicationState::on_exit();
         panel_manager_.remove_all_panels();
-        
     }
 
     void EditorState::render() {
         // Create main dockspace
         create_dockspace();
-
         panel_manager_.render_all();
     }
 
@@ -98,5 +117,11 @@ namespace hellfire::editor {
 
     Entity* EditorState::get_render_camera_override() {
         return viewport_panel_ ? viewport_panel_->get_editor_camera() : nullptr;
+    }
+
+    bool EditorState::on_window_resize(const int width, const int height) {
+        editor_settings_.width = width;
+        editor_settings_.height = height;
+        return true;
     }
 }

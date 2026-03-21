@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <string>
 
+#include "core/EditorConfig.h"
 #include "hellfire/core/Project.h"
 #include "ui/EventBus.h"
 
@@ -55,7 +56,7 @@ namespace hellfire::editor {
         void clear_recent_projects();
         void remove_from_recent(const std::filesystem::path& path);
         std::filesystem::path get_recent_projects_path() const {
-            return config_path_ / "recent_projects.json";
+            return EditorConfig::get_config_path() / "recent_projects.json";
         }
 
         // Templates

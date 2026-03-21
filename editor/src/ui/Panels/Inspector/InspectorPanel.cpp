@@ -18,7 +18,7 @@
 
 namespace hellfire::editor {
     void InspectorPanel::render_add_component_context_menu(Entity *selected_entity) {
-        if (ImGui::BeginPopupContextWindow("AddComponentPopup")) {
+        if (ImGui::BeginPopupContextItem("AddComponentPopup")) {
             const bool has_light = selected_entity->has_component<LightComponent>();
             if (ImGui::MenuItem("Light", nullptr, false, !has_light)) {
                 selected_entity->add_component<LightComponent>();
@@ -101,7 +101,9 @@ namespace hellfire::editor {
             ImGui::BeginGroup();
             ImGui::SameLine(120, 1);
             render_add_component_context_menu(selected_entity);
-            if (ImGui::Button("Add Component", ImVec2(320, 20))) {
+            float lineHeight = ImGui::GetFrameHeight();
+            float em = ImGui::GetFontSize();
+            if (ImGui::Button("Add Component", ImVec2(20.0f * em, lineHeight))) {
                 ImGui::OpenPopup("AddComponentPopup");
             }
             ImGui::EndGroup();

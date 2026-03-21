@@ -37,7 +37,7 @@ namespace hellfire {
     };
 
     struct TextureSettings {
-        TextureFilter min_filter = TextureFilter::LINEAR_MIPMAP_LINEAR;
+        TextureFilter min_filter = TextureFilter::LINEAR;
         TextureFilter mag_filter = TextureFilter::LINEAR;
         TextureWrap wrap_s = TextureWrap::REPEAT;
         TextureWrap wrap_t = TextureWrap::REPEAT;

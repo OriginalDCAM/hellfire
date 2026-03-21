@@ -3,6 +3,9 @@
 //
 #include "EditorApplication.h"
 
+#include <fstream>
+
+#include "EditorConfig.h"
 #include "../EditorStyles.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -18,11 +21,16 @@
 #include "events/StateEvents.h"
 #include "../states/Editor/EditorState.h"
 #include "../states/ProjectHub/ProjectHubState.h"
+#include "serializers/EditorSerializer.h"
 #include "states/ProjectCreator/ProjectCreatorState.h"
 #include "states/ProjectLoading/ProjectLoadingState.h"
 
 namespace hellfire::editor {
+
+
     void EditorApplication::on_initialize(Application &app) {
+        std::filesystem::create_directories(EditorConfig::get_config_path());
+        
         app.get_window_info().should_warp_cursor = false;
 
         auto *window = ServiceLocator::get_service<IWindow>();
@@ -119,6 +127,9 @@ namespace hellfire::editor {
         styles::SetupDarkRedModeStyle();
 
         ImGuiStyle &style = ImGui::GetStyle();
+        style.FontScaleDpi = 1.5f;
+        style.ScaleAllSizes(1.5f);
+        
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             style.WindowRounding = 0.0f;
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -136,12 +147,17 @@ namespace hellfire::editor {
         imgui_initialized_ = true;
     }
 
+
+
     EditorApplication::~EditorApplication() {
         cleanup_imgui();
     }
 
     void EditorApplication::cleanup_imgui() {
         if (imgui_initialized_) {
+            
+            ImGui::SaveIniSettingsToDisk("imgui.ini");
+            
             ImGui_ImplOpenGL3_Shutdown();
             ImGui_ImplGlfw_Shutdown();
             ImGui::DestroyContext();
@@ -157,6 +173,8 @@ namespace hellfire::editor {
         ImGui::NewFrame();
         ImGuizmo::BeginFrame();
     }
+    
+    
 
     void EditorApplication::on_end_frame() {
         if (!imgui_initialized_) return;
@@ -211,7 +229,7 @@ namespace hellfire::editor {
     }
 
     void EditorApplication::on_window_resize(int width, int height) {
-        IApplicationPlugin::on_window_resize(width, height);
+        return;state_manager_.on_window_resize(width, height);
     }
 
     void EditorApplication::on_window_focus(bool focused) {

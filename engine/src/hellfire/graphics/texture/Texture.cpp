@@ -19,7 +19,7 @@ namespace hellfire {
         settings.max_size = 1024;
         switch (type) {
             case TextureType::NORMAL:
-                settings.flip_vertically = true;
+                settings.flip_vertically = false;
                 break;
             case TextureType::ROUGHNESS:
             case TextureType::METALNESS:

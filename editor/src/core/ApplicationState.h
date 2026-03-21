@@ -22,6 +22,8 @@ namespace hellfire::editor {
         virtual bool on_mouse_wheel(float delta) { return false; }
         virtual bool on_key_down(int key) { return false; }
         virtual bool on_key_up(int key) { return false; }
+        
+        virtual bool on_window_resize(int width, int height) { return  false; }
     
         // Optional overrides
         virtual Entity* get_render_camera_override() { return nullptr; }

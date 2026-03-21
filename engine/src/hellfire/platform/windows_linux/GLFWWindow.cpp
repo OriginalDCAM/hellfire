@@ -24,7 +24,6 @@ namespace hellfire {
         glfwMakeContextCurrent(window_);
         glfwSetWindowUserPointer(window_, this);
 
-        
 
         // Set callbacks
         glfwSetKeyCallback(window_, key_callback);
@@ -199,5 +198,10 @@ namespace hellfire {
 
     void GLFWWindow::enable_vsync(const bool vsync) {
         glfwSwapInterval(vsync);
+    }
+
+    void GLFWWindow::maximize(bool should_maximize) {
+        if (window_ && should_maximize)
+            glfwMaximizeWindow(window_);
     }
 }

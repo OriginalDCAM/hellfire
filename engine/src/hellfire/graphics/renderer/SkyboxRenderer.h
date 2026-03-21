@@ -3,9 +3,12 @@
 //
 
 #pragma once
+#include <complex.h>
 #include <cstdint>
 
 #include "hellfire/ecs/CameraComponent.h"
+#include "hellfire/graphics/Mesh.h"
+#include "hellfire/graphics/shader/Shader.h"
 
 namespace hellfire {
     class Skybox;
@@ -16,7 +19,7 @@ namespace hellfire {
     class SkyboxRenderer {
     public:
         SkyboxRenderer() = default;
-        ~SkyboxRenderer();
+        ~SkyboxRenderer() = default;
 
         void initialize();
         void render(const Skybox &skybox, const CameraComponent *camera) const;
@@ -25,10 +28,9 @@ namespace hellfire {
         void setup_skybox_geometry();
         void load_skybox_shader();
         
-        uint32_t skybox_shader_ = 0;
-        uint32_t skybox_vao_ = 0;
-        uint32_t skybox_vbo_ = 0;
-
+        uint32_t skybox_shader_id_ = 0;
         bool initialized_ = false;
+        Shader skybox_shader_;
+        std::shared_ptr<Mesh> skybox_mesh_;
     };
 }
