@@ -12,7 +12,9 @@
 #include "json.hpp"
 
 namespace hellfire {
-    AssetRegistry::AssetRegistry(const std::filesystem::path &registry_file, const std::filesystem::path &project_root) : registry_file_(registry_file), project_root_(project_root) {
+    AssetRegistry::AssetRegistry(const std::filesystem::path &registry_file,
+                                 const std::filesystem::path &project_root) : registry_file_(registry_file),
+                                                                              project_root_(project_root) {
         load();
     }
 
@@ -25,7 +27,7 @@ namespace hellfire {
         return register_asset(filepath, type);
     }
 
-    AssetID AssetRegistry::register_asset(const std::filesystem::path &filepath, AssetType type) {
+    AssetID AssetRegistry::register_asset(const std::filesystem::path &filepath, const AssetType type) {
         auto absolute_path = std::filesystem::absolute(filepath);
 
         // Check if already registered
@@ -33,7 +35,7 @@ namespace hellfire {
         auto it = path_to_uuid_.find(relative_path);
         if (it != path_to_uuid_.end()) {
             // Update last modified time
-            if (auto* asset = &assets_.at(it->second)) {
+            if (auto *asset = &assets_.at(it->second)) {
                 asset->last_modified = get_file_last_modified(absolute_path);
             }
             return it->second;
@@ -63,7 +65,8 @@ namespace hellfire {
         }
     }
 
-    std::vector<AssetID> AssetRegistry::register_directory(const std::filesystem::path &directory_path, bool recursive) {
+    std::vector<AssetID>
+    AssetRegistry::register_directory(const std::filesystem::path &directory_path, bool recursive) {
         std::vector<AssetID> registered_assets;
         auto absolute_dir = to_absolute_path(directory_path);
 
@@ -72,7 +75,7 @@ namespace hellfire {
         }
 
         auto iterator = std::filesystem::recursive_directory_iterator(absolute_dir);
-        for (const auto& entry : iterator) {
+        for (const auto &entry: iterator) {
             if (entry.is_regular_file()) {
                 AssetType type = get_type_from_extension(entry.path());
                 if (type != AssetType::UNKNOWN) {
@@ -81,7 +84,7 @@ namespace hellfire {
                 }
             }
         }
-        
+
         return registered_assets;
     }
 
@@ -94,9 +97,8 @@ namespace hellfire {
         }
     }
 
-    std::optional<AssetMetadata> AssetRegistry::get_asset(AssetID uuid) const {
-        const auto it = assets_.find(uuid);
-        if (it != assets_.end()) {
+    std::optional<AssetMetadata> AssetRegistry::get_asset(const AssetID uuid) const {
+        if (const auto it = assets_.find(uuid); it != assets_.end()) {
             return it->second;
         }
         return std::nullopt;
@@ -104,14 +106,14 @@ namespace hellfire {
 
     std::optional<uint64_t> AssetRegistry::get_uuid_by_path(const std::filesystem::path &filepath) {
         const auto relative_path = to_relative_path(filepath);
-        const auto it = path_to_uuid_.find(relative_path);
-        if (it != path_to_uuid_.end()) {
+        if (const auto it = path_to_uuid_.find(relative_path); it != path_to_uuid_.end()) {
             return it->second;
         }
+        
         return std::nullopt;
     }
 
-    std::vector<AssetMetadata> AssetRegistry::get_assets_by_type(AssetType type) {
+    std::vector<AssetMetadata> AssetRegistry::get_assets_by_type(const AssetType type) {
         std::vector<AssetMetadata> result;
         for (const auto &metadata: assets_ | std::views::values) {
             if (metadata.type == type) {
@@ -130,18 +132,18 @@ namespace hellfire {
         return result;
     }
 
-    bool AssetRegistry::asset_exists(AssetID uuid) const {
+    bool AssetRegistry::asset_exists(const AssetID uuid) const {
         return assets_.contains(uuid);
     }
 
-    std::filesystem::path AssetRegistry::get_absolute_path(AssetID uuid) {
+    std::filesystem::path AssetRegistry::get_absolute_path(const AssetID uuid) {
         if (const auto it = assets_.find(uuid); it != assets_.end()) {
             return to_absolute_path(it->second.filepath);
         }
         return {};
     }
 
-    std::filesystem::path AssetRegistry::get_relative_path(AssetID uuid) {
+    std::filesystem::path AssetRegistry::get_relative_path(const AssetID uuid) {
         if (const auto it = assets_.find(uuid); it != assets_.end()) {
             return to_relative_path(it->second.filepath);
         }
@@ -200,7 +202,7 @@ namespace hellfire {
             file >> j;
 
             if (j.contains("assets")) {
-                for (const auto& asset_json : j["assets"]) {
+                for (const auto &asset_json: j["assets"]) {
                     AssetMetadata metadata{
                         .uuid = asset_json["uuid"].get<AssetID>(),
                         .filepath = asset_json["path"].get<std::string>(),
@@ -214,7 +216,7 @@ namespace hellfire {
                 }
             }
             return true;
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "ERROR::ASSETREGISTRY::LOAD:: " << e.what() << std::endl;
             return false;
         }
@@ -252,26 +254,30 @@ namespace hellfire {
         std::ranges::transform(extension, extension.begin(), tolower); // To make sure it's case-insensitive
         const auto it = extension_map.find(extension);
 
-        return  (it != extension_map.end()) ? it->second : AssetType::UNKNOWN;
+        return (it != extension_map.end()) ? it->second : AssetType::UNKNOWN;
     }
 
-    AssetID AssetRegistry::generate_uuid(const std::filesystem::path& filepath) {
+    AssetID AssetRegistry::generate_uuid(const std::filesystem::path &filepath) {
         std::hash<std::string> hasher;
         uint64_t id = hasher(filepath.string());
         return (id == INVALID_ASSET_ID) ? 1 : id;
     }
 
     std::filesystem::path AssetRegistry::to_relative_path(const std::filesystem::path &absolute_path) const {
+        if (absolute_path.is_relative()) return absolute_path;
+
         return std::filesystem::relative(absolute_path, project_root_);
     }
 
     std::filesystem::path AssetRegistry::to_absolute_path(const std::filesystem::path &relative_path) const {
+        if (relative_path.is_absolute()) return relative_path;
+
         return project_root_ / relative_path;
     }
 
     void AssetRegistry::rebuild_path_map() {
         path_to_uuid_.clear();
-        for (const auto& [uuid, metadata] : assets_) {
+        for (const auto &[uuid, metadata]: assets_) {
             path_to_uuid_[metadata.filepath] = uuid;
         }
     }

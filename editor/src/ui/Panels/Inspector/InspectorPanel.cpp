@@ -5,6 +5,8 @@
 #include "InspectorPanel.h"
 
 #include "imgui.h"
+#include "imgui/misc/cpp/imgui_stdlib.h"
+
 #include "hellfire/ecs/LightComponent.h"
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/ecs/ScriptComponent.h"
@@ -19,12 +21,10 @@
 namespace hellfire::editor {
     void InspectorPanel::render_add_component_context_menu(Entity *selected_entity) {
         if (ImGui::BeginPopupContextItem("AddComponentPopup")) {
-            const bool has_light = selected_entity->has_component<LightComponent>();
-            if (ImGui::MenuItem("Light", nullptr, false, !has_light)) {
+            if (ImGui::MenuItem("Light", nullptr, false, !selected_entity->has_component<LightComponent>())) {
                 selected_entity->add_component<LightComponent>();
             }
-            const bool has_renderable = selected_entity->has_component<RenderableComponent>();
-            if (ImGui::MenuItem("Renderable", nullptr, false, !has_renderable)) {
+            if (ImGui::MenuItem("Renderable", nullptr, false, selected_entity->has_component<RenderableComponent>())) {
                 selected_entity->add_component<RenderableComponent>();
             }
             if (ImGui::BeginMenu("Script")) {
@@ -36,12 +36,12 @@ namespace hellfire::editor {
                 }
                 ImGui::EndMenu();
             }
-            bool has_mesh = selected_entity->has_component<MeshComponent>();
-            if (ImGui::MenuItem("Mesh", nullptr, false, !has_mesh)) {
+
+            if (ImGui::MenuItem("Mesh", nullptr, false, !selected_entity->has_component<MeshComponent>())) {
                 selected_entity->add_component<MeshComponent>();
             }
-            bool has_camera = selected_entity->has_component<CameraComponent>();
-            if (ImGui::MenuItem("Camera", nullptr, false, !has_camera)) {
+
+            if (ImGui::MenuItem("Camera", nullptr, false, !selected_entity->has_component<CameraComponent>())) {
                 selected_entity->add_component<CameraComponent>();
             }
             ImGui::EndPopup();
@@ -58,18 +58,13 @@ namespace hellfire::editor {
                 ImGui::TextDisabled("No entity selected");
                 return;
             }
-
-
+            
             // Entity name
-            static char name_buffer[256];
+            char name_buffer[256];
             strncpy_s(name_buffer, selected_entity->get_name().c_str(), 255);
-
-            ImGui::Text("Name");
-            ImGui::SameLine(120);
-            if (ImGui::InputText("##EntityName", name_buffer, 256)) {
+            if (ui::text_input("Name", name_buffer, 256)) {
                 selected_entity->set_name(name_buffer);
             }
-
 
             // Transform Component (always present)
             if (auto transform = selected_entity->transform()) {
@@ -137,17 +132,119 @@ namespace hellfire::editor {
 
     void InspectorPanel::render_mesh_component(MeshComponent *mesh) {
         if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen)) {
-            // TODO: Decide which inputs to use for this component
-            // Probably allow for the mesh to be changed?
-            if (mesh->get_source() == MeshSource::INTERNAL) {
-                ImGui::Text("Internal Mesh Source");
-                const auto *mesh_types_labels = "Cube\0Sphere\0Quad\0";
-                auto current_type = 0;
+            if (auto proj = context_->project_manager->get_current_project()) {
+                char path[256];
 
-                if (ui::combo_box_int("Mesh", mesh_types_labels, &current_type)) {
+                const auto mesh_id = mesh->get_mesh_asset();
+                auto asset = proj->get_asset_registry()->get_asset(mesh_id);
+                
+                if (asset) {
+                strncpy_s(path,  proj->get_asset_registry()->get_asset(mesh_id)->filepath.string().c_str(), 255);
+                } else {
+                strncpy_s(path,  "(No asset selected)", 255);
+                }
+                
+                if (ui::text_input("Mesh", path, 256)) {
+                    if (auto asset_id = proj->get_asset_registry()->get_uuid_by_path(path).value_or(INVALID_ASSET_ID)) {
+                        if (proj->get_asset_registry()->get_asset(asset_id).value().type == AssetType::MESH) {
+                            swap_mesh(proj->get_asset_registry()->get_asset(asset_id).value(), *mesh);
+                        }
+                    }
+                }
+                
+                if (!should_open_asset_selector_) return;
+
+                if (ui::Window window{"Asset Selector"}) {
+                    auto asset_registry = proj->get_asset_registry();
+
+                    ImGui::Columns(4, nullptr, false);
+                    for (auto &asset: asset_registry->get_assets_by_type(AssetType::MESH)) {
+                        render_asset_tile(asset, 80.0, *mesh);
+                        ImGui::NextColumn();
+                    }
+                    ImGui::Columns(1);
                 }
             }
         }
+    }
+
+    std::string InspectorPanel::truncate_string(const std::string &name, int i) {
+        return name.substr(0, i);
+    }
+
+    void InspectorPanel::swap_mesh(const AssetMetadata &asset, MeshComponent &mesh_comp) {
+        if (auto am = ServiceLocator::get_service<AssetManager>()) {
+            if (auto mesh = am->get_mesh(asset.uuid)) {
+                mesh_comp.set_mesh(mesh);
+                mesh_comp.set_mesh_asset(asset.uuid);
+            }
+        }
+    }
+
+    void InspectorPanel::render_asset_tile(const AssetMetadata &asset, const float size,
+                                           MeshComponent &mesh_comp) {
+        ImGui::PushID(asset.uuid);
+
+        ImGui::BeginGroup();
+
+        ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+        bool is_selected = (selected_asset_ == asset.uuid);
+        bool is_hovered = false;
+
+        if (ImGui::InvisibleButton("##tile", ImVec2(size, size + 20))) {
+            selected_asset_ = asset.uuid;
+        }
+        is_hovered = ImGui::IsItemHovered();
+
+        // Draw background
+        ImDrawList *draw_list = ImGui::GetWindowDrawList();
+        ImU32 bg_color = is_selected
+                             ? IM_COL32(70, 130, 180, 255)
+                             : is_hovered
+                                   ? IM_COL32(60, 60, 60, 255)
+                                   : IM_COL32(40, 40, 40, 255);
+        draw_list->AddRectFilled(cursor_pos,
+                                 ImVec2(cursor_pos.x + size, cursor_pos.y + size + 20),
+                                 bg_color, 4.0f);
+
+        // Draw thumbnail
+        draw_list->AddImage(mesh_texture_->get_id(),
+                            ImVec2(cursor_pos.x + 4, cursor_pos.y + 4),
+                            ImVec2(cursor_pos.x + size - 4, cursor_pos.y + size - 4));
+
+        // Draw label (truncated)
+        std::string display_name = truncate_string(asset.name, 18);
+        ImVec2 text_size = ImGui::CalcTextSize(display_name.c_str());
+        float text_x = cursor_pos.x + (size - text_size.x) * 0.5f;
+        draw_list->AddText(ImVec2(text_x, cursor_pos.y + size + 2),
+                           IM_COL32(255, 255, 255, 255), display_name.c_str());
+
+        ImGui::EndGroup();
+
+        // Double-click to instantiate
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && context_->active_scene) {
+            swap_mesh(asset, mesh_comp);
+        }
+
+        // Context menu
+        if (ImGui::BeginPopupContextItem(("##" + asset.filepath.string()).c_str())) {
+            if (ImGui::MenuItem("Instantiate")) {
+                swap_mesh(asset, mesh_comp);
+            }
+            if (ImGui::MenuItem("Show in Explorer")) {
+                // open_in_explorer(asset.filepath.parent_path());
+            }
+            ImGui::EndPopup();
+        }
+
+        // Tooltip on hover
+        if (is_hovered && ImGui::BeginTooltip()) {
+            ImGui::Text("%s", asset.name.c_str());
+            ImGui::TextDisabled("Path: %s", asset.filepath.string().c_str());
+            ImGui::EndTooltip();
+        }
+
+        ImGui::PopID();
     }
 
 
@@ -309,15 +406,15 @@ namespace hellfire::editor {
     void InspectorPanel::render_script_component(const ScriptComponent *script) {
         if (ImGui::CollapsingHeader(script->get_class_name(), ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::Indent();
-            for (const auto &prop: script->get_properties()) {
-                if (prop.type == ScriptComponent::PropertyType::BOOL) {
-                    auto *boolean_value = static_cast<bool *>(prop.data_ptr);
-                    ui::bool_input(prop.name, boolean_value);
+            for (const auto &[name, type, data_ptr]: script->get_properties()) {
+                if (type == ScriptComponent::PropertyType::BOOL) {
+                    auto *boolean_value = static_cast<bool *>(data_ptr);
+                    ui::bool_input(name, boolean_value);
                 }
 
-                if (prop.type == ScriptComponent::PropertyType::VEC3) {
-                    auto *vec3_value = static_cast<glm::vec3 *>(prop.data_ptr);
-                    ui::vec3_input(prop.name, vec3_value);
+                if (type == ScriptComponent::PropertyType::VEC3) {
+                    auto *vec3_value = static_cast<glm::vec3 *>(data_ptr);
+                    ui::vec3_input(name, vec3_value);
                 }
             }
             ImGui::Unindent();

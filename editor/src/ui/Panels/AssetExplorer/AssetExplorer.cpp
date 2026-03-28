@@ -134,7 +134,7 @@ namespace hellfire::editor {
         ImGui::PopID();
     }
 
-    std::string AssetExplorer::truncate_string(const std::string &name, int i) {
+        std::string AssetExplorer::truncate_string(const std::string &name, int i) {
         return name.substr(0, i);
     }
 
