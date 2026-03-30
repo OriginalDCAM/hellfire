@@ -17,7 +17,7 @@ namespace hellfire::editor {
     public:
         void on_initialize(Application &app) override;
 
-        void load_editor_ui_config(ImGuiIO &io);
+        void load_editor_ui_config(ImGuiIO &io) const;
 
         void initialize_imgui(IWindow *window);
 
