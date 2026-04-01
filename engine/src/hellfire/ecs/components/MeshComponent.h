@@ -41,6 +41,12 @@ namespace hellfire {
         }
         MeshSource get_source() const { return source_;}
 
+        void remove_mesh_asset() {
+            mesh_.reset();
+            mesh_asset_id_ = INVALID_ASSET_ID;
+        }
+            
+
         bool is_wireframe = false;
     private:
         std::shared_ptr<Mesh> mesh_;
