@@ -109,6 +109,8 @@ namespace hellfire::editor {
             // Open file dialog, then emit OpenProjectEvent
             hellfire::Utility::FileFilter project_ext_filter = {"Hellfire Project", "*.hfproj"};
             const std::string path_to_proj = Utility::FileDialog::open_file({project_ext_filter});
+            
+            if (!std::filesystem::exists(path_to_proj)) return;
     
             context_->event_bus.dispatch<OpenProjectEvent>(path_to_proj);
         }
