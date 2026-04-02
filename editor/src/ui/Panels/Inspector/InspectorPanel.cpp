@@ -16,6 +16,7 @@
 #include "hellfire/ecs/components/MeshComponent.h"
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Sphere.h"
+#include "scenes/DiscoScript.h"
 #include "scenes/RotateScript.h"
 #include "ui/ui.h"
 
@@ -30,10 +31,10 @@ namespace hellfire::editor {
             }
             if (ImGui::BeginMenu("Script")) {
                 if (ImGui::MenuItem("Rotate Script")) {
-                    if (selected_entity->has_component<RotateScript>()) {
-                    } else {
-                        selected_entity->add_component<RotateScript>();
-                    }
+                    if (!selected_entity->has_component<RotateScript>()) selected_entity->add_component<RotateScript>();
+                }
+                if (ImGui::MenuItem("Disco Script")) {
+                    if (!selected_entity->has_component<DiscoScript>()) selected_entity->add_component<DiscoScript>();
                 }
                 ImGui::EndMenu();
             }
