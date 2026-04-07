@@ -28,14 +28,28 @@ Step 3. Run the sandbox project.
 - Texture loading
 - Basic animation
 - Scene serialization/deserialization (using JSON)
-- Basic GUI using ImGui, get opened using '`' key
+- Basic GUI using ImGui, get opened using '`' or 'tab' key
 - Scene transitions
 - Scene management
 - Ability to load multiple shaders
 
-## Things I'd like to improve
+
+## Things I'd need to implement for the resit
+- [ ] Blinn phong shading
+- [ ] Skybox/Cubemaps
+- [ ] Fix scene serializing
+- [ ] Set the working directory to the sandbox project
+- [ ] Better inspector
+- [ ] Shadows
+- [ ] Reflections
+- [ ] Water shader
+- [ ] Two scenes to show scene transitions
+- [ ] Basic 3d collisions so can't fall through map
+- [ ] Actually make a scene using assets and good textures
+
+## Things I'd like to improve later (Not for resit)
 - Add more advanced lighting models (PBR)
 - Add more advanced materials
 - Ability to script using a language like lua
 - User interface needs improvement
-- 
+
