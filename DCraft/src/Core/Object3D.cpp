@@ -43,7 +43,14 @@ namespace DCraft {
 
     void Object3D::set_rotation_quaternion(glm::quat quat) {
         transform_.set_rotation_quaternion(quat);
-        
+    }
+
+    void Object3D::set_rotation(glm::vec3 eulers) {
+        transform_.set_rotation(eulers);
+    }
+
+    glm::vec3 Object3D::get_rotation() {
+        return transform_.get_rotation();
     }
 
     void Object3D::set_translation_matrix(const glm::mat4 &translation_matrix) {

@@ -44,6 +44,14 @@ namespace DCraft {
         set_rotation(euler_degrees);
     }
 
+    glm::vec3 Transform3D::get_rotation() {
+        return glm::vec3(
+    glm::degrees(rotation_x_),
+    glm::degrees(rotation_y_),
+    glm::degrees(rotation_z_)
+);
+    }
+
     void Transform3D::match_orientation(const Transform3D &other) {
         rotation_matrix_ = other.get_rotation_matrix();
         use_rotation_matrix_ = true;

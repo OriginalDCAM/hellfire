@@ -14,7 +14,7 @@ namespace DCraft {
         float get_range() const { return range; }
 
         void set_attenuation(float att) { attenuation = att; }
-        float get_attenuation() { return attenuation; }
+        float get_attenuation() const { return attenuation; }
 
         void upload_to_shader(uint32_t shader_program, int light_index) override;
         

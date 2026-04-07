@@ -161,6 +161,8 @@ namespace DCraft
             use_scale_matrix_ = false;
         }
 
+        glm::vec3 get_rotation();
+
     private:
         glm::vec3 position_;
         glm::vec3 scale_;

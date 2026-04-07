@@ -96,14 +96,12 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     
     // Visual indicator for blue light
     auto* blue_light_visual = new DCraft::Cube("Blue cube");
-    blue_light_visual->set_name("Blue Light Visual");
     blue_light_visual->set_scale(glm::vec3(0.2f));
     blue_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
     blue_light->add(blue_light_visual);
     
     // Visual indicator for green light
-    auto* green_light_visual = new DCraft::Cube("Red cube");
-    green_light_visual->set_name("Red Light Visual");
+    auto* green_light_visual = new DCraft::Cube("Green cube");
     green_light_visual->set_scale(glm::vec3(0.2f));
     green_light_visual->set_material(materials["PLASTIC_GREEN_MATERIAL"]);
     green_light->add(green_light_visual);
@@ -123,7 +121,6 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(drone_camera);
     
     auto *cube = new DCraft::Cube("Cool cube");
-    cube->set_name("Cool cube");
     cube->set_rotation(90, glm::vec3(1.0f, 0.0f, 0.0f));
     cube->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
     cube->set_position(0.0f, 4.0f, 0.0f);
@@ -131,8 +128,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(cube);
 
     // Plane primitive object
-    auto *floor = new DCraft::Plane("Ground Plane");
-    floor->set_name("Ground");
+    auto *floor = new DCraft::Plane("Guard Plane");
     floor->set_position(0, 0, 0);
     floor->set_scale(glm::vec3(100.0f, 100.0f, 100.0f));
     floor->set_rotation(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
