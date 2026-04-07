@@ -15,8 +15,11 @@ namespace hellfire::Utility {
     class FileDialog {
     public:
         static std::string open_file(const std::vector<FileFilter>& filters = {});
+
+        static std::string select_folder(const std::string &title);
+
         static std::string save_file(std::string& save_name_to,
-            const std::string& default_filename = "", 
+                                     const std::string& default_filename = "", 
                                      const std::vector<FileFilter>& filters = {});
 
     private:
@@ -25,8 +28,11 @@ namespace hellfire::Utility {
         static std::string win32_save_file(const std::string &default_filename,
                                            const std::vector<FileFilter> &filters, std::string &save_name_to);
         static std::string imgui_open_file(const std::vector<FileFilter>& filters);
+
+        static std::string win32_select_folder(const std::string &title);
+
         static std::string imgui_save_file(const std::string& default_filename, 
-                                          const std::vector<FileFilter>& filters);
+                                           const std::vector<FileFilter>& filters);
     };
 
 } // namespace hellfire::Utility

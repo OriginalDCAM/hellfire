@@ -20,6 +20,4 @@ int main() {
     app.run();
 
     std::clog << "Terminating the application" << std::endl;
-
-    return 0;
 }

@@ -8,6 +8,8 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <commdlg.h>
+#include <shobjidl.h>  
+#include <shlobj.h> 
 #endif
 
 namespace hellfire::Utility {
@@ -168,6 +170,65 @@ namespace hellfire::Utility {
         return filepath;
     }
 
+    std::string FileDialog::win32_select_folder(const std::string& title) {
+        std::string folder_path;
+
+        // Initialize COM (required for IFileDialog)
+        HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+        if (FAILED(hr)) {
+            return folder_path;
+        }
+
+        IFileDialog* pfd = nullptr;
+        hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
+
+        if (SUCCEEDED(hr)) {
+            // Get current options and add folder picker flag
+            DWORD dwOptions;
+            hr = pfd->GetOptions(&dwOptions);
+            if (SUCCEEDED(hr)) {
+                // FOS_PICKFOLDERS makes it a folder picker instead of file picker
+                hr = pfd->SetOptions(dwOptions | FOS_PICKFOLDERS);
+            }
+        
+            // Set the dialog title if provided
+            if (SUCCEEDED(hr) && !title.empty()) {
+                std::wstring wideTitle(title.begin(), title.end());
+                pfd->SetTitle(wideTitle.c_str());
+            }
+        
+            // Show the dialog
+            if (SUCCEEDED(hr)) {
+                hr = pfd->Show(GetActiveWindow());
+            }
+        
+            // Get the result
+            if (SUCCEEDED(hr)) {
+                IShellItem* psi = nullptr;
+                hr = pfd->GetResult(&psi);
+                if (SUCCEEDED(hr)) {
+                    PWSTR pszPath = nullptr;
+                    hr = psi->GetDisplayName(SIGDN_FILESYSPATH, &pszPath);
+                    if (SUCCEEDED(hr) && pszPath) {
+                        // Convert wide string to narrow string
+                        const int size = WideCharToMultiByte(CP_UTF8, 0, pszPath, -1, nullptr, 0, nullptr, nullptr);
+                        if (size > 0) {
+                            folder_path.resize(size - 1);
+                            WideCharToMultiByte(CP_UTF8, 0, pszPath, -1, &folder_path[0], size, nullptr, nullptr);
+                        }
+                        CoTaskMemFree(pszPath);
+                    }
+                    psi->Release();
+                }
+            }
+            pfd->Release();
+        }
+
+        CoUninitialize();
+        return folder_path;
+        
+    }
+
     std::string FileDialog::imgui_save_file(const std::string &default_filename,
                                             const std::vector<FileFilter> &filters) {
         static std::string filepath;
@@ -237,6 +298,14 @@ namespace hellfire::Utility {
         return win32_open_file(filters);
 #else
         return imgui_open_file(filters);
+#endif
+    }
+
+    std::string FileDialog::select_folder(const std::string& title) {
+#ifdef _WIN32
+        return win32_select_folder(title);
+#else
+        return imgui_select_folder(title); // TODO: Filepicker for other platforms using imgui 
 #endif
     }
 

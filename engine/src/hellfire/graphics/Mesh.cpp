@@ -13,12 +13,22 @@ namespace hellfire {
         create_mesh();
     }
 
+    Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices, bool defer_build) : vertices(vertices), indices(indices), index_count_(0) {
+        if (!defer_build) {
+            create_mesh();
+        }
+    }
+
     void Mesh::bind() const {
         vao_->bind();
     }
 
     void Mesh::unbind() const {
         vao_->unbind();
+    }
+
+    void Mesh::build() {
+        create_mesh();
     }
 
     void Mesh::create_mesh() {

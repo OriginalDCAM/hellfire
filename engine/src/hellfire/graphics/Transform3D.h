@@ -152,16 +152,7 @@ namespace hellfire {
             use_scale_matrix_ = false;
         }
 
-        glm::vec3& get_rotation();
-
-        json to_json() {
-            json j;
-            j["position"] = {position_.x, position_.y, position_.z};
-            j["rotation"] = {get_rotation().x, get_rotation().y, get_rotation().z};
-            j["scale"] = {scale_.x, scale_.y, scale_.z};
-
-            return j;
-        }
+        const glm::vec3& get_rotation() const;
 
     private:
         glm::vec3 position_;

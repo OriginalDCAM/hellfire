@@ -10,7 +10,6 @@
 #include "hellfire/core/Application.h"
 #include "hellfire/scene/Scene.h"
 #include "hellfire/graphics/Mesh.h"
-#include "hellfire/assets/AnimationSystem.h"
 #include "hellfire/graphics/Skybox.h"
 #include "hellfire/assets/Asset.h"
 #include "hellfire/scene/CameraFactory.h"

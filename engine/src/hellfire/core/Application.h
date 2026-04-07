@@ -62,6 +62,11 @@ namespace hellfire {
             plugins_.push_back(std::move(plugin));
         }
 
+        void set_exit_condition(std::function<bool()> condition);
+
+        void request_exit();
+
+        bool should_exit() const;
     protected:
         // IWindowEventHandler implementation
         void on_render() override;
@@ -82,7 +87,12 @@ namespace hellfire {
 
         void on_window_minimize(bool minimized) override;
 
+
+
     private:
+        std::function<bool()> exit_condition_;
+        bool should_exit_ = false;
+        
         // Managers
         std::vector<std::unique_ptr<IApplicationPlugin> > plugins_;
         std::unique_ptr<IWindow> window_;
@@ -90,8 +100,6 @@ namespace hellfire {
 
         ShaderManager shader_manager_;
         ShaderRegistry shader_registry_;
-        SceneManager scene_manager_;
-        Renderer renderer_;
 
         // Window info tracking
         AppInfo window_info_;

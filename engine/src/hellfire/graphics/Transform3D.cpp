@@ -45,7 +45,7 @@ namespace hellfire {
         set_rotation(euler_degrees);
     }
 
-    glm::vec3& Transform3D::get_rotation() {
+    const glm::vec3& Transform3D::get_rotation() const {
         return rotation_in_degrees_;
 
     }

@@ -3,7 +3,6 @@
 #include <utility>
 
 #include "../graphics/Skybox.h"
-#include "hellfire/assets/AnimationSystem.h"
 #include "hellfire/ecs/CameraComponent.h"
 
 namespace hellfire {

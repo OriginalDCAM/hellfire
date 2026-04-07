@@ -19,4 +19,6 @@ uniform int numDirectionalLights;
 uniform int numPointLights;
 uniform DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform sampler2D uShadowMap[MAX_DIRECTIONAL_LIGHTS];
+uniform mat4 uLightSpaceMatrix[MAX_DIRECTIONAL_LIGHTS];
 

@@ -13,11 +13,12 @@ namespace hellfire {
     
     enum class AssetType {
         MODEL,
+        MESH,
         TEXTURE,
         MATERIAL,
         SCENE,
         SHADER,
-        UNKNOWN
+        UNKNOWN, 
     };
 
     struct AssetMetadata {
@@ -46,7 +47,7 @@ namespace hellfire {
         void refresh_assets(); // Re-scan and update modified times
 
         // Lookup
-        std::optional<AssetMetadata> get_asset(uint32_t uuid) const;
+        std::optional<AssetMetadata> get_asset(AssetID uuid) const;
         std::optional<AssetID> get_uuid_by_path(const std::filesystem::path &filepath);
         std::vector<AssetMetadata> get_assets_by_type(AssetType type);
         std::vector<AssetMetadata> get_all_assets() const;
