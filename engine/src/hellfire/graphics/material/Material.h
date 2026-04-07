@@ -38,13 +38,13 @@ namespace hellfire {
             }
 
             Property(const std::string &name, const glm::vec2 &value,
-                     const std::string &uniform = "") : type(PropertyType::VEC2), value(value),
-                                                        uniform_name(uniform.empty() ? name : uniform), name(name) {
+                     const std::string &uniform = "") : type(PropertyType::VEC2), name(name),
+                                                        value(value), uniform_name(uniform.empty() ? name : uniform) {
             }
 
             Property(const std::string &name, const glm::vec3 &value,
-                     const std::string &uniform = "") : type(PropertyType::VEC3), value(value),
-                                                        uniform_name(uniform.empty() ? name : uniform), name(name) {
+                     const std::string &uniform = "") : type(PropertyType::VEC3), name(name),
+                                                        value(value), uniform_name(uniform.empty() ? name : uniform) {
             }
 
             Property(const std::string &name, const glm::vec3 &value, PropertyType type,
@@ -59,28 +59,28 @@ namespace hellfire {
                   uniform_name(uniform.empty() ? name : uniform) {
             }
 
-            Property(const std::string &name, const glm::vec4 &value, const std::string &uniform = "") : name(name),
-                type(PropertyType::VEC4), value(value), uniform_name(uniform.empty() ? name : uniform) {
+            Property(const std::string &name, const glm::vec4 &value, const std::string &uniform = "") : type(PropertyType::VEC4),
+                name(name), value(value), uniform_name(uniform.empty() ? name : uniform) {
             }
 
-            Property(const std::string &name, Texture *value, const std::string &uniform = "") : name(name),
-                type(PropertyType::TEXTURE), value(value), uniform_name(uniform.empty() ? name : uniform) {
+            Property(const std::string &name, Texture *value, const std::string &uniform = "") : type(PropertyType::TEXTURE),
+                name(name), value(value), uniform_name(uniform.empty() ? name : uniform) {
             }
 
-            Property(const std::string &name, bool value, const std::string &uniform = "") : name(name),
-                type(PropertyType::BOOL), value(value), uniform_name(uniform.empty() ? name : uniform) {
+            Property(const std::string &name, bool value, const std::string &uniform = "") : type(PropertyType::BOOL),
+                name(name), value(value), uniform_name(uniform.empty() ? name : uniform) {
             }
 
-            Property(const std::string &name, int value, const std::string &uniform = "") : name(name),
-                type(PropertyType::INT), value(value), uniform_name(uniform.empty() ? name : uniform) {
+            Property(const std::string &name, int value, const std::string &uniform = "") : type(PropertyType::INT),
+                name(name), value(value), uniform_name(uniform.empty() ? name : uniform) {
             }
 
-            Property(const std::string &name, const glm::mat3 &value, const std::string &uniform = "") : name(name),
-                type(PropertyType::MAT3), value(value), uniform_name(uniform.empty() ? name : uniform) {
+            Property(const std::string &name, const glm::mat3 &value, const std::string &uniform = "") : type(PropertyType::MAT3),
+                name(name), value(value), uniform_name(uniform.empty() ? name : uniform) {
             }
 
-            Property(const std::string &name, const glm::mat4 &value, const std::string &uniform = "") : name(name),
-                type(PropertyType::MAT4), value(value), uniform_name(uniform.empty() ? name : uniform) {
+            Property(const std::string &name, const glm::mat4 &value, const std::string &uniform = "") : type(PropertyType::MAT4),
+                name(name), value(value), uniform_name(uniform.empty() ? name : uniform) {
             }
         };
 

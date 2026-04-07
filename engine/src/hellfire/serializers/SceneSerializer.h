@@ -55,6 +55,7 @@ namespace hellfire {
 
     private:
         static void serialize_entity_recursive(const Scene& scene, EntityID id, nlohmann::ordered_json& out) {
+            
             const Entity* entity = scene.get_entity(id);
             if (!entity) return;
 

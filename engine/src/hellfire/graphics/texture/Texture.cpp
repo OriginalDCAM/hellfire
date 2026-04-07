@@ -10,46 +10,11 @@
 #include "hellfire/graphics/material/Material.h"
 
 namespace hellfire {
-    // Static cache for TextureCache
-    std::unordered_map<std::string, std::weak_ptr<Texture> > TextureCache::cache_;
-
-    TextureSettings TextureSettings::for_type(TextureType type) {
-        TextureSettings settings;
-
-        settings.max_size = 1024;
-        switch (type) {
-            case TextureType::NORMAL:
-                settings.flip_vertically = false;
-                break;
-            case TextureType::ROUGHNESS:
-            case TextureType::METALNESS:
-            case TextureType::AMBIENT_OCCLUSION:
-                settings.min_filter = TextureFilter::LINEAR; // Single channel, less filtering
-                break;
-            case TextureType::DIFFUSE:
-            case TextureType::EMISSIVE:
-                settings.generate_mipmaps = true; // Full quality for color textures
-                break;
-            default:
-                break;
-        }
-
-        return settings;
-    }
-
-    Texture::Texture(const std::string &path, TextureType type)
-        : Texture(path, type, TextureSettings::for_type(type)) {
-    }
-
-    Texture::Texture(const std::string &path, TextureType type, const TextureSettings &settings)
-        : path_(path), type_(type), settings_(settings) {
-        load_texture_data();
-    }
 
     Texture::Texture(Texture &&other) noexcept
-        : width(other.width), height(other.height), nr_channels(other.nr_channels),
-          type_(other.type_), path_(std::move(other.path_)),
-          texture_id_(other.texture_id_), settings_(other.settings_) {
+        : type_(other.type_), texture_id_(other.texture_id_), width_(other.width_),
+          height_(other.height_),
+          nr_channels_(other.nr_channels_) {
         other.texture_id_ = 0; // Transfer ownership
     }
 
@@ -61,13 +26,11 @@ namespace hellfire {
             }
 
             // Transfer ownership
-            width = other.width;
-            height = other.height;
-            nr_channels = other.nr_channels;
+            width_ = other.width_;
+            height_ = other.height_;
+            nr_channels_ = other.nr_channels_;
             type_ = other.type_;
-            path_ = std::move(other.path_);
             texture_id_ = other.texture_id_;
-            settings_ = other.settings_;
 
             other.texture_id_ = 0;
         }
@@ -196,8 +159,10 @@ namespace hellfire {
     }
 
     bool Texture::is_valid() const {
-        return texture_id_ != 0 && is_valid_ && width > 0 && height > 0;
+        return texture_id_ != 0 && is_valid_ && width_ > 0 && height_ > 0;
     }
+
+    Texture::Texture(const TextureHandle handle, const TextureType type, int width, int height, int channels) : texture_id_(handle), type_(type), width_(width), height_(height), nr_channels_(channels)  {}
 
     void Texture::bind(unsigned int slot) const {
         glActiveTexture(GL_TEXTURE0 + slot);
@@ -206,36 +171,6 @@ namespace hellfire {
 
     void Texture::unbind() const {
         glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
-    std::string Texture::type_to_string(TextureType type) {
-        switch (type) {
-            case TextureType::DIFFUSE: return "Diffuse";
-            case TextureType::SPECULAR: return "Specular";
-            case TextureType::NORMAL: return "Normal";
-            case TextureType::AMBIENT_OCCLUSION: return "AO";
-            case TextureType::ROUGHNESS: return "Roughness";
-            case TextureType::METALNESS: return "Metalness";
-            case TextureType::EMISSIVE: return "Emissive";
-            case TextureType::HEIGHT: return "Height";
-            case TextureType::OPACITY: return "Opacity";
-            default: return "Unknown";
-        }
-    }
-
-    std::string Texture::get_uniform_name(TextureType type) {
-        switch (type) {
-            case TextureType::DIFFUSE: return "uDiffuseTexture";
-            case TextureType::SPECULAR: return "uSpecularTexture";
-            case TextureType::NORMAL: return "uNormalTexture";
-            case TextureType::AMBIENT_OCCLUSION: return "uAOTexture";
-            case TextureType::ROUGHNESS: return "uRoughnessTexture";
-            case TextureType::METALNESS: return "uMetalnessTexture";
-            case TextureType::EMISSIVE: return "uEmissiveTexture";
-            case TextureType::HEIGHT: return "uHeightTexture";
-            case TextureType::OPACITY: return "uOpacityTexture";
-            default: return "uTexture";
-        }
     }
 
     GLint Texture::get_gl_wrap_mode(const TextureWrap wrap) const {
@@ -256,210 +191,5 @@ namespace hellfire {
             case TextureFilter::NEAREST_MIPMAP_NEAREST: return GL_NEAREST_MIPMAP_NEAREST;
             default: return GL_LINEAR;
         }
-    }
-
-    std::shared_ptr<Texture> TextureCache::load(const std::string &path, TextureType type,
-                                                const TextureSettings &settings) {
-        std::string cache_key = path + "_" + std::to_string(static_cast<int>(type));
-        const auto it = cache_.find(cache_key);
-        if (it != cache_.end()) {
-            auto shared_texture = it->second.lock();
-            if (shared_texture) {
-                return shared_texture;
-            }
-            cache_.erase(it);
-        }
-
-        // Create new texture
-        auto texture = std::make_shared<Texture>(path, type);
-        if (texture->is_valid()) {
-            cache_[cache_key] = texture;
-            return texture;
-        } else {
-            std::cerr << "Failed to create valid texture from: " << path << std::endl;
-            return nullptr;
-        }
-    }
-
-    void TextureCache::clear_cache() {
-        cache_.clear();
-    }
-
-    size_t TextureCache::get_cache_size() {
-        for (auto it = cache_.begin(); it != cache_.end();) {
-            if (it->second.expired()) {
-                it = cache_.erase(it);
-            } else {
-                ++it;
-            }
-        }
-        return cache_.size();
-    }
-
-    MaterialTextureSet &MaterialTextureSet::diffuse(const std::string &path) {
-        textures_[TextureType::DIFFUSE] = TextureCache::load(path, TextureType::DIFFUSE);
-        return *this;
-    }
-
-    MaterialTextureSet &MaterialTextureSet::normal(const std::string &path) {
-        textures_[TextureType::NORMAL] = TextureCache::load(path, TextureType::NORMAL);
-        return *this;
-    }
-
-    MaterialTextureSet &MaterialTextureSet::specular(const std::string &path) {
-        textures_[TextureType::SPECULAR] = TextureCache::load(path, TextureType::SPECULAR);
-        return *this;
-    }
-
-    MaterialTextureSet &MaterialTextureSet::roughness(const std::string &path) {
-        textures_[TextureType::ROUGHNESS] = TextureCache::load(path, TextureType::ROUGHNESS);
-        return *this;
-    }
-
-    MaterialTextureSet &MaterialTextureSet::metalness(const std::string &path) {
-        textures_[TextureType::METALNESS] = TextureCache::load(path, TextureType::METALNESS);
-        return *this;
-    }
-
-    MaterialTextureSet &MaterialTextureSet::texture(TextureType type, const std::string &path) {
-        textures_[type] = TextureCache::load(path, type);
-        return *this;
-    }
-
-    MaterialTextureSet &MaterialTextureSet::ao(const std::string &path) {
-        textures_[TextureType::AMBIENT_OCCLUSION] = TextureCache::load(path, TextureType::AMBIENT_OCCLUSION);
-        return *this;
-    }
-
-    MaterialTextureSet &MaterialTextureSet::emissive(const std::string &path) {
-        textures_[TextureType::EMISSIVE] = TextureCache::load(path, TextureType::EMISSIVE);
-        return *this;
-    }
-
-    std::shared_ptr<Texture> MaterialTextureSet::get(TextureType type) const {
-        auto it = textures_.find(type);
-        return (it != textures_.end()) ? it->second : nullptr;
-    }
-
-    bool MaterialTextureSet::has(TextureType type) const {
-        auto it = textures_.find(type);
-        return (it != textures_.end()) && (it->second != nullptr) && (it->second->is_valid());
-    }
-
-    void MaterialTextureSet::bind_all() const {
-        int texture_unit = 0;
-        for (const auto &texture: textures_ | std::views::values) {
-            if (texture && texture->is_valid()) {
-                texture->bind(texture_unit);
-                texture_unit++;
-            }
-        }
-    }
-
-    void MaterialTextureSet::apply_to_material(Material &material) const {
-        for (const auto &[type, texture]: textures_) {
-            if (texture && texture->is_valid()) {
-                std::string uniform_name = Texture::get_uniform_name(type);
-                material.set_property(uniform_name, texture.get(), uniform_name);
-            }
-        }
-    }
-
-    bool file_exists(const std::string &filename) {
-        return std::filesystem::exists(filename);
-    }
-
-    MaterialTextureSet MaterialTextureSet::from_directory(const std::string &base_path,
-                                                          const std::string &material_name) {
-        MaterialTextureSet texture_set;
-
-        // Common naming conventions for different texture types
-        std::vector<std::pair<TextureType, std::vector<std::string> > > naming_patterns = {
-            {
-                TextureType::DIFFUSE, {
-                    material_name + "_diffuse.jpg", material_name + "_diffuse.png",
-                    material_name + "_albedo.jpg", material_name + "_albedo.png",
-                    material_name + "_color.jpg", material_name + "_color.png",
-                    material_name + "_basecolor.jpg", material_name + "_basecolor.png"
-                }
-            },
-            {
-                TextureType::NORMAL, {
-                    material_name + "_normal.jpg", material_name + "_normal.png",
-                    material_name + "_nrm.jpg", material_name + "_nrm.png",
-                    material_name + "_norm.jpg", material_name + "_norm.png",
-                    material_name + "_normalmap.jpg", material_name + "_normalmap.png"
-                }
-            },
-            {
-                TextureType::SPECULAR, {
-                    material_name + "_specular.jpg", material_name + "_specular.png",
-                    material_name + "_spec.jpg", material_name + "_spec.png",
-                    material_name + "_gloss.jpg", material_name + "_gloss.png"
-                }
-            },
-            {
-                TextureType::ROUGHNESS, {
-                    material_name + "_roughness.jpg", material_name + "_roughness.png",
-                    material_name + "_rough.jpg", material_name + "_rough.png"
-                }
-            },
-            {
-                TextureType::METALNESS, {
-                    material_name + "_metalness.jpg", material_name + "_metalness.png",
-                    material_name + "_metal.jpg", material_name + "_metal.png",
-                    material_name + "_metallic.jpg", material_name + "_metallic.png"
-                }
-            },
-            {
-                TextureType::AMBIENT_OCCLUSION, {
-                    material_name + "_ao.jpg", material_name + "_ao.png",
-                    material_name + "_occlusion.jpg", material_name + "_occlusion.png",
-                    material_name + "_ambient.jpg", material_name + "_ambient.png"
-                }
-            },
-            {
-                TextureType::EMISSIVE, {
-                    material_name + "_emissive.jpg", material_name + "_emissive.png",
-                    material_name + "_emission.jpg", material_name + "_emission.png",
-                    material_name + "_glow.jpg", material_name + "_glow.png"
-                }
-            },
-            {
-                TextureType::HEIGHT, {
-                    material_name + "_height.jpg", material_name + "_height.png",
-                    material_name + "_displacement.jpg", material_name + "_displacement.png",
-                    material_name + "_disp.jpg", material_name + "_disp.png"
-                }
-            },
-            {
-                TextureType::OPACITY, {
-                    material_name + "_opacity.jpg", material_name + "_opacity.png",
-                    material_name + "_alpha.jpg", material_name + "_alpha.png",
-                    material_name + "_mask.jpg", material_name + "_mask.png"
-                }
-            }
-        };
-
-        // Try to find textures based on naming patterns
-        for (const auto &[type, patterns]: naming_patterns) {
-            for (const auto &pattern: patterns) {
-                std::string full_path = base_path;
-
-                // Ensure proper path separator
-                if (!base_path.empty() && base_path.back() != '/' && base_path.back() != '\\') {
-                    full_path += "/";
-                }
-                full_path += pattern;
-
-                if (file_exists(full_path)) {
-                    // Found one, move to next type
-                    texture_set.texture(type, full_path);
-                    break;
-                }
-            }
-        }
-
-        return texture_set;
     }
 }

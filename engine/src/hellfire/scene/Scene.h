@@ -170,14 +170,11 @@ namespace hellfire {
         const std::string &get_name() const { return name_; }
         void set_name(const std::string &name) { name_ = name; }
         bool is_playing() const { return is_playing_; }
-        void set_playing(bool active) { is_playing_ = active; }
+        void set_playing(const bool active) { is_playing_ = active; }
         void set_source_filename(const std::filesystem::path &filename) { source_filename_ = filename; }
         const std::filesystem::path &get_source_filename() const { return source_filename_; }
         bool was_loaded_from_file() const { return !source_filename_.empty(); }
         std::string generate_unique_name(const std::string& base_name);
-
-        void save();
-
         SceneEnvironment* environment() const { return environment_.get(); }
 
         std::unordered_map<EntityID, std::unique_ptr<Entity>>& get_all_entities() { return entities_; }
@@ -213,7 +210,7 @@ namespace hellfire {
     template<typename T>
     std::vector<EntityID> Scene::find_entities_with_component() {
         std::vector<EntityID> results;
-        auto predicate = [](Entity *entity) { return entity->has_component<T>(); };
+        auto predicate = [](const Entity *entity) { return entity->has_component<T>(); };
 
         for (EntityID root_id: root_entities_) {
             find_entities_recursive(root_id, predicate, results);

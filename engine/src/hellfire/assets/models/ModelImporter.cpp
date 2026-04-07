@@ -279,7 +279,7 @@ namespace hellfire {
         const std::string filename = data.name + ".hfmat";
         const auto filepath = output_dir_ / filename;
 
-        if (!MaterialSerializer::save(filepath, data)) {
+        if (!MaterialSerializer::save_json(filepath, data)) {
             std::cerr << "Failed to save material: " << filepath << std::endl;
             return INVALID_ASSET_ID;
         }

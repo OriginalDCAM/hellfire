@@ -16,12 +16,12 @@ namespace hellfire {
     bool TextureSerializer::save_metadata(const std::filesystem::path &texture_path, const TextureMetadata &meta) {
         nlohmann::json j;
 
-        j["type"] = static_cast<int>(meta.type);
+        j["type"] = meta.type;
         j["generate_mipmaps"] = meta.generate_mipmaps;
         j["srgb"] = meta.srgb;
-        j["filter"] = static_cast<int>(meta.filter);
-        j["wrap_u"] = static_cast<int>(meta.wrap_u);
-        j["wrap_v"] = static_cast<int>(meta.wrap_v);
+        j["filter"] = meta.filter;
+        j["wrap_u"] = meta.wrap_u;
+        j["wrap_v"] = meta.wrap_v;
         j["compressed"] = meta.compressed;
         j["compression_format"] = meta.compression_format;
 

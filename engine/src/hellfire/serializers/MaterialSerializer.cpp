@@ -119,7 +119,7 @@ namespace hellfire {
     }
 
     // Helper for TextureType to string conversion
-    static const char *texture_type_to_string(TextureType type) {
+    static const char *tex_type_to_string(TextureType type) {
         switch (type) {
             case TextureType::DIFFUSE: return "diffuse";
             case TextureType::NORMAL: return "normal";
@@ -177,7 +177,7 @@ namespace hellfire {
         // Textures
         nlohmann::json textures = nlohmann::json::object();
         for (const auto &[type, asset_id]: mat.texture_assets) {
-            textures[texture_type_to_string(type)] = asset_id;
+            textures[tex_type_to_string(type)] = asset_id;
         }
         j["textures"] = textures;
 

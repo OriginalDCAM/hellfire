@@ -14,12 +14,13 @@ namespace hellfire {
         // Typed asset loading with caching
         std::shared_ptr<Mesh> get_mesh(AssetID id);
         std::shared_ptr<Material> get_material(AssetID id);
-        std::shared_ptr<Texture> get_texture(AssetID id, TextureType type);
+        Texture* get_texture(AssetID id, TextureType type);
 
         // Cache management
         void unload(AssetID id);
         void clear_cache();
         void reload_modified(); // Reload assets that changed on disk
+        void save_modified();
 
         // Stats
         size_t get_loaded_mesh_count() const { return mesh_cache_.size(); }
@@ -29,8 +30,8 @@ namespace hellfire {
     private:
         AssetRegistry& registry_;
 
-        std::unordered_map<AssetID, std::shared_ptr<Mesh>> mesh_cache_;
-        std::unordered_map<AssetID, std::shared_ptr<Material>> material_cache_;
-        std::unordered_map<AssetID, std::shared_ptr<Texture>> texture_cache_;
+        std::unordered_map<AssetID, std::weak_ptr<Mesh>> mesh_cache_;
+        std::unordered_map<AssetID, std::weak_ptr<Material>> material_cache_;
+        std::unordered_map<AssetID, std::unique_ptr<Texture>> texture_cache_;
     };
 } // hellfire

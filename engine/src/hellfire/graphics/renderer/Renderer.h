@@ -21,8 +21,8 @@ namespace hellfire {
 
     struct RenderCommand {
         EntityID entity_id; // The entity being rendered
-        std::shared_ptr<Mesh> mesh; // Direct reference to renderable component
-        std::shared_ptr<Material> material; // Material for sorting and rendering
+        Mesh* mesh; // Direct reference to renderable component
+        Material* material; // Material for sorting and rendering
         float distance_to_camera; // Distance for sorting
         bool is_transparent; // Transparency flag for render pass
 
@@ -37,7 +37,7 @@ namespace hellfire {
     struct InstancedRenderCommand {
         EntityID entity_id;
         InstancedRenderableComponent *instanced_renderable;
-        std::shared_ptr<Material> material;
+        Material* material;
         float distance_to_camera;
         bool is_transparent;
 
@@ -95,9 +95,9 @@ namespace hellfire {
 
         void set_fallback_shader(Shader &fallback_shader);
 
-        Shader &get_shader_for_material(const std::shared_ptr<Material> &material);
+        Shader &get_shader_for_material(Material *material);
 
-        uint32_t compile_material_shader(std::shared_ptr<Material> material);
+        uint32_t compile_material_shader(const Material *material);
 
         ShaderManager &get_shader_manager() { return shader_manager_; }
         ShaderRegistry &get_shader_registry() { return shader_registry_; }
@@ -143,16 +143,16 @@ namespace hellfire {
         void store_lights_in_context(const std::vector<Entity *> &light_entities, CameraComponent &camera);
 
         void collect_lights_from_scene(Scene & scene, CameraComponent & camera);
-        void collect_geometry_from_scene(Scene &scene, const glm::vec3 camera_pos);
+        void collect_geometry_from_scene(const Scene &scene, const glm::vec3 &camera_pos);
 
         void execute_main_pass(Scene& scene, CameraComponent& camera);
         glm::mat4 calculate_light_view_proj(Entity *light_entity, LightComponent *light, const CameraComponent &camera);
         void draw_shadow_geometry(const glm::mat4& light_view_proj);
 
-        void execute_shadow_passes(Scene &scene, CameraComponent &camera);
+        void execute_shadow_passes(Scene &scene, const CameraComponent &camera);
         void execute_geometry_pass(const glm::mat4 &view, const glm::mat4 &proj);
-        void execute_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection,
-                                CameraComponent *camera_comp) const;
+        void execute_skybox_pass(const Scene *scene,
+                                const CameraComponent *camera_comp) const;
         void execute_transparency_pass(const glm::mat4 &view, const glm::mat4 &proj);
 
         // Draw methods

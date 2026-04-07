@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 
+#include "Material.h"
 #include "hellfire/assets/AssetRegistry.h"
 #include "hellfire/graphics/texture/Texture.h"
 
@@ -40,5 +41,24 @@ namespace hellfire {
         bool double_sided = false;
         bool alpha_blend = false;
         float alpha_cutoff = 0.5f;
+        
+        MaterialData() = default;
+        
+        MaterialData(const std::shared_ptr<Material> &mat) {
+            name = mat->get_name();
+            
+            diffuse_color = mat->get_property<glm::vec3>(MaterialConstants::DIFFUSE_COLOR);
+            ambient_color = mat->get_property<glm::vec3>(MaterialConstants::AMBIENT_COLOR);
+            specular_color = mat->get_property<glm:: vec3>(MaterialConstants::SPECULAR_COLOR);
+            emissive_color = mat->get_property<glm::vec3>(MaterialConstants::EMISSIVE_COLOR);
+            
+            opacity = mat->get_property<float>(MaterialConstants::OPACITY);
+            shininess = mat->get_property<float>(MaterialConstants::SHININESS);
+            metallic = mat->get_property<float>(MaterialConstants::METALLIC);
+            roughness = mat->get_property<float>(MaterialConstants::ROUGHNESS);
+            
+            uv_scale = mat->get_property<glm::vec2>(MaterialConstants::UV_TILING);
+            uv_offset = mat->get_property<glm::vec2>(MaterialConstants::UV_OFFSET);
+        }
     };
 }

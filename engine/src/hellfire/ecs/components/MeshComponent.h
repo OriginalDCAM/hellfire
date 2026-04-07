@@ -26,7 +26,7 @@ namespace hellfire {
         explicit MeshComponent(std::shared_ptr<Mesh> mesh) : mesh_(std::move(mesh)) {}
 
         void set_mesh(std::shared_ptr<Mesh> mesh) { mesh_ = std::move(mesh); }
-        [[nodiscard]] std::shared_ptr<Mesh> get_mesh() const { return mesh_; }
+        [[nodiscard]] Mesh* get_mesh() const { return mesh_.get(); }
         [[nodiscard]] bool has_mesh() const { return mesh_ != nullptr; }
 
         void set_mesh_asset(AssetID id) {

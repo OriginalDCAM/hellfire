@@ -14,6 +14,7 @@
 #include "hellfire/utilities/SerializerUtils.h"
 
 namespace hellfire {
+#define INDENTATION_SIZE 4
     template<typename T>
     struct Serializer {
         static bool serialize(std::ostream &output, const T *obj);
@@ -32,7 +33,7 @@ namespace hellfire {
                 {"scale", obj->get_scale()}
             };
 
-            output << j.dump(4);
+            output << j.dump(INDENTATION_SIZE);
             return output.good();
         }
 
@@ -54,7 +55,8 @@ namespace hellfire {
                 obj->set_scale(*scale);
 
                 return true;
-            } catch (...) {
+            } catch (const std::exception &e) {
+                std::cout << "Failed to deserialize TransformComponent: " << e.what();
                 return false;
             }
         }
@@ -71,7 +73,7 @@ namespace hellfire {
 
             };
 
-            output << j.dump(4);
+            output << j.dump(INDENTATION_SIZE);
             return output.good();
         }
 
@@ -86,7 +88,8 @@ namespace hellfire {
                 obj->is_wireframe = j.value("is_wireframe", false);
 
                 return true;
-            } catch (...) {
+            } catch (const std::exception &e) {
+                std::cout << "Failed to deserialize MeshComponent: " << e.what();
                 return false;
             }
         }
@@ -105,7 +108,7 @@ namespace hellfire {
                 {"render_layer", obj->render_layer}
             };
             
-            output << j.dump(4);
+            output << j.dump(INDENTATION_SIZE);
             return output.good();
         }
 
@@ -123,7 +126,8 @@ namespace hellfire {
                 obj->render_layer = j.value("render_layer", 0u);
 
                 return true;
-            } catch (...) {
+            } catch (const std::exception &e) {
+                std::cout << "Failed to deserialize RenderableComponent: " << e.what();
                 return false;
             }
         }
@@ -146,7 +150,7 @@ namespace hellfire {
                 j["attenuation"] = obj->get_attenuation();
             }
 
-            output << j.dump(2);
+            output << j.dump(INDENTATION_SIZE);
 
             return output.good();
         }
@@ -169,7 +173,8 @@ namespace hellfire {
                 }
 
                 return true;
-            } catch (...) {
+            } catch (const std::exception &e) {
+                std::cout << "Failed to deserialize LightComponent: " << e.what();
                 return false;
             }
         }

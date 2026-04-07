@@ -6,14 +6,18 @@
 
 #include "hellfire/serializers/MaterialSerializer.h"
 #include "hellfire/serializers/MeshSerializer.h"
+#include "loaders/TextureLoader.h"
 
 namespace hellfire {
     AssetManager::AssetManager(AssetRegistry &registry) : registry_(registry) {}
 
-    std::shared_ptr<Mesh> AssetManager::get_mesh(AssetID id) {
+    std::shared_ptr<Mesh> AssetManager::get_mesh(const AssetID id) {
         // Check cache
         if (auto it = mesh_cache_.find(id); it != mesh_cache_.end()) {
-            return it->second;
+            if (auto locked = it->second.lock()) {
+                return locked;
+            }
+            mesh_cache_.erase(it);
         }
 
         // Load from disk
@@ -37,9 +41,12 @@ namespace hellfire {
         return mesh;
     }
 
-    std::shared_ptr<Material> AssetManager::get_material(AssetID id) {
+    std::shared_ptr<Material> AssetManager::get_material(const AssetID id) {
         if (auto it = material_cache_.find(id); it != material_cache_.end()) {
-            return it->second;
+            if (auto locked = it->second.lock()) {
+                return locked;
+            }
+            material_cache_.erase(it);
         }
 
         auto meta = registry_.get_asset(id);
@@ -47,7 +54,7 @@ namespace hellfire {
             return nullptr;
         }
 
-        auto data = MaterialSerializer::load(registry_.get_absolute_path(id));
+        auto data = MaterialSerializer::load_json(registry_.get_absolute_path(id));
         if (!data) {
             return nullptr;
         }
@@ -73,29 +80,30 @@ namespace hellfire {
         return material;
     }
 
-    std::shared_ptr<Texture> AssetManager::get_texture(AssetID id, TextureType type = TextureType::DIFFUSE) {
-        if (auto it = texture_cache_.find(id); it != texture_cache_.end()) {
-            return it->second;
+    Texture* AssetManager::get_texture(const AssetID id, const TextureType type = TextureType::DIFFUSE) {
+        if (const auto it = texture_cache_.find(id); it != texture_cache_.end()) {
+            if (it->second) {
+                return it->second.get();
+            }
+            texture_cache_.erase(it);
         }
 
         auto meta = registry_.get_asset(id);
         if (!meta || meta->type != AssetType::TEXTURE) {
             return nullptr;
         }
+        
+        auto texture = TextureLoader::load(registry_.get_absolute_path(id).string(), type);
 
-        auto texture = std::make_shared<Texture>(
-            registry_.get_absolute_path(id).string(), type
-        );
-
-        if (!texture->is_valid()) {
+        if (!texture || !texture->is_valid()) {
             return nullptr;
         }
 
-        texture_cache_[id] = texture;
-        return texture;
+        texture_cache_[id] = std::move(texture);
+        return texture.get();
     }
 
-    void AssetManager::unload(AssetID id) {
+    void AssetManager::unload(const AssetID id) {
         mesh_cache_.erase(id);
         material_cache_.erase(id);
         texture_cache_.erase(id);
@@ -112,5 +120,14 @@ namespace hellfire {
             unload(id);
         }
         registry_.refresh_assets();
+    }
+
+    void AssetManager::save_modified() {
+        for (auto &[id, mat] : material_cache_) {
+            // if (MaterialSerializer::save_json(registry_.get_absolute_path(id), mat)) {
+            //     
+            // }
+        }
+
     }
 } // hellfire

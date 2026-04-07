@@ -17,7 +17,7 @@
 
 namespace hellfire {
     Renderer::Renderer()
-        : shader_registry_(nullptr), fallback_shader_(nullptr), fallback_program_(0), render_to_framebuffer_(false),
+        : shader_registry_(nullptr), fallback_shader_(nullptr), fallback_program_(0), scene_(nullptr), render_to_framebuffer_(false),
           framebuffer_width_(800), framebuffer_height_(600) {
         context_ = std::make_unique<OGLRendererContext>();
         context_->shader_handle = 0;
@@ -60,6 +60,7 @@ namespace hellfire {
 
         if (!camera_comp) {
             std::cerr << "Camera entity missing CameraComponent" << std::endl;
+            return;
         }
 
         render_frame(scene, *camera_comp);
@@ -137,7 +138,7 @@ namespace hellfire {
         context_->camera_component = &camera;
     }
 
-    void Renderer::collect_geometry_from_scene(Scene &scene, const glm::vec3 camera_pos) {
+    void Renderer::collect_geometry_from_scene(const Scene &scene, const glm::vec3 &camera_pos) {
         for (const EntityID root_id: scene.get_root_entities()) {
             collect_render_commands_recursive(root_id, camera_pos);
         }
@@ -162,7 +163,7 @@ namespace hellfire {
                 const float distance = glm::length(camera_pos - object_pos);
                 const bool is_transparent = material->is_transparent();
 
-                const RenderCommand cmd = {entity_id, mesh, material, distance, is_transparent};
+                const RenderCommand cmd = {entity_id, mesh, material.get(), distance, is_transparent};
 
                 if (is_transparent) {
                     transparent_objects_.push_back(cmd);
@@ -172,7 +173,7 @@ namespace hellfire {
             }
         }
 
-        // If the entity has an Instancing component setup the render commands
+        // If the entity has an Instancing component set up the render commands
         if (auto *instanced = entity->get_component<InstancedRenderableComponent>()) {
             if (transform && instanced->has_mesh() && instanced->get_instance_count() > 0) {
                 if (const auto material = instanced->get_material()) {
@@ -180,7 +181,7 @@ namespace hellfire {
                     const float distance = glm::length(camera_pos - object_pos);
                     const bool is_transparent = material->is_transparent();
 
-                    const InstancedRenderCommand cmd = {entity_id, instanced, material, distance, is_transparent};
+                    const InstancedRenderCommand cmd = {entity_id, instanced, material.get(), distance, is_transparent};
 
                     if (is_transparent) {
                         transparent_instanced_objects_.push_back(cmd);
@@ -211,7 +212,7 @@ namespace hellfire {
             shadow_map->attach_depth_texture(settings);
 
             glBindTexture(GL_TEXTURE_2D, shadow_map->get_depth_attachment());
-            const float border_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+            constexpr float border_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
             glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
             glBindTexture(GL_TEXTURE_2D, 0);
             shadow_maps_[light_entity] = {std::move(shadow_map), glm::mat4(1.0f)};
@@ -297,8 +298,8 @@ namespace hellfire {
         cmd.material->unbind();
     }
 
-    void Renderer::execute_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection,
-                                       CameraComponent *camera_comp) const {
+    void Renderer::execute_skybox_pass(const Scene *scene,
+                                       const CameraComponent *camera_comp) const {
         if (!scene || !scene->environment()->has_skybox()) return;
 
         glDisable(GL_CULL_FACE);
@@ -333,13 +334,13 @@ namespace hellfire {
         const glm::mat4 projection = camera.get_projection_matrix();
 
         execute_geometry_pass(view, projection);
-        execute_skybox_pass(&scene, view, projection, &camera);
+        execute_skybox_pass(&scene, &camera);
         execute_transparency_pass(view, projection);
     }
 
 
 
-    void Renderer::execute_shadow_passes(Scene &scene, CameraComponent& camera) {
+    void Renderer::execute_shadow_passes(Scene &scene, const CameraComponent& camera) {
          // Gather all lights that cast shadows
         const std::vector<EntityID> light_entity_ids = scene.find_entities_with_component<LightComponent>();
 
@@ -396,7 +397,7 @@ namespace hellfire {
     }
 
     void Renderer::draw_shadow_geometry(const glm::mat4 &light_view_proj) {
-        const Shader& shadow_shader = get_shader_for_material(shadow_material_);
+        const Shader& shadow_shader = get_shader_for_material(shadow_material_.get());
         shadow_shader.use();
         shadow_shader.set_mat4("uLightViewProjMatrix", light_view_proj);
 
@@ -424,13 +425,13 @@ namespace hellfire {
         // Center shadow map on camera position
         const glm::vec3 camera_pos = camera.get_owner().transform()->get_position();
 
-        const float ortho_size = 100.0f;
-        const float texel_size = (ortho_size * 2.0f) / 4096.0f;
+        constexpr float ortho_size = 100.0f;
+        constexpr float texel_size = (ortho_size * 2.0f) / 4096.0f;
 
         glm::vec3 look_at;
         look_at.x = floor(camera_pos.x / texel_size) * texel_size;
         look_at.y = 0.0f;
-        look_at.z = float(camera_pos.z / texel_size) * texel_size;
+        look_at.z = camera_pos.z / texel_size * texel_size;
 
         const glm::vec3 light_pos = look_at - light_dir * 100.0f;
 
@@ -467,6 +468,8 @@ namespace hellfire {
                           [](const RenderCommand &a, const RenderCommand &b) {
                               return a.distance_to_camera < b.distance_to_camera;
                           });
+        
+
 
         for (const auto &cmd: opaque_objects_) {
             draw_render_command(cmd, view, proj);
@@ -615,7 +618,7 @@ namespace hellfire {
         }
     }
 
-    Shader &Renderer::get_shader_for_material(const std::shared_ptr<Material> &material) {
+    Shader &Renderer::get_shader_for_material(Material* material) {
         if (!material) {
             return *fallback_shader_;
         }
@@ -642,7 +645,7 @@ namespace hellfire {
         return *fallback_shader_;
     }
 
-    uint32_t Renderer::compile_material_shader(std::shared_ptr<Material> material) {
+    uint32_t Renderer::compile_material_shader(const Material* material) {
         if (!material || !material->has_custom_shader()) {
             return 0;
         }

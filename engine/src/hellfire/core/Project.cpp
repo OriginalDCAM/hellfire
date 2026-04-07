@@ -6,9 +6,7 @@
 
 #include <fstream>
 #include <iostream>
-#include <glm/gtc/matrix_transform.hpp>
 
-#include "imgui_internal.h"
 #include "json.hpp"
 #include "hellfire/assets/AssetManager.h"
 #include "hellfire/assets/importers/AssetImportManager.h"
@@ -110,7 +108,10 @@ namespace hellfire {
             scene_manager_->save_current_scene();
             metadata_.last_scene = scene_manager_->get_active_scene_asset_id();
         }
-
+        
+        if (asset_manager_ && asset_manager_->get_loaded_material_count() > 0) {
+            asset_manager_->save_modified();
+        }
 
         return Serializer<ProjectMetadata>::serialize(file, &metadata_);
     }

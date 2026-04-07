@@ -82,7 +82,7 @@ namespace hellfire {
         std::mutex registry_mutex;
 
         auto worker = [&](const AssetMetadata &meta) {
-            bool success = import_model_threaded(meta, registry_mutex);
+            const bool success = import_model_threaded(meta, registry_mutex);
 
             std::lock_guard lock(output_mutex);
             if (success) {
@@ -159,7 +159,7 @@ bool AssetImportManager::needs_import(AssetID id) const {
     return source_time > imported_time;
 }
 
-bool AssetImportManager::import_model(const AssetMetadata &meta) {
+bool AssetImportManager::import_model(const AssetMetadata &meta) const {
     auto source_path = project_root_ / meta.filepath;
 
     if (!std::filesystem::exists(source_path)) {

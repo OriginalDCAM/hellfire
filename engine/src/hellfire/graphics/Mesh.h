@@ -8,15 +8,13 @@
 namespace hellfire {
     class Mesh {
     public:
-        Mesh();
+        Mesh() = default;
 
         Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices);
 
         Mesh(const std::vector<Vertex> &vertices,
              const std::vector<unsigned int> &indices,
              bool defer_build);
-
-        void cleanup();
 
         void bind() const;
 
@@ -42,7 +40,7 @@ namespace hellfire {
         std::unique_ptr<VB> vbo_ = nullptr;
         std::unique_ptr<IB> ibo_ = nullptr;
 
-        int index_count_;
+        int index_count_ = 0;
 
         void create_mesh();
     };

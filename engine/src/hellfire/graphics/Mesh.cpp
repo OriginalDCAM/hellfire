@@ -5,9 +5,6 @@
 #include "hellfire/graphics/material/Material.h"
 
 namespace hellfire {
-    Mesh::Mesh() : vao_(nullptr), vbo_(nullptr), ibo_(nullptr), index_count_(0) {
-    }
-
     Mesh::Mesh(const std::vector<Vertex> &vertices,
                const std::vector<unsigned int> &indices) : vertices(vertices), indices(indices), index_count_(0) {
         create_mesh();

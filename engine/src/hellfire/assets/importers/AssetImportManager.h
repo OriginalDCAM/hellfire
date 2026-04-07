@@ -33,7 +33,7 @@ private:
     std::filesystem::path project_root_;
     std::filesystem::path import_output_dir_;
 
-    bool import_model(const AssetMetadata& meta);
+    bool import_model(const AssetMetadata& meta) const;
 
    bool import_model_threaded(const AssetMetadata &meta, std::mutex &registry_mutex);
 

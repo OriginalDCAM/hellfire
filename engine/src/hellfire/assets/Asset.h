@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "ModelLoader.h"
+#include "loaders/ModelLoader.h"
 
 namespace hellfire {
     class Scene;
