@@ -13,5 +13,6 @@
 #include "DCraft/Structs/Object3D.h"
 #include "DCraft/Graphics/Mesh.h"
 #include "DCraft/Addons/AnimationSystem.h"
+#include "DCraft/Structs/Skybox.h"
 
 #endif //DCRAFT_H

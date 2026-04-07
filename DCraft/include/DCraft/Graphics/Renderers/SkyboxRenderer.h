@@ -1,0 +1,32 @@
+﻿//
+// Created by denzel on 14/06/2025.
+//
+
+#pragma once
+#include <cstdint>
+
+namespace DCraft {
+    class Skybox;
+    class Camera;
+}
+
+namespace DCraft {
+    class SkyboxRenderer {
+    public:
+        SkyboxRenderer() = default;
+        ~SkyboxRenderer();
+
+        void initialize();
+        void render(Skybox *skybox, Camera *camera) const;
+
+    private:
+        void setup_skybox_geometry();
+        void load_skybox_shader();
+        
+        uint32_t skybox_shader_ = 0;
+        uint32_t skybox_vao_ = 0;
+        uint32_t skybox_vbo_ = 0;
+
+        bool initialized_ = false;
+    };
+}

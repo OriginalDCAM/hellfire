@@ -236,6 +236,9 @@ namespace DCraft {
             material->set_builtin_material_type(0);
             material->set_diffuse_color(glm::vec3(0.8f));
             material->set_ambient_color(glm::vec3(0.1f));
+            material->set_uv_tiling(1.0f, 1.0f);  
+            material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
+            material->set_uv_rotation(0.0f);     
             return material;
         }
         
@@ -246,6 +249,9 @@ namespace DCraft {
             material->set_ambient_color(glm::vec3(0.3f));
             material->set_specular_color(glm::vec3(0.5f));
             material->set_shininess(32.0f);
+            material->set_uv_tiling(1.0f, 1.0f);  
+            material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
+            material->set_uv_rotation(0.0f);     
             return material;
         }
         
@@ -256,6 +262,9 @@ namespace DCraft {
             material->set_property("metallic", 0.0f);
             material->set_property("roughness", 0.5f);
             material->set_property("ao", 1.0f);
+            material->set_uv_tiling(1.0f, 1.0f);  
+            material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
+            material->set_uv_rotation(0.0f);     
             return material;
         }
         
