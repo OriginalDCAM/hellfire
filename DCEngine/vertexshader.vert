@@ -1,7 +1,7 @@
 #version 430 core
 
 // Uniform inputs
-uniform mat4 mvp;
+uniform mat4 MVP;
 
 // Per-vertex inputs
 layout(location = 0) in vec3 position;
@@ -14,6 +14,6 @@ out vec3 vColor;
 
 void main()
 {
-    gl_Position = mvp * vec4(position, 1.0);
+    gl_Position = MVP * vec4(position, 1.0);
     vColor = color;
 }
