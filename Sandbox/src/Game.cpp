@@ -169,7 +169,6 @@ void Game::process_camera_movement() {
     main_rotation[0] = glm::vec4(main_right, 0.0f);
     main_rotation[1] = glm::vec4(main_up, 0.0f);
     main_rotation[2] = glm::vec4(main_front, 0.0f);
-    main_rotation = glm::transpose(main_rotation);
 
     main_camera_visual_->set_rotation_matrix(main_rotation);
 
@@ -182,7 +181,6 @@ void Game::process_camera_movement() {
     drone_rotation[0] = glm::vec4(right, 0.0f);
     drone_rotation[1] = glm::vec4(up, 0.0f);
     drone_rotation[2] = glm::vec4(front, 0.0f);
-    drone_rotation = glm::transpose(drone_rotation);
 
     drone_camera_visual_->set_rotation_matrix(drone_rotation);
 
