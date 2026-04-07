@@ -22,6 +22,8 @@ namespace hellfire {
         SceneManager();
         ~SceneManager();
 
+        std::vector<Scene*> get_scenes();
+
         // Setup callback for when a scene is activated
         using SceneActivatedCallback = std::function<void(Scene *)>;
 

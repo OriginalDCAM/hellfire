@@ -5,10 +5,16 @@
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "MenuBarComponent.h"
 #include "hellfire/core/Application.h"
 #include "hellfire/platform/IWindow.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
+
+#define MENUBAR_COMPONENT 0
+#define VIEWPORT_COMPONENT 1 
+#define SCENE_HIERARCHY_COMPONENT 2 
 
 namespace hellfire::editor {
     void CoreEditorPlugin::on_initialize(Application &app) {
@@ -21,6 +27,8 @@ namespace hellfire::editor {
         }
 
         initialize_imgui(window);
+
+        ui_components[MENUBAR_COMPONENT] = std::make_unique<MenuBarComponent>();
     }
 
     void CoreEditorPlugin::initialize_imgui(IWindow *window) {
@@ -91,24 +99,6 @@ namespace hellfire::editor {
         }
     }
 
-    void CoreEditorPlugin::render_menu_bar() {
-        if (ImGui::BeginMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("New Project")) {
-                    std::cout << "New Project" << std::endl;
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Scene")) {
-                if (ImGui::MenuItem("New Scene")) {
-                    std::cout << "New scene created!" << std::endl;
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-    }
-
     void CoreEditorPlugin::on_render() {
         if (!imgui_initialized_) return;
 
@@ -163,9 +153,9 @@ namespace hellfire::editor {
 
         ImGui::Begin("DockSpace", nullptr, window_flags);
         ImGui::PopStyleVar(3);
-
-        render_menu_bar();
-
+        
+        ui_components[MENUBAR_COMPONENT]->render();
+        
         // Create dockspace
         ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);

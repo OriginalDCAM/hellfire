@@ -3,6 +3,11 @@
 //
 
 #pragma once
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+#include "EditorComponent.h"
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
 
@@ -20,8 +25,6 @@ namespace hellfire::editor {
         void on_begin_frame() override;
 
         void on_end_frame() override;
-
-        void render_menu_bar();
 
         void on_render() override;
 
@@ -45,6 +48,7 @@ namespace hellfire::editor {
     private:
         Application* app_ = nullptr;
         bool imgui_initialized_ = false;
-        bool show_demo_ = true;
+        bool show_demo_ = false;
+        std::unordered_map<uint32_t, std::unique_ptr<EditorComponent>>ui_components = {};
     };
 }

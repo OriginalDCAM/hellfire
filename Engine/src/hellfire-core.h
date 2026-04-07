@@ -17,6 +17,5 @@
 #include "hellfire/graphics/Geometry/Quad.h"
 #include "hellfire/graphics/lighting/DirectionalLight.h"
 #include "hellfire/graphics/Skybox.h"
-#include "Scripts/PlayerController.h"
 
 #endif //DCRAFT_H

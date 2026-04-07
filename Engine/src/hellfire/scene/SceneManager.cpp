@@ -12,6 +12,10 @@ namespace hellfire {
         clear();
     }
 
+    std::vector<Scene *> SceneManager::get_scenes() {
+        return scenes_;
+    }
+
     Scene* SceneManager::create_scene(const std::string& name) {
         auto* scene = new Scene(name);
         scenes_.push_back(scene);
