@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "Dcraft/Graphics/Primitives/Cube.h"
+#include "DCraft/Structs/Skybox.h"
 
 namespace DCraft 
 {
@@ -14,6 +15,11 @@ namespace DCraft
     Scene::~Scene()
     {
         cameras_.clear();
+
+        if (skybox_) {
+            delete skybox_;
+            skybox_ = nullptr;
+        }
     }
 
     // Scene lifecycle
@@ -27,10 +33,7 @@ namespace DCraft
         for (auto obj: registered_objects_) {
             obj->update(delta_time);
         }
-        // Object3D::update(delta_time);
     }
-
-
 
     Object3D* Scene::create_object(const std::string& name = "GameObject")
     {
@@ -78,6 +81,7 @@ namespace DCraft
 
     json Scene::to_json() {
         json j = Object3D::to_json();
+        // TODO: Add skybox serialization for saving
         return j;
     }
 
