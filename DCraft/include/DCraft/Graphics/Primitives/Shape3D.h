@@ -18,7 +18,7 @@ namespace DCraft
 
         // Material properties
         void set_material(Material* material);
-        Material* get_material();
+        Material* get_material() const;
 
         // Geometry Access & modification
         const std::vector<float>& get_vertices() const;

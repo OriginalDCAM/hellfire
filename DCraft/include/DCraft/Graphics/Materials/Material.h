@@ -24,29 +24,79 @@ namespace DCraft {
 
         glm::vec3 ambient_color_ = glm::vec3(0.1f);
         glm::vec3 diffuse_color_ = glm::vec3(1.0f);
-        
-        virtual void on_diffuse_texture_set(Texture* texture) {}
-        virtual void on_specular_texture_set(Texture* texture) {}
+
+        virtual void on_diffuse_texture_set(Texture *texture) {
+        }
+
+        virtual void on_specular_texture_set(Texture *texture) {
+        }
 
     public:
         Material(const std::string &name);
 
         virtual ~Material() = default;
 
-        glm::vec3 get_ambient_color() const { return  ambient_color_; };
-        glm::vec3 get_diffuse_color() const { return  diffuse_color_; };
+        glm::vec3 get_ambient_color() const { return ambient_color_; };
+        glm::vec3 get_diffuse_color() const { return diffuse_color_; };
 
-        void set_ambient_color(const glm::vec3& color) { ambient_color_ = color; }
-        void set_diffuse_color(const glm::vec3& color) { diffuse_color_ = color; }
+        void set_ambient_color(const glm::vec3 &color) { ambient_color_ = color; }
+        void set_diffuse_color(const glm::vec3 &color) { diffuse_color_ = color; }
 
-        void set_diffuse_texture(std::string& path) { set_texture(path, TextureType::DIFFUSE); }
-        void set_diffuse_texture(Texture* texture) {
+        void set_diffuse_texture(std::string &path) { set_texture(path, TextureType::DIFFUSE); }
+
+        void set_diffuse_texture(Texture *texture) {
             set_texture(texture);
             has_diffuse_texture_ = true;
         }
-        Texture* get_diffuse_texture() {
-            auto& diffuseTextures = textures_map_[TextureType::DIFFUSE];
+
+        Texture *get_diffuse_texture() {
+            auto &diffuseTextures = textures_map_[TextureType::DIFFUSE];
             return diffuseTextures.empty() ? nullptr : diffuseTextures[0];
+        }
+
+        void remove_texture(TextureType type) {
+            // Clear textures of the specified type from the map
+            auto it = textures_map_.find(type);
+            if (it != textures_map_.end()) {
+                // If we're removing diffuse textures, update the flag
+                if (type == TextureType::DIFFUSE) {
+                    has_diffuse_texture_ = false;
+                }
+
+                // Remove the textures of this type from the main textures_ collection
+                for (auto *texture: it->second) {
+                    auto texIt = std::find(textures_.begin(), textures_.end(), texture);
+                    if (texIt != textures_.end()) {
+                        textures_.erase(texIt);
+                    }
+                }
+
+                // Unbind the texture
+                for (auto* texture : it->second) {
+                    // Unbind the texture
+                    texture->unbind();
+            
+                    // Remove from the main vector
+                    auto texIt = std::find(textures_.begin(), textures_.end(), texture);
+                    if (texIt != textures_.end()) {
+                        textures_.erase(texIt);
+                    }
+                }
+
+                // Clear this type's vector in the map
+                it->second.clear();
+            }
+        }
+
+        void remove_all_textures() {
+            // Clear all textures
+            textures_.clear();
+            textures_map_.clear();
+            has_diffuse_texture_ = false;
+        }
+
+        void remove_diffuse_texture() {
+            remove_texture(TextureType::DIFFUSE);
         }
 
 
@@ -74,6 +124,6 @@ namespace DCraft {
 
         virtual void bind(void *renderer_context) = 0;
 
-        void set_name(const std::string& value) { name = value; }
+        void set_name(const std::string &value) { name = value; }
     };
 }

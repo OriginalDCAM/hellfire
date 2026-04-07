@@ -72,6 +72,12 @@ namespace DCraft
     void Scene::destroy_camera(Camera* camera)
     {
     }
+
+    json Scene::to_json() {
+        json j = Object3D::to_json();
+        return j;
+    }
+
     void Scene::register_object(Object3D* obj)
     {
         if (obj && std::find(registered_objects_.begin(), registered_objects_.end(), obj) == registered_objects_.end())

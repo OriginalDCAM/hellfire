@@ -387,7 +387,7 @@ namespace DCraft {
         }
 
             // Standard exit with ESC
-            if (keys_[27]) {
+            if (keys_[27] && game_mode_) {
                 glutLeaveMainLoop();
             }
 

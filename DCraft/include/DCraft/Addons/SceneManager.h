@@ -6,29 +6,29 @@
 
 #include <vector>
 
+#include "DCraft/Utility/ObjectDeserializer.h"
+#include "DCraft/Utility/ObjectSerializer.h"
+
 namespace DCraft {
     class Scene;
 
     class SceneManager {
     public:
         SceneManager();
-
         ~SceneManager();
+
+        // Setup callback for when a scene is activated
+        using SceneActivatedCallback = std::function<void(Scene*)>;
+        void set_scene_activated_callback(SceneActivatedCallback callback) {
+            scene_activated_callback_ = callback;
+        }
 
         // Scene creation and loading
         void create_default_scene();
 
-        Object3D* deserialize_node(const json& obj_data);
-
-        Material *deserialize_material(const json &material_data);
-
-        bool load_scene(const std::string &filename);
+        Scene* load_scene(const std::string &filename);
 
         bool save_scene(const std::string &filename, Scene *scene);
-
-       json serialize_node(Object3D *scene);
-        
-        json serialize_material(Material * material);
 
         // Scene management
         void update(float delta_time);
@@ -65,6 +65,8 @@ namespace DCraft {
 
         void set_active_scene(Scene *scene);
 
+        void set_active_scene(std::shared_ptr<Scene> scene);
+
         Scene *get_active_scene() const {
             if (!active_scene_) return nullptr;
 
@@ -75,13 +77,14 @@ namespace DCraft {
         Object3D *root_node_;
         std::vector<Object3D *> objects_;
         Scene *active_scene_;
-        // Camera* active_camera_;
+
+        std::unique_ptr<ObjectDeserializer> object_deserializer_;
+        std::unique_ptr<ObjectSerializer> object_serializer_;
 
         // Helper methods
         void register_object(Object3D *object);
-
         void unregister_object(Object3D *object);
-
+        SceneActivatedCallback scene_activated_callback_;
         bool objects_contains_camera_component(Object3D *object, Camera *target_camera);
     };
 }

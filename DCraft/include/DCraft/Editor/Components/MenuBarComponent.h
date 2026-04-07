@@ -84,7 +84,7 @@ namespace DCraft {
                     };
                     std::string filepath = open_file_dialog(scene_filters);
                     if (!filepath.empty()) {
-                        if (scene_manager_->load_scene(filepath)) {
+                        if (auto* scene = scene_manager_->load_scene(filepath)) {
                             std::clog << "Scene loaded successfully from path:" << filepath << std::endl;
                         } else {
                             std::clog << "Failed to load Scene from path:" << filepath << std::endl;

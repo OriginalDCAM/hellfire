@@ -10,15 +10,15 @@
 #include "Scenes/SandboxScene.h"
 
 
-void Game::setup_callbacks(DCraft::Application &app) {
+void Game::setup_callbacks(Application &app) {
     DCraft::ApplicationCallbacks application_callbacks;
 
-    application_callbacks.init = [this](DCraft::Application &app) { init(app); };
-    application_callbacks.setup = [this](DCraft::SceneManager &sm, const DCraft::WindowInfo &info) {
+    application_callbacks.init = [this](Application &app) { init(app); };
+    application_callbacks.setup = [this](SceneManager &sm, const DCraft::WindowInfo &info) {
         setup(sm, info);
     };
     application_callbacks.update = [this](float dt) { update(dt); };
-    application_callbacks.process_input = [this](DCraft::Application &app, float dt) {
+    application_callbacks.process_input = [this](Application &app, float dt) {
         handle_input(app, dt);
     };
     application_callbacks.on_mouse_moved = [this](float x_offset, float y_offset) {
@@ -28,7 +28,7 @@ void Game::setup_callbacks(DCraft::Application &app) {
     app.set_callbacks(application_callbacks);
 }
 
-void Game::init(DCraft::Application &app) {
+void Game::init(Application &app) {
     glDisable(GL_CULL_FACE);
     glutSetCursor(GLUT_CURSOR_NONE);
     glutWarpPointer(app.get_window_width() / 2, app.get_window_height() / 2);
@@ -40,29 +40,160 @@ void Game::init(DCraft::Application &app) {
     app.set_shader_program(shader_program);
 }
 
+// Animation setup 
+void Game::setup_animations() {
+    // God creature animation
+    Object3D* god = scenes_["Terrain"]->find_object_by_name("Godly Creature");
+    if (god) {
+        if (auto* icosphere = god->find_object_by_name("Icosphere")) {
+            animation_system_.create_rotation(
+                "god_sphere_rotation",
+                icosphere,    
+                40.0f,    
+                30.0f,     
+                50.0f     
+            );
+        }
+        
+        if (auto* god_head = god->find_object_by_name("Icosphere")) {
+            animation_system_.create_pulsing_scale(
+                "icosphere_god__head_scaling",
+                god_head,    
+                1.0f,    
+                1.0f,     
+                1.75f     
+            );
+        }
+        
+        animation_system_.create_circular_path(
+            "god_path", god, 30.0f, 15.0f, true);
+    }
 
-void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
-    scene_manager_ = &sm;
+    // Mars rotation animation
+    if (auto* mars = scenes_["Terrain"]->find_object_by_name("Mars 2K.obj")) {
+        animation_system_.create_rotation("mars rotation around itself", mars, 0.0f, 10.0f, 0.0f);
+    }
 
-    scenes_["Sandbox"] = load_scene(sm, window);
-
-    main_camera_ = dynamic_cast<DCraft::PerspectiveCamera *>(scenes_["Sandbox"]->
-        find_object_by_name("Main Camera"));
-    drone_camera_ = dynamic_cast<DCraft::PerspectiveCamera *>(scenes_["Sandbox"]->find_object_by_name(
-        "Drone Camera"));
-
-    main_camera_visual_ = scenes_["Sandbox"]->find_object_by_name(
-        "Main Camera Visual");
-    drone_camera_visual_ = scenes_["Sandbox"]->find_object_by_name(
-        "Drone Camera Visual");
-
-    sm.set_active_scene(scenes_["Sandbox"]);
+    Light* point_light = static_cast<Light*>(
+    scenes_["Terrain"]->find_object_by_name("Green Light"));
+    
+    if (point_light) {
+        animation_system_.create_intensity_pulse(
+            "light_flicker",     
+            point_light,         
+            1.5f,                 
+            0.7f,                 
+            1.0f                  
+        );
+    }
 }
 
-void Game::handle_input(DCraft::Application &app, float delta_time) {
+void Game::on_scene_activated(Scene *scene) {
+    // Find the scene name from the scene pointer
+    std::string scene_name;
+    for (const auto &pair: scenes_) {
+        if (pair.second == scene) {
+            scene_name = pair.first;
+            break;
+        }
+    }
+
+    if (scene_name.empty()) {
+        std::cerr << "Unknown scene activated!\n";
+        return;
+    }
+
+    active_scene_name_ = scene_name;
+
+    // Set the appropriate camera based on the current drone mode
+    auto &cameras = scene_cameras_[scene_name];
+    if (drone_mode_active) {
+        if (cameras.drone_camera) {
+            scene->set_active_camera(cameras.drone_camera);
+        }
+    } else {
+        if (cameras.main_camera) {
+            scene->set_active_camera(cameras.main_camera);
+        }
+    }
+
+    // Update camera visuals
+    const glm::vec3 visible_scale(0.3f);
+    const glm::vec3 hidden_scale(0.0f);
+
+    if (cameras.drone_camera_visual) {
+        cameras.drone_camera_visual->set_scale(drone_mode_active ? hidden_scale : visible_scale);
+    }
+    if (cameras.main_camera_visual) {
+        cameras.main_camera_visual->set_scale(drone_mode_active ? visible_scale : hidden_scale);
+    }
+
+    std::clog << "Activated scene: " << scene_name << "\n";
+}
+
+void Game::setup_cameras_for_scene(const std::string &scene_name) {
+    if (scenes_.find(scene_name) == scenes_.end()) {
+        std::cerr << "Scene " << scene_name << " not found!\n";
+        return;
+    }
+
+    auto scene = scenes_[scene_name];
+    SceneCameras cameras;
+
+    // Find cameras and their visual representations in this scene
+    cameras.main_camera = dynamic_cast<PerspectiveCamera *>(scene->find_object_by_name("Main Camera"));
+    cameras.drone_camera = dynamic_cast<PerspectiveCamera *>(scene->find_object_by_name("Drone Camera"));
+    cameras.main_camera_visual = scene->find_object_by_name("Main Camera Visual");
+    cameras.drone_camera_visual = scene->find_object_by_name("Drone Camera Visual");
+
+    // Validate that we found all required objects
+    if (!cameras.main_camera || !cameras.drone_camera) {
+        std::cerr << "Warning: Missing camera in scene " << scene_name << "!\n";
+    }
+
+    if (!cameras.main_camera_visual || !cameras.drone_camera_visual) {
+        std::cerr << "Warning: Missing camera visual in scene " << scene_name << "!\n";
+    }
+
+    // Store the cameras for this scene
+    scene_cameras_[scene_name] = cameras;
+}
+
+
+void Game::setup(SceneManager &sm, WindowInfo window) {
+    scene_manager_ = &sm;
+
+    // Scene loading with code behind
+    scenes_["Sandbox"] = load_scene(sm, window);
+    // Scene loading from file path
+    scenes_["Terrain"] = sm.load_scene("assets/scenes/Terrain Scene.json");
+
+    setup_cameras_for_scene("Sandbox");
+    setup_cameras_for_scene("Terrain");
+
+    // Set the initial active scene
+    sm.set_active_scene(scenes_["Sandbox"]);
+    active_scene_name_ = "Sandbox";
+
+    // Set up the animations
+    setup_animations();
+
+    // Register scene activation callback with the scene manager
+    sm.set_scene_activated_callback([this](Scene *scene) {
+        on_scene_activated(scene);
+    });
+}
+
+Game::SceneCameras &Game::get_active_scene_cameras() {
+    return scene_cameras_[active_scene_name_];
+}
+
+void Game::handle_input(Application &app, float delta_time) {
     if (drone_toggle_timer > 0.0f) {
         drone_toggle_timer -= delta_time;
     }
+
+    // Camera movement controls
     if (app.is_key_pressed('w') || app.is_key_pressed('W')) {
         scene_manager_->get_active_camera()->process_keyboard(DCraft::FORWARD, delta_time);
     }
@@ -81,26 +212,29 @@ void Game::handle_input(DCraft::Application &app, float delta_time) {
     if (app.is_key_pressed('e') || app.is_key_pressed('E')) {
         scene_manager_->get_active_camera()->process_keyboard(DCraft::UP, delta_time);
     }
+
+    // Toggle drone mode
     if (app.is_key_pressed('v') || app.is_key_pressed('V')) {
         if (!drone_key_processed && drone_toggle_timer <= 0.0f) {
             drone_mode_active = !drone_mode_active;
+            auto &cameras = get_active_scene_cameras();
 
             const glm::vec3 visible_scale(0.3f);
             const glm::vec3 hidden_scale(0.0f);
-            if (drone_mode_active) {
-                scene_manager_->get_active_scene()->set_active_camera(drone_camera_);
-                std::clog << "Entering drone mode with the " << scene_manager_->get_active_camera()->get_name() <<
-                        '\n';
-            } else {
-                scene_manager_->get_active_scene()->set_active_camera(main_camera_);
+
+            if (drone_mode_active && cameras.drone_camera) {
+                scene_manager_->get_active_scene()->set_active_camera(cameras.drone_camera);
+                std::clog << "Entering drone mode with the " << scene_manager_->get_active_camera()->get_name() << '\n';
+            } else if (cameras.main_camera) {
+                scene_manager_->get_active_scene()->set_active_camera(cameras.main_camera);
                 std::clog << "Leaving drone mode to the " << scene_manager_->get_active_camera()->get_name() << '\n';
             }
 
-            if (drone_camera_visual_) {
-                drone_camera_visual_->set_scale(drone_mode_active ? hidden_scale : visible_scale);
+            if (cameras.drone_camera_visual) {
+                cameras.drone_camera_visual->set_scale(drone_mode_active ? hidden_scale : visible_scale);
             }
-            if (main_camera_visual_) {
-                main_camera_visual_->set_scale(drone_mode_active ? visible_scale : hidden_scale);
+            if (cameras.main_camera_visual) {
+                cameras.main_camera_visual->set_scale(drone_mode_active ? visible_scale : hidden_scale);
             }
 
             drone_toggle_timer = DRONE_TOGGLE_COOLDOWN;
@@ -108,6 +242,13 @@ void Game::handle_input(DCraft::Application &app, float delta_time) {
         }
     } else {
         drone_key_processed = false;
+    }
+
+    if (app.is_key_pressed('1')) {
+    scene_manager_->set_active_scene(scenes_["Terrain"]);
+        
+    } else if (app.is_key_pressed('2')) {
+    scene_manager_->set_active_scene(scenes_["Sandbox"]);
     }
 
     if (app.is_special_key_pressed(GLUT_KEY_F11 + 256)) {
@@ -120,29 +261,33 @@ void Game::process_mouse_movement(float x_offset, float y_offset) {
 }
 
 void Game::process_camera_movement() {
-    if (!main_camera_ || !drone_camera_ || !main_camera_visual_ || !drone_camera_visual_) return;
+    auto &cameras = get_active_scene_cameras();
 
-    // update position
-    main_camera_visual_->set_position(main_camera_->get_position());
+    if (!cameras.main_camera || !cameras.drone_camera ||
+        !cameras.main_camera_visual || !cameras.drone_camera_visual) {
+        return;
+    }
 
-    glm::vec3 camera_pos = main_camera_->get_position();
-    glm::vec3 camera_target = camera_pos + main_camera_->get_front_vector();
-    main_camera_visual_->look_at(camera_target, main_camera_->get_up_vector());
+    // Update main camera visual
+    cameras.main_camera_visual->set_position(cameras.main_camera->get_position());
+    glm::vec3 camera_pos = cameras.main_camera->get_position();
+    glm::vec3 camera_target = camera_pos + cameras.main_camera->get_front_vector();
+    cameras.main_camera_visual->look_at(camera_target, cameras.main_camera->get_up_vector());
+    cameras.main_camera_visual->match_orientation(*cameras.main_camera);
 
-    main_camera_visual_->match_orientation(*main_camera_);
-
-
-    drone_camera_visual_->set_position(drone_camera_->get_position());
-
-    glm::vec3 drone_pos = drone_camera_->get_position();
-    glm::vec3 drone_target = drone_pos + drone_camera_->get_front_vector();
-    drone_camera_visual_->look_at(drone_target, drone_camera_->get_up_vector());
-
-    drone_camera_visual_->match_orientation(*drone_camera_);
+    // Update drone camera visual
+    cameras.drone_camera_visual->set_position(cameras.drone_camera->get_position());
+    glm::vec3 drone_pos = cameras.drone_camera->get_position();
+    glm::vec3 drone_target = drone_pos + cameras.drone_camera->get_front_vector();
+    cameras.drone_camera_visual->look_at(drone_target, cameras.drone_camera->get_up_vector());
+    cameras.drone_camera_visual->match_orientation(*cameras.drone_camera);
 }
 
 void Game::update(float delta_time) {
+    animation_system_.update(delta_time);
+    
     process_camera_movement();
+
     for (auto &scene: scenes_) {
         scene.second->update(delta_time);
     }

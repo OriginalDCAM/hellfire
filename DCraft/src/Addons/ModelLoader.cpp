@@ -57,6 +57,7 @@ namespace DCraft::Addons {
             std::string relative_path = path_str.substr(pos);
             imported_shape->set_file_path(relative_path);
         } else {
+            // If not in assets directory, use full path
             imported_shape->set_file_path(path_str);
         }
 
@@ -136,7 +137,7 @@ namespace DCraft::Addons {
 
     Mesh *ModelLoader::process_mesh(aiMesh *mesh, const aiScene *scene, Material *default_material) {
         size_t vertex_hash = 0;
-        size_t sample_size = std::min(size_t(10), size_t(mesh->mNumVertices)); // Sample up to 10 vertices
+        size_t sample_size = std::min(static_cast<size_t>(10), static_cast<size_t>(mesh->mNumVertices)); 
 
         for (size_t i = 0; i < sample_size; i++) {
             // Hash the position of each sampled vertex
@@ -263,7 +264,7 @@ namespace DCraft::Addons {
                 texture.type = typeName;
 
                 std::string path = str.C_Str();
-                texture.path = "assets/models/" + path;
+                texture.path = "models/" + path;
 
                 textures.push_back(texture);
                 textures_loaded.push_back(texture);

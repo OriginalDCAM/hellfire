@@ -12,5 +12,6 @@
 #include "DCraft/Structs/Scene.h"
 #include "DCraft/Structs/Object3D.h"
 #include "DCraft/Graphics/Mesh.h"
+#include "DCraft/Addons/AnimationSystem.h"
 
 #endif //DCRAFT_H

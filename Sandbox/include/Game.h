@@ -25,13 +25,16 @@ public:
     float drone_toggle_timer = 0.0f;
     const float DRONE_TOGGLE_COOLDOWN = 0.2f; // 200ms cooldown
 
-    void init(DCraft::Application &app);
+    void init(Application &app);
 
 
-    void setup(DCraft::SceneManager &sm, DCraft::WindowInfo window);
+    void setup_animations();
+
+    void setup(SceneManager &sm, WindowInfo window);
+
 
     // Input handler
-    void handle_input(DCraft::Application &app, float delta_time);
+    void handle_input(Application &app, float delta_time);
 
     void process_mouse_movement(float x_offset, float y_offset);
 
@@ -40,16 +43,27 @@ public:
     void update(float delta_time);
 
 private:
-    DCraft::PerspectiveCamera* main_camera_ = nullptr;
-    DCraft::PerspectiveCamera* drone_camera_ = nullptr;
+    SceneManager *scene_manager_;
+    std::unordered_map<std::string, Scene*> scenes_;
+    std::string active_scene_name_ = "Sandbox";
     
-    // Also store visual indicators
-    DCraft::Object3D* main_camera_visual_ = nullptr;
-    DCraft::Object3D* drone_camera_visual_ = nullptr;
-    
-    std::unordered_map<std::string, DCraft::Scene*> scenes_;
-    DCraft::SceneManager *scene_manager_;
+    void on_scene_activated(Scene* scene);
+
+    void setup_cameras_for_scene(const std::string& scene_name);
+
+    struct SceneCameras {
+        PerspectiveCamera* main_camera = nullptr;
+        PerspectiveCamera* drone_camera = nullptr;
+        Object3D* main_camera_visual = nullptr;
+        Object3D* drone_camera_visual = nullptr;
+    };
+
+    AnimationSystem animation_system_;
+    SceneCameras &get_active_scene_cameras();
+    std::unordered_map<std::string, SceneCameras> scene_cameras_;
 };
+
+
 
 
 #endif //GAME_H
