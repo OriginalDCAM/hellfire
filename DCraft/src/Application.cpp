@@ -78,8 +78,9 @@ namespace DCraft {
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
         (void) io;
+        io.IniFilename = "editorconfig.ini";
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
 
         io.DisplaySize.x = static_cast<float>(window_info_.width);
         io.DisplaySize.y = static_cast<float>(window_info_.height);
