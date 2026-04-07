@@ -29,7 +29,7 @@ namespace DCraft {
         set_active_camera(camera);
 
         auto *cube_obj = create_object("Cube");
-        Cube *cube = new Cube();
+        Cube *cube = new Cube("Cube");
         cube_obj->add(cube);
     }
 

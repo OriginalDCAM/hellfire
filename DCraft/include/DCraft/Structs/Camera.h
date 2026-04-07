@@ -61,6 +61,9 @@ namespace DCraft
             update_camera_vectors();
         }
 
+        void set_movement_speed(float value) { movement_speed_ = value; }
+        float get_movement_speed() { return movement_speed_; }
+
         virtual glm::mat4 get_view_matrix();
         virtual glm::mat4 get_projection_matrix() = 0;
 

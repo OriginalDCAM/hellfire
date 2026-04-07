@@ -9,9 +9,9 @@
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 
 namespace DCraft::Editor {
-    class SceneHierarchyPanel {
+    class SceneEditorOverlay {
     public:
-        SceneHierarchyPanel(SceneManager& scene_manager, Object3D*& selected_node)
+        SceneEditorOverlay(SceneManager& scene_manager, Object3D*& selected_node)
             : scene_manager_(scene_manager), selected_node_(selected_node) {}
 
         void render();
@@ -30,12 +30,16 @@ namespace DCraft::Editor {
 
         void redo();
 
+        void setup_docking_space();
+
         void render_menu_bar();
 
         void render_light_properties(Light * light) const;
         void render_camera_properties(Camera * camera) const;
         void render_shape_properties(Shape3D * shape) const;
         void render_mesh_properties(Mesh * mesh) const;
+
+        void import_model(const std::string& filepath);
 
         void render_object_properties(Object3D * object) const;
         

@@ -1,17 +1,18 @@
 ﻿//
 // Created by denzel on 09/04/2025.
 //
-#include "DCraft/Editor/SceneHierarchyPanel.h"
+#include "DCraft/Editor/SceneEditorOverlay.h"
 
 #include <imgui.h>
 
+#include "DCraft/Addons/ModelLoader.h"
 #include "DCraft/Graphics/Lights/DirectionalLight.h"
 #include "DCraft/Graphics/Lights/Light.h"
 #include "DCraft/Graphics/Lights/PointLight.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 
 namespace DCraft::Editor {
-    void SceneHierarchyPanel::render_object_properties(Object3D *object) const {
+    void SceneEditorOverlay::render_object_properties(Object3D *object) const {
         if (!object) return;
         ImGui::Begin("Properties");
 
@@ -49,7 +50,7 @@ namespace DCraft::Editor {
         ImGui::End();
     }
 
-    void SceneHierarchyPanel::render() {
+    void SceneEditorOverlay::render() {
         render_menu_bar();
 
         ImGui::Begin("Scene Hierarchy");
@@ -98,7 +99,7 @@ namespace DCraft::Editor {
         }
     }
 
-    void SceneHierarchyPanel::render_object_node(Object3D *object) {
+    void SceneEditorOverlay::render_object_node(Object3D *object) {
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
 
         if (object == selected_node_)
@@ -144,22 +145,82 @@ namespace DCraft::Editor {
         }
     }
 
-    void SceneHierarchyPanel::undo() {
+    void SceneEditorOverlay::undo() {
         if (current_command_index_ >= 0) {
             command_history_[current_command_index_]->undo();
             current_command_index_--;
         }
     }
 
-    void SceneHierarchyPanel::redo() {
+    void SceneEditorOverlay::redo() {
         if (current_command_index_ < command_history_.size() - 1) {
             current_command_index_++;
             command_history_[current_command_index_]->execute();
         }
     }
 
-    void SceneHierarchyPanel::render_menu_bar() {
+    void SceneEditorOverlay::setup_docking_space() {
+        // Set up the dockspace
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    
+        // Make the parent window full-screen
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    
+        // Begin the main dockspace window
+        ImGui::Begin("DockSpace", nullptr, window_flags);
+        ImGui::PopStyleVar(2);
+    
+        // Add a dockspace inside this window
+        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+    
+        // Optional menu bar
+        if (ImGui::BeginMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                // Add menu items
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+    
+        // Create your specific windows
+        // These will be dockable into the dockspace
+    
+        // Scene Hierarchy window - default to left side
+        ImGui::SetNextWindowDockID(dockspace_id, ImGuiCond_FirstUseEver);
+        ImGui::Begin("Scene Hierarchy");
+        // Scene hierarchy content here
+        ImGui::End();
+    
+        // Inspector window - default to right side
+        ImGui::SetNextWindowDockID(dockspace_id, ImGuiCond_FirstUseEver);
+        ImGui::Begin("Inspector");
+        // Inspector content here
+        ImGui::End();
+    
+        // End the dockspace window
+        ImGui::End();
+    }
+
+    void SceneEditorOverlay::render_menu_bar() {
         if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("Import Model...")) {
+                    // For a real application, you'd use a file dialog
+                    // But for your assignment, you could use a hardcoded path for testing
+                    std::string filepath = "assets/models/teapot.obj";  // Replace with your test model
+                    import_model(filepath);
+                }
+                ImGui::Separator();
+                ImGui::EndMenu();
+            }
             if (ImGui::BeginMenu("Edit")) {
                 if (ImGui::MenuItem("Undo", "Ctrl+Z", false, current_command_index_ >= 0)) {
                     undo();
@@ -174,7 +235,20 @@ namespace DCraft::Editor {
         }
     }
 
-    void SceneHierarchyPanel::render_light_properties(Light *light) const {
+    
+
+    void SceneEditorOverlay::import_model(const std::string &filepath) {
+        Object3D* model = Addons::ModelLoader::load(filepath, scene_manager_.get_active_scene());
+
+        if (model) {
+            // Position the model at a visible location
+            model->set_position(glm::vec3(0.0f, 2.0f, 0.0f));
+        
+            scene_manager_.get_active_scene()->add(model);
+        }
+    }
+
+    void SceneEditorOverlay::render_light_properties(Light *light) const {
         ImGui::SeparatorText("Light Properties");
         glm::vec3 color = light->get_color();
         if (ImGui::ColorPicker3("Light", &color[0], ImGuiColorEditFlags_Float)) {
@@ -206,8 +280,13 @@ namespace DCraft::Editor {
         }
     }
 
-    void SceneHierarchyPanel::render_camera_properties(Camera *camera) const {
+    void SceneEditorOverlay::render_camera_properties(Camera *camera) const {
         ImGui::SeparatorText("Camera Properties");
+
+        float movement_speed = camera->get_movement_speed();
+        if (ImGui::DragFloat("Movement speed", &movement_speed, 0.25)) {
+            camera->set_movement_speed(movement_speed);
+        }
 
         if (auto *perspective_cam = dynamic_cast<PerspectiveCamera *>(camera)) {
             glm::vec3 target = perspective_cam->get_target();
@@ -217,10 +296,11 @@ namespace DCraft::Editor {
         }
     }
 
-    void SceneHierarchyPanel::render_shape_properties(Shape3D *shape) const {
+    void SceneEditorOverlay::render_shape_properties(Shape3D *shape) const {
         Material *material = shape->get_material();
     }
 
-    void SceneHierarchyPanel::render_mesh_properties(Mesh *mesh) const {
+    void SceneEditorOverlay::render_mesh_properties(Mesh *mesh) const {
     }
+
 }

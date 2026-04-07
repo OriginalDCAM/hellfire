@@ -152,6 +152,7 @@ namespace DCraft
 
     public:
         Cube();
+        Cube(const std::string& name);
 
         void update(float dt) override;
     };

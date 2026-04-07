@@ -8,6 +8,7 @@ namespace DCraft
     class Shape3D : public Object3D
     {
     public:
+        Shape3D(const std::string& name) : Object3D(name) {}
         // Texture Management
         void set_texture(const std::string& path, TextureType type);
         void set_texture(Texture* texture, bool take_ownsership = false);

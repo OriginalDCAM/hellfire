@@ -38,6 +38,7 @@ namespace DCraft
 
     public:
         Plane();
+        Plane(const std::string& name);
 
         void update(float dt) override;
         void set_vertices() override;

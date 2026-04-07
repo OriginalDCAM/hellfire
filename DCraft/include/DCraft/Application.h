@@ -6,7 +6,7 @@
 #include "DCraft/Addons/SceneManager.h"
 #include "DCraft/Graphics/Renderer.h"
 #include "DCraft/Addons/PerspectiveCamera.h"
-#include "Editor/SceneHierarchyPanel.h"
+#include "Editor/SceneEditorOverlay.h"
 
 // READ: The application class relies on the freeGLUT api to handle windows, callbacks.
 // freeGLUT is an ancient api that shouldn't be used in modern days. But had to use this
@@ -148,7 +148,7 @@ namespace DCraft {
         uint32_t shader_program_id_;
 
         Object3D* selected_node_ = nullptr;
-        Editor::SceneHierarchyPanel scene_hierarchy_panel_;
+        Editor::SceneEditorOverlay scene_editor_overlay_;
 
         // Keys stuff
         bool game_mode_ = true;
