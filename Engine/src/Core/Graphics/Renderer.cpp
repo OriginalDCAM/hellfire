@@ -45,7 +45,9 @@ namespace hellfire {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
         glDepthFunc(GL_LESS);
+
         glDisable(GL_CULL_FACE);
 
         skybox_renderer_.initialize();
@@ -70,7 +72,10 @@ namespace hellfire {
     void Renderer::begin_frame() {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
         glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
 
         opaque_objects_.clear();
         transparent_objects_.clear();
@@ -166,7 +171,7 @@ namespace hellfire {
         if (auto *renderable = entity->get_component<RenderableComponent>()) {
             if (const auto *transform = entity->get_component<TransformComponent>()) {
                 if (renderable->has_mesh()) {
-                    if (Material *material = renderable->get_material()) {
+                    if (std::shared_ptr<Material> material = renderable->get_material()) {
                         const glm::vec3 object_pos = transform->get_world_position();
                         const float distance = glm::length(camera_pos - object_pos);
                         const bool is_transparent = is_material_transparent(material);
@@ -186,7 +191,7 @@ namespace hellfire {
         if (auto* instanced_renderable = entity->get_component<InstancedRenderableComponent>()) {
             if (auto* transform = entity->get_component<TransformComponent>()) {
                 if (instanced_renderable->has_mesh() && instanced_renderable->get_instance_count() > 0) {
-                    if (Material* material = instanced_renderable->get_material()) {
+                    if (std::shared_ptr<Material> material = instanced_renderable->get_material()) {
                         glm::vec3 object_pos = transform->get_world_position();
                         float distance = glm::length(camera_pos - object_pos);
                         bool is_transparent = is_material_transparent(material);
@@ -209,17 +214,24 @@ namespace hellfire {
     }
 
 
-    bool Renderer::is_material_transparent(const Material *material) {
-        const auto transparency = material->get_property<float>("transparency", 1.0f);
-        const auto alpha = material->get_property<float>("alpha", 1.0f);
+    bool Renderer::is_material_transparent(const std::shared_ptr<Material> &material) {
+        if (!material) {
+            return false; 
+        }
+        const auto transparency = material->get_property<float>("uTransparency", 1.0f);
+        const auto alpha = material->get_property<float>("uAlpha", 1.0f);
         const bool use_transparency = material->get_property<bool>("useTransparency", false);
         return transparency < 1.0f || alpha < 1.0f || use_transparency;
     }
 
     void Renderer::render_opaque_pass(const glm::mat4 &view, const glm::mat4 &projection) {
+        // TODO: make this a render setting that could be passed via global method
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
         glDisable(GL_BLEND);
+        
+        glDisable(GL_CULL_FACE);
 
         std::sort(opaque_objects_.begin(), opaque_objects_.end(),
                   [](const RenderCommand &a, const RenderCommand &b) {
@@ -248,6 +260,8 @@ namespace hellfire {
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
 
+        glDisable(GL_CULL_FACE);
+
         std::sort(transparent_objects_.begin(), transparent_objects_.end(),
                   [](const RenderCommand &a, const RenderCommand &b) {
                       return a.distance_to_camera > b.distance_to_camera;
@@ -273,6 +287,8 @@ namespace hellfire {
 
     void Renderer::render_skybox_pass(Scene *scene, const glm::mat4 &view, const glm::mat4 &projection) const {
         if (!scene || !scene->has_skybox()) return;
+
+       glDisable(GL_CULL_FACE);
 
         CameraComponent *camera_comp = scene->get_active_camera();
         if (camera_comp) {
@@ -340,7 +356,7 @@ namespace hellfire {
         }
     }
 
-    Shader *Renderer::get_shader_for_material(Material *material) {
+    Shader *Renderer::get_shader_for_material(std::shared_ptr<Material> material) {
         if (!material) {
             return fallback_shader_;
         }
@@ -369,7 +385,7 @@ namespace hellfire {
         return fallback_shader_;
     }
 
-    uint32_t Renderer::compile_material_shader(Material *material) {
+    uint32_t Renderer::compile_material_shader(std::shared_ptr<Material> material) {
         if (!material || !material->has_custom_shader()) {
             return 0;
         }

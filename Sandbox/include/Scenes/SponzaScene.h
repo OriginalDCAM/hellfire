@@ -12,4 +12,4 @@ namespace hellfire {
     class SceneManager;
 }
 
-hellfire::Scene *load_sponza_scene(hellfire::AppInfo window);
+hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window);

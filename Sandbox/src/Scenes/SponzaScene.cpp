@@ -13,7 +13,7 @@
 #include "DCraft/Structs/Skybox.h"
 #include "Scripts/PlayerController.h"
 
-hellfire::Scene *load_sponza_scene(hellfire::AppInfo window) {
+hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {
     auto *scene = new hellfire::Scene("Sponza Scene");
     hellfire::Entity *spaceshuttle_model = hellfire::Asset::load(
         "assets/models/shuttle/orbiter_space_shuttle_ov-103_discovery.glb");

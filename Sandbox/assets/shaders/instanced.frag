@@ -36,14 +36,14 @@ uniform DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
 // Material uniforms
-uniform sampler2D diffuseTexture;
+uniform sampler2D uDiffuseTexture;
 
 // Texture usage flags
-uniform bool useDiffuseTexture;
+uniform bool useUDiffuseTexture;
 
 // Material properties
-uniform vec3 ambientColor;
-uniform vec3 diffuseColor;
+uniform vec3 uAmbientColor;
+uniform vec3 uDiffuseColor;
 
 // Uv controls
 uniform vec2 uvTiling = vec2(1.0);
@@ -54,8 +54,8 @@ uniform float uvRotation = 0.0;
 uniform int textureWrapMode = 0; // 0=repeat, 1=clamp, 2=mirror
 
 // Transparency uniforms
-uniform float alpha = 1.0;
-uniform float transparency = 1.0;
+uniform float uAlpha = 1.0;
+uniform float uTransparency = 1.0;
 uniform bool useTransparency = false;
 
 uniform vec3 baseColor = vec3(1.0);
@@ -163,10 +163,10 @@ float LinearizeDepth(float depth)
 
 void main() {
     vec4 diffuseValue;
-    if (useDiffuseTexture) {
-        diffuseValue = sampleTexture(diffuseTexture, vTexCoords);
+    if (useUDiffuseTexture) {
+        diffuseValue = sampleTexture(uDiffuseTexture, vTexCoords);
     } else {
-        diffuseValue = vec4(diffuseColor, 1.0);
+        diffuseValue = vec4(uDiffuseColor, 1.0);
     }
 
     vec4 materialColor = diffuseValue * vec4(baseColor, 1.0);
@@ -186,7 +186,7 @@ void main() {
     vec3 viewDir = normalize(-vFragPos); 
 
     // Calculate lighting
-    vec3 result = ambientColor * finalBaseColor.rgb + emissiveContribution;
+    vec3 result = uAmbientColor * finalBaseColor.rgb + emissiveContribution;
 
     for (int i = 0; i < numDirectionalLights; i++) {
         result += calcDirectionalLightWithSpecular(directionalLights[i], normal, vFragPos, viewDir, finalBaseColor.rgb);
@@ -199,7 +199,7 @@ void main() {
     // Calculate final alpha
     float finalAlpha = finalBaseColor.a;
     if (useTransparency) {
-        finalAlpha *= alpha * transparency;
+        finalAlpha *= uAlpha * uTransparency;
     }
 
     fragColor = vec4(result, finalAlpha);

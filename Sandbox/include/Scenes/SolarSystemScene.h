@@ -24,7 +24,7 @@ typedef std::unordered_map<std::string, std::shared_ptr<hellfire::Material>> Mat
 
 // Function declarations only
 MaterialMap load_material_map();
-hellfire::Scene* load_solar_system_scene( hellfire::AppInfo window);
+hellfire::Scene* load_solar_system_scene(const hellfire::AppInfo& window);
 
 #endif // SANDBOXSCENE_H
 

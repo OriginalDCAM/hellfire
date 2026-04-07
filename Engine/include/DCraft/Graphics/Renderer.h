@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "DCraft/Structs/Entity.h"
-#include "DCraft/Components/CameraComponent.h"
 #include "DCraft/Components/RenderableComponent.h"
 #include "DCraft/Graphics/OGL/Framebuffer.h"
 #include "DCraft/Graphics/Renderers/SkyboxRenderer.h"

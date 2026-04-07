@@ -113,7 +113,7 @@ hellfire::Entity *create_planet_with_rotation(const std::string &name, float sca
     return planet;
 }
 
-hellfire::Scene *load_solar_system_scene(hellfire::AppInfo window) {
+hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo& window) {
     const auto scene = new hellfire::Scene("Solar System Scene");
     MaterialMap materials = load_material_map();
 
@@ -179,8 +179,8 @@ hellfire::Scene *load_solar_system_scene(hellfire::AppInfo window) {
     skybox->set_cubemap_faces({
         "assets/skyboxes/space_right.png", // +X
         "assets/skyboxes/space_left.png", // -X
-        "assets/skyboxes/space_top.png", // +Y
-        "assets/skyboxes/space_bottom.png", // -Y
+        "assets/skyboxes/space_bottom.png", // +Y
+        "assets/skyboxes/space_top.png", // -Y
         "assets/skyboxes/space_front.png", // +Z
         "assets/skyboxes/space_back.png" // -Z
     });
