@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <glm/detail/type_vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,7 +25,7 @@ namespace DCraft
         }
         Object3D() : position_(0.0f, 0.0f, 0.0f), scale_(1.0, 1.0f, 1.0f), rotation_axis_(0.0f, 0.0f, 0.0f), rotation_angle_(0.0f), world_matrix_(1.0f)
         {
-            model_.transform = glm::mat4(1.0f);
+            get_model()->transform = glm::mat4(1.0f);
         }
 
         void set_name(std::string name)
@@ -35,6 +36,17 @@ namespace DCraft
         std::string& get_name()
         {
             return name_;
+        }
+
+        Model* get_model() {
+            if (!model_ptr_) {
+                model_ptr_ = std::make_unique<Model>();
+            }
+            return model_ptr_.get();
+        }
+
+        bool has_model() const {
+            return model_ptr_ != nullptr;
         }
 
 
@@ -70,23 +82,19 @@ namespace DCraft
 
         float get_rotation_angle() const { return rotation_angle_; }
 
-        //VA* get_vao() const { return vao_; }
-
         const std::vector<unsigned int>& get_indices() const
         {
-            if (model_.meshes.empty()) {
+            if (model_ptr_->meshes.empty()) {
                 static const std::vector<unsigned int> empty_indices;
                 return empty_indices;
             }
 
-            return model_.meshes[0].indices;
+            return model_ptr_->meshes[0].indices;
         }
 
-        const glm::mat4& get_model_matrix() const { return model_.transform; }
+        const glm::mat4& get_model_matrix() const { return model_ptr_->transform; }
 
-        Model& get_model() { return model_; }
-
-        void add(Object3D* child)
+        virtual void add(Object3D* child)
         {
             // Check if the child is already in the children list
             auto iterator = std::find(children_.begin(), children_.end(), child);
@@ -141,7 +149,8 @@ namespace DCraft
 
         void update_world_matrix()
         {
-            glm::mat4 world_matrix = model_.transform;
+            if (!model_ptr_) return;
+            glm::mat4 world_matrix = model_ptr_->transform;
 
             if (parent_ != nullptr)
             {
@@ -164,16 +173,18 @@ namespace DCraft
 
         void update_model_matrix()
         {
-            model_.transform = glm::mat4(1.0f);
-            model_.transform = glm::translate(model_.transform, position_);
+            model_ptr_->transform = glm::mat4(1.0f);
+            model_ptr_->transform = glm::translate(model_ptr_->transform, position_);
 
             if (glm::length(rotation_axis_) > 0.0001f) {
                 glm::vec3 normalized_axis = glm::normalize(rotation_axis_);
-                model_.transform = glm::rotate(model_.transform, rotation_angle_, normalized_axis);
+                model_ptr_->transform = glm::rotate(model_ptr_->transform, rotation_angle_, normalized_axis);
             }
 
-            model_.transform = glm::scale(model_.transform, scale_);
+            model_ptr_->transform = glm::scale(model_ptr_->transform, scale_);
         }
+
+        
 
         // overload for the new operator to set the proper memory alignment for glm methods
         void* operator new(size_t size) {
@@ -195,9 +206,9 @@ namespace DCraft
         glm::vec3 scale_;
         glm::vec3 rotation_axis_;
         float rotation_angle_;
-        //VA* vao_;
-        Model model_;
 
+        
+        std::shared_ptr<Model> model_ptr_;
 
     protected:
         glm::mat4 world_matrix_ = glm::mat4(1.0f);
