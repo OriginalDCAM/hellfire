@@ -33,6 +33,9 @@ namespace DCraft {
             return name_;
         }
 
+        // Find objects
+        Object3D* find_object_by_name(const std::string& name);
+
         // Mesh handling
         void add_mesh(const Mesh &mesh) {
             if (!mesh_) {
@@ -70,6 +73,7 @@ namespace DCraft {
         void set_position(const float x, const float y, const float z) {
             transform_.set_position(x, y, z);
         }
+
 
         void set_scale(const glm::vec3 &new_scale) {
             transform_.set_scale(new_scale);

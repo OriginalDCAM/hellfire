@@ -64,6 +64,8 @@ namespace DCraft
         }
     }
 
+
+
     void Scene::destroy_camera(Camera* camera)
     {
     }

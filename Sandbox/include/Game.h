@@ -40,16 +40,13 @@ public:
     void update(float delta_time);
 
 private:
-    DCraft::PerspectiveCamera *camera_ = nullptr;
-    DCraft::PerspectiveCamera *drone_camera_ = nullptr;
-    DCraft::Cube *cube_ = nullptr;
+    DCraft::PerspectiveCamera* main_camera_ = nullptr;
+    DCraft::PerspectiveCamera* drone_camera_ = nullptr;
     
-    DCraft::Cube *main_camera_visual_ = nullptr;
-    DCraft::Cube *drone_camera_visual_ = nullptr;
-
-    std::unordered_map<std::string, DCraft::Material*> materials_;
+    // Also store visual indicators
+    DCraft::Object3D* main_camera_visual_ = nullptr;
+    DCraft::Object3D* drone_camera_visual_ = nullptr;
     
-    DCraft::Scene *initial_scene;
     std::unordered_map<std::string, DCraft::Scene*> scenes_;
     DCraft::SceneManager *scene_manager_;
 };
