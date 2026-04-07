@@ -83,7 +83,7 @@ namespace hellfire::editor {
         state_manager_.switch_to<ProjectHubState>();
     }
 
-    void EditorApplication::load_editor_ui_config(ImGuiIO& io) {
+    void EditorApplication::load_editor_ui_config(ImGuiIO& io) const {
         io.IniFilename = nullptr;
         
         if (std::filesystem::exists("imgui.ini")) {
