@@ -26,7 +26,7 @@ namespace hellfire::editor {
         ImGui::SetNextWindowSize(viewport->Size);
 
         if (ui::Window window{
-            "Hellfire - Project Hub", nullptr,
+            "Create New Project", nullptr,
             ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
         }) {
             // Center the form

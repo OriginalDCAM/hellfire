@@ -11,7 +11,7 @@
 #include "../ui/Panels/Inspector/InspectorPanel.h"
 
 namespace hellfire::editor {
-    class EditorApplication final : public IApplicationPlugin {
+    class EditorApplication : public IApplicationPlugin {
     public:
         void on_initialize(Application &app) override;
 
@@ -43,12 +43,14 @@ namespace hellfire::editor {
 
         void on_window_focus(bool focused) override;
 
-        Entity * get_render_camera_override() override;
+        Entity *get_render_camera_override() override;
+
+    protected:
+        EditorContext editor_context_;
 
     private:
-        EditorContext editor_context_;
         bool imgui_initialized_ = false;
 
-       StateManager state_manager_; 
+        StateManager state_manager_;
     };
 }
