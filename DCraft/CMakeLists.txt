@@ -39,6 +39,7 @@ target_link_libraries(${LIBRARY_NAME}
         GLM::GLM
         OpenGL::GL
         imgui
+        assimp
         PRIVATE
         stb_image
 )

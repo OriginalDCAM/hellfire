@@ -90,7 +90,7 @@ namespace DCraft {
             transform_.set_scale(new_scale);
         }
 
-        glm::vec3 get_current_scale() { return transform_.get_scale(); }
+        glm::vec3 get_scale() { return transform_.get_scale(); }
 
         void set_rotation(const float degrees, const glm::vec3 &new_axis) {
             transform_.set_rotation(degrees, new_axis);

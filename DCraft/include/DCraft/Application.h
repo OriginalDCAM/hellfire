@@ -6,6 +6,7 @@
 #include "DCraft/Addons/SceneManager.h"
 #include "DCraft/Graphics/Renderer.h"
 #include "DCraft/Addons/PerspectiveCamera.h"
+#include "Editor/SceneHierarchyPanel.h"
 
 // READ: The application class relies on the freeGLUT api to handle windows, callbacks.
 // freeGLUT is an ancient api that shouldn't be used in modern days. But had to use this
@@ -62,7 +63,6 @@ namespace DCraft {
 
         bool is_ready;
         int ImGui_ImplGLUT_MouseButtonCallback;
-        bool is_running = true;
 
         void load_scene();
 
@@ -73,7 +73,7 @@ namespace DCraft {
 
         void update();
 
-        void render_frame() const;
+        void render_frame();
 
         /// public method function: on_key_down
         /// @param key ASCII table keycode
@@ -146,6 +146,9 @@ namespace DCraft {
         WindowInfo window_info_;
         std::string title_;
         uint32_t shader_program_id_;
+
+        Object3D* selected_node_ = nullptr;
+        Editor::SceneHierarchyPanel scene_hierarchy_panel_;
 
         // Keys stuff
         bool game_mode_ = true;

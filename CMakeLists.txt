@@ -76,17 +76,31 @@ add_library(imgui STATIC
 target_include_directories(imgui PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor
         ${IMGUI_DIR}
-        ${IMGUI_DIR}/backends  # Add this to find the backend header files
-        ${GLEW_INCLUDE_DIR}    # Add this for GLEW includes
-        ${GLUT_INCLUDE_DIR}    # Add this for GLUT includes
+        ${IMGUI_DIR}/backends  
+        ${GLEW_INCLUDE_DIR}    
+        ${GLUT_INCLUDE_DIR}    
 )
 
-# Link against the targets you've created, not the variables
 target_link_libraries(imgui PUBLIC
         opengl32
         GLEW::GLEW
         GLUT::GLUT
 )
+
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)  # Build zlib with Assimp
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)  # Only build needed importers
+
+# Select only the importers you need to reduce build time
+set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
+
+add_subdirectory(vendor/assimp)
 
 add_subdirectory(DCraft)
 add_subdirectory(Sandbox)

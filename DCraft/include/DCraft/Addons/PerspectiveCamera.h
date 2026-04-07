@@ -49,6 +49,8 @@ namespace DCraft
 
         void set_target(float x, float y, float z);
 
+        glm::vec3 get_target();
+
     private:
         void update_projection_matrix() {
             if (near_ <= 0.0f) {
