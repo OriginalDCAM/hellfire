@@ -4,6 +4,7 @@
 
 #include "InspectorPanel.h"
 
+#include "IconsFontAwesome6.h"
 #include "imgui.h"
 #include "imgui/misc/cpp/imgui_stdlib.h"
 
@@ -58,7 +59,7 @@ namespace hellfire::editor {
                 ImGui::TextDisabled("No entity selected");
                 return;
             }
-            
+
             // Entity name
             char name_buffer[256];
             strncpy_s(name_buffer, selected_entity->get_name().c_str(), 255);
@@ -137,13 +138,13 @@ namespace hellfire::editor {
 
                 const auto mesh_id = mesh->get_mesh_asset();
                 auto asset = proj->get_asset_registry()->get_asset(mesh_id);
-                
+
                 if (asset) {
-                strncpy_s(path,  proj->get_asset_registry()->get_asset(mesh_id)->filepath.string().c_str(), 255);
+                    strncpy_s(path, proj->get_asset_registry()->get_asset(mesh_id)->filepath.string().c_str(), 255);
                 } else {
-                strncpy_s(path,  "(No asset selected)", 255);
+                    strncpy_s(path, "(No asset selected)", 255);
                 }
-                
+
                 if (ui::text_input("Mesh", path, 256)) {
                     if (auto asset_id = proj->get_asset_registry()->get_uuid_by_path(path).value_or(INVALID_ASSET_ID)) {
                         if (proj->get_asset_registry()->get_asset(asset_id).value().type == AssetType::MESH) {
@@ -151,8 +152,13 @@ namespace hellfire::editor {
                         }
                     }
                 }
-                
-                if (!should_open_asset_selector_) return;
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_RECEIPT))
+                    should_open_asset_selector_ = !should_open_asset_selector_;
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_X)) mesh->remove_mesh_asset();
+
+                    if (!should_open_asset_selector_) return;
 
                 if (ui::Window window{"Asset Selector"}) {
                     auto asset_registry = proj->get_asset_registry();
@@ -224,12 +230,14 @@ namespace hellfire::editor {
         // Double-click to instantiate
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && context_->active_scene) {
             swap_mesh(asset, mesh_comp);
+            should_open_asset_selector_ = false;
         }
 
         // Context menu
         if (ImGui::BeginPopupContextItem(("##" + asset.filepath.string()).c_str())) {
-            if (ImGui::MenuItem("Instantiate")) {
+            if (ImGui::MenuItem("Select")) {
                 swap_mesh(asset, mesh_comp);
+                should_open_asset_selector_ = false;
             }
             if (ImGui::MenuItem("Show in Explorer")) {
                 // open_in_explorer(asset.filepath.parent_path());
