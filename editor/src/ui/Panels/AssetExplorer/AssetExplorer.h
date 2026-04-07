@@ -3,6 +3,7 @@
 //
 #pragma once
 
+#include "hellfire/graphics/managers/TextureManager.h"
 #include "ui/Panels/EditorPanel.h"
 
 namespace hellfire::editor {

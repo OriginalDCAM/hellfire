@@ -61,7 +61,7 @@ namespace hellfire::editor {
     void ProjectHubState::render_project_list() {
         if (ui::ChildWindow child{"ProjectList"}) {
             for (const auto& project : recent_projects_) {
-                ImGui::PushID(&project);
+                ImGui::PushID(&project.path);
             
                 bool selected = false;
                 if (ImGui::Selectable("##project", &selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(0, 30))) {
@@ -75,7 +75,7 @@ namespace hellfire::editor {
                 ImGui::SameLine(120);
                 ImGui::Text("%s", project.path.string().c_str());
 
-                if (ImGui::BeginPopupContextWindow(("##" + project.path.string()).c_str())) {
+                if (ImGui::BeginPopupContextItem(("##" + project.path.string()).c_str())) {
                     if (ImGui::MenuItem("Remove from recent projects...")) {
                         context_->project_manager->remove_from_recent(project.path);
                         recent_projects_ = context_->project_manager->get_recent_projects();
