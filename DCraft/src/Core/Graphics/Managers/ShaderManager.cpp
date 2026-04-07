@@ -172,7 +172,7 @@ namespace DCraft {
     uint32_t ShaderManager::get_shader_for_material(Material &material) {
         ShaderVariant variant;
             
-        // Check if material has Custom shader
+        // Check if material has custom shader
         if (material.has_custom_shader()) {
             const auto* shader_info = material.get_shader_info();
             variant.vertex_path = shader_info->vertex_path;
@@ -187,24 +187,24 @@ namespace DCraft {
                 
             switch (material_type) {
                 case 0: // Lambert
-                    variant.vertex_path = "./assets/Shaders/standard.vert";
-                    variant.fragment_path = "./assets/Shaders/lambert.frag";
+                    variant.vertex_path = "./assets/shaders/standard.vert";
+                    variant.fragment_path = "./assets/shaders/lambert.frag";
                     break;
                 case 1: // Phong
-                    variant.vertex_path = "./assets/Shaders/standard.vert";
-                    variant.fragment_path = "./assets/Shaders/phong.frag";
+                    variant.vertex_path = "./assets/shaders/standard.vert";
+                    variant.fragment_path = "./assets/shaders/phong.frag";
                     break;
                 case 2: // PBR
-                    variant.vertex_path = "./assets/Shaders/standard.vert";
-                    variant.fragment_path = "./assets/Shaders/pbr.frag";
+                    variant.vertex_path = "./assets/shaders/standard.vert";
+                    variant.fragment_path = "./assets/shaders/pbr.frag";
                     break;
                 default:
-                    variant.vertex_path = "./assets/Shaders/standard.vert";
-                    variant.fragment_path = "./assets/Shaders/lambert.frag";
+                    variant.vertex_path = "./assets/shaders/standard.vert";
+                    variant.fragment_path = "./assets/shaders/lambert.frag";
                     break;
             }
                 
-            // Add automatic defines for built-in Shaders
+            // Add automatic defines for built-in shaders
             add_automatic_defines(material, variant.defines);
         }
             
@@ -254,7 +254,7 @@ namespace DCraft {
                 
             return program_id;
         } catch (const std::exception& e) {
-            std::cerr << "Error loading Shaders: " << e.what() << std::endl;
+            std::cerr << "Error loading shaders: " << e.what() << std::endl;
             return 0;
         }
     }
@@ -262,7 +262,7 @@ namespace DCraft {
     void ShaderManager::clear_cache() {
         include_cache_.clear();
             
-        // Clean up compiled Shaders
+        // Clean up compiled shaders
         for (const auto& [key, shader_id] : compiled_shaders_) {
             glDeleteProgram(shader_id);
         }
@@ -298,7 +298,7 @@ namespace DCraft {
 
         uint32_t program_id = glsl::makeShaderProgram(vertex_shader, fragment_shader);
 
-        // Clean up individual Shaders after linking
+        // Clean up individual shaders after linking
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
 

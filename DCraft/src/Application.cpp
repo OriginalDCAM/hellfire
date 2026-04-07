@@ -348,15 +348,15 @@ namespace DCraft {
         // Try to load a default shader
         try {
             Shader* shader = shader_registry_.load_and_get_shader(
-                "assets/Shaders/standard.vert",
-                "assets/Shaders/lambert.frag"
+                "assets/shaders/standard.vert",
+                "assets/shaders/lambert.frag"
             );
         
             if (shader && shader->is_valid()) {
                 return shader;
             }
         } catch (const std::exception &e) {
-            std::cerr << "Warning: Could not load default Shaders: " << e.what() << std::endl;
+            std::cerr << "Warning: Could not load default shaders: " << e.what() << std::endl;
         }
     
         std::cerr << "Using minimal fallback shader" << std::endl;

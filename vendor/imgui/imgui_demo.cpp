@@ -116,7 +116,7 @@ Index of this file:
 // [SECTION] Example App: Simple overlay / ShowExampleAppSimpleOverlay()
 // [SECTION] Example App: Fullscreen window / ShowExampleAppFullscreen()
 // [SECTION] Example App: Manipulating window titles / ShowExampleAppWindowTitles()
-// [SECTION] Example App: Custom Rendering using ImDrawList API / ShowExampleAppCustomRendering()
+// [SECTION] Example App: custom Rendering using ImDrawList API / ShowExampleAppCustomRendering()
 // [SECTION] Example App: Docking, DockSpace / ShowExampleAppDockSpace()
 // [SECTION] Example App: Documents Handling / ShowExampleAppDocuments()
 // [SECTION] Example App: Assets Browser / ShowExampleAppAssetsBrowser()
@@ -715,7 +715,7 @@ static void DemoWindowMenuBar(ImGuiDemoWindowData* demo_data)
             ImGui::SeparatorText("Mini apps");
             ImGui::MenuItem("Assets Browser", NULL, &demo_data->ShowAppAssetsBrowser);
             ImGui::MenuItem("Console", NULL, &demo_data->ShowAppConsole);
-            ImGui::MenuItem("Custom rendering", NULL, &demo_data->ShowAppCustomRendering);
+            ImGui::MenuItem("custom rendering", NULL, &demo_data->ShowAppCustomRendering);
             ImGui::MenuItem("Documents", NULL, &demo_data->ShowAppDocuments);
             ImGui::MenuItem("Dockspace", NULL, &demo_data->ShowAppDockSpace);
             ImGui::MenuItem("Log", NULL, &demo_data->ShowAppLog);
@@ -932,7 +932,7 @@ static void DemoWindowWidgetsBasic()
         ImGui::SeparatorText("Inputs");
 
         {
-            // To wire InputText() with std::string or any other Custom string type,
+            // To wire InputText() with std::string or any other custom string type,
             // see the "Text Input > Resize Callback" section of this demo, and the misc/cpp/imgui_stdlib.h file.
             IMGUI_DEMO_MARKER("Widgets/Basic/InputText");
             static char str0[128] = "Hello, world!";
@@ -1168,8 +1168,8 @@ static void DemoWindowWidgetsColorAndPickers()
             "be used for the tooltip and picker popup.");
         ImGui::ColorEdit4("MyColor##3", (float*)&color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | base_flags);
 
-        IMGUI_DEMO_MARKER("Widgets/Color/ColorButton (with Custom Picker popup)");
-        ImGui::Text("Color button with Custom Picker Popup:");
+        IMGUI_DEMO_MARKER("Widgets/Color/ColorButton (with custom Picker popup)");
+        ImGui::Text("Color button with custom Picker Popup:");
 
         // Generate a default palette. The palette will persist and can be edited.
         static bool saved_palette_init = true;
@@ -1844,7 +1844,7 @@ static void DemoWindowWidgetsImages()
         static int pressed_count = 0;
         for (int i = 0; i < 8; i++)
         {
-            // UV coordinates are often (0.0f, 0.0f) and (1.0f, 1.0f) to display an entire Textures.
+            // UV coordinates are often (0.0f, 0.0f) and (1.0f, 1.0f) to display an entire textures.
             // Here are trying to display only a 32x32 pixels area of the texture, hence the UV computation.
             // Read about UV coordinates here: https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
             ImGui::PushID(i);
@@ -1911,7 +1911,7 @@ static void DemoWindowWidgetsListBoxes()
         }
         ImGui::SameLine(); HelpMarker("Here we are sharing selection state between both boxes.");
 
-        // Custom size: use all width, 5 items tall
+        // custom size: use all width, 5 items tall
         ImGui::Text("Full-width:");
         if (ImGui::BeginListBox("##listbox 2", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
         {
@@ -2816,7 +2816,7 @@ static void DemoWindowWidgetsSelectionAndMultiSelect(ImGuiDemoWindowData* demo_d
         {
             // Storing items data separately from selection data.
             // (you may decide to store selection data inside your item (aka intrusive storage) if you don't need multiple views over same items)
-            // Use a Custom selection.Adapter: store item identifier in Selection (instead of index)
+            // Use a custom selection.Adapter: store item identifier in Selection (instead of index)
             static ImVector<ImGuiID> items;
             static ExampleSelectionWithDeletion selection;
             selection.UserData = (void*)&items;
@@ -3029,7 +3029,7 @@ static void DemoWindowWidgetsSelectionAndMultiSelect(ImGuiDemoWindowData* demo_d
         // - The difficulty here is to "interpolate" from RangeSrcItem to RangeDstItem in the SetAll/SetRange request.
         //   We want this interpolation to match what the user sees: in visible order, skipping closed nodes.
         //   This is implemented by our TreeGetNextNodeInVisibleOrder() user-space helper.
-        // - Important: In a real codebase aiming to implement full-featured selectable tree with Custom filtering, you
+        // - Important: In a real codebase aiming to implement full-featured selectable tree with custom filtering, you
         //   are more likely to build an array mapping sequential indices to visible tree nodes, since your
         //   filtering/search + clipping process will benefit from it. Having this will make this interpolation much easier.
         // - Consider this a prototype: we are working toward simplifying some of it.
@@ -3680,7 +3680,7 @@ static void DemoWindowWidgetsTextFilter()
 
 static void DemoWindowWidgetsTextInput()
 {
-    // To wire InputText() with std::string or any other Custom string type,
+    // To wire InputText() with std::string or any other custom string type,
     // see the "Text Input > Resize Callback" section of this demo, and the misc/cpp/imgui_stdlib.h file.
     IMGUI_DEMO_MARKER("Widgets/Text Input");
     if (ImGui::TreeNode("Text Input"))
@@ -3820,11 +3820,11 @@ static void DemoWindowWidgetsTextInput()
         IMGUI_DEMO_MARKER("Widgets/Text Input/Resize Callback");
         if (ImGui::TreeNode("Resize Callback"))
         {
-            // To wire InputText() with std::string or any other Custom string type,
-            // you can use the ImGuiInputTextFlags_CallbackResize flag + create a Custom ImGui::InputText() wrapper
+            // To wire InputText() with std::string or any other custom string type,
+            // you can use the ImGuiInputTextFlags_CallbackResize flag + create a custom ImGui::InputText() wrapper
             // using your preferred type. See misc/cpp/imgui_stdlib.h for an implementation of this using std::string.
             HelpMarker(
-                "Using ImGuiInputTextFlags_CallbackResize to wire your Custom string type to InputText().\n\n"
+                "Using ImGuiInputTextFlags_CallbackResize to wire your custom string type to InputText().\n\n"
                 "See misc/cpp/imgui_stdlib.h for an implementation of this for std::string.");
             struct Funcs
             {
@@ -3943,11 +3943,11 @@ static void DemoWindowWidgetsTooltips()
             ImGui::EndTooltip();
         }
 
-        ImGui::SeparatorText("Custom");
+        ImGui::SeparatorText("custom");
 
         HelpMarker(
             "Passing ImGuiHoveredFlags_ForTooltip to IsItemHovered() is the preferred way to standardize "
-            "tooltip activation details across your application. You may however decide to use Custom "
+            "tooltip activation details across your application. You may however decide to use custom "
             "flags for a specific tooltip instance.");
 
         // The following examples are passed for documentation purpose but may not be useful to most users.
@@ -6027,9 +6027,9 @@ static void DemoWindowTables()
             ImGui::EndTable();
         }
 
-        // Second example: set style.CellPadding to (0.0) or a Custom value.
+        // Second example: set style.CellPadding to (0.0) or a custom value.
         // FIXME-TABLE: Vertical border effectively not displayed the same way as horizontal one...
-        HelpMarker("Setting style.CellPadding to (0,0) or a Custom value.");
+        HelpMarker("Setting style.CellPadding to (0,0) or a custom value.");
         static ImGuiTableFlags flags2 = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
         static ImVec2 cell_padding(0.0f, 0.0f);
         static bool show_widget_frame_bg = true;
@@ -6769,7 +6769,7 @@ static void DemoWindowTables()
             {
                 { "Root with Long Name",          "Folder",       -1,       1, 3    }, // 0
                 { "Music",                        "Folder",       -1,       4, 2    }, // 1
-                { "Textures",                     "Folder",       -1,       6, 3    }, // 2
+                { "textures",                     "Folder",       -1,       6, 3    }, // 2
                 { "desktop.ini",                  "System file",  1024,    -1,-1    }, // 3
                 { "File1_a.wav",                  "Audio file",   123000,  -1,-1    }, // 4
                 { "File1_b.wav",                  "Audio file",   456000,  -1,-1    }, // 5
@@ -6834,8 +6834,8 @@ static void DemoWindowTables()
     // Demonstrate using TableHeader() calls instead of TableHeadersRow()
     if (open_action != -1)
         ImGui::SetNextItemOpen(open_action != 0);
-    IMGUI_DEMO_MARKER("Tables/Custom headers");
-    if (ImGui::TreeNode("Custom headers"))
+    IMGUI_DEMO_MARKER("Tables/custom headers");
+    if (ImGui::TreeNode("custom headers"))
     {
         const int COLUMNS_COUNT = 3;
         if (ImGui::BeginTable("table_custom_headers", COLUMNS_COUNT, ImGuiTableFlags_Borders | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
@@ -6848,7 +6848,7 @@ static void DemoWindowTables()
             // FIXME: It would be nice to actually demonstrate full-featured selection using those checkbox.
             static bool column_selected[3] = {};
 
-            // Instead of calling TableHeadersRow() we'll submit Custom headers ourselves.
+            // Instead of calling TableHeadersRow() we'll submit custom headers ourselves.
             // (A different approach is also possible:
             //    - Specify ImGuiTableColumnFlags_NoHeaderLabel in some TableSetupColumn() call.
             //    - Call TableHeadersRow() normally. This will submit TableHeader() with no name.
@@ -6952,7 +6952,7 @@ static void DemoWindowTables()
         ImGui::TreePop();
     }
 
-    // Demonstrate creating Custom context menus inside columns,
+    // Demonstrate creating custom context menus inside columns,
     // while playing it nice with context menus provided by TableHeadersRow()/TableHeader()
     if (open_action != -1)
         ImGui::SetNextItemOpen(open_action != 0);
@@ -6996,11 +6996,11 @@ static void DemoWindowTables()
 
         // Context Menus: second example
         // [2.1] Right-click on the TableHeadersRow() line to open the default table context menu.
-        // [2.2] Right-click on the ".." to open a Custom popup
-        // [2.3] Right-click in columns to open another Custom popup
+        // [2.2] Right-click on the ".." to open a custom popup
+        // [2.3] Right-click in columns to open another custom popup
         HelpMarker(
             "Demonstrate mixing table context menu (over header), item context button (over button) "
-            "and Custom per-colunm context menu (over column body).");
+            "and custom per-colunm context menu (over column body).");
         ImGuiTableFlags flags2 = ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Borders;
         if (ImGui::BeginTable("table_context_menu_2", COLUMNS_COUNT, flags2))
         {
@@ -7020,7 +7020,7 @@ static void DemoWindowTables()
                     ImGui::Text("Cell %d,%d", column, row);
                     ImGui::SameLine();
 
-                    // [2.2] Right-click on the ".." to open a Custom popup
+                    // [2.2] Right-click on the ".." to open a custom popup
                     ImGui::PushID(row * COLUMNS_COUNT + column);
                     ImGui::SmallButton("..");
                     if (ImGui::BeginPopupContextItem())
@@ -7034,7 +7034,7 @@ static void DemoWindowTables()
                 }
             }
 
-            // [2.3] Right-click anywhere in columns to open another Custom popup
+            // [2.3] Right-click anywhere in columns to open another custom popup
             // (instead of testing for !IsAnyItemHovered() we could also call OpenPopup() with ImGuiPopupFlags_NoOpenOverExistingPopup
             // to manage popup priority as the popups triggers, here "are we hovering a column" are overlapping)
             int hovered_column = -1;
@@ -7048,9 +7048,9 @@ static void DemoWindowTables()
                 if (ImGui::BeginPopup("MyPopup"))
                 {
                     if (column == COLUMNS_COUNT)
-                        ImGui::Text("This is a Custom popup for unused space after the last column.");
+                        ImGui::Text("This is a custom popup for unused space after the last column.");
                     else
-                        ImGui::Text("This is a Custom popup for Column %d", column);
+                        ImGui::Text("This is a custom popup for Column %d", column);
                     if (ImGui::Button("Close"))
                         ImGui::CloseCurrentPopup();
                     ImGui::EndPopup();
@@ -8863,7 +8863,7 @@ struct ExampleAppConsole
                 ImGui::EndPopup();
             }
 
-            // Display every line as a separate entry so we can change their color or add Custom widgets.
+            // Display every line as a separate entry so we can change their color or add custom widgets.
             // If you only want raw text you can use ImGui::TextUnformatted(log.begin(), log.end());
             // NB- if you have thousands of entries this approach may be too inefficient and may require user-side clipping
             // to only process visible items. The clipper will automatically measure the height of your first item and then
@@ -9574,7 +9574,7 @@ static void ShowExampleAppAutoResize(bool* p_open)
 // [SECTION] Example App: Constrained Resize / ShowExampleAppConstrainedResize()
 //-----------------------------------------------------------------------------
 
-// Demonstrate creating a window with Custom resize constraints.
+// Demonstrate creating a window with custom resize constraints.
 // Note that size constraints currently don't work on a docked window (when in 'docking' branch)
 static void ShowExampleAppConstrainedResize(bool* p_open)
 {
@@ -9607,9 +9607,9 @@ static void ShowExampleAppConstrainedResize(bool* p_open)
         "Resize horizontal + lock current height",
         "Width Between 400 and 500",
         "Height at least 400",
-        "Custom: Aspect Ratio 16:9",
-        "Custom: Always Square",
-        "Custom: Fixed Steps (100)",
+        "custom: Aspect Ratio 16:9",
+        "custom: Always Square",
+        "custom: Fixed Steps (100)",
     };
 
     // Options
@@ -9715,7 +9715,7 @@ static void ShowExampleAppSimpleOverlay(bool* p_open)
             ImGui::Text("Mouse Position: <invalid>");
         if (ImGui::BeginPopupContextWindow())
         {
-            if (ImGui::MenuItem("Custom",       NULL, location == -1)) location = -1;
+            if (ImGui::MenuItem("custom",       NULL, location == -1)) location = -1;
             if (ImGui::MenuItem("Center",       NULL, location == -2)) location = -2;
             if (ImGui::MenuItem("Top-left",     NULL, location == 0)) location = 0;
             if (ImGui::MenuItem("Top-right",    NULL, location == 1)) location = 1;
@@ -9801,7 +9801,7 @@ static void ShowExampleAppWindowTitles(bool*)
 }
 
 //-----------------------------------------------------------------------------
-// [SECTION] Example App: Custom Rendering using ImDrawList API / ShowExampleAppCustomRendering()
+// [SECTION] Example App: custom Rendering using ImDrawList API / ShowExampleAppCustomRendering()
 //-----------------------------------------------------------------------------
 
 // Add a |_| looking shape
@@ -9812,17 +9812,17 @@ static void PathConcaveShape(ImDrawList* draw_list, float x, float y, float sz)
         draw_list->PathLineTo(ImVec2(x + 0.5f + (int)(sz * p.x), y + 0.5f + (int)(sz * p.y)));
 }
 
-// Demonstrate using the low-level ImDrawList to draw Custom shapes.
+// Demonstrate using the low-level ImDrawList to draw custom shapes.
 static void ShowExampleAppCustomRendering(bool* p_open)
 {
-    if (!ImGui::Begin("Example: Custom rendering", p_open))
+    if (!ImGui::Begin("Example: custom rendering", p_open))
     {
         ImGui::End();
         return;
     }
-    IMGUI_DEMO_MARKER("Examples/Custom Rendering");
+    IMGUI_DEMO_MARKER("Examples/custom Rendering");
 
-    // Tip: If you do a lot of Custom rendering, you probably want to use your own geometrical types and benefit of
+    // Tip: If you do a lot of custom rendering, you probably want to use your own geometrical types and benefit of
     // overloaded operators, etc. Define IM_VEC2_CLASS_EXTRA in imconfig.h to create implicit conversions between your
     // types and ImVec2/ImVec4. Dear ImGui defines overloaded operators but they are internal to imgui.cpp and not
     // exposed outside (to avoid messing with your types) In this example we are not using the maths operators!
@@ -9969,7 +9969,7 @@ static void ShowExampleAppCustomRendering(bool* p_open)
             ImGui::Text("Mouse Left: drag to add lines,\nMouse Right: drag to scroll, click for context menu.");
 
             // Typically you would use a BeginChild()/EndChild() pair to benefit from a clipping region + own scrolling.
-            // Here we demonstrate that this can be replaced by simple offsetting + Custom drawing + PushClipRect/PopClipRect() calls.
+            // Here we demonstrate that this can be replaced by simple offsetting + custom drawing + PushClipRect/PopClipRect() calls.
             // To use a child window instead we could use, e.g:
             //      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));      // Disable padding
             //      ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(50, 50, 50, 255));  // Set a background color
@@ -10852,7 +10852,7 @@ struct ExampleAssetsBrowser
 
             ImGuiMultiSelectIO* ms_io = ImGui::BeginMultiSelect(ms_flags, Selection.Size, Items.Size);
 
-            // Use Custom selection adapter: store ID in selection (recommended)
+            // Use custom selection adapter: store ID in selection (recommended)
             Selection.UserData = this;
             Selection.AdapterIndexToStorageId = [](ImGuiSelectionBasicStorage* self_, int idx) { ExampleAssetsBrowser* self = (ExampleAssetsBrowser*)self_->UserData; return self->Items[idx].ID; };
             Selection.ApplyRequests(ms_io);

@@ -49,7 +49,7 @@ namespace DCraft
         std::vector<Entity*> get_camera_entities() const;
         void destroy_camera(Entity* camera_entity);
 
-        // Skybox management
+        // skyboxes management
         void set_skybox(Skybox* skybox) { skybox_ = skybox; }
         Skybox* get_skybox() const { return skybox_; }
         bool has_skybox() const { return skybox_ != nullptr; }

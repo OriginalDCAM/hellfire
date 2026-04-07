@@ -31,11 +31,11 @@ namespace DCraft {
         ibo_ = nullptr;
     }
 
-    void Mesh::bind() {
+    void Mesh::bind() const {
         vao_->bind();
     }
 
-    void Mesh::unbind() {
+    void Mesh::unbind() const {
         vao_->unbind();
     }
 

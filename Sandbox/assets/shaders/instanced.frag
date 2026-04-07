@@ -58,6 +58,31 @@ uniform float alpha = 1.0;
 uniform float transparency = 1.0;
 uniform bool useTransparency = false;
 
+uniform vec3 baseColor = vec3(1.0);
+uniform float roughness = 0.5;
+uniform float metallic = 0.0;
+uniform vec3 emissive = vec3(0.0);
+uniform float specularStrength = 0.5;
+
+vec3 calcDirectionalLightWithSpecular(DirectionalLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 diffuse) {
+    vec3 lightDir = normalize(-light.direction);
+
+    // Diffuse
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuseResult = light.color * light.intensity * diff * diffuse;
+
+    // Simple specular for metallic materials
+    if (metallic > 0.1) {
+        vec3 reflectDir = reflect(-lightDir, normal);
+        float shininess = mix(32.0, 128.0, 1.0 - roughness); // Roughness affects shininess
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+        vec3 specularResult = light.color * light.intensity * spec * specularStrength * metallic;
+        diffuseResult += specularResult;
+    }
+
+    return diffuseResult;
+}
+
 vec2 transformUV(vec2 uv) {
     // Apply offset first
     uv += uvOffset;
@@ -93,8 +118,6 @@ vec4 sampleTexture(sampler2D tex, vec2 uv) {
     return texture(tex, transformedUV);
 }
 
-
-
 // Calculate lighting contribution from a directional light 
 vec3 calcDirectionalLight(DirectionalLight light, vec3 normal, vec3 diffuse) {
     vec3 lightDir = normalize(-light.direction);
@@ -120,7 +143,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse) {
     float attenuation = clamp(1.0 - (distance * distance) / (light.range * light.range), 0.0, 1.0);
     attenuation *= attenuation;  // Smooth falloff
 
-    // Combine results (no specular for Lambert)
+    // Combine results 
     vec3 diffuseResult = light.color * light.intensity * diff * diffuse;
 
     // Apply attenuation
@@ -130,7 +153,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse) {
 }
 
 float near = 0.1;
-float far  = 100.0;
+float far = 100.0;
 
 float LinearizeDepth(float depth)
 {
@@ -146,32 +169,35 @@ void main() {
         diffuseValue = vec4(diffuseColor, 1.0);
     }
 
-    // Apply vertex colors if present
-    vec4 baseColor;
+    vec4 materialColor = diffuseValue * vec4(baseColor, 1.0);
+
+    // Apply instance colors for variation
+    vec4 finalBaseColor;
     if (vInstanceColor.r != 0.0 || vInstanceColor.g != 0.0 || vInstanceColor.b != 0.0) {
-        baseColor = diffuseValue * vec4(vInstanceColor, 1.0);
+        finalBaseColor = materialColor * vec4(vInstanceColor, 1.0);
     } else {
-        baseColor = diffuseValue;
+        finalBaseColor = materialColor;
     }
 
-    // Normalize the normal
+    // Add emissive component
+    vec3 emissiveContribution = emissive;
+
     vec3 normal = normalize(vNormal);
+    vec3 viewDir = normalize(-vFragPos); 
 
-    // Calculate lighting - Lambert model (ambient + diffuse only)
-    vec3 result = ambientColor * baseColor.rgb; // Ambient light
+    // Calculate lighting
+    vec3 result = ambientColor * finalBaseColor.rgb + emissiveContribution;
 
-    // Add all directional lights
     for (int i = 0; i < numDirectionalLights; i++) {
-        result += calcDirectionalLight(directionalLights[i], normal, baseColor.rgb);
+        result += calcDirectionalLightWithSpecular(directionalLights[i], normal, vFragPos, viewDir, finalBaseColor.rgb);
     }
 
-    // Add all point lights
     for (int i = 0; i < numPointLights; i++) {
-        result += calcPointLight(pointLights[i], normal, vFragPos, baseColor.rgb);
+        result += calcPointLight(pointLights[i], normal, vFragPos, finalBaseColor.rgb);
     }
 
     // Calculate final alpha
-    float finalAlpha = baseColor.a;
+    float finalAlpha = finalBaseColor.a;
     if (useTransparency) {
         finalAlpha *= alpha * transparency;
     }

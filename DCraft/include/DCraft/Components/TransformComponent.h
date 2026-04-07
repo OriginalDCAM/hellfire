@@ -22,6 +22,7 @@ namespace DCraft {
         const glm::vec3& get_rotation() { return transform_.get_rotation(); }
         void set_rotation(const glm::vec3& eulers) { transform_.set_rotation(eulers); }
         void set_rotation(float x, float y, float z) { transform_.set_rotation(glm::vec3(x, y, z)); }
+        void set_rotation(const glm::quat& quaternion) { transform_.set_rotation_quaternion(quaternion); }
 
         
         const glm::vec3& get_scale() const { return transform_.get_scale(); }

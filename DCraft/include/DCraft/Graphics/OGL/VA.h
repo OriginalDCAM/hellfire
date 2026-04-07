@@ -9,10 +9,10 @@ class VA
 public:
 	VA();
 	~VA();
-	void bind();
+	void bind() const;
 	void unbind();
 
-	uint32_t get_id();
+	uint32_t get_id() const;
 	
 };
 
