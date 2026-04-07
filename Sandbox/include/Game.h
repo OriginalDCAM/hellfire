@@ -12,24 +12,24 @@ public:
     Game() = default;
     ~Game() = default;
 
-    void setup_callbacks(DCraft::Application &app);
+    void setup_callbacks(hellfire::Application &app);
 
-    void init(DCraft::Application &app);
+    void init(hellfire::Application &app);
 
-    void setup(DCraft::SceneManager &sm, DCraft::WindowInfo window, DCraft::ShaderManager &shader_manager);
+    void setup(hellfire::SceneManager &sm, hellfire::AppInfo window, hellfire::ShaderManager &shader_manager);
 
 
     // Input handler
-    void handle_input(DCraft::Application &app, float delta_time);
+    void handle_input(hellfire::Application &app, float delta_time);
 
     void process_mouse_movement(float x_offset, float y_offset) const;
 
     void update(float delta_time) const;
 private:
-    DCraft::SceneManager *scene_manager_;
-    std::unordered_map<std::string, DCraft::Scene *> scenes_;
+    hellfire::SceneManager *scene_manager_;
+    std::unordered_map<std::string, hellfire::Scene *> scenes_;
 
-    void on_scene_activated(DCraft::Scene *scene) const;
+    void on_scene_activated(hellfire::Scene *scene) const;
 };
 
 

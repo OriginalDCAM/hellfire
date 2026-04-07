@@ -5,11 +5,11 @@
 #pragma once
 
 
-namespace DCraft {
+namespace hellfire {
     class Scene;
     class ShaderManager;
-    struct WindowInfo;
+    struct AppInfo;
     class SceneManager;
 }
 
-DCraft::Scene *load_sponza_scene(DCraft::WindowInfo window);
+hellfire::Scene *load_sponza_scene(hellfire::AppInfo window);

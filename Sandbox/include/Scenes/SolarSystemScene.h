@@ -12,19 +12,19 @@
 #include <string>
 
 // Forward declarations
-namespace DCraft {
+namespace hellfire {
     class Material;
     class Scene;
     class SceneManager;
-    struct WindowInfo;
+    struct AppInfo;
 }
 
 // Typedef for readability
-typedef std::unordered_map<std::string, std::shared_ptr<DCraft::Material>> MaterialMap;
+typedef std::unordered_map<std::string, std::shared_ptr<hellfire::Material>> MaterialMap;
 
 // Function declarations only
 MaterialMap load_material_map();
-DCraft::Scene* load_solar_system_scene( DCraft::WindowInfo window);
+hellfire::Scene* load_solar_system_scene( hellfire::AppInfo window);
 
 #endif // SANDBOXSCENE_H
 
