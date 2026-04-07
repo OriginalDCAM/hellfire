@@ -5,9 +5,8 @@
 #include <string>
 
 #include "Addons/SceneManager.h"
-// #include "Editor/SceneEditorOverlay.h"
 #include "Graphics/Renderer.h"
-#include "Graphics/Managers/ShaderManager.hpp"
+#include "Graphics/Managers/ShaderManager.h"
 
 
 namespace DCraft {
@@ -108,7 +107,6 @@ namespace DCraft {
         /// @param y offset
         void on_mouse_passive_motion(int x, int y);
 
-        // TODO: write JavaDOC comments
         void on_mouse_wheel(int wheel, int direction, int x, int y);
 
         void on_window_resize(int width, int height);

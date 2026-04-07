@@ -10,6 +10,11 @@
 #include "DCraft/Graphics/Textures/Texture.h"
 
 namespace DCraft {
+    class ShaderManager;
+    class Application;
+}
+
+namespace DCraft {
     class Material {
     public:
         enum class PropertyType {
@@ -177,14 +182,8 @@ namespace DCraft {
             set_property("useTransparency", transparent);
         }
     
-        bool is_transparent() const {
-            float alpha = get_property<float>("alpha", 1.0f);
-            float transparency = get_property<float>("transparency", 1.0f);
-            bool use_transparency = get_property<bool>("useTransparency", false);
-        
-            return (alpha < 1.0f) || (transparency < 1.0f) || use_transparency;
-        }
-    
+        bool is_transparent() const;
+
         // Quick presets for common tiling patterns
         void set_brick_tiling() { set_uv_tiling(4.0f, 2.0f); }
         void set_tile_pattern() { set_uv_tiling(8.0f, 8.0f); }
@@ -195,12 +194,9 @@ namespace DCraft {
             set_property("useDiffuseTexture", texture != nullptr);
         }
         
-        void set_texture(const std::string& path, TextureType type) {
-            auto* texture = new Texture(path, type);
-            if (type == TextureType::DIFFUSE) {
-                set_diffuse_texture(texture);
-            }
-        }
+        void set_texture(const std::string& path, TextureType type);
+
+        Material& add_texture(const std::string& path, const std::string& uniform_name, int texture_slot = -1);
 
         // === Getters ===
         template<typename T>
@@ -228,80 +224,110 @@ namespace DCraft {
         float get_shininess() const { return get_property<float>("shininess", 32.0f); }
     };
 
-
     class MaterialBuilder {
-            public:
-        static std::unique_ptr<Material> create_lambert(const std::string& name) {
-            auto material = std::make_unique<Material>(name);
-            material->set_builtin_material_type(0);
-            material->set_diffuse_color(glm::vec3(0.8f));
-            material->set_ambient_color(glm::vec3(0.1f));
-            material->set_uv_tiling(1.0f, 1.0f);  
-            material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
-            material->set_uv_rotation(0.0f);     
-            return material;
-        }
-        
-        static std::unique_ptr<Material> create_phong(const std::string& name) {
-            auto material = std::make_unique<Material>(name);
-            material->set_builtin_material_type(1);
-            material->set_diffuse_color(glm::vec3(0.8f));
-            material->set_ambient_color(glm::vec3(0.3f));
-            material->set_specular_color(glm::vec3(0.5f));
-            material->set_shininess(32.0f);
-            material->set_uv_tiling(1.0f, 1.0f);  
-            material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
-            material->set_uv_rotation(0.0f);     
-            return material;
-        }
-        
-        static std::unique_ptr<Material> create_pbr(const std::string& name) {
-            auto material = std::make_unique<Material>(name);
-            material->set_builtin_material_type(2);
-            material->set_diffuse_color(glm::vec3(0.8f));
-            material->set_property("metallic", 0.0f);
-            material->set_property("roughness", 0.5f);
-            material->set_property("ao", 1.0f);
-            material->set_uv_tiling(1.0f, 1.0f);  
-            material->set_uv_offset(glm::vec2(0.0f, 0.0f)); 
-            material->set_uv_rotation(0.0f);     
-            return material;
-        }
-        
+    public:
+        static std::unique_ptr<Material> create_lambert(const std::string& name);
+
+        static std::unique_ptr<Material> create_phong(const std::string& name);
+
+        static std::unique_ptr<Material> create_pbr(const std::string& name);
+
         // Create material with Custom shader
         static std::unique_ptr<Material> create_custom(const std::string& name, 
                                                       const std::string& vertex_path,
-                                                      const std::string& fragment_path) {
-            auto material = std::make_unique<Material>(name);
-            material->set_custom_shader(vertex_path, fragment_path);
-            return material;
-        }
-        
+                                                      const std::string& fragment_path);
+
+
         // Create material from shader template
         static std::unique_ptr<Material> create_from_template(const std::string& name,
-                                                             const std::string& template_name) {
-            auto material = std::make_unique<Material>(name);
-            
-            // Built-in templates
-            if (template_name == "toon") {
-                material->set_custom_shader("assets/Shaders/toon.vert", "assets/Shaders/toon.frag");
-                material->set_property("toonSteps", 4.0f);
-                material->set_property("outlineWidth", 0.02f);
-            }
-            else if (template_name == "water") {
-                material->set_custom_shader("assets/Shaders/water.vert", "assets/Shaders/water.frag");
-                material->set_property("waveSpeed", 1.0f);
-                material->set_property("waveAmplitude", 0.1f);
-                material->add_shader_define("ANIMATED_WAVES");
-            }
-            else if (template_name == "hologram") {
-                material->set_custom_shader("assets/Shaders/hologram.vert", "assets/Shaders/hologram.frag");
-                material->set_property("scanlineSpeed", 2.0f);
-                material->set_property("glitchIntensity", 0.1f);
-                material->set_property("hologramColor", glm::vec3(0.0f, 1.0f, 1.0f));
-            }
-            
-            return material;
-        }
+                                                             const std::string& template_name);
+
+    private:
+        static void compile_shader_from_material(Material& material);
+        
     };
+
+    // Fluent interface for chaining operations
+    class MaterialChain {
+    public:
+        MaterialChain(std::unique_ptr<Material> material, ShaderManager& shader_manager) : material_(std::move(material)), shader_manager_(shader_manager) {}
+
+                MaterialChain& diffuse_texture(const std::string& path) {
+            material_->set_texture(path, TextureType::DIFFUSE);
+            return *this;
+        }
+        
+        MaterialChain& normal_texture(const std::string& path) {
+            material_->set_texture(path, TextureType::NORMAL);
+            return *this;
+        }
+        
+        MaterialChain& specular_texture(const std::string& path) {
+            material_->set_texture(path, TextureType::SPECULAR);
+            return *this;
+        }
+        
+        MaterialChain& diffuse_color(const glm::vec3& color) {
+            material_->set_diffuse_color(color);
+            return *this;
+        }
+        
+        MaterialChain& ambient_color(const glm::vec3& color) {
+            material_->set_ambient_color(color);
+            return *this;
+        }
+        
+        MaterialChain& specular_color(const glm::vec3& color) {
+            material_->set_specular_color(color);
+            return *this;
+        }
+        
+        MaterialChain& shininess(float value) {
+            material_->set_shininess(value);
+            return *this;
+        }
+        
+        MaterialChain& transparency(float alpha) {
+            material_->set_transparency(alpha);
+            return *this;
+        }
+        
+        MaterialChain& uv_tiling(float x, float y) {
+            material_->set_uv_tiling(x, y);
+            return *this;
+        }
+        
+        MaterialChain& property(const std::string& name, float value) {
+            material_->set_property(name, value);
+            return *this;
+        }
+        
+        MaterialChain& property(const std::string& name, const glm::vec3& value) {
+            material_->set_property(name, value);
+            return *this;
+        }
+        
+        // Auto-compile and return the material
+        std::unique_ptr<Material> build();
+
+        // Release without auto-compilation 
+        std::unique_ptr<Material> build_manual() {
+            return std::move(material_);
+        }
+        
+    private:
+        std::unique_ptr<Material> material_;
+        ShaderManager& shader_manager_;
+    };
+
+    // Start fluent chains
+    static MaterialChain lambert(const std::string& name, ShaderManager& shader_manager);
+
+    static MaterialChain phong(const std::string& name, ShaderManager& shader_manager);
+
+    static MaterialChain custom(const std::string& name,
+                                const std::string& vertex_path,
+                                const std::string& fragment_path,
+                                ShaderManager& shader_manager);
+    
 }
