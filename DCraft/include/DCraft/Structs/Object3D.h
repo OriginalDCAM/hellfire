@@ -22,7 +22,6 @@ namespace DCraft {
                 std::clog << "Deleting child named: " << child->get_name() << ", from the parent: " << get_name() << '\n';
                 delete child;
             }
-            children_.clear();
         }
 
         Object3D() : transform_(Transform3D()) {
@@ -71,10 +70,7 @@ namespace DCraft {
         }
 
         Mesh *get_mesh() const {
-            if (!mesh_) {
-                mesh_ = std::make_shared<Mesh>();
-            }
-            return mesh_.get();
+            return mesh_ ? mesh_.get() : nullptr;
         }
 
         bool has_mesh() const {

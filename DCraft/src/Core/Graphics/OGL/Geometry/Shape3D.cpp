@@ -23,13 +23,17 @@ namespace DCraft {
     
 
     Material *Shape3D::get_material() const {
-        return get_mesh()->get_material();
+        Mesh* mesh = get_mesh();
+        return mesh ? mesh->get_material() : nullptr;
     }
 
     void Shape3D::draw_self(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program, void* renderer_context = nullptr) {
         if (!has_mesh()) return;
 
-        Material* material = get_mesh()->get_material();
+        Mesh* mesh = get_mesh();
+        if (!mesh) return;
+
+        Material* material = mesh->get_material();
         if (!material) return;
 
         glm::mat4 model = get_world_matrix();

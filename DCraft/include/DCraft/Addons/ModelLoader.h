@@ -19,18 +19,15 @@ namespace DCraft::Addons {
         static ImportedModel3D* load(const std::string& filepath, Scene* target_scene);
     private:
         static ImportedModel3D* process_node(aiNode* node, const aiScene* scene, Material* default_material);
-        static Mesh* process_mesh(aiMesh* mesh, const aiScene* scene, Material* default_material);
+        static std::shared_ptr<Mesh> process_mesh(aiMesh* mesh, const aiScene* scene, Material* default_material);
         
         struct MaterialMap {
             std::string type;
             std::string path;
         };
         static std::vector<MaterialMap> load_material_textures(aiMaterial* material, aiTextureType type, std::string typeName);
-        static std::unordered_map<std::string, Mesh*> mesh_cache;
+        static std::unordered_map<std::string, std::shared_ptr<Mesh>> mesh_cache;
         static std::vector<MaterialMap> textures_loaded;
-
-        
-        
     };
 }
 

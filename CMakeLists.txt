@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(FinalAssignment VERSION 1.0)
+project(CustomEngine VERSION 1.1)
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Configure paths to external libraries
 set(GLEW_ROOT_DIR "C:/Libraries/glew-2.0.0-win32/glew-2.0.0" CACHE PATH "GLEW root directory")
 set(GLUT_ROOT_DIR "C:/Libraries/freeglut-MSVC-3.0.0-2.mp/freeglut" CACHE PATH "GLUT root directory")
-# For GLM, set to the parent directory of the first glm folder
 set(GLM_ROOT_DIR "C:/Libraries/glm-0.9.6.3/glm" CACHE PATH "GLM root directory")
 
 # If we have multiple cores, use them for building

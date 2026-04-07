@@ -18,7 +18,7 @@
 namespace fs = std::filesystem;
 
 namespace DCraft::Addons {
-    std::unordered_map<std::string, Mesh *> ModelLoader::mesh_cache;
+    std::unordered_map<std::string, std::shared_ptr<Mesh>> ModelLoader::mesh_cache;
     std::vector<ModelLoader::MaterialMap> ModelLoader::textures_loaded;
 
     ImportedModel3D *ModelLoader::load(const std::string &filepath, Scene *target_scene) {
@@ -113,7 +113,7 @@ namespace DCraft::Addons {
         for (uint32_t i = 0; i < node->mNumMeshes; i++) {
             uint32_t meshIndex = node->mMeshes[i];
             aiMesh *mesh = scene->mMeshes[meshIndex];
-            Mesh *my_mesh = process_mesh(mesh, scene, default_material);
+            std::shared_ptr<Mesh> my_mesh = process_mesh(mesh, scene, default_material);
 
             if (node->mNumMeshes > 1) {
                 Object3D *meshObj = new Object3D(mesh->mName.length > 0
@@ -135,7 +135,7 @@ namespace DCraft::Addons {
         return obj;
     }
 
-    Mesh *ModelLoader::process_mesh(aiMesh *mesh, const aiScene *scene, Material *default_material) {
+    std::shared_ptr<Mesh> ModelLoader::process_mesh(aiMesh *mesh, const aiScene *scene, Material *default_material) {
         size_t vertex_hash = 0;
         size_t sample_size = std::min(static_cast<size_t>(10), static_cast<size_t>(mesh->mNumVertices)); 
 
@@ -158,7 +158,7 @@ namespace DCraft::Addons {
         if (mesh_cache.find(meshKey) != mesh_cache.end()) {
             std::cout << "Using cached mesh: " << meshKey << std::endl;
             return mesh_cache[meshKey];
-        }
+        } 
 
         std::cout << "Creating new mesh: " << meshKey << std::endl;
 
@@ -200,7 +200,7 @@ namespace DCraft::Addons {
         }
 
         // Create and process the mesh as before
-        Mesh *myMesh = new Mesh(vertices, indices);
+        std::shared_ptr<Mesh> myMesh = std::make_shared<Mesh>(vertices, indices);
         myMesh->set_material(default_material);
 
         // Process materials if available

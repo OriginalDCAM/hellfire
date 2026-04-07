@@ -9,9 +9,11 @@ namespace DCraft {
     struct Mesh {
     public:
         Mesh();
-        Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices);
+        Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices);
 
         ~Mesh();
+
+        void cleanup();
 
         // mesh data
         std::vector<Vertex> vertices;
