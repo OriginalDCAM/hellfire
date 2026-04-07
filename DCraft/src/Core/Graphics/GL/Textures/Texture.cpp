@@ -7,7 +7,7 @@
 #include <stb/stb_image.h>
 
 namespace DCraft {
-    Texture::Texture(const std::string &path) {
+    Texture::Texture(const std::string &path, TextureType type) : path_(path), type_(type) {
         glGenTextures(1, &texture_id_);
         glBindTexture(GL_TEXTURE_2D, texture_id_);
 
@@ -19,18 +19,18 @@ namespace DCraft {
             switch (nr_channels) {
                 case 1:
                     format = GL_RED;
-                    break;
+                break;
                 case 3:
                     format = GL_RGB;
-                    break;
+                break;
                 case 4:
                     format = GL_RGBA;
-                    break;
+                break;
                 default:
                     format = GL_RGB;
-                    break;
+                break;
             }
-
+            
             glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
 

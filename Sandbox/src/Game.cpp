@@ -34,6 +34,40 @@ void Game::init(DCraft::Application &app) {
 
     uint32_t shader_program = app.create_shader_program("assets/shaders/vertexshader.vert",
                                                         "assets/shaders/fragmentshader.frag");
+
+    DCraft::Material *mossy_material = new DCraft::Material();
+    mossy_material->set_texture("assets/textures/mossy_brick.jpg", DCraft::TextureType::DIFFUSE);
+    mossy_material->set_shader(shader_program);
+
+    DCraft::Material *pavement_material = new DCraft::Material();
+    pavement_material->set_texture("assets/textures/brick_pavement.jpg", DCraft::TextureType::DIFFUSE);
+    pavement_material->set_shader(shader_program);
+
+
+    DCraft::Material *miquel_material = new DCraft::Material();
+    miquel_material->set_texture("assets/textures/miquel.jpg", DCraft::TextureType::DIFFUSE);
+    miquel_material->set_shader(shader_program);
+
+
+    DCraft::Material *plastic_green_material = new DCraft::Material();
+    plastic_green_material->set_texture("assets/textures/plastic_green.jpg", DCraft::TextureType::DIFFUSE);
+    plastic_green_material->set_shader(shader_program);
+
+
+    DCraft::Material *denzel_material = new DCraft::Material();
+    denzel_material->set_texture("assets/textures/denzel.jpg", DCraft::TextureType::DIFFUSE);
+    denzel_material->set_shader(shader_program);
+
+
+    DCraft::Material *plastic_blue_material = new DCraft::Material();
+    plastic_blue_material->set_texture("assets/textures/plastic_blue.jpg", DCraft::TextureType::DIFFUSE);
+    plastic_blue_material->set_shader(shader_program);
+
+    materials_ = {
+        {"PLASTIC_BLUE_MATERIAL", plastic_blue_material}, {"DENZEL_MATERIAL", denzel_material},
+        {"PLASTIC_GREEN_MATERIAL", plastic_green_material}, {"MIQUEL_MATERIAL", miquel_material},
+        {"MOSSY_MATERIAL", mossy_material}, {"PAVEMENT_MATERIAL", pavement_material}
+    };
     
     app.toggle_fullscreen();
     app.set_shader_program(shader_program);
@@ -65,7 +99,7 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     main_camera_visual_->set_name("Main Camera Visual");
     main_camera_visual_->set_scale(glm::vec3(0.3f, 0.3f, 0.3f));
     main_camera_visual_->set_position(camera_->get_position());
-    main_camera_visual_->set_texture("assets/textures/brick_pavement.jpg", DCraft::TextureType::DIFFUSE);
+    main_camera_visual_->set_material(materials_["MIQUEL_MATERIAL"]);
     initial_scene->add(main_camera_visual_);
 
     // Visual indicator for drone camera position
@@ -73,6 +107,14 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     drone_camera_visual_->set_name("Drone Camera Visual");
     drone_camera_visual_->set_scale(glm::vec3(0.3f, 0.3f, 0.3f));
     drone_camera_visual_->set_position(drone_camera_->get_position());
+    drone_camera_visual_->set_material(materials_["DENZEL_MATERIAL"]);
+
+    DCraft::Cube *main_camera_direction = new DCraft::Cube();
+    main_camera_direction->set_name("Main Camera Direction");
+    main_camera_direction->set_scale(glm::vec3(0.05f, 0.05f, 0.5f));
+    main_camera_direction->set_position(0.0f, 0.0f, 1.0f);
+    main_camera_direction->set_material(materials_["PLASTIC_GREEN_MATERIAL"]);
+    main_camera_visual_->add(main_camera_direction);
 
     // Direction indicator for drone camera
     DCraft::Cube *drone_camera_direction = new DCraft::Cube();
@@ -80,7 +122,7 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     drone_camera_direction->set_scale(glm::vec3(0.05f, 0.05f, 0.5f));
     drone_camera_direction->set_position(0.0f, 0.0f, 1.0f);
     drone_camera_visual_->add(drone_camera_direction);
-    drone_camera_visual_->set_texture("assets/textures/mossy_brick.jpg", DCraft::TextureType::DIFFUSE);
+    drone_camera_direction->set_material(materials_["PLASTIC_GREEN_MATERIAL"]);
     initial_scene->add(drone_camera_visual_);
 
     cube_ = new DCraft::Cube();
@@ -88,7 +130,7 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     cube_->set_rotation(90, glm::vec3(1.0f, 0.0f, 0.0f));
     cube_->set_scale(glm::vec3(5.0f, 5.0f, 5.0f));
     cube_->set_position(0.0f, 1.0f, 0.0f);
-    cube_->set_texture("assets/textures/mossy_brick.jpg", DCraft::TextureType::DIFFUSE);
+    cube_->set_material(materials_["MOSSY_MATERIAL"]);
     initial_scene->add(cube_);
 
     // Plane primitive object
@@ -97,7 +139,7 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     plane->set_position(0, -10, 0);
     plane->set_scale(glm::vec3(100.0f, 100.0f, 100.0f));
     plane->set_rotation(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-    plane->set_texture("assets/textures/brick_pavement.jpg", DCraft::TextureType::DIFFUSE);
+    plane->set_material(materials_["PAVEMENT_MATERIAL"]);
     initial_scene->add(plane);
 
     sm.set_active_scene(initial_scene);

@@ -22,15 +22,16 @@ namespace DCraft
         int nr_channels;
 
         [[nodiscard]]
-        Texture(const std::string& path);
+        Texture(const std::string& path, TextureType type);
         void bind(unsigned int slot = 0);
         void unbind();
-        TextureType type;
 
+        TextureType get_type() const { return type_; }
         uint32_t get_id() { return texture_id_; }
 
     private:
+        TextureType type_;
+        std::string path_;
         uint32_t texture_id_;
     };
 }
-
