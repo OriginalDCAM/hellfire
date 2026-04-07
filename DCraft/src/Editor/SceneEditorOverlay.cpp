@@ -7,7 +7,6 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#include <commdlg.h>
 #endif
 
 #include "DCraft/Addons/ModelLoader.h"
@@ -17,7 +16,7 @@
 #include "DCraft/Graphics/Materials/LambertMaterial.h"
 #include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
-#include "DCraft/Addons/ImportedModel3D.h"
+#include "DCraft/Editor/Components/MenuBarComponent.h"
 
 namespace DCraft::Editor {
     void SceneEditorOverlay::render_object_properties(Object3D *object) const {
@@ -69,7 +68,9 @@ namespace DCraft::Editor {
     }
 
     void SceneEditorOverlay::render() {
-        render_menu_bar();
+        MenuBarComponent menu_bar_component;
+        menu_bar_component.init(scene_manager_, command_history_, current_command_index_);
+        menu_bar_component.render();
 
         ImGui::Begin("Scene Hierarchy");
 
@@ -160,201 +161,6 @@ namespace DCraft::Editor {
             }
 
             ImGui::TreePop();
-        }
-    }
-
-    void SceneEditorOverlay::undo() {
-        if (current_command_index_ >= 0) {
-            command_history_[current_command_index_]->undo();
-            current_command_index_--;
-        }
-    }
-
-    void SceneEditorOverlay::redo() {
-        if (current_command_index_ < command_history_.size() - 1) {
-            current_command_index_++;
-            command_history_[current_command_index_]->execute();
-        }
-    }
-
-    void SceneEditorOverlay::setup_docking_space() {
-        // Set up the dockspace
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-
-        // Make the parent window full-screen
-        ImGuiViewport *viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->Pos);
-        ImGui::SetNextWindowSize(viewport->Size);
-        ImGui::SetNextWindowViewport(viewport->ID);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-                ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-        // Begin the main dockspace window
-        ImGui::Begin("DockSpace", nullptr, window_flags);
-        ImGui::PopStyleVar(2);
-
-        // Add a dockspace inside this window
-        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-
-        // Optional menu bar
-        if (ImGui::BeginMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                // Add menu items
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-
-        // Create your specific windows
-        // These will be dockable into the dockspace
-
-        // Scene Hierarchy window - default to left side
-        ImGui::SetNextWindowDockID(dockspace_id, ImGuiCond_FirstUseEver);
-        ImGui::Begin("Scene Hierarchy");
-        // Scene hierarchy content here
-        ImGui::End();
-
-        // Inspector window - default to right side
-        ImGui::SetNextWindowDockID(dockspace_id, ImGuiCond_FirstUseEver);
-        ImGui::Begin("Inspector");
-        // Inspector content here
-        ImGui::End();
-
-        // End the dockspace window
-        ImGui::End();
-    }
-
-    std::string SceneEditorOverlay::save_file_dialog(const std::string &defaultFilename) {
-        std::string filepath;
-
-#ifdef _WIN32
-        OPENFILENAMEA ofn;
-        CHAR szFile[260] = {0};
-
-        // Pre-populate with default filename if provided
-        if (!defaultFilename.empty()) {
-            strncpy(szFile, defaultFilename.c_str(), sizeof(szFile) - 1);
-        }
-
-        ZeroMemory(&ofn, sizeof(ofn));
-        ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = GetActiveWindow();
-        ofn.lpstrFile = szFile;
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = "Scene Files\0*.json\0All Files\0*.*\0";
-        ofn.nFilterIndex = 1;
-        ofn.lpstrFileTitle = NULL;
-        ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = NULL;
-        ofn.Flags = OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
-        ofn.lpstrDefExt = "json"; // Default extension
-
-        if (GetSaveFileNameA(&ofn) == TRUE) {
-            filepath = ofn.lpstrFile;
-        }
-#else
-        // ImGui fallback
-        ImGui::OpenPopup("Save Scene");
-    
-        if (ImGui::BeginPopupModal("Save Scene", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            static char buf[512] = "";
-        
-            // Initialize with default filename if empty
-            if (buf[0] == '\0' && !defaultFilename.empty()) {
-                strncpy(buf, defaultFilename.c_str(), sizeof(buf) - 1);
-            }
-        
-            ImGui::Text("Enter file path to save scene:");
-            ImGui::InputText("##filepath", buf, 512);
-        
-            if (ImGui::Button("Save", ImVec2(120, 0))) {
-                filepath = buf;
-            
-                // Add .json extension if none
-                if (filepath.find('.') == std::string::npos) {
-                    filepath += ".json";
-                }
-            
-                ImGui::CloseCurrentPopup();
-            }
-        
-            ImGui::SameLine();
-        
-            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-                ImGui::CloseCurrentPopup();
-            }
-        
-            ImGui::EndPopup();
-        }
-#endif
-
-        return filepath;
-    }
-
-    void SceneEditorOverlay::render_menu_bar() {
-        if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Import Model...")) {
-                    std::string filepath = open_file_dialog();
-                    if (!filepath.empty()) {
-                        import_model(filepath);
-                    }
-                }
-                ImGui::Separator();
-                ImGui::EndMenu();
-
-                if (ImGui::MenuItem("Save Scene...")) {
-                    std::string sceneName = scene_manager_.get_active_scene()->get_name();
-                    std::string defaultFilename = sceneName + ".json";
-
-                    std::string filepath = save_file_dialog(sceneName);
-                    if (!filepath.empty()) {
-                        if (scene_manager_.save_scene(filepath, nullptr)) {
-                            std::cout << "Saved scene: " << sceneName << std::endl;
-                        } else {
-                            std::cerr << "FAILED TO SAVE SCENE" << std::endl;
-                        }
-                    }
-                }
-
-                if (ImGui::MenuItem("Load Scene...")) {
-                    std::string filepath = open_file_dialog();
-                    if (!filepath.empty()) {
-                        if (scene_manager_.load_scene(filepath)) {
-                            // Success notification
-                        } else {
-                            // Error handling
-                        }
-                    }
-                }
-            }
-            if (ImGui::BeginMenu("Edit")) {
-                if (ImGui::MenuItem("Undo", "Ctrl+Z", false, current_command_index_ >= 0)) {
-                    undo();
-                }
-                if (ImGui::MenuItem("Redo", "Ctrl+Y", false,
-                                    current_command_index_ < command_history_.size() - 1)) {
-                    redo();
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-        }
-    }
-
-
-    void SceneEditorOverlay::import_model(const std::string &filepath) {
-        auto model = Addons::ModelLoader::load(filepath, scene_manager_.get_active_scene());
-
-        if (model) {
-            // Position the model at a visible location
-            model->set_position(glm::vec3(0.0f, 1.0f, 5.0f));
-
-            scene_manager_.get_active_scene()->add(model);
         }
     }
 
@@ -462,7 +268,12 @@ namespace DCraft::Editor {
             } else {
                 ImGui::Text("No texture");
                 if (ImGui::Button("Add Texture...")) {
-                    std::string filepath = open_file_dialog();
+                    std::vector<Utility::FileFilter> scene_filters = {
+                        {"Texture Files", "*.png;*.jpg;*.jpeg"},
+                        {"All Files", "*.*"}
+                    };
+                    
+                    std::string filepath = Utility::FileDialog::open_file(scene_filters);
                     // TODO: Make this support multiple textures and not only diffuse
                     lambert->set_texture(filepath, TextureType::DIFFUSE);
                 }
@@ -536,48 +347,6 @@ namespace DCraft::Editor {
         ImGui::End();
     }
 
-    std::string SceneEditorOverlay::open_file_dialog() const {
-        std::string filepath;
-
-#ifdef _WIN32
-        OPENFILENAMEA ofn;
-        CHAR szFile[260] = {0};
-        ZeroMemory(&ofn, sizeof(ofn));
-        ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = GetActiveWindow();
-        ofn.lpstrFile = szFile;
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = "Model Files\0*.obj;*.fbx;*.dae;*.gltf\0All Files\0*.*\0";
-        ofn.nFilterIndex = 1;
-        ofn.lpstrFileTitle = NULL;
-        ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = NULL;
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-
-        if (GetOpenFileNameA(&ofn) == TRUE) {
-            filepath = ofn.lpstrFile;
-        }
-#else
-        ImGui::OpenPopup("File path input");
-
-        if (ImGui::BeginPopupModal("File path input", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            static char buf[512] = "assets/models/";
-            ImGui::InputText("Path to model file", buf, 512);
-
-            if (ImGui::Button("OK", ImVec2(120, 0))) {
-                filepath = buf;
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-#endif
-
-        return filepath;
-    }
 
     void SceneEditorOverlay::render_mesh_properties(Mesh *mesh) const {
     }

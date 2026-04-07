@@ -60,13 +60,14 @@ namespace DCraft
 
     void Scene::set_active_camera(Camera* camera)
     {
-        if (std::find(cameras_.begin(), cameras_.end(), camera) != cameras_.end())
-        {
+        if (camera) {
+            // Add camera to the list if it's not there already
+            if (std::find(cameras_.begin(), cameras_.end(), camera) == cameras_.end()) {
+                cameras_.push_back(camera);
+            }
             active_camera_ = camera;
         }
     }
-
-
 
     void Scene::destroy_camera(Camera* camera)
     {

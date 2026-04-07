@@ -10,10 +10,10 @@
 namespace DCraft {
     void PhongMaterial::bind(void *renderer_context) {
         StandardMaterial::bind(renderer_context);
-        // Set Phong-specific uniforms
 
         uint32_t shader_program = get_shader();
-        
+
+        // Set Phong-specific uniforms
         glUniform3fv(glGetUniformLocation(shader_program, "ambientColor"), 1, glm::value_ptr(ambient_color_));
         glUniform3fv(glGetUniformLocation(shader_program, "diffuseColor"), 1, glm::value_ptr(diffuse_color_));
         glUniform3fv(glGetUniformLocation(shader_program, "specularColor"), 1, glm::value_ptr(specular_color_));

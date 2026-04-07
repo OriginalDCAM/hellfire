@@ -50,6 +50,12 @@ namespace DCraft {
         get_mesh()->draw();
     }
 
+    json Shape3D::to_json() {
+        json j = Object3D::to_json();
+        j["type"] = "Shape3D";
+        return j;
+    }
+
     void Shape3D::set_vertices() {
     }
 

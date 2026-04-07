@@ -26,25 +26,11 @@ namespace DCraft::Editor {
         std::vector<std::unique_ptr<EditorCommand>> command_history_;
         int current_command_index_ = -1;
 
-        void undo();
-
-        void redo();
-
-        void setup_docking_space();
-
-        std::string save_file_dialog(const std::string& str);
-
-        void render_menu_bar();
-
         void render_light_properties(Light * light) const;
         void render_camera_properties(Camera * camera) const;
         void render_shape_properties(Shape3D * shape) const;
 
-        std::string open_file_dialog() const;
-
         void render_mesh_properties(Mesh * mesh) const;
-
-        void import_model(const std::string& filepath);
 
         void render_object_properties(Object3D * object) const;
         

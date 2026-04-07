@@ -59,19 +59,12 @@ namespace DCraft {
     }
 
     json Cube::to_json() {
-        json j = Object3D::to_json();
+        json j = Shape3D::to_json();
         j["geometry"] = "cube";
         return j;
     }
 
     void Cube::update(float dt) {
-        // Get the current rotation angle in degrees (convert from radians)
-        // float current_degrees = get_rotation_angle() * 180.0f / glm::pi<float>();
-        // current_degrees += 40.0f * dt;
-        // float movement_speed = 2.0f;
-        // float movement_amount = movement_speed * dt;
-        // Set the new rotation (this will convert back to radians internally)
-        // set_position(get_position() + glm::vec3(movement_amount, 0.0, 0.0));
-        // set_rotation(current_degrees, glm::vec3(1.0, 1.0, 0.0));
+
     }
 }

@@ -18,6 +18,10 @@ namespace DCraft {
         // Scene creation and loading
         void create_default_scene();
 
+        Object3D* deserialize_node(const json& obj_data);
+
+        Material *deserialize_material(const json &material_data);
+
         bool load_scene(const std::string &filename);
 
         bool save_scene(const std::string &filename, Scene *scene);

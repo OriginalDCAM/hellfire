@@ -10,21 +10,11 @@
 namespace DCraft {
     class LambertMaterial : public OGL::StandardMaterial {
     public:
+        LambertMaterial();
         LambertMaterial(const std::string& name) : StandardMaterial(name) {}
-
-        void set_ambient_color(const glm::vec3& color) { ambient_color_ = color; }
-        void set_diffuse_color(const glm::vec3& color) { diffuse_color_ = color; }
-
         void bind(void* renderer_context) override;
-
-        glm::vec3 get_ambient_color() const { return  ambient_color_; };
-
-        glm::vec3 get_diffuse_color() const { return  diffuse_color_; };
-
-
     private:
-        glm::vec3 ambient_color_ = glm::vec3(0.1f);
-        glm::vec3 diffuse_color_ = glm::vec3(1.0f);
+
 
         void on_diffuse_texture_set(Texture *texture) override { has_diffuse_texture_ = true; }
 

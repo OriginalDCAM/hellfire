@@ -8,6 +8,7 @@
 namespace DCraft {
     class DirectionalLight : public Light {
     public:
+        DirectionalLight() = default;
         DirectionalLight(const std::string &name = "DirectionalLight");
 
         void set_direction(const glm::vec3 &dir);

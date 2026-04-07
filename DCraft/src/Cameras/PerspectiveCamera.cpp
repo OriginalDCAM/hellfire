@@ -58,6 +58,8 @@ namespace DCraft
         update_camera_vectors();
     }
 
+
+
     glm::vec3 PerspectiveCamera::get_target() {
         return target_;
     }

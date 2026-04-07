@@ -10,6 +10,7 @@ namespace DCraft {
 
     json Light::to_json() {
         json j = Object3D::to_json();
+        j["type"] = "Light";
         j["color"] = { color.r, color.g, color.b };
         j["intensity"] = intensity;
         return j;

@@ -219,7 +219,7 @@ namespace DCraft {
         // Application render
         renderer_->begin_frame();
 
-        renderer_->render(*scene_manager_.get_root_node(), *scene_manager_.get_active_camera());
+        renderer_->render(*scene_manager_.get_active_scene(), *scene_manager_.get_active_scene()->get_active_camera());
 
         renderer_->end_frame();
 

@@ -8,7 +8,7 @@ using json = nlohmann::json;
 
 namespace DCraft {
     class Object3D;
-    
+
     class Transform3D {
     public:
         Transform3D()
@@ -52,13 +52,6 @@ namespace DCraft {
 
         glm::vec3 get_scale() const { return scale_; }
 
-        // Rotation methods
-        void set_rotation(const float degrees, const glm::vec3 &new_axis) {
-            rotation_angle_ = degrees * glm::pi<float>() / 180;
-            rotation_axis_ = new_axis;
-            update_local_matrix();
-        }
-
         void set_rotation(glm::vec3 &angles);
 
         void set_rotation_quaternion(const glm::quat &q);
@@ -92,6 +85,7 @@ namespace DCraft {
         const glm::mat4 &get_local_matrix() const { return local_matrix_; }
         const glm::mat4 &get_world_matrix() const { return world_matrix_; }
 
+
         void update_local_matrix() {
             local_matrix_ = glm::mat4(1.0f);
 
@@ -103,11 +97,13 @@ namespace DCraft {
 
             if (use_rotation_matrix_) {
                 local_matrix_ = local_matrix_ * rotation_matrix_;
+                
+                // Extract and store euler angles for consistency
+                extract_euler_angles_(rotation_matrix_, rotation_x_, rotation_y_, rotation_z_);
             } else if (use_euler_angles_) {
                 glm::mat4 rot_x = glm::rotate(glm::mat4(1.0f), rotation_x_, glm::vec3(1, 0, 0));
                 glm::mat4 rot_y = glm::rotate(glm::mat4(1.0f), rotation_y_, glm::vec3(0, 1, 0));
                 glm::mat4 rot_z = glm::rotate(glm::mat4(1.0f), rotation_z_, glm::vec3(0, 0, 1));
-
                 // Combine rotations
                 glm::mat4 rotation_matrix = rot_z * rot_y * rot_x;
 
@@ -157,7 +153,7 @@ namespace DCraft {
         json to_json() {
             json j;
             j["position"] = {position_.x, position_.y, position_.z};
-            j["rotation"] = {rotation_x_, rotation_y_, rotation_z_};
+            j["rotation"] = {get_rotation().x, get_rotation().y, get_rotation().z};
             j["scale"] = {scale_.x, scale_.y, scale_.z};
 
             return j;
@@ -185,5 +181,7 @@ namespace DCraft {
         float rotation_y_ = 0.0f;
         float rotation_z_ = 0.0f;
         bool use_euler_angles_ = false;
+
+        void extract_euler_angles_(const glm::mat4 &rotation_matrix, float &x, float &y, float &z);
     };
 }
