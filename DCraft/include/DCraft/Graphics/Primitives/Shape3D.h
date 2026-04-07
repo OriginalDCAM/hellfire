@@ -5,7 +5,7 @@
 namespace DCraft
 {
 
-    class Shape : public Object3D
+    class Shape3D : public Object3D
     {
     public:
         // Texture Management
@@ -28,11 +28,13 @@ namespace DCraft
         bool is_wireframe_mode() const;
 
         // Collision detection helpers
-        bool intersects(const Shape& other) const;
+        bool intersects(const Shape3D& other) const;
         float get_bounding_radius();
 
         // Rebuild the Geometry
         void rebuild();
+
+        void draw_self(const glm::mat4 &view, const glm::mat4 &projection, uint32_t shader_program) override;
     
     protected:
         virtual void set_vertices();

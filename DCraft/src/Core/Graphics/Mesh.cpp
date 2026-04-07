@@ -7,6 +7,10 @@
 #include "DCraft/Graphics/Materials/Material.h"
 
 namespace DCraft {
+    Mesh::Mesh() {
+        
+    }
+
     Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices,
                std::vector<Texture *> &textures) : vertices(vertices), indices(indices), textures(textures) {
         create_mesh();
@@ -57,7 +61,7 @@ namespace DCraft {
     // Implement this, Claude don't give me the implementation please would like to do this myself.
     // }
 
-    void Mesh::draw_mesh(uint32_t shader_program) const {
+    void Mesh::draw(uint32_t shader_program) const {
         VAO->bind();
 
         uint32_t diffuse_nr = 1;

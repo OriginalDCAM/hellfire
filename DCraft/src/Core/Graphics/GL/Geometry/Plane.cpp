@@ -28,32 +28,10 @@ Plane::Plane()
     }
 
     Mesh planeMesh(vertices_data, indices_data, texture_data);
-
-    get_model()->add_mesh(planeMesh);
+    add_mesh(planeMesh);
 	
-	get_model()->transform = glm::mat4(1.0f);
-    world_matrix_ = glm::mat4(1.0f);
-
-    update_model_matrix();
+    update_world_matrix();
 }
-
-void Plane::draw_self(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program)
-{
-    glm::mat4 mvp = projection * view * get_world_matrix();
-
-    unsigned int mvpLoc = glGetUniformLocation(shader_program, "MVP");
-    glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
-
-    if (!get_model()->meshes.empty())
-    {
-	    for (auto& mesh: get_model()->meshes)
-	    {
-            mesh.draw_mesh(shader_program);
-	    }
-    }
-
-}
-
 
 void Plane::update(float dt)
 {

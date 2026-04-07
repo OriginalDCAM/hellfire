@@ -1,11 +1,11 @@
 #pragma once
-#include "Shape.h"
+#include "Shape3D.h"
 #include "DCraft/Structs/Object3D.h"
 
 namespace DCraft
 {
 
-    class Cube : public Shape
+    class Cube : public Shape3D
     {
         const std::vector<float> vertices = {
             // Front face
@@ -152,8 +152,6 @@ namespace DCraft
 
     public:
         Cube();
-
-        void draw_self(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program) override;
 
         void update(float dt) override;
     };
