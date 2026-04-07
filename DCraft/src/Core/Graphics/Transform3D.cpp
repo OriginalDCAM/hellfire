@@ -24,7 +24,7 @@ namespace DCraft {
         update_local_matrix();
     }
 
-    void Transform3D::set_rotation(glm::vec3 &angles) {
+    void Transform3D::set_rotation(const glm::vec3 &angles) {
         rotation_x_ = glm::radians(angles.x);
         rotation_y_ = glm::radians(angles.y);
         rotation_z_ = glm::radians(angles.z);

@@ -1,68 +1,130 @@
-#include "Dcraft/Graphics/Primitives/Cube.h"
-
+#include "Dcraft/Graphics/Geometry/Cube.h"
 #include <iostream>
-#include <glm/gtc/type_ptr.inl>
+#include <glm/glm.hpp>
+
+#include "DCraft/Components/RenderableComponent.h"
+#include "DCraft/Graphics/Mesh.h"
 
 namespace DCraft {
-    Cube::Cube(const std::string& name) : MeshRenderer(name) {
-        std::vector<Vertex> vertices_data;
-        std::vector<unsigned int> indices_data;
-        std::vector<Texture *> texture_data = {};
+// Static geometry data
+    const std::vector<float> Cube::vertices_ = {
+        // Front face (Z+)
+        -1.0f, -1.0f,  1.0f,   // 0: bottom-left
+         1.0f, -1.0f,  1.0f,   // 1: bottom-right  
+         1.0f,  1.0f,  1.0f,   // 2: top-right
+        -1.0f,  1.0f,  1.0f,   // 3: top-left
+        
+        // Back face (Z-)
+        -1.0f, -1.0f, -1.0f,   // 4: bottom-left
+         1.0f, -1.0f, -1.0f,   // 5: bottom-right
+         1.0f,  1.0f, -1.0f,   // 6: top-right  
+        -1.0f,  1.0f, -1.0f,   // 7: top-left
+        
+        // Left face (X-)
+        -1.0f, -1.0f, -1.0f,   // 8: bottom-back
+        -1.0f, -1.0f,  1.0f,   // 9: bottom-front
+        -1.0f,  1.0f,  1.0f,   // 10: top-front
+        -1.0f,  1.0f, -1.0f,   // 11: top-back
+        
+        // Right face (X+)
+         1.0f, -1.0f, -1.0f,   // 12: bottom-back
+         1.0f, -1.0f,  1.0f,   // 13: bottom-front
+         1.0f,  1.0f,  1.0f,   // 14: top-front
+         1.0f,  1.0f, -1.0f,   // 15: top-back
+        
+        // Bottom face (Y-)
+        -1.0f, -1.0f, -1.0f,   // 16: back-left
+         1.0f, -1.0f, -1.0f,   // 17: back-right
+         1.0f, -1.0f,  1.0f,   // 18: front-right
+        -1.0f, -1.0f,  1.0f,   // 19: front-left
+        
+        // Top face (Y+)
+        -1.0f,  1.0f, -1.0f,   // 20: back-left
+         1.0f,  1.0f, -1.0f,   // 21: back-right
+         1.0f,  1.0f,  1.0f,   // 22: front-right
+        -1.0f,  1.0f,  1.0f    // 23: front-left
+    };
 
-        // Create the cube's vertex data
+    const std::vector<float> Cube::uvs_ = {
+        // Front face
+        0.0f, 0.0f,  1.0f, 0.0f,  1.0f, 1.0f,  0.0f, 1.0f,
+        // Back face
+        1.0f, 0.0f,  0.0f, 0.0f,  0.0f, 1.0f,  1.0f, 1.0f,
+        // Left face
+        0.0f, 0.0f,  1.0f, 0.0f,  1.0f, 1.0f,  0.0f, 1.0f,
+        // Right face
+        1.0f, 0.0f,  0.0f, 0.0f,  0.0f, 1.0f,  1.0f, 1.0f,
+        // Bottom face
+        0.0f, 1.0f,  1.0f, 1.0f,  1.0f, 0.0f,  0.0f, 0.0f,
+        // Top face
+        0.0f, 0.0f,  1.0f, 0.0f,  1.0f, 1.0f,  0.0f, 1.0f
+    };
+
+    const std::vector<unsigned int> Cube::indices_ = {
+        // Front face
+        0,  1,  2,    2,  3,  0,
+        // Back face  
+        4,  5,  6,    6,  7,  4,
+        // Left face
+        8,  9,  10,   10, 11, 8,
+        // Right face
+        12, 13, 14,   14, 15, 12,
+        // Bottom face
+        16, 17, 18,   18, 19, 16,
+        // Top face
+        20, 21, 22,   22, 23, 20
+    };
+
+    Entity* Cube::create(const std::string& name, const glm::vec3& color) {
+        // Create the entity
+        auto* entity = new Entity(name);
+        
+        // Add renderable component
+        auto* renderable = entity->add_component<RenderableComponent>();
+        
+        // Generate cube mesh data
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        get_cube_data(vertices, indices, color);
+        
+        // Create and set mesh
+        auto mesh = std::make_shared<Mesh>(vertices, indices);
+        renderable->set_mesh(mesh);
+        
+        // Update world matrices
+        entity->update_world_matrices();
+        
+        return entity;
+    }
+    
+    void Cube::get_cube_data(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 
+                            const glm::vec3& color) {
+        vertices.clear();
+        indices.clear();
+        
+        vertices.reserve(24); // 6 faces * 4 vertices each
+        indices.assign(indices_.begin(), indices_.end());
+        
+        // Create vertex data
         for (size_t i = 0; i < 24; ++i) {
             Vertex v;
-            v.position = glm::vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
-            v.color = glm::vec3(color_);
-
-            // Determine which face this vertex belongs to
+            v.position = glm::vec3(vertices_[i * 3], vertices_[i * 3 + 1], vertices_[i * 3 + 2]);
+            v.color = color;
+            
+            // Determine face and assign normal
             int face = i / 4;
-
-            // Assign the normal based on the face
             switch (face) {
-                case 0: v.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-                    break; // Front face (+Z)
-                case 1: v.normal = glm::vec3(0.0f, 0.0f, -1.0f);
-                    break; // Back face (-Z)
-                case 2: v.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-                    break; // Top face (+Y)
-                case 3: v.normal = glm::vec3(0.0f, -1.0f, 0.0f);
-                    break; // Bottom face (-Y)
-                case 4: v.normal = glm::vec3(1.0f, 0.0f, 0.0f);
-                    break; // Right face (+X)
-                case 5: v.normal = glm::vec3(-1.0f, 0.0f, 0.0f);
-                    break; // Left face (-X)
+                case 0: v.normal = glm::vec3(0.0f, 0.0f, 1.0f);  break; // Front face (+Z)
+                case 1: v.normal = glm::vec3(0.0f, 0.0f, -1.0f); break; // Back face (-Z)
+                case 2: v.normal = glm::vec3(-1.0f, 0.0f, 0.0f); break; // Left face (-X)
+                case 3: v.normal = glm::vec3(1.0f, 0.0f, 0.0f);  break; // Right face (+X)
+                case 4: v.normal = glm::vec3(0.0f, -1.0f, 0.0f); break; // Bottom face (-Y)
+                case 5: v.normal = glm::vec3(0.0f, 1.0f, 0.0f);  break; // Top face (+Y)
+                default: v.normal = glm::vec3(0.0f, 1.0f, 0.0f); break;
             }
-
-            v.texCoords = glm::vec2(uvs[i * 2], uvs[i * 2 + 1]);
-            vertices_data.push_back(v);
+            
+            v.texCoords = glm::vec2(uvs_[i * 2], uvs_[i * 2 + 1]);
+            vertices.push_back(v);
         }
-
-        indices_data.reserve(std::size(cube_elements));
-
-        for (size_t i = 0; i < std::size(cube_elements); ++i) {
-            indices_data.push_back(static_cast<unsigned int>(cube_elements[i]));
-        }
-
-        if (has_texture()) {
-            texture_data.push_back(get_texture());
-        }
-
-        // Create mesh and add to the model
-        Mesh* cubeMesh = new Mesh(vertices_data, indices_data);
-        set_mesh(cubeMesh);
-
-        // Initialize transformations
-        update_world_matrix();
-    }
-
-    json Cube::to_json() {
-        json j = MeshRenderer::to_json();
-        j["geometry"] = "cube";
-        return j;
-    }
-
-    void Cube::update(float dt) {
-
     }
 }

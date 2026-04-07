@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" addBOMForNewFiles="with BOM under Windows, with no BOM otherwise">
-    <file url="file://$PROJECT_DIR$/Sandbox/assets/shaders/skybox.frag" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Sandbox/assets/shaders/skybox.vert" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Sandbox/assets/shaders/test.frag" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Sandbox/assets/Shaders/Custom/sun.frag" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Sandbox/assets/Shaders/Custom/sun.vert" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Sandbox/assets/Shaders/skybox.frag" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Sandbox/assets/Shaders/skybox.vert" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Sandbox/assets/Shaders/test.frag" charset="UTF-8" />
   </component>
 </project>
