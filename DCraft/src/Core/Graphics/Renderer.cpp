@@ -49,8 +49,6 @@ namespace DCraft {
         glDepthFunc(GL_LESS);
 
         glDisable(GL_CULL_FACE);
-        glCullFace(GL_NONE);
-        glFrontFace(GL_CCW);
 
         skybox_renderer_.initialize();
     }
@@ -229,7 +227,6 @@ namespace DCraft {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glDisable(GL_BLEND);
-
         
         glDisable(GL_CULL_FACE);
 

@@ -5,7 +5,7 @@
 #include "Game.h"
 
 int main(int argc, char **argv) {
-    DCraft::Application app(800, 600, "Final assignment :)");
+    DCraft::Application app(800, 600, "Custom Engine - Hellfire");
     Game game;
 
     // Hook up the application callbacks into the game class

@@ -33,11 +33,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="556e4ab8-241b-4e6b-b84d-6223cac85f81" name="Changes" comment="- Added sponza as a test scene to the examples">
+    <list default="true" id="556e4ab8-241b-4e6b-b84d-6223cac85f81" name="Changes" comment="- Fixed an issue with uniforms">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Material.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Material.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderers/MaterialRenderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderers/MaterialRenderer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scenes/SponzaScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SponzaScene.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vendor/imguizmo" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/imguizmo" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -217,7 +218,7 @@
       <workItem from="1755931109105" duration="3578000" />
       <workItem from="1756284726439" duration="1285000" />
       <workItem from="1756362729565" duration="13416000" />
-      <workItem from="1756922209871" duration="4179000" />
+      <workItem from="1756922209871" duration="6074000" />
     </task>
     <task id="LOCAL-00001" summary="- Added sponza as a test scene to the examples">
       <option name="closed" value="true" />
@@ -227,7 +228,15 @@
       <option name="project" value="LOCAL" />
       <updated>1756925390534</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="- Fixed an issue with uniforms">
+      <option name="closed" value="true" />
+      <created>1756926465099</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1756926465099</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -240,7 +249,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="- Added sponza as a test scene to the examples" />
-    <option name="LAST_COMMIT_MESSAGE" value="- Added sponza as a test scene to the examples" />
+    <MESSAGE value="- Fixed an issue with uniforms" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Fixed an issue with uniforms" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
