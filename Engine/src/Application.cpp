@@ -13,7 +13,8 @@ namespace hellfire {
         window_info_.aspect_ratio = static_cast<float>(width) / height;
     }
 
-    Application::~Application() {}
+    Application::~Application() {
+    }
 
     Shader *Application::ensure_fallback_shader() {
         try {
@@ -82,9 +83,6 @@ namespace hellfire {
             throw std::runtime_error("Failed to initialize GLEW");
         }
 
-        // Initialize ImGui
-        initialize_imgui();
-
         // Register services
         ServiceLocator::register_service<Renderer>(&renderer_);
         ServiceLocator::register_service<InputManager>(input_manager_.get());
@@ -97,6 +95,10 @@ namespace hellfire {
         // Create fallback shader
         Shader *fallback = ensure_fallback_shader();
         renderer_.set_fallback_shader(*fallback);
+
+        call_plugins([this](IApplicationPlugin &plugin) {
+            plugin.on_initialize(*this);
+        });
 
         // Load initial scene
         if (callbacks_.setup) {
@@ -131,6 +133,10 @@ namespace hellfire {
     }
 
     void Application::on_render() {
+        // Plugin begin_frame
+        call_plugins([](IApplicationPlugin &plugin) {
+            plugin.on_begin_frame();
+        });
         renderer_.begin_frame();
 
         if (auto *active_scene = scene_manager_.get_active_scene()) {
@@ -142,12 +148,28 @@ namespace hellfire {
             callbacks_.render();
         }
 
+        // Plugin render
+        call_plugins([](IApplicationPlugin &plugin) {
+            plugin.on_render();
+        });
+
         renderer_.end_frame();
+
+        // Plugin end_frame
+        call_plugins([](IApplicationPlugin &plugin) {
+            plugin.on_end_frame();
+        });
         window_->swap_buffers();
     }
 
     void Application::on_key_down(int key) {
-        input_manager_->on_key_down(key);
+        bool consumed = call_plugins_until_consumed([key](IApplicationPlugin &plugin) {
+            return plugin.on_key_down(key);
+        });
+
+        if (!consumed) {
+            input_manager_->on_key_down(key);
+        }
     }
 
     void Application::on_key_up(int key) {
@@ -155,7 +177,13 @@ namespace hellfire {
     }
 
     void Application::on_mouse_button(int button, bool pressed) {
-        IWindowEventHandler::on_mouse_button(button, pressed);
+        bool consumed = call_plugins_until_consumed([button, pressed](IApplicationPlugin &plugin) {
+            return plugin.on_mouse_button(button, pressed);
+        });
+
+        if (!consumed) {
+            IWindowEventHandler::on_mouse_button(button, pressed);
+        }
     }
 
     bool Application::handle_first_mouse_movement(float x, float y) {
@@ -179,6 +207,12 @@ namespace hellfire {
     }
 
     void Application::on_mouse_move(float x, float y) {
+        bool consumed = call_plugins_until_consumed([x, y](IApplicationPlugin &plugin) {
+            return plugin.on_mouse_move(x, y);
+        });
+
+        if (consumed) return;
+
         input_manager_->on_mouse_move(x, y);
 
         if (handle_first_mouse_movement(x, y)) return;
@@ -212,6 +246,10 @@ namespace hellfire {
         for (const auto &camera: scene_manager_.get_camera_entities()) {
             camera->get_component<CameraComponent>()->set_aspect_ratio(window_info_.aspect_ratio);
         }
+
+        call_plugins([width, height](IApplicationPlugin &plugin) {
+            plugin.on_window_resize(width, height);
+        });
     }
 
     void Application::update_delta_time() {
@@ -220,16 +258,5 @@ namespace hellfire {
         last_frame_time_ = current_time;
     }
 
-    void Application::initialize_imgui() {
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO &io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-        ImGui::StyleColorsDark();
-
-        // Initialize GLFW + OpenGL3 backends
-        ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow *>(window_->get_native_handle()), true);
-        ImGui_ImplOpenGL3_Init("#version 330");
-    }
 }

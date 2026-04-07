@@ -1,0 +1,207 @@
+﻿//
+// Created by denzel on 23/09/2025.
+//
+#include "EditorPlugin.h"
+
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include "DCraft/Application.h"
+#include "DCraft/IWindow.h"
+#include "DCraft/Utility/ServiceLocator.h"
+#include "DCraft/Window/GLFWWindow.h"
+
+namespace hellfire::editor {
+    void EditorPlugin::on_initialize(Application &app) {
+        app_ = &app;
+        app_->get_window_info().should_warp_cursor = false;
+
+        auto *window = ServiceLocator::get_service<IWindow>();
+        if (!window) {
+            throw std::runtime_error("EditorPlugin: No window service available");
+        }
+
+        initialize_imgui(window);
+    }
+
+    void EditorPlugin::initialize_imgui(IWindow *window) {
+        // Setup ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+
+        // Enable docking and multi-viewport
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+        // Setup style
+        ImGui::StyleColorsDark();
+
+        ImGuiStyle &style = ImGui::GetStyle();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            style.WindowRounding = 0.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        }
+
+        GLFWwindow *glfw_window = static_cast<GLFWwindow *>(window->get_native_handle());
+        if (!glfw_window) {
+            throw std::runtime_error("EditorPlugin: Could not get GLFW window handle");
+        }
+
+        // Setup Platform/Renderer backends
+        ImGui_ImplGlfw_InitForOpenGL(glfw_window, true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+
+        imgui_initialized_ = true;
+    }
+
+    EditorPlugin::~EditorPlugin() {
+        cleanup_imgui();
+    }
+
+    void EditorPlugin::cleanup_imgui() {
+        if (imgui_initialized_) {
+            ImGui_ImplOpenGL3_Shutdown();
+            ImGui_ImplGlfw_Shutdown();
+            ImGui::DestroyContext();
+            imgui_initialized_ = false;
+        }
+    }
+
+    void EditorPlugin::on_begin_frame() {
+        if (!imgui_initialized_) return;
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
+
+    void EditorPlugin::on_end_frame() {
+        if (!imgui_initialized_) return;
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Handle multi-viewport
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            GLFWwindow *backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+    }
+
+    void EditorPlugin::on_render() {
+        if (!imgui_initialized_) return;
+
+        // Create main dockspace
+        create_dockspace();
+
+        if (show_demo_) {
+            ImGui::ShowDemoWindow(&show_demo_);
+        }
+
+        render_test_windows();
+    }
+
+    void EditorPlugin::render_test_windows() {
+        // Test window 3 - Game Viewport
+        if (ImGui::Begin("Game Viewport")) {
+            ImVec2 size = ImGui::GetContentRegionAvail();
+            if (size.x > 0 && size.y > 0) {
+                // Draw a simple placeholder
+                ImDrawList *draw_list = ImGui::GetWindowDrawList();
+                ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+                ImVec2 canvas_size = ImGui::GetContentRegionAvail();
+
+                draw_list->AddRectFilled(canvas_pos,
+                                         ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y),
+                                         IM_COL32(50, 50, 50, 255));
+                draw_list->AddRect(canvas_pos,
+                                   ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y),
+                                   IM_COL32(255, 255, 255, 255));
+
+                ImGui::InvisibleButton("canvas", canvas_size);
+            }
+        }
+        ImGui::End();
+    }
+
+    void EditorPlugin::create_dockspace() {
+        ImGuiViewport *viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+        ImGui::SetNextWindowViewport(viewport->ID);
+
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+                                        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                                        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                        ImGuiWindowFlags_NoNavFocus;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+        ImGui::Begin("DockSpace", nullptr, window_flags);
+        ImGui::PopStyleVar(3);
+
+        // Create dockspace
+        ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
+        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+
+        ImGui::End();
+    }
+
+    bool EditorPlugin::on_key_down(int key) {
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard) {
+            return true; // ImGui consumed the input
+        }
+
+        return false;
+    }
+
+    bool EditorPlugin::on_key_up(int key) {
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard) {
+            return true; // ImGui consumed the input
+        }
+
+        return false;
+    }
+
+    bool EditorPlugin::on_mouse_button(int button, bool pressed) {
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureMouse) {
+            return true;
+        }
+
+        return false;
+    }
+
+    bool EditorPlugin::on_mouse_move(float x, float y) {
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureMouse) {
+            return true;
+        }
+
+        return false;
+    }
+
+    bool EditorPlugin::on_mouse_wheel(float delta) {
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureMouse) {
+            return true;
+        }
+
+        return false;
+    }
+
+    void EditorPlugin::on_window_resize(int width, int height) {
+        IApplicationPlugin::on_window_resize(width, height);
+    }
+
+    void EditorPlugin::on_window_focus(bool focused) {
+        IApplicationPlugin::on_window_focus(focused);
+    }
+}
