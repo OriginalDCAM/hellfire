@@ -64,7 +64,7 @@ namespace hellfire {
         void clear_cache();
 
         ~ShaderManager() {
-            clear_cache();
+            // clear_cache();
         }
         
         // Get all compiled shader IDs (for cleanup in Application)
