@@ -7,9 +7,9 @@
     <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="15" type="long" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
   </component>
-  <component name="CMakePresetLoader"><![CDATA[{
-  "useNewFormat": true
-}]]></component>
+  <component name="CMakePresetLoader">{
+  &quot;useNewFormat&quot;: true
+}</component>
   <component name="CMakeProjectFlavorService">
     <option name="flavorId" value="CMakePlainProjectFlavor" />
   </component>
@@ -32,19 +32,17 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="762fe770-3d52-496e-84d4-7a5060a0c66b" name="Changes" comment="">
+    <list default="true" id="762fe770-3d52-496e-84d4-7a5060a0c66b" name="Changes" comment="- Final commit">
       <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/cmake.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/final_assignment_computer_graphics.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeSettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeSettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/include/Scripts/PlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Scripts/PlayerController.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scripts/PlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scripts/PlayerController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeSettings.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/vendor/imguizmo" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/imguizmo" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -59,54 +57,54 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "OriginalDCAM"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;OriginalDCAM&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "git@github.com:OriginalDCAM/final_assignment_computer_graphics.git",
-    "accountId": "188d7b98-3f65-4422-961d-7761810a980f"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:OriginalDCAM/final_assignment_computer_graphics.git&quot;,
+    &quot;accountId&quot;: &quot;188d7b98-3f65-4422-961d-7761810a980f&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
     <option name="majorVersion" value="2025" />
     <option name="minorVersion" value="2" />
     <option name="productBranch" value="Classic" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="31QfvwcsWViih5LUiErO3QkQHa8" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "CMake Application.Sandbox.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.RadMigrateCodeStyle": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.west.config.association.type.startup.service": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "new__ui__overhaul",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;CMake Application.Sandbox.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.west.config.association.type.startup.service&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;new__ui__overhaul&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="CMake Application.Sandbox">
     <configuration name="DCraft" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="DCraft" CONFIG_NAME="Debug">
       <method v="2">
@@ -119,11 +117,6 @@
       </method>
     </configuration>
     <configuration name="UpdateAssimpLibsDebugSymbolsAndDLLs" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="UpdateAssimpLibsDebugSymbolsAndDLLs" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -144,11 +137,11 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="CMake Application.imgui" />
       <item itemvalue="CMake Application.DCraft" />
       <item itemvalue="CMake Application.Sandbox" />
       <item itemvalue="CMake Application.UpdateAssimpLibsDebugSymbolsAndDLLs" />
       <item itemvalue="CMake Application.assimp" />
+      <item itemvalue="CMake Application.imgui" />
       <item itemvalue="CMake Application.zlibstatic" />
     </list>
   </component>
@@ -159,8 +152,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1755461451747</updated>
-      <workItem from="1755461453305" duration="2520000" />
+      <workItem from="1755461453305" duration="2601000" />
     </task>
+    <task id="LOCAL-00001" summary="- Final commit">
+      <option name="closed" value="true" />
+      <created>1755464002208</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1755464002208</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -170,5 +172,9 @@
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
     <isAutomaticReloadCMake value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="- Final commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Final commit" />
   </component>
 </project>
