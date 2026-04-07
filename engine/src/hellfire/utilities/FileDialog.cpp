@@ -4,16 +4,19 @@
 
 #include "hellfire/utilities/FileDialog.h"
 
+#include <filesystem>
 #include <imgui.h>
+#include <iostream>
 #ifdef _WIN32
 #include <windows.h>
 #include <commdlg.h>
-#include <shobjidl.h>  
-#include <shlobj.h> 
+#include <shobjidl.h>
+#include <shlobj.h>
 #endif
 
 namespace hellfire::Utility {
-    std::string FileDialog::win32_open_file(const std::vector<FileFilter> &filters) {
+    std::string FileDialog::win32_open_file(const std::vector<FileFilter> &filters,
+                                            const std::filesystem::path &default_path) {
         std::string filepath;
 
         OPENFILENAMEA ofn;
@@ -41,28 +44,47 @@ namespace hellfire::Utility {
 
         ofn.lpstrFilter = filterBuf.data();
         ofn.nFilterIndex = 1;
-        ofn.lpstrFileTitle = NULL;
+        ofn.lpstrFileTitle = nullptr;
         ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = NULL;
+        ofn.lpstrInitialDir = nullptr;
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-
+        
+        std::string initialDir;
+        if (!default_path.empty()) {
+            initialDir = default_path.string();
+            std::ranges::replace(initialDir, '/', '\\');
+            ofn.lpstrInitialDir = initialDir.c_str();
+        }
+        
         if (GetOpenFileNameA(&ofn) == TRUE) {
             filepath = ofn.lpstrFile;
+        } else {
+            DWORD err = CommDlgExtendedError();
+            std::cerr << err << '\n';
         }
 
         return filepath;
     }
 
     std::string FileDialog::win32_save_file(const std::string &default_filename,
-                                            const std::vector<FileFilter> &filters, std::string &save_name_to) {
+                                            const std::vector<FileFilter> &filters, std::string &save_name_to,
+                                            const std::filesystem::path &default_path) {
         std::string filepath;
 
         OPENFILENAMEA ofn;
-        CHAR szFile[260] = {0};
+        CHAR szFile[260] = {};
 
-        // Pre-populate with default filename if provided
-        if (!default_filename.empty()) {
-            strncpy(szFile, default_filename.c_str(), sizeof(szFile) - 1);
+        if (!default_path.empty()) {
+            std::string dir = default_path.string();
+            std::replace(dir.begin(), dir.end(), '/', '\\');
+
+            if (!default_filename.empty()) {
+                std::string full = dir + "\\" + default_filename;
+                strncpy(szFile, full.c_str(), sizeof(szFile) - 1);
+            } else {
+                dir += "\\";
+                strncpy(szFile, dir.c_str(), sizeof(szFile) - 1);
+            }
         }
 
         ZeroMemory(&ofn, sizeof(ofn));
@@ -79,40 +101,40 @@ namespace hellfire::Utility {
             // Default to all files if no filters provided
             filterStr = "All Files\0*.*\0";
         } else {
-            for (const auto &filter: filters) {
-                filterStr += filter.name + '\0' + filter.extensions + '\0';
+            for (const auto &[name, extensions]: filters) {
+                filterStr += name + '\0' + extensions + '\0';
 
                 // Set default extension from first filter if not already set
-                if (defaultExt.empty() && !filter.extensions.empty()) {
+                if (defaultExt.empty() && !extensions.empty()) {
                     // Extract extension from the first extension in the list
-                    size_t pos = filter.extensions.find("*.");
+                    size_t pos = extensions.find("*.");
                     if (pos != std::string::npos) {
-                        size_t endPos = filter.extensions.find(';', pos);
+                        size_t endPos = extensions.find(';', pos);
                         if (endPos == std::string::npos) {
-                            endPos = filter.extensions.size();
+                            endPos = extensions.size();
                         }
                         // Get extension without the "*."
-                        defaultExt = filter.extensions.substr(pos + 2, endPos - pos - 2);
+                        defaultExt = extensions.substr(pos + 2, endPos - pos - 2);
                     }
                 }
             }
         }
 
         // Create a non-const copy that will persist for the duration of the call
-        std::vector<char> filterBuf(filterStr.begin(), filterStr.end());
+        std::vector filterBuf(filterStr.begin(), filterStr.end());
         filterBuf.push_back('\0'); // Add final null terminator
 
         ofn.lpstrFilter = filterBuf.data();
         ofn.nFilterIndex = 1;
-        ofn.lpstrFileTitle = NULL;
+        ofn.lpstrFileTitle = nullptr;
+        ofn.lpstrInitialDir = nullptr;
         ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = NULL;
         ofn.Flags = OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
 
         // Set default extension if we found one
+        std::vector extBuf(defaultExt.begin(), defaultExt.end());
         if (!defaultExt.empty()) {
             // Windows API requires a non-const char*
-            std::vector<char> extBuf(defaultExt.begin(), defaultExt.end());
             extBuf.push_back('\0');
             ofn.lpstrDefExt = extBuf.data();
         }
@@ -127,6 +149,9 @@ namespace hellfire::Utility {
             } else {
                 save_name_to = filepath;
             }
+        } else {
+            DWORD err = CommDlgExtendedError();
+            std::cerr << err << '\n';
         }
 
         return filepath;
@@ -151,7 +176,7 @@ namespace hellfire::Utility {
 
         ImGui::OpenPopup("Open File");
 
-        if (ImGui::BeginPopupModal("Open File", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (ImGui::BeginPopupModal("Open File", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
             static char buf[512] = "assets/";
             ImGui::Text("%s", filterDesc.c_str());
             ImGui::InputText("Path to file", buf, 512);
@@ -170,17 +195,17 @@ namespace hellfire::Utility {
         return filepath;
     }
 
-    std::string FileDialog::win32_select_folder(const std::string& title) {
+    std::string FileDialog::win32_select_folder(const std::string &title) {
         std::string folder_path;
 
         // Initialize COM (required for IFileDialog)
-        HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+        HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
         if (FAILED(hr)) {
             return folder_path;
         }
 
-        IFileDialog* pfd = nullptr;
-        hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
+        IFileDialog *pfd = nullptr;
+        hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
 
         if (SUCCEEDED(hr)) {
             // Get current options and add folder picker flag
@@ -190,21 +215,21 @@ namespace hellfire::Utility {
                 // FOS_PICKFOLDERS makes it a folder picker instead of file picker
                 hr = pfd->SetOptions(dwOptions | FOS_PICKFOLDERS);
             }
-        
+
             // Set the dialog title if provided
             if (SUCCEEDED(hr) && !title.empty()) {
                 std::wstring wideTitle(title.begin(), title.end());
                 pfd->SetTitle(wideTitle.c_str());
             }
-        
+
             // Show the dialog
             if (SUCCEEDED(hr)) {
                 hr = pfd->Show(GetActiveWindow());
             }
-        
+
             // Get the result
             if (SUCCEEDED(hr)) {
-                IShellItem* psi = nullptr;
+                IShellItem *psi = nullptr;
                 hr = pfd->GetResult(&psi);
                 if (SUCCEEDED(hr)) {
                     PWSTR pszPath = nullptr;
@@ -226,7 +251,6 @@ namespace hellfire::Utility {
 
         CoUninitialize();
         return folder_path;
-        
     }
 
     std::string FileDialog::imgui_save_file(const std::string &default_filename,
@@ -249,7 +273,7 @@ namespace hellfire::Utility {
 
         ImGui::OpenPopup("Save File");
 
-        if (ImGui::BeginPopupModal("Save File", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (ImGui::BeginPopupModal("Save File", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
             static char buf[512] = "";
 
             // Initialize with default filename if empty
@@ -293,15 +317,16 @@ namespace hellfire::Utility {
     }
 
 
-    std::string FileDialog::open_file(const std::vector<FileFilter> &filters) {
+    std::string FileDialog::open_file(const std::vector<FileFilter> &filters,
+                                      const std::filesystem::path &default_path) {
 #ifdef _WIN32
-        return win32_open_file(filters);
+        return win32_open_file(filters, default_path);
 #else
         return imgui_open_file(filters);
 #endif
     }
 
-    std::string FileDialog::select_folder(const std::string& title) {
+    std::string FileDialog::select_folder(const std::string &title) {
 #ifdef _WIN32
         return win32_select_folder(title);
 #else
@@ -310,14 +335,12 @@ namespace hellfire::Utility {
     }
 
     std::string FileDialog::save_file(std::string &save_name_to, const std::string &default_filename,
-                                      const std::vector<FileFilter> &filters) {
+                                      const std::vector<FileFilter> &filters,
+                                      const std::filesystem::path &default_path) {
 #ifdef _WIN32
-        return win32_save_file(default_filename, filters, save_name_to);
+        return win32_save_file(default_filename, filters, save_name_to, default_path);
 #else
         return imgui_save_file(default_filename, filters);
 #endif
     }
 }
-
-    
-

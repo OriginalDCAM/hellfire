@@ -63,9 +63,9 @@ namespace hellfire {
         material->set_metallic(data->metallic);
         material->set_roughness(data->roughness);
 
-        for (const auto &tex_id: data->texture_assets | std::views::values) {
-            if (auto tex = get_texture(tex_id)) {
-                material->set_texture(tex, 0);
+        for (const auto &[type, tex_id]: data->texture_assets) {
+            if (auto tex = get_texture(tex_id, type)) {
+                material->set_texture(tex, static_cast<int>(type));
             }
         }
 
@@ -73,7 +73,7 @@ namespace hellfire {
         return material;
     }
 
-    std::shared_ptr<Texture> AssetManager::get_texture(AssetID id) {
+    std::shared_ptr<Texture> AssetManager::get_texture(AssetID id, TextureType type = TextureType::DIFFUSE) {
         if (auto it = texture_cache_.find(id); it != texture_cache_.end()) {
             return it->second;
         }
@@ -84,7 +84,7 @@ namespace hellfire {
         }
 
         auto texture = std::make_shared<Texture>(
-            registry_.get_absolute_path(id).string()
+            registry_.get_absolute_path(id).string(), type
         );
 
         if (!texture->is_valid()) {

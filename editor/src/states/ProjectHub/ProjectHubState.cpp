@@ -9,7 +9,6 @@
 #include <shellapi.h>
 #endif
 
-#include "IconsFontAwesome6.h"
 #include "imgui.h"
 #include "events/StateEvents.h"
 #include "ui/ui.h"
@@ -18,6 +17,9 @@
 namespace hellfire::editor {
     void ProjectHubState::on_enter() {
         recent_projects_ = context_->project_manager->get_recent_projects();
+        
+        auto *window = ServiceLocator::get_service<IWindow>();
+        window->set_size(1280, 720);
     }
 
     void ProjectHubState::render() {
@@ -61,7 +63,7 @@ namespace hellfire::editor {
     void ProjectHubState::render_project_list() {
         if (ui::ChildWindow child{"ProjectList"}) {
             for (const auto& project : recent_projects_) {
-                ImGui::PushID(&project);
+                ImGui::PushID(&project.path);
             
                 bool selected = false;
                 if (ImGui::Selectable("##project", &selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(0, 30))) {
@@ -72,17 +74,17 @@ namespace hellfire::editor {
             
                 ImGui::SameLine();
                 ImGui::Text("%s", project.name.c_str());
-                ImGui::SameLine(120);
+                ImGui::SameLine(240);
                 ImGui::Text("%s", project.path.string().c_str());
 
-                if (ImGui::BeginPopupContextWindow(("##" + project.path.string()).c_str())) {
+                if (ImGui::BeginPopupContextItem(("##" + project.path.string()).c_str())) {
                     if (ImGui::MenuItem("Remove from recent projects...")) {
                         context_->project_manager->remove_from_recent(project.path);
                         recent_projects_ = context_->project_manager->get_recent_projects();
                     }
                     if (ImGui::MenuItem("Open in Explorer")) {
 #if WIN32
-                        ShellExecuteW(NULL, L"open", project.path.parent_path().c_str(), NULL, NULL, SW_SHOW);
+                        ShellExecuteW(nullptr, L"open", project.path.parent_path().c_str(), NULL, NULL, SW_SHOW);
 #endif
                     }
                     ImGui::EndPopup();
@@ -93,7 +95,7 @@ namespace hellfire::editor {
         }
     }
 
-    void ProjectHubState::render_buttons() {
+    void ProjectHubState::render_buttons() const {
         float button_width = 120.0f;
         float spacing = ImGui::GetContentRegionAvail().x - (button_width * 2) - ImGui::GetStyle().ItemSpacing.x;
         
