@@ -90,7 +90,6 @@ namespace hellfire {
 
         ShaderManager shader_manager_;
         ShaderRegistry shader_registry_;
-        SceneManager scene_manager_;
         Renderer renderer_;
 
         // Window info tracking
