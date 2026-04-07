@@ -5,10 +5,17 @@
 
 #include <imgui.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <commdlg.h>
+#endif
+
 #include "DCraft/Addons/ModelLoader.h"
 #include "DCraft/Graphics/Lights/DirectionalLight.h"
 #include "DCraft/Graphics/Lights/Light.h"
 #include "DCraft/Graphics/Lights/PointLight.h"
+#include "DCraft/Graphics/Materials/LambertMaterial.h"
+#include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 
 namespace DCraft::Editor {
@@ -162,25 +169,26 @@ namespace DCraft::Editor {
     void SceneEditorOverlay::setup_docking_space() {
         // Set up the dockspace
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-    
+
         // Make the parent window full-screen
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGuiViewport *viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
         ImGui::SetNextWindowViewport(viewport->ID);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoMove;
         window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-    
+
         // Begin the main dockspace window
         ImGui::Begin("DockSpace", nullptr, window_flags);
         ImGui::PopStyleVar(2);
-    
+
         // Add a dockspace inside this window
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-    
+
         // Optional menu bar
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu("File")) {
@@ -189,22 +197,22 @@ namespace DCraft::Editor {
             }
             ImGui::EndMenuBar();
         }
-    
+
         // Create your specific windows
         // These will be dockable into the dockspace
-    
+
         // Scene Hierarchy window - default to left side
         ImGui::SetNextWindowDockID(dockspace_id, ImGuiCond_FirstUseEver);
         ImGui::Begin("Scene Hierarchy");
         // Scene hierarchy content here
         ImGui::End();
-    
+
         // Inspector window - default to right side
         ImGui::SetNextWindowDockID(dockspace_id, ImGuiCond_FirstUseEver);
         ImGui::Begin("Inspector");
         // Inspector content here
         ImGui::End();
-    
+
         // End the dockspace window
         ImGui::End();
     }
@@ -213,10 +221,10 @@ namespace DCraft::Editor {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Import Model...")) {
-                    // For a real application, you'd use a file dialog
-                    // But for your assignment, you could use a hardcoded path for testing
-                    std::string filepath = "assets/models/teapot.obj";  // Replace with your test model
-                    import_model(filepath);
+                    std::string filepath = open_file_dialog();
+                    if (!filepath.empty()) {
+                        import_model(filepath);
+                    }
                 }
                 ImGui::Separator();
                 ImGui::EndMenu();
@@ -235,15 +243,14 @@ namespace DCraft::Editor {
         }
     }
 
-    
 
     void SceneEditorOverlay::import_model(const std::string &filepath) {
-        Object3D* model = Addons::ModelLoader::load(filepath, scene_manager_.get_active_scene());
+        Object3D *model = Addons::ModelLoader::load(filepath, scene_manager_.get_active_scene());
 
         if (model) {
             // Position the model at a visible location
             model->set_position(glm::vec3(0.0f, 2.0f, 0.0f));
-        
+
             scene_manager_.get_active_scene()->add(model);
         }
     }
@@ -297,10 +304,181 @@ namespace DCraft::Editor {
     }
 
     void SceneEditorOverlay::render_shape_properties(Shape3D *shape) const {
+        ImGui::Begin("Material Editor");
+
+        if (!shape) {
+            ImGui::Text("No shape selected");
+            ImGui::End();
+            return;
+        }
+
         Material *material = shape->get_material();
+        if (!material) {
+            ImGui::Text("Selected shape has no material");
+            ImGui::End();
+            return;
+        }
+
+        // Material name
+        std::string name = material->get_name();
+        char buffer[256];
+        strcpy(buffer, name.c_str());
+        if (ImGui::InputText("Name", buffer, sizeof(buffer))) {
+            material->set_name(buffer);
+        }
+
+        ImGui::Separator();
+
+        // Display material type
+        ImGui::Text("Material Type: %s", typeid(*material).name());
+
+        // Specific material properties based on type
+        if (auto lambert = dynamic_cast<LambertMaterial *>(material)) {
+            // Diffuse color editing
+            glm::vec3 diffuse = lambert->get_diffuse_color();
+            float diffuse_color[3] = {diffuse.r, diffuse.g, diffuse.b};
+            if (ImGui::ColorEdit3("Diffuse Color", diffuse_color)) {
+                lambert->set_diffuse_color(glm::vec3(diffuse_color[0], diffuse_color[1], diffuse_color[2]));
+            }
+
+            // Texture section
+            ImGui::Separator();
+            ImGui::Text("Diffuse Texture");
+
+            // Show current texture if it exists
+            if (lambert->has_diffuse_texture()) {
+                Texture *tex = lambert->get_diffuse_texture();
+                if (tex && tex->get_id() > 0) {
+                    // Show texture preview
+                    ImGui::Image(reinterpret_cast<ImTextureID>((void *) (uintptr_t) tex->get_id()), ImVec2(150, 150));
+
+                    if (ImGui::Button("Remove Texture")) {
+                        // lambert->remove_diffuse_texture();
+                    }
+                }
+            } else {
+                ImGui::Text("No texture");
+                if (ImGui::Button("Add Texture...")) {
+                    std::string filepath = open_file_dialog();
+                    // TODO: Make this support multiple textures and not only diffuse
+                    lambert->set_texture(filepath, TextureType::DIFFUSE);
+                }
+            }
+        } else if (auto phong = dynamic_cast<PhongMaterial *>(material)) {
+            // Phong Material Properties
+            ImGui::Text("Phong Material Properties");
+
+
+
+            // Ambient color
+            glm::vec3 ambient = phong->get_ambient_color();
+            float ambient_color[3] = {ambient.r, ambient.g, ambient.b};
+            if (ImGui::ColorEdit3("Ambient Color", ambient_color)) {
+                phong->set_ambient_color(glm::vec3(ambient_color[0], ambient_color[1], ambient_color[2]));
+            }
+
+            // Diffuse color
+            glm::vec3 diffuse = phong->get_diffuse_color();
+            float diffuse_color[3] = {diffuse.r, diffuse.g, diffuse.b};
+            if (ImGui::ColorEdit3("Diffuse Color", diffuse_color)) {
+                phong->set_diffuse_color(glm::vec3(diffuse_color[0], diffuse_color[1], diffuse_color[2]));
+            }
+
+            // Specular color
+            glm::vec3 specular = phong->get_specular_color();
+            float specular_color[3] = {specular.r, specular.g, specular.b};
+            if (ImGui::ColorEdit3("Specular Color", specular_color)) {
+                phong->set_specular_color(glm::vec3(specular_color[0], specular_color[1], specular_color[2]));
+            }
+
+            // Shininess
+            float shininess = phong->get_shininess();
+            if (ImGui::SliderFloat("Shininess", &shininess, 1.0f, 128.0f, "%.1f")) {
+                phong->set_shininess(shininess);
+            }
+        } else {
+            // Base Material Properties or unknown material type
+            ImGui::Text("Basic Material Properties");
+            // Add any properties common to all materials
+        }
+
+        ImGui::Separator();
+
+        // Material change section
+        if (ImGui::CollapsingHeader("Change Material Type")) {
+            if (ImGui::Button("Lambert Material")) {
+                // Create new Lambert material
+                auto new_material = new LambertMaterial(material->get_name());
+                // Copy any common properties from old material
+                // ...
+
+                // Replace material
+                shape->set_material(new_material);
+                // Handle memory cleanup for old material if needed
+            }
+
+            if (ImGui::Button("Phong Material")) {
+                // Create new Phong material
+                auto new_material = new PhongMaterial(material->get_name());
+                // Copy any common properties from old material
+                // ...
+
+                // Replace material
+                shape->set_material(new_material);
+                // Handle memory cleanup for old material if needed
+            }
+
+            // Add buttons for other material types as needed
+        }
+
+        ImGui::End();
+    }
+
+    std::string SceneEditorOverlay::open_file_dialog() const {
+        std::string filepath;
+    
+#ifdef _WIN32
+        OPENFILENAMEA ofn;
+        CHAR szFile[260] = {0};
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = GetActiveWindow();
+        ofn.lpstrFile = szFile;
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = "Model Files\0*.obj;*.fbx;*.dae;*.gltf\0All Files\0*.*\0";
+        ofn.nFilterIndex = 1;
+        ofn.lpstrFileTitle = NULL;
+        ofn.nMaxFileTitle = 0;
+        ofn.lpstrInitialDir = NULL;
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+    
+        if (GetOpenFileNameA(&ofn) == TRUE) {
+            filepath = ofn.lpstrFile;
+        }
+#else
+        // For non-Windows platforms, you could use a simple dialog box
+        // or implement platform-specific dialogs for macOS/Linux
+        ImGui::OpenPopup("File path input");
+
+        if (ImGui::BeginPopupModal("File path input", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            static char buf[512] = "assets/models/";
+            ImGui::InputText("Path to model file", buf, 512);
+
+            if (ImGui::Button("OK", ImVec2(120, 0))) {
+                filepath = buf;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+#endif
+
+        return filepath;
     }
 
     void SceneEditorOverlay::render_mesh_properties(Mesh *mesh) const {
     }
-
 }

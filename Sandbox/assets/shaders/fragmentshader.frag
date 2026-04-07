@@ -125,13 +125,12 @@ void main() {
         diffuseValue = vec4(diffuseColor, 1.0);
     }
 
-    // Apply vertex color
+    // Apply vertex color (only if we're using it)
     vec4 baseColor;
-    
-    if (useDiffuse1) {
-        baseColor = diffuseValue;
-    } else {
+    if (vColor.r != 0.0 || vColor.g != 0.0 || vColor.b != 0.0) {
         baseColor = diffuseValue * vec4(vColor, 1.0);
+    } else {
+        baseColor = diffuseValue;
     }
 
     // Get specular value

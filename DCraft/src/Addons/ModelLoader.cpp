@@ -9,14 +9,15 @@
 
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
+#include "DCraft/Graphics/Materials/LambertMaterial.h"
 #include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 #include "DCraft/Structs/Scene.h"
 
 namespace DCraft::Addons {
-    std::unordered_map<std::string, Mesh*> ModelLoader::mesh_cache;
+    std::unordered_map<std::string, Mesh *> ModelLoader::mesh_cache;
     std::vector<ModelLoader::MaterialMap> ModelLoader::textures_loaded;
-    
+
     Shape3D *ModelLoader::load(const std::string &filepath, Scene *target_scene) {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(
@@ -29,11 +30,9 @@ namespace DCraft::Addons {
         }
 
         // Default material for model
-        PhongMaterial *defaultMaterial = new PhongMaterial("ModelMaterial");
+        LambertMaterial *defaultMaterial = new LambertMaterial("ModelMaterial");
         defaultMaterial->set_ambient_color(glm::vec3(0.2f, 0.2f, 0.2f));
         defaultMaterial->set_diffuse_color(glm::vec3(0.8f, 0.8, 0.8f));
-        defaultMaterial->set_specular_color(glm::vec3(0.5f));
-        defaultMaterial->set_shininess(32.0f);
 
         std::string filename = filepath;
         size_t last_slash = filepath.find_last_of("/\\");
@@ -48,21 +47,36 @@ namespace DCraft::Addons {
             target_scene->add(rootObj);
         }
 
-        return static_cast<Shape3D*>(rootObj);
+        return static_cast<Shape3D *>(rootObj);
     }
 
     glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4 &from) {
         glm::mat4 to;
-
-        // Assimp matrices are row-major, glm matrices are column-major
-        memcpy(glm::value_ptr(to), &from, sizeof(float) * 16);
-
-        return glm::transpose(to);
+        to[0][0] = from.a1;
+        to[1][0] = from.a2;
+        to[2][0] = from.a3;
+        to[3][0] = from.a4;
+        to[0][1] = from.b1;
+        to[1][1] = from.b2;
+        to[2][1] = from.b3;
+        to[3][1] = from.b4;
+        to[0][2] = from.c1;
+        to[1][2] = from.c2;
+        to[2][2] = from.c3;
+        to[3][2] = from.c4;
+        to[0][3] = from.d1;
+        to[1][3] = from.d2;
+        to[2][3] = from.d3;
+        to[3][3] = from.d4;
+        return to;
     }
 
 
-    Shape3D* ModelLoader::process_node(aiNode *node, const aiScene *scene, Material *default_material) {
+    Shape3D *ModelLoader::process_node(aiNode *node, const aiScene *scene, Material *default_material) {
         Shape3D *obj = new Shape3D(node->mName.length > 0 ? node->mName.C_Str() : "Node");
+
+        std::cout << "Node: " << node->mName.C_Str() << ", Meshes: " << node->mNumMeshes
+                << ", Children: " << node->mNumChildren << std::endl;
 
         aiMatrix4x4 transform = node->mTransformation;
         glm::mat4 glm_transform = aiMatrix4x4ToGlm(transform);
@@ -76,11 +90,11 @@ namespace DCraft::Addons {
 
         obj->set_position(translation);
         obj->set_scale(scale);
-
-        // Todo convert the quat to euler angles for rotation
+        obj->set_rotation_quaternion(rotation);
 
         for (uint32_t i = 0; i < node->mNumMeshes; i++) {
-            aiMesh *mesh = scene->mMeshes[i];
+            uint32_t meshIndex = node->mMeshes[i];
+            aiMesh *mesh = scene->mMeshes[meshIndex];
             Mesh *my_mesh = process_mesh(mesh, scene, default_material);
 
             if (node->mNumMeshes > 1) {
@@ -104,12 +118,31 @@ namespace DCraft::Addons {
     }
 
     Mesh *ModelLoader::process_mesh(aiMesh *mesh, const aiScene *scene, Material *default_material) {
-        std::string meshKey = std::to_string(mesh->mNumVertices) + "_" +
-                              std::to_string(mesh->mNumFaces);
+        size_t vertex_hash = 0;
+        size_t sample_size = std::min(size_t(10), size_t(mesh->mNumVertices)); // Sample up to 10 vertices
+
+        for (size_t i = 0; i < sample_size; i++) {
+            // Hash the position of each sampled vertex
+            aiVector3D pos = mesh->mVertices[i];
+            vertex_hash = vertex_hash ^ (std::hash<float>()(pos.x) +
+                                         (std::hash<float>()(pos.y) << 1) +
+                                         (std::hash<float>()(pos.z) << 2));
+        }
+
+        // Create a unique mesh key that includes the mesh name, material index, vertex/face counts, and geometry hash
+        std::string meshName = mesh->mName.length > 0 ? mesh->mName.C_Str() : "unnamed";
+        std::string meshKey = meshName + "_" +
+                              std::to_string(mesh->mMaterialIndex) + "_" +
+                              std::to_string(mesh->mNumVertices) + "_" +
+                              std::to_string(mesh->mNumFaces) + "_" +
+                              std::to_string(vertex_hash);
 
         if (mesh_cache.find(meshKey) != mesh_cache.end()) {
+            std::cout << "Using cached mesh: " << meshKey << std::endl;
             return mesh_cache[meshKey];
         }
+
+        std::cout << "Creating new mesh: " << meshKey << std::endl;
 
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -152,7 +185,7 @@ namespace DCraft::Addons {
         Mesh *myMesh = new Mesh(vertices, indices);
         myMesh->set_material(default_material);
 
-        // Proccess materials if available
+        // Process materials if available
         if (mesh->mMaterialIndex >= 0) {
             aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
@@ -200,7 +233,8 @@ namespace DCraft::Addons {
         return myMesh;
     }
 
-    std::vector<ModelLoader::MaterialMap> ModelLoader::load_material_textures(aiMaterial *material, aiTextureType type, std::string typeName) {
+    std::vector<ModelLoader::MaterialMap> ModelLoader::load_material_textures(
+        aiMaterial *material, aiTextureType type, std::string typeName) {
         std::vector<MaterialMap> textures;
 
         for (unsigned int i = 0; i < material->GetTextureCount(type); i++) {

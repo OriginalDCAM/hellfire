@@ -45,17 +45,15 @@ namespace DCraft {
 
     class Application {
     public:
-        Application(int width = 800, int height = 600, const std::string &title = "OpenGL Application");
+        explicit Application(int width = 800, int height = 600, std::string title = "OpenGL Application");
 
         ~Application();
 
 
-        int get_window_width() { return window_info_.width; }
-        int get_window_height() { return window_info_.height; }
+        [[nodiscard]] int get_window_width() const { return window_info_.width; }
+        [[nodiscard]] int get_window_height() const { return window_info_.height; }
 
         uint32_t create_shader_program(const std::string &vertex_path, const std::string &fragment_path);
-
-        void configure_camera(float fov, float near_plane, float far_plane, glm::vec3 position);
 
         Application(const Application &) = delete;
 
@@ -77,28 +75,20 @@ namespace DCraft {
 
         /// public method function: on_key_down
         /// @param key ASCII table keycode
-        /// @param x [Discarded]
-        /// @param y [Discarded]
         void on_key_down(unsigned char key);
 
         /// public method function:on_key_up 
         /// @param key ASCII table keycode
-        /// @param x [Discarded]
-        /// @param y [Discarded]
         void on_key_up(unsigned char key);
 
         /// public method function:on_special_key_down
         /// handles special keys down events
         /// @param key ASCII table keycode
-        /// @param x [Discarded]
-        /// @param y [Discarded]
         void on_special_key_down(int key);
 
         /// public method function:on_special_key_up
         /// handles special keys up events
         /// @param key ASCII table keycode
-        /// @param x [Discarded]
-        /// @param y [Discarded]
         void on_special_key_up(int key);
 
         // TODO: write JavaDOC comments
@@ -117,6 +107,7 @@ namespace DCraft {
         void on_window_resize(int width, int height);
 
         // Game state methods
+        bool game_mode_changed = false;
         // void load_scene();
 
         void process_input();
@@ -124,15 +115,14 @@ namespace DCraft {
         void toggle_fullscreen();
 
         // Accessor methods
-        const WindowInfo &get_window_info() const { return window_info_; }
-        bool is_key_pressed(unsigned char key) const { return keys_[key]; }
+        [[nodiscard]] const WindowInfo &get_window_info() const { return window_info_; }
+        [[nodiscard]] bool is_key_pressed(unsigned char key) const { return keys_[key]; }
         // Add the 256 index offset to special keys
-        bool is_special_key_pressed(unsigned char key) const { return keys_[key + 256]; }
-        float get_delta_time() const { return delta_time_; }
+        [[nodiscard]] bool is_special_key_pressed(unsigned char key) const { return keys_[key + 256]; }
+        [[nodiscard]] float get_delta_time() const { return delta_time_; }
         void set_callbacks(const ApplicationCallbacks &callbacks) { callbacks_ = callbacks; }
         void set_shader_program(uint32_t shader_program_id) { shader_program_id_ = shader_program_id; }
-        uint32_t get_shader_program() const { return shader_program_id_; }
-
+        [[nodiscard]] uint32_t get_shader_program() const { return shader_program_id_; }
         static Application &get_instance() { return *instance_; }
 
     protected:
@@ -147,6 +137,7 @@ namespace DCraft {
         std::string title_;
         uint32_t shader_program_id_;
 
+        std::array<bool, 512> active_keys_before_mode_change_; 
         Object3D* selected_node_ = nullptr;
         Editor::SceneEditorOverlay scene_editor_overlay_;
 
@@ -172,7 +163,7 @@ namespace DCraft {
         float delta_time_ = 0.0f;
 
         // Setup callbacks method
-        void setup_callbacks();
+        static void setup_callbacks();
 
         // Static callback methods for GLUT
         static void display_callback() {

@@ -37,6 +37,9 @@ namespace DCraft::Editor {
         void render_light_properties(Light * light) const;
         void render_camera_properties(Camera * camera) const;
         void render_shape_properties(Shape3D * shape) const;
+
+        std::string open_file_dialog() const;
+
         void render_mesh_properties(Mesh * mesh) const;
 
         void import_model(const std::string& filepath);

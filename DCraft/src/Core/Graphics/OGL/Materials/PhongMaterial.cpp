@@ -19,6 +19,14 @@ namespace DCraft {
         glUniform3fv(glGetUniformLocation(shader_program, "specularColor"), 1, glm::value_ptr(specular_color_));
         glUniform1f(glGetUniformLocation(shader_program, "shininess"), shininess_);
         glUniform1i(glGetUniformLocation(shader_program, "materialType"), 1); // 1 = Phong
+
+        if (has_diffuse_texture_) {
+            Texture* diffuseTexture = get_diffuse_texture();
+            if (diffuseTexture) {
+                diffuseTexture->bind(0);
+                glUniform1i(glGetUniformLocation(shader_program, "diffuse1"), 0);
+            }
+        }
         
     }
 }

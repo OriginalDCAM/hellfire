@@ -8,11 +8,13 @@
 
 #include "Dcraft/Graphics/OGL/glsl.h"
 #include <iostream>
+#include <utility>
 
 #include "DCraft/Editor/SceneEditorOverlay.h"
 
 namespace DCraft {
-    Application::Application(int width, int height, const std::string &title) : title_(title), scene_editor_overlay_(scene_manager_, selected_node_) {
+    Application::Application(int width, int height, std::string title) : title_(std::move(title)),
+        scene_editor_overlay_(scene_manager_, selected_node_) {
         if (instance_ != nullptr) {
             throw std::runtime_error("Singleton Application already created");
         }
@@ -53,11 +55,11 @@ namespace DCraft {
     }
 
     uint32_t Application::create_shader_program(const std::string &vertex_path, const std::string &fragment_path) {
-        std::string base_path = "";
+        std::string base_path;
 
 #ifdef _WIN32
         char exePath[MAX_PATH];
-        GetModuleFileNameA(NULL, exePath, MAX_PATH);
+        GetModuleFileNameA(nullptr, exePath, MAX_PATH);
         base_path = std::string(exePath);
         base_path = base_path.substr(0, base_path.find_last_of("\\/")) + "/";
 #endif
@@ -373,7 +375,7 @@ namespace DCraft {
             callbacks_.process_input(*this, delta_time_);
         }
 
-        // Check for a key that was just pressed (not held down)
+        // Handle switching to the Editor UI
         if (keys_['`'] && !prev_keys_['`']) {
             game_mode_ = !game_mode_;
             if (game_mode_) {
@@ -384,17 +386,14 @@ namespace DCraft {
             }
         }
 
-        // Standard exit with ESC
-        if (keys_[27]) {
-            // is_running = false;
-            glutLeaveMainLoop();
-        }
+            // Standard exit with ESC
+            if (keys_[27]) {
+                glutLeaveMainLoop();
+            }
 
-        // At the end of the frame, copy current keys to previous keys
-        for (int i = 0; i < 512; i++) {
-            prev_keys_[i] = keys_[i];
-        }
-
+            for (int i = 0; i < 512; i++) {
+                prev_keys_[i] = keys_[i];
+            }
     }
 
     void Application::toggle_fullscreen() {

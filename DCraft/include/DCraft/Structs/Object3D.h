@@ -113,6 +113,8 @@ namespace DCraft {
 
         void set_rotation_matrix(const glm::mat4 &rotation_matrix);
 
+        void set_rotation_quaternion(glm::quat quat);
+
         void set_translation_matrix(const glm::mat4 &translation_matrix);
 
         void set_scale_matrix(const glm::mat4 &scale_matrix);

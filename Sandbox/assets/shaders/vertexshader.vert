@@ -25,9 +25,6 @@ void main()
     vColor = color;
     vTexCoords = texCoords;
 
-    // Transform the normal to world space
-    // Using the normal matrix (transpose of inverse of model matrix)
-    // This is needed for correct lighting calculations
     mat3 normalMatrix = transpose(inverse(mat3(model)));
     vNormal = normalize(normalMatrix * normal);  // Also normalize here
 
