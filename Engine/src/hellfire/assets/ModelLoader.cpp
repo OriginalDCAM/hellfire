@@ -11,11 +11,13 @@
 
 namespace fs = std::filesystem;
 
+#define MODEL_LOADER_DEBUG 0
+
 namespace hellfire::Addons {
     // Static member definitions
     std::unordered_map<std::string, std::shared_ptr<Mesh> > ModelLoader::mesh_cache;
     std::unordered_map<std::string, std::shared_ptr<Material> > ModelLoader::material_cache;
-    std::unordered_map<std::string, std::shared_ptr<Texture>> ModelLoader::texture_cache;
+    std::unordered_map<std::string, std::shared_ptr<Texture> > ModelLoader::texture_cache;
 
     std::unique_ptr<Entity> ModelLoader::load_model(const std::filesystem::path &filepath, unsigned int import_flags) {
         auto start_time = std::chrono::high_resolution_clock::now();
@@ -38,7 +40,9 @@ namespace hellfire::Addons {
         }
 
         // Debug information
+#if MODEL_LOADER_DEBUG
         debug_scene_info(scene, filepath.string());
+#endif
 
         // Pre-process materials for caching
         preprocess_materials(scene, filepath.string());
@@ -55,7 +59,7 @@ namespace hellfire::Addons {
 
     void ModelLoader::debug_scene_info(const aiScene *scene, const std::string &filepath) {
         std::cout << "=== Scene Debug Info for " << fs::path(filepath).filename() << " ===" << std::endl;
-        std::cout << "Size: " << fs::file_size(filepath) / 1024 << "(KB)" << std::endl; 
+        std::cout << "Size: " << fs::file_size(filepath) / 1024 << "(KB)" << std::endl;
         std::cout << "Materials: " << scene->mNumMaterials << std::endl;
         std::cout << "Meshes: " << scene->mNumMeshes << std::endl;
         std::cout << "Embedded Textures: " << scene->mNumTextures << std::endl;
@@ -72,7 +76,9 @@ namespace hellfire::Addons {
     }
 
     void ModelLoader::preprocess_materials(const aiScene *scene, const std::string &filepath) {
+#if MODEL_LOADER_DEBUG
         std::cout << "Preprocessing " << scene->mNumMaterials << " materials..." << std::endl;
+#endif
 
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             const aiMaterial *ai_material = scene->mMaterials[i];
@@ -197,7 +203,6 @@ namespace hellfire::Addons {
             if (mesh->HasTextureCoords(0)) {
                 const auto &tex = mesh->mTextureCoords[0][i];
                 v.texCoords = glm::vec2(tex.x, tex.y);
-                
             } else {
                 v.texCoords = glm::vec2(0.0f);
             }
@@ -215,10 +220,11 @@ namespace hellfire::Addons {
         return filepath + "_mesh_" + std::string(mesh->mName.C_Str()) + "_" + std::to_string(mesh->mMaterialIndex);
     }
 
-    std::string ModelLoader::create_material_key(const aiMaterial *ai_material, const std::string &filepath, unsigned int material_index) {
+    std::string ModelLoader::create_material_key(const aiMaterial *ai_material, const std::string &filepath,
+                                                 unsigned int material_index) {
         aiString material_name;
         ai_material->Get(AI_MATKEY_NAME, material_name);
-        return filepath + "_mat_" + std::to_string(material_index) + "_" + 
+        return filepath + "_mat_" + std::to_string(material_index) + "_" +
                (material_name.length > 0 ? material_name.C_Str() : "unnamed");
     }
 
@@ -241,7 +247,7 @@ namespace hellfire::Addons {
         if (mesh->mMaterialIndex >= 0) {
             const aiMaterial *ai_material = scene->mMaterials[mesh->mMaterialIndex];
             std::string material_key = create_material_key(ai_material, filepath, mesh->mMaterialIndex);
-            
+
             auto cached_material = material_cache.find(material_key);
             if (cached_material != material_cache.end()) {
                 // Use cached material
@@ -322,9 +328,9 @@ namespace hellfire::Addons {
         }
     }
 
-    std::vector<std::string> ModelLoader::get_texture_search_paths(const std::string& filepath) {
+    std::vector<std::string> ModelLoader::get_texture_search_paths(const std::string &filepath) {
         std::filesystem::path model_dir = std::filesystem::path(filepath).parent_path();
-        
+
         return {
             model_dir.string() + "/textures/",
             model_dir.string() + "/Textures/",
@@ -338,32 +344,35 @@ namespace hellfire::Addons {
         };
     }
 
-        void ModelLoader::load_material_textures(const aiMaterial *ai_material, Material &material, const aiScene *scene, const std::string &filepath) {
+    void ModelLoader::load_material_textures(const aiMaterial *ai_material, Material &material, const aiScene *scene,
+                                             const std::string &filepath) {
         // Pre-compute search paths once
-        static thread_local std::vector<std::string> search_paths;
+        thread_local std::vector<std::string> search_paths;
         if (search_paths.empty()) {
             search_paths = get_texture_search_paths(filepath);
         }
 
-        auto load_texture_fast = [&](aiTextureType ai_type, TextureType dcr_type, const std::string& property_name) {
+        auto load_texture_fast = [&](aiTextureType ai_type, TextureType dcr_type, const std::string &property_name) {
             if (ai_material->GetTextureCount(ai_type) == 0) return;
-            
+
             aiString texture_path;
             if (ai_material->GetTexture(ai_type, 0, &texture_path) != AI_SUCCESS) return;
-            
+
             std::string path_str = texture_path.C_Str();
+#if MODEL_LOADER_DEBUG
             std::cout << "Processing " << property_name << " texture: " << path_str << std::endl;
-            
+#endif
+
             // Try embedded texture first
             if (try_load_embedded_texture(path_str, scene, dcr_type, material, property_name)) {
                 return;
             }
-            
+
             // Try external texture
             if (try_load_external_texture(path_str, filepath, dcr_type, material, property_name)) {
                 return;
             }
-            
+
             std::cerr << "Failed to load texture: " << path_str << std::endl;
         };
 
@@ -377,27 +386,31 @@ namespace hellfire::Addons {
         // load_texture_fast(aiTextureType_EMISSIVE, TextureType::EMISSIVE, "uEmissiveTexture");
     }
 
-        bool ModelLoader::try_load_embedded_texture(const std::string& path_str, const aiScene* scene, TextureType dcr_type, Material& material, const std::string& property_name) {
+    bool ModelLoader::try_load_embedded_texture(const std::string &path_str, const aiScene *scene, TextureType dcr_type,
+                                                Material &material, const std::string &property_name) {
         if (path_str.empty() || path_str[0] != '*') {
             return false;
         }
-
+#if MODEL_LOADER_DEBUG
         std::cout << "Found embedded texture reference: " << path_str << std::endl;
+#endif
 
         try {
             int texture_index = std::stoi(path_str.substr(1));
-            
+
             if (!scene || texture_index >= static_cast<int>(scene->mNumTextures)) {
-                std::cerr << "Embedded texture index " << texture_index << " is out of range! Scene has " 
-                         << (scene ? scene->mNumTextures : 0) << " embedded textures" << std::endl;
+                std::cerr << "Embedded texture index " << texture_index << " is out of range! Scene has "
+                        << (scene ? scene->mNumTextures  : 0) << " embedded textures" << std::endl;
                 return false;
             }
 
-            const aiTexture* embedded_texture = scene->mTextures[texture_index];
-            
+            const aiTexture *embedded_texture = scene->mTextures[texture_index];
+
+#if MODEL_LOADER_DEBUG
             std::cout << "Processing embedded texture " << texture_index << std::endl;
             std::cout << "Format hint: '" << embedded_texture->achFormatHint << "'" << std::endl;
             std::cout << "Dimensions: " << embedded_texture->mWidth << "x" << embedded_texture->mHeight << std::endl;
+#endif
 
             // Handle compressed embedded textures (PNG, JPG, etc.)
             if (embedded_texture->mHeight == 0) {
@@ -405,7 +418,7 @@ namespace hellfire::Addons {
                 std::string extension = embedded_texture->achFormatHint;
                 if (extension.empty() || extension.length() > 4) {
                     // Try to detect format from magic bytes
-                    const unsigned char* data = reinterpret_cast<const unsigned char*>(embedded_texture->pcData);
+                    const unsigned char *data = reinterpret_cast<const unsigned char *>(embedded_texture->pcData);
                     if (data && embedded_texture->mWidth >= 2) {
                         if (data[0] == 0xFF && data[1] == 0xD8) extension = "jpg";
                         else if (data[0] == 0x89 && data[1] == 0x50) extension = "png";
@@ -424,67 +437,76 @@ namespace hellfire::Addons {
                     std::cerr << "Failed to create temp file: " << temp_filename << std::endl;
                     return false;
                 }
-                
-                temp_file.write(reinterpret_cast<const char*>(embedded_texture->pcData), embedded_texture->mWidth);
-                temp_file.close();
 
-                std::cout << "Saved embedded texture to: " << temp_filename << " (" << embedded_texture->mWidth << " bytes)" << std::endl;
+                temp_file.write(reinterpret_cast<const char *>(embedded_texture->pcData), embedded_texture->mWidth);
+                temp_file.close();
+#if MODEL_LOADER_DEBUG
+                std::cout << "Saved embedded texture to: " << temp_filename << " (" << embedded_texture->mWidth <<
+                        " bytes)" << std::endl;
+#endif
 
                 try {
                     auto texture = new Texture(temp_filename, dcr_type);
                     if (texture && texture->is_valid()) {
                         material.add_texture(*texture, property_name, 0);
+#if MODEL_LOADER_DEBUG
                         std::cout << "Successfully loaded embedded texture: " << property_name << std::endl;
+#endif
                         std::filesystem::remove(temp_filename);
                         return true;
                     } else {
                         std::cout << "Failed to create valid texture from embedded data" << std::endl;
                     }
-                } catch (const std::exception& e) {
+                } catch (const std::exception &e) {
                     std::cerr << "Exception loading embedded texture: " << e.what() << std::endl;
                 }
-                
+
                 std::filesystem::remove(temp_filename);
                 return false;
             }
             // Handle uncompressed embedded textures (raw RGBA data)
             else {
-                std::cout << "Uncompressed embedded texture found - needs direct GPU upload implementation" << std::endl;
+                std::cout << "Uncompressed embedded texture found - needs direct GPU upload implementation" <<
+                        std::endl;
                 // TODO: Implement direct GPU upload from RGBA data
                 // The data is in embedded_texture->pcData as RGBA pixels
                 return false;
             }
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Error processing embedded texture: " << e.what() << std::endl;
             return false;
         }
     }
 
-        bool ModelLoader::try_load_external_texture(const std::string& path_str, const std::string& filepath, TextureType dcr_type, Material& material, const std::string& property_name) {
+    bool ModelLoader::try_load_external_texture(const std::string &path_str, const std::string &filepath,
+                                                TextureType dcr_type, Material &material,
+                                                const std::string &property_name) {
         std::string texture_filename = std::filesystem::path(path_str).filename().string();
         std::filesystem::path model_dir = std::filesystem::path(filepath).parent_path();
 
         // Try different path combinations
         std::vector<std::string> possible_paths = {
-            path_str,  // Original path
-            model_dir.string() + "/" + path_str,  // Relative to model file
-            model_dir.string() + "/textures/" + texture_filename,  // textures subfolder
-            model_dir.string() + "/Textures/" + texture_filename,  // Textures subfolder
-            model_dir.string() + "/texture/" + texture_filename,   // texture subfolder
+            path_str, // Original path
+            model_dir.string() + "/" + path_str, // Relative to model file
+            model_dir.string() + "/textures/" + texture_filename, // textures subfolder
+            model_dir.string() + "/Textures/" + texture_filename, // Textures subfolder
+            model_dir.string() + "/texture/" + texture_filename, // texture subfolder
             model_dir.string() + "/materials/" + texture_filename, // materials folder
-            model_dir.string() + "/source/" + texture_filename,    // source folder
+            model_dir.string() + "/source/" + texture_filename, // source folder
             model_dir.string() + "/../textures/" + texture_filename, // Parent directory textures
-            model_dir.string() + "/" + texture_filename,  // Same directory as model
-            "assets/models/" + texture_filename,  // Common assets structure
+            model_dir.string() + "/" + texture_filename, // Same directory as model
+            "assets/models/" + texture_filename, // Common assets structure
             "assets/textures/" + texture_filename
         };
 
-        for (const auto& test_path : possible_paths) {
+        for (const auto &test_path: possible_paths) {
             if (std::filesystem::exists(test_path)) {
                 auto texture = load_cached_texture(test_path, dcr_type);
                 if (texture) {
                     material.add_texture(*texture, property_name, 0);
+#if MODEL_LOADER_DEBUG
                     std::cout << "Loaded external texture: " << property_name << " from " << test_path << std::endl;
+#endif
                     return true;
                 }
             }
@@ -492,27 +514,27 @@ namespace hellfire::Addons {
         return false;
     }
 
-    std::shared_ptr<Texture> ModelLoader::load_cached_texture(const std::string& path, TextureType type) {
+    std::shared_ptr<Texture> ModelLoader::load_cached_texture(const std::string &path, TextureType type) {
         auto it = texture_cache.find(path);
         if (it != texture_cache.end()) {
             std::cout << "Using cached texture: " << path << std::endl;
             return it->second;
         }
-    
+
         try {
             auto texture = std::make_shared<Texture>(path, type);
             if (texture->is_valid()) {
                 texture_cache[path] = texture;
                 return texture;
             }
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Failed to load texture " << path << ": " << e.what() << std::endl;
         }
-    
+
         return nullptr;
     }
 
-        std::string ModelLoader::capitalize_first(const std::string &str) {
+    std::string ModelLoader::capitalize_first(const std::string &str) {
         if (str.empty()) return str;
         std::string result = str;
         result[0] = std::toupper(result[0]);
