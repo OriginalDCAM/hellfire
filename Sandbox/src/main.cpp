@@ -1,6 +1,3 @@
-
-
-
 #include "DCraft/Application.h"
 #include "Game.h"
 
