@@ -24,7 +24,7 @@ namespace hellfire {
         delete vao_;
         delete vbo_;
         delete ibo_;
-        
+
         vao_ = nullptr;
         vbo_ = nullptr;
         ibo_ = nullptr;
@@ -53,28 +53,34 @@ namespace hellfire {
 
         // Layout 0: Position
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, position)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              reinterpret_cast<void *>(offsetof(Vertex, position)));
 
         // Layout 1: Normal
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, normal)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              reinterpret_cast<void *>(offsetof(Vertex, normal)));
 
         // Layout 2: Color 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, color)));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              reinterpret_cast<void *>(offsetof(Vertex, color)));
 
         // Layout 3: texCoords (Uv's) 
         glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, texCoords)));
+        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              reinterpret_cast<void *>(offsetof(Vertex, texCoords)));
 
         // Layout 4: Tangent
         glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, tangent)));
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              reinterpret_cast<void *>(offsetof(Vertex, tangent)));
 
         // Layout 5: Bit Tangent
         glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, bitangent)));
-        
+        glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              reinterpret_cast<void *>(offsetof(Vertex, bitangent)));
+
 
         // Unbind the buffers
         vao_->unbind();
@@ -83,11 +89,8 @@ namespace hellfire {
     }
 
     void Mesh::draw() const {
-        if (!material) return;
-        
         vao_->bind();
-        
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE ? GL_LINE : GL_FILL);
+
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Always restore
@@ -96,8 +99,6 @@ namespace hellfire {
     }
 
     void Mesh::draw_instanced(size_t amount) {
-        if (!material) return;
-
         vao_->bind();
 
         glDrawElementsInstanced(GL_TRIANGLES, get_index_count(),
@@ -106,7 +107,7 @@ namespace hellfire {
         vao_->unbind();
     }
 
-   int Mesh::get_index_count() {
+    int Mesh::get_index_count() {
         return indices.size();
     }
 }

@@ -13,8 +13,8 @@
 
 
 namespace hellfire {
-    class Entity;
     class Mesh;
+    using EntityID = uint32_t;
     class Scene;
 }
 
@@ -22,7 +22,7 @@ namespace hellfire::Addons {
     class ModelLoader {
     public:
         // Updated method signatures to include ShaderManager
-        static std::unique_ptr<Entity> load_model(const std::filesystem::path &filepath, unsigned int import_flags = 0);
+        static EntityID load_model(Scene* scene, const std::filesystem::path &filepath, unsigned int import_flags = 0);
 
         static void clear_cache();
 
@@ -62,7 +62,7 @@ namespace hellfire::Addons {
         };
 
         // Node processing
-        static std::unique_ptr<Entity> process_node(aiNode *node, const aiScene *scene, const std::string &filepath);
+        static EntityID process_node(Scene* scene,aiNode *node, const aiScene *ai_scene, const std::string &filepath,EntityID parent_id = 0);
 
         // Mesh processing
         static void process_mesh_vertices(aiMesh *mesh, std::vector<Vertex> &vertices,

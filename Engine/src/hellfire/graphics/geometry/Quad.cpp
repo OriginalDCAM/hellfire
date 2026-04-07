@@ -4,6 +4,8 @@
 
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/ecs/Entity.h"
+#include "hellfire/ecs/components/MeshComponent.h"
+#include "hellfire/scene/Scene.h"
 
 namespace hellfire {
     const std::vector<float> Quad::vertices_ = {
@@ -27,26 +29,39 @@ namespace hellfire {
         0.0, 0.0   // bottom-left
     };
     
-    Entity* Quad::create(const std::string& name, const glm::vec3& color) {
-        // Create the entity
-        auto* entity = new Entity(name);
+    EntityID Quad::create(Scene* scene, const std::string& name, const Config& config) {
+        EntityID id = scene->create_entity(name);
+        Entity* entity = scene->get_entity(id);
+        
+        // Add mesh component
+        auto* mesh_comp = entity->add_component<MeshComponent>();
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        get_quad_data(vertices, indices, config.color);
+        mesh_comp->set_mesh(std::make_shared<Mesh>(vertices, indices));
         
         // Add renderable component
         auto* renderable = entity->add_component<RenderableComponent>();
+        if (config.material) {
+            renderable->set_material(config.material);
+        } else {
+            auto material = MaterialBuilder::create_lambert("Quad Material");
+            renderable->set_material(material);
+        }
         
-        // Generate quad mesh data
+        // Apply transform
+        entity->transform()->set_position(config.position);
+        entity->transform()->set_rotation(config.rotation);
+        entity->transform()->set_scale(config.scale);
+        
+        return id;
+    }
+
+    std::shared_ptr<Mesh> Quad::create_mesh() {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-        get_quad_data(vertices, indices, color);
-        
-        // Create and set mesh
-        auto mesh = std::make_shared<Mesh>(vertices, indices);
-        renderable->set_mesh(mesh);
-        
-        // Update world matrices
-        entity->update_world_matrices();
-        
-        return entity;
+        get_quad_data(vertices, indices);
+        return std::make_shared<Mesh>(vertices, indices);
     }
     
     void Quad::get_quad_data(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 

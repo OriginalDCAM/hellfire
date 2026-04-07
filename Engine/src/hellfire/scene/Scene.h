@@ -2,98 +2,115 @@
 #include <string>
 
 #include "../ecs/Entity.h"
+#include "assimp/code/Common/Win32DebugLogStream.h"
+#include "glm/mat4x4.hpp"
 #include "nlohmann/json.hpp"
 
 
-namespace hellfire
-{
+namespace hellfire {
     class CameraComponent;
     class Skybox;
 
-    class Scene 
-    {
+    using EntityID = uint32_t;
+
+    class Scene {
     public:
-        Scene(const std::string& name = "Unnamed");
+        Scene(const std::string &name = "Unnamed");
+
         virtual ~Scene();
+
+        // Entity lifecycle
+        EntityID create_entity(const std::string &name = "GameObject");
+
+        void destroy_entity(EntityID id);
+
+        Entity *get_entity(EntityID id);
+
+        const Entity *get_entity(EntityID id) const;
+
+        // Hierarchy management
+        void set_parent(EntityID child_id, EntityID parent_id);
+
+        void set_as_root(EntityID entity_id);
+
+        EntityID get_parent(EntityID entity_id) const;
+
+        std::vector<EntityID> get_children(EntityID parent_id) const;
+
+        const std::vector<EntityID> &get_root_entities() const { return root_entities_; }
 
         // Scene lifecycle
         virtual void initialize();
+
         virtual void update(float delta_time);
 
-        // Entity management
-        void add_entity(Entity* entity);
-        void remove_entity(const Entity* entity);
-        Entity* create_entity(const std::string& name = "GameObject");
-        const std::vector<Entity*>& get_entities() const { return entities_; }
+        void update_world_matrices();
 
-        // Find entities
-        Entity* find_entity_by_name(const std::string& name);
-        std::vector<Entity*> find_entities_with_component(const std::type_index& component_type);
+        // Finding entities
+        Entity *find_entity_by_name(const std::string &name);
 
-        // Template version for type safety
         template<typename T>
-        std::vector<Entity*> find_entities_with_component() {
-            std::vector<Entity*> results;
-            find_entities_with_component_recursive<T>(entities_, results);
-            return results;
-        }
+        std::vector<EntityID> find_entities_with_component();
 
         // Camera management
-        void set_active_camera(Entity* camera_entity);
-        Entity* get_active_camera_entity() const { return active_camera_entity_; }
-        CameraComponent* get_active_camera() const {
-            return active_camera_entity_ ? active_camera_entity_->get_component<CameraComponent>() : nullptr;
-        }
+        void set_active_camera(EntityID camera_id);
 
-        // Get all camera entities in the scene
-        std::vector<Entity*> get_camera_entities() const;
-        void destroy_camera(Entity* camera_entity);
+        EntityID get_active_camera_entity() const { return active_camera_entity_id_; }
+
+        CameraComponent *get_active_camera() const;
+
+        std::vector<EntityID> get_camera_entities() const;
 
         // Skybox management
-        void set_skybox(Skybox* skybox) { skybox_ = skybox; }
-        Skybox* get_skybox() const { return skybox_; }
+        void set_skybox(Skybox *skybox);
+
+        Skybox *get_skybox() const { return skybox_.get(); }
         bool has_skybox() const { return skybox_ != nullptr; }
 
         // Scene properties
-        const std::string& get_name() const { return name_; }
-        void set_name(const std::string& name) { name_ = name; }
-        
+        const std::string &get_name() const { return name_; }
+        void set_name(const std::string &name) { name_ = name; }
         bool is_active() const { return is_active_; }
         void set_active(bool active) { is_active_ = active; }
-
-        void set_source_filename(const std::string& filename) { source_filename_ = filename; }
-        const std::string& get_source_filename() const { return source_filename_; }
+        void set_source_filename(const std::string &filename) { source_filename_ = filename; }
+        const std::string &get_source_filename() const { return source_filename_; }
         bool was_loaded_from_file() const { return !source_filename_.empty(); }
 
-        // World matrix updates for all entities
-        void update_world_matrices() const;
-
-        // Serialization
-        nlohmann::json to_json();
-
     private:
-        std::vector<Entity*> entities_;
-        Entity* active_camera_entity_;
+        // All entities owned by scene
+        std::unordered_map<EntityID, std::unique_ptr<Entity> > entities_;
+
+        // Hierarchy management
+        std::unordered_map<EntityID, EntityID> parent_map_;
+        std::unordered_map<EntityID, std::vector<EntityID> > children_map_;
+        std::vector<EntityID> root_entities_;
+
+        // Scene state
+        EntityID next_id_ = 1;
+        EntityID active_camera_entity_id_ = 0;
         std::string name_;
         bool is_active_;
         std::string source_filename_;
-        Skybox* skybox_ = nullptr;
+        std::unique_ptr<Skybox> skybox_;
 
         // Helper methods
-        void find_entity_by_name_recursive(const std::vector<Entity*>& entities, const std::string& name, Entity*& result);
+        void update_hierarchy(EntityID entity_id, float delta_time);
 
-        template<typename T>
-        void find_entities_with_component_recursive(const std::vector<Entity*>& entities, std::vector<Entity*>& results) {
-            for (Entity* entity : entities) {
-                if (entity->has_component<T>()) {
-                    results.push_back(entity);
-                }
+        void update_world_matrices_recursive(unsigned int entity_id, const glm::mat4& parent_world);
 
-                // Recurse through children
-                find_entities_with_component_recursive<T>(entity->get_children(), results);
-            }
-        }
+        void find_entities_recursive(EntityID entity_id, const std::function<bool(Entity *)> &predicate,
+                                     std::vector<EntityID> &results);
     };
 
-}
+    template<typename T>
+    std::vector<EntityID> Scene::find_entities_with_component() {
+        std::vector<EntityID> results;
+        auto predicate = [](Entity *entity) { return entity->has_component<T>(); };
 
+        for (EntityID root_id: root_entities_) {
+            find_entities_recursive(root_id, predicate, results);
+        }
+
+        return results;
+    }
+}

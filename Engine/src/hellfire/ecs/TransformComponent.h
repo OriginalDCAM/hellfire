@@ -24,6 +24,7 @@ namespace hellfire {
         void set_scale(float x, float y, float z) { transform_.set_scale(glm::vec3(x, y, z)); }
         void set_scale(float value) { transform_.set_scale(glm::vec3(value, value, value)); }
         void set_scale(glm::vec3& scale) { transform_.set_scale(scale); }
+        void set_scale(const glm::vec3& scale) { transform_.set_scale(scale); }
         
 
         const glm::vec3& get_world_position() const { return transform_.get_position(); }
@@ -38,7 +39,7 @@ namespace hellfire {
             transform_.look_at(target, up);
         }
 
-        void update_world_matrix(const glm::mat4 *parent_world_matrix = nullptr) {
+        void update_world_matrix(const glm::mat4& parent_world_matrix) {
             transform_.update_world_matrix(parent_world_matrix);
         }
         

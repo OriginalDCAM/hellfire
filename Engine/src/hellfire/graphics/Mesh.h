@@ -23,11 +23,6 @@ namespace hellfire {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
 
-        Material *material = nullptr;
-
-        void set_material(Material *mat) { material = mat; }
-        [[nodiscard]] Material *get_material() const { return material ? material : nullptr; }
-
         bool is_wireframe = false;
 
         void draw() const;
