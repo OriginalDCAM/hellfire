@@ -149,6 +149,8 @@ namespace DCraft {
             return parent_;
         }
 
+        virtual void setup() { }
+
         virtual void update(float delta_time) {
         }
 

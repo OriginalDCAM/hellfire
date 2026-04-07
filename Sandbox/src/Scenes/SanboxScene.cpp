@@ -93,9 +93,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     drone_camera->set_target(0.0f, 0.0f, 0.0f);
     scene->add(drone_camera);
 
-    auto *displayCase = new DisplayCase();
-    displayCase->init();
-    scene->add(displayCase);
+
 
     auto *floor = new DCraft::Quad("Floor Quad");
     floor->set_position(0, 0, 0);
@@ -104,7 +102,8 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     floor->set_material(materials["PAVEMENT_MATERIAL"].release()); 
     scene->add(floor);
 
-
+    auto *displayCase = new DisplayCase();
+    scene->add(displayCase);
 
     auto *main_camera_visual = new DCraft::Cube("Main Camera Visual");
     main_camera_visual->set_name("Main Camera Visual");

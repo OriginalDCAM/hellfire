@@ -215,6 +215,10 @@ namespace DCraft {
         }
 
         const auto& get_properties() const { return properties_; }
+
+        void set_name(const std::string& name) {
+            name_ = name;
+        } 
         const std::string& get_name() const { return name_; }
 
         // Backwards compatibility
@@ -239,7 +243,7 @@ namespace DCraft {
             auto material = std::make_unique<Material>(name);
             material->set_builtin_material_type(1);
             material->set_diffuse_color(glm::vec3(0.8f));
-            material->set_ambient_color(glm::vec3(0.1f));
+            material->set_ambient_color(glm::vec3(0.3f));
             material->set_specular_color(glm::vec3(0.5f));
             material->set_shininess(32.0f);
             return material;

@@ -55,6 +55,9 @@ namespace DCraft
     void Scene::add(Object3D *obj) {
         Object3D::add(obj);
 
+        // Call the setup method if it has been overridden
+        obj->setup();
+        
         register_object(obj);
     }
 
