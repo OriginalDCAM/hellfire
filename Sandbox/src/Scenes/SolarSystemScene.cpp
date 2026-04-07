@@ -16,25 +16,18 @@ MaterialMap load_material_map(DCraft::ShaderManager& shader_manager) {
     auto sun_material = DCraft::MaterialBuilder::create_custom("Sun Material", "assets/Shaders/Custom/sun.vert", "assets/Shaders/Custom/sun.frag");
     sun_material->set_texture(planet_surface_dir + "sun.jpg", DCraft::TextureType::DIFFUSE);
     sun_material->set_uv_tiling(100.0f, 100.0f);
-    uint32_t sun_shader = shader_manager.get_shader_for_material(*sun_material);
-    sun_material->set_compiled_shader_id(sun_shader);
     materials["SUN_MATERIAL"] = std::move(sun_material);
 
     auto mercury_material = DCraft::MaterialBuilder::create_lambert("Mercury Material");
     mercury_material->set_texture(planet_surface_dir + "mercury.jpg", DCraft::TextureType::DIFFUSE);
-
     materials["MERCURY_MATERIAL"] = std::move(mercury_material);
     
     auto venus_material = DCraft::MaterialBuilder::create_lambert("Venus Material");
     venus_material->set_texture(planet_surface_dir + "venus_surface.jpg", DCraft::TextureType::DIFFUSE);
-    uint32_t venus_shader = shader_manager.get_shader_for_material(*venus_material);
-    venus_material->set_compiled_shader_id(venus_shader);
     materials["VENUS_MATERIAL"] = std::move(venus_material);
 
     auto earth_material = DCraft::MaterialBuilder::create_lambert("Earth Material");
     earth_material->set_texture(planet_surface_dir + "earth.jpg", DCraft::TextureType::DIFFUSE);
-    uint32_t earth_shader = shader_manager.get_shader_for_material(*earth_material);
-    earth_material->set_compiled_shader_id(earth_shader);
     materials["EARTH_MATERIAL"] = std::move(earth_material);
 
     auto dynamic_earth_material = DCraft::MaterialBuilder::create_custom("Dynamic Earth Material", "assets/Shaders/Custom/earth_day_night.vert", "assets/Shaders/Custom/earth_day_night.frag");
@@ -42,27 +35,19 @@ MaterialMap load_material_map(DCraft::ShaderManager& shader_manager) {
     auto earth_cloud_material = DCraft::MaterialBuilder::create_lambert("Earth Cloud Material");
     earth_cloud_material->set_texture(planet_surface_dir + "earth_clouds.jpg", DCraft::TextureType::DIFFUSE);
     earth_cloud_material->set_transparency(0.50f);
-    uint32_t earth_cloud_shader = shader_manager.get_shader_for_material(*earth_cloud_material);
-    earth_cloud_material->set_compiled_shader_id(earth_cloud_shader);
     materials["EARTH_CLOUD_MATERIAL"] = std::move(earth_cloud_material);
    
     
     auto mars_material = DCraft::MaterialBuilder::create_lambert("Mars Material");
     mars_material->set_texture(planet_surface_dir + "mars.jpg", DCraft::TextureType::DIFFUSE);
-    uint32_t mars_shader = shader_manager.get_shader_for_material(*mars_material);
-    mars_material->set_compiled_shader_id(mars_shader);
     materials["MARS_MATERIAL"] = std::move(mars_material);
     
     auto jupiter_material = DCraft::MaterialBuilder::create_lambert("Jupiter Material");
     jupiter_material->set_texture(planet_surface_dir + "jupiter.jpg", DCraft::TextureType::DIFFUSE);
-    uint32_t jupiter_shader = shader_manager.get_shader_for_material(*jupiter_material);
-    jupiter_material->set_compiled_shader_id(jupiter_shader);
     materials["JUPITER_MATERIAL"] = std::move(jupiter_material);
 
     auto saturn_surface_material = DCraft::MaterialBuilder::create_lambert("Saturn Surface Material");
     saturn_surface_material->set_texture(planet_surface_dir + "saturn_surface.jpg", DCraft::TextureType::DIFFUSE);
-    uint32_t saturn_surface_shader = shader_manager.get_shader_for_material(*saturn_surface_material);
-    saturn_surface_material->set_compiled_shader_id(saturn_surface_shader);
     materials["SATURN_SURFACE_MATERIAL"] = std::move(saturn_surface_material);
     
     return materials;
