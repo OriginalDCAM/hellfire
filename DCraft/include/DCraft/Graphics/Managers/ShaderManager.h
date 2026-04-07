@@ -8,6 +8,10 @@
 #include <regex>
 
 namespace DCraft {
+    class Application;
+}
+
+namespace DCraft {
     class Material;
 
     class ShaderManager {
@@ -42,6 +46,12 @@ namespace DCraft {
         // Method for material-based shader loading
         uint32_t get_shader_for_material(Material& material);
 
+        [[nodiscard]] uint32_t get_shader(const std::string& key) const;
+
+        bool has_shader(const std::string& key) const {
+            return compiled_shaders_.find(key) != compiled_shaders_.end();
+        }
+
         // Helper method to add automatic defines based on material properties
         void add_automatic_defines(const Material& material, std::unordered_set<std::string>& defines);
 
@@ -55,6 +65,8 @@ namespace DCraft {
         
         // Get all compiled shader IDs (for cleanup in Application)
         std::vector<uint32_t> get_all_shader_ids() const;
+
+        friend class Application;
 
     private:
         uint32_t compile_shader_program(const std::string& vertex_source, const std::string& fragment_source);

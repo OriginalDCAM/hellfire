@@ -117,7 +117,9 @@ namespace DCraft {
         void process_input();
         void toggle_fullscreen();
 
-        uint32_t ensure_fallback_shader();
+        Shader *ensure_fallback_shader();
+
+        uint32_t create_minimal_fallback_shader();
 
         // Accessor methods
         [[nodiscard]] const WindowInfo &get_window_info() const { return window_info_; }
@@ -134,15 +136,16 @@ namespace DCraft {
         bool is_editor_mode() const { return !game_mode_; }
         
         static Application &get_instance() { return *instance_; }
-    protected:
-        SceneManager scene_manager_;
-        Renderer renderer_;
     private:
         static Application *instance_;
         ApplicationCallbacks callbacks_;
         WindowInfo window_info_;
         std::string title_;
+        // Managers
         ShaderManager shader_manager_;
+        ShaderRegistry shader_registry_;
+        SceneManager scene_manager_;
+        Renderer renderer_;
 
         std::array<bool, 512> active_keys_before_mode_change_; 
         Entity* selected_node_ = nullptr;

@@ -114,7 +114,7 @@ namespace DCraft {
             } else if (type_ == TextureType::ROUGHNESS || type_ == TextureType::METALNESS ||
                        type_ == TextureType::AMBIENT_OCCLUSION) {
                 if (nr_channels >= 3) {
-                    internal_format = GL_RED; // Use only red channel for single-value textures
+                    internal_format = GL_RED;
                 }
             }
 
@@ -389,9 +389,9 @@ namespace DCraft {
                 }
                 full_path += pattern;
 
-                if (file_exists(full_path)) {
+                if (file_exists(full_path)) { // Found one, move to next type
                     texture_set.texture(type, full_path);
-                    break; // Found one, move to next type
+                    break; 
                 }
             }
         }
