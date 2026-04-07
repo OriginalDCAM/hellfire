@@ -76,7 +76,6 @@ namespace DCraft::Editor {
         menu_bar_component.render();
 
         ImGui::Begin("Scene Hierarchy");
-
         // Get scenes from scene manager
         auto &scenes = scene_manager_.get_objects(); // These are the Scene objects
         ImGui::Text("Number of scenes: %d", scenes.size());
@@ -93,7 +92,69 @@ namespace DCraft::Editor {
                 ImGui::TableNextColumn();
 
                 // Render the scene as a tree node
-                if (ImGui::TreeNode(scene->get_name().c_str())) {
+                bool node_open = ImGui::TreeNode(scene->get_name().c_str());
+
+                if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+                    ImGui::OpenPopup(("SceneContextMenu_" + scene->get_name()).c_str());
+                }
+
+                // Create context menu
+                if (ImGui::BeginPopup(("SceneContextMenu_" + scene->get_name()).c_str())) {
+                    if (scene_manager_.get_active_scene() != scene) {
+                        if (ImGui::MenuItem("Activate Scene")) {
+                            // Call method to set this as the active scene
+                            scene_manager_.set_active_scene(static_cast<Scene *>(scene));
+                        }
+                    }
+                    if (ImGui::MenuItem("Remove Scene")) {
+                        // Check if the scene to be removed is the active scene
+                        bool is_active = scene_manager_.get_active_scene() == scene;
+
+                        // Find another scene to activate if this is the active scene
+                        Scene *new_active_scene = nullptr;
+                        if (is_active) {
+                            // Get all scenes and find one that's not this one
+                            auto &all_scenes = scene_manager_.get_objects();
+                            for (auto *potential_scene: all_scenes) {
+                                if (potential_scene && potential_scene != scene) {
+                                    new_active_scene = static_cast<Scene *>(potential_scene);
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Truncate any redoable commands
+                        if (current_command_index_ < command_history_.size() - 1) {
+                            command_history_.resize(current_command_index_ + 1);
+                        }
+
+                        // Store removal command
+                        command_history_.push_back(std::make_unique<RemoveObjectCommand>(
+                            scene_manager_, scene->get_parent(), scene));
+
+                        // Execute the removal command
+                        command_history_.back()->execute();
+
+                        // Update index to point to the new command
+                        current_command_index_ = command_history_.size() - 1;
+
+                        // If we found another scene to activate and the removed scene was active,
+                        // set the new active scene
+                        if (is_active && new_active_scene) {
+                            scene_manager_.set_active_scene(new_active_scene);
+                        }
+
+                        // Close the popup since we've removed the scene
+                        ImGui::CloseCurrentPopup();
+
+                        // Skip the rest of the popup rendering
+                        ImGui::EndPopup();
+                        continue; // Skip to the next scene in the loop
+                    }
+                    ImGui::EndPopup();
+                }
+
+                if (node_open) {
                     // Now render the objects in this scene
                     auto &sceneObjects = scene->get_children(); // Objects in the scene
 
@@ -109,7 +170,6 @@ namespace DCraft::Editor {
                     ImGui::TreePop();
                 }
             }
-
             ImGui::EndTable();
         }
 
@@ -134,7 +194,7 @@ namespace DCraft::Editor {
 
         if (ImGui::BeginPopupContextItem()) {
             if (ImGui::MenuItem("Remove")) {
-                // Truncate any redoable commands
+                // Truncate any re doable commands
                 if (current_command_index_ < command_history_.size() - 1) {
                     command_history_.resize(current_command_index_ + 1);
                 }
@@ -295,8 +355,6 @@ namespace DCraft::Editor {
         } else if (auto phong = dynamic_cast<PhongMaterial *>(material)) {
             // Phong Material Properties
             ImGui::Text("Phong Material Properties");
-
-
             // Ambient color
             glm::vec3 ambient = phong->get_ambient_color();
             float ambient_color[3] = {ambient.r, ambient.g, ambient.b};
