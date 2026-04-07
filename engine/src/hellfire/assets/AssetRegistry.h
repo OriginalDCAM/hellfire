@@ -13,11 +13,12 @@ namespace hellfire {
     
     enum class AssetType {
         MODEL,
+        MESH,
         TEXTURE,
         MATERIAL,
         SCENE,
         SHADER,
-        UNKNOWN
+        UNKNOWN, 
     };
 
     struct AssetMetadata {
