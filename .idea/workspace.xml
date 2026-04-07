@@ -30,63 +30,10 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bf5790e7-c1f4-4aa6-bc31-e597b93be0eb" name="Changes" comment="- Updated README.md">
-      <change afterPath="$PROJECT_DIR$/Sandbox/include/Utils/AnimationInputHandler.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/src/Scripts/PlayerController.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/src/Utils/AnimationInputHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/Asset.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/Asset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Application.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Application.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/src/Application.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Application.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Cratered_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Cratered_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Desert_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Desert_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Hazy_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Hazy_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Icy_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Icy_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Island_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Island_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Lava_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Lava_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Lush_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Lush_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Mars_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Mars_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Methane_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Methane_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Ocean_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Ocean_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Plains_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Plains_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Red_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Red_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Rocky_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Rocky_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Snowy_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Snowy_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Temperate_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Temperate_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Tropical_01-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/cubemaps/Cubemap_Tropical_02-512x512.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/Plane.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/high_def_sphere.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/low_poly_well.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/low_poly_well.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/terrain.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/test_for_game_engine_monkey.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/textures/eltjo.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/textures/ground.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/textures/lava.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/textures/miquel.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/include/Game.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Game.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/include/Scripts/OrbitController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Scripts/OrbitController.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/include/Scripts/PlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Scripts/PlayerController.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Game.cpp" afterDir="false" />
+    <list default="true" id="bf5790e7-c1f4-4aa6-bc31-e597b93be0eb" name="Changes" comment="Kappa">
+      <change afterPath="$PROJECT_DIR$/Sandbox/include/Utils/AsteroidBeltFactory.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Sandbox/src/Utils/AsteroidBeltFactory.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scripts/OrbitController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scripts/OrbitController.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vendor/imguizmo" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/imguizmo" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -250,7 +197,7 @@
       <option name="presentableId" value="Default" />
       <updated>1755408114514</updated>
       <workItem from="1755408117032" duration="3461000" />
-      <workItem from="1755450809190" duration="6984000" />
+      <workItem from="1755450809190" duration="9200000" />
     </task>
     <task id="LOCAL-00001" summary="- Fixed cmake issue where msvc working directory was set twice">
       <option name="closed" value="true" />
@@ -276,7 +223,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755411581459</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Kappa">
+      <option name="closed" value="true" />
+      <created>1755457868164</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1755457868164</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -291,6 +246,7 @@
     <MESSAGE value="- Fixed cmake issue where msvc working directory was set twice" />
     <MESSAGE value="- F" />
     <MESSAGE value="- Updated README.md" />
-    <option name="LAST_COMMIT_MESSAGE" value="- Updated README.md" />
+    <MESSAGE value="Kappa" />
+    <option name="LAST_COMMIT_MESSAGE" value="Kappa" />
   </component>
 </project>
