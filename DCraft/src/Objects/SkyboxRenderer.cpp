@@ -93,7 +93,7 @@ namespace DCraft {
             "assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
     }
 
-    void SkyboxRenderer::render(Skybox *skybox, CameraComponent *camera) const {
+    void SkyboxRenderer::render(const Skybox *skybox, const CameraComponent *camera) const {
         if (!skybox || !skybox->is_loaded()) return;
 
         // Save current depth state

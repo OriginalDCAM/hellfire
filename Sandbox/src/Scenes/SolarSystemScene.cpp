@@ -1,4 +1,4 @@
-﻿#include "DCraft/Addons/Cameras.h"
+﻿#include "DCraft/Addons/CameraFactory.h"
 #include "DCraft/Addons/Asset.h"
 #include "DCraft/Graphics/Lighting/DirectionalLight.h"
 #include "Scenes/SolarSystemScene.h"
@@ -90,11 +90,6 @@ DCraft::Entity *create_planet(const std::string &name, float scale, const glm::v
     }
 
     return planet;
-}
-
-DCraft::Entity *create_moon(const std::string &name, float scale, glm::vec3 center, DCraft::Material *material,
-                            float orbit_radius = 0.0f, float orbit_speed = 0.0f) {
-    return create_planet(name, scale, glm::vec3(0.0f), material, orbit_radius, orbit_speed, center);
 }
 
 DCraft::Entity *create_planet_with_rotation(const std::string &name, float scale, const glm::vec3 &position,

@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-#include "DCraft/Addons/Cameras.h"
+#include "DCraft/Addons/CameraFactory.h"
 #include "DCraft/Utility/ObjectDeserializer.h"
 #include "DCraft/Utility/ObjectSerializer.h"
 

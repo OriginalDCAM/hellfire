@@ -2,10 +2,9 @@
 // Created by denzel on 03/04/2025.
 //
 
-#include <Dcraft/Graphics/Geometry/Cube.h>
-
 #include "Game.h"
 #include "Scenes/SolarSystemScene.h"
+#include "Scenes/SponzaScene.h"
 #include "Scripts/PlayerController.h"
 #include "Utils/AnimationInputHandler.h"
 
@@ -30,8 +29,6 @@ void Game::setup_callbacks(DCraft::Application &app) {
 }
 
 void Game::init(DCraft::Application &app) {
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
     glutSetCursor(GLUT_CURSOR_NONE);
     glutWarpPointer(app.get_window_width() / 2, app.get_window_height() / 2);
 
@@ -62,11 +59,12 @@ void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window, DCraft::Sh
     scene_manager_ = &sm;
 
     // Scene loading with code behind
-    scenes_["SolarSystem"] = load_solar_system_scene(sm, window, shader_manager);
+    // scenes_["SolarSystem"] = load_solar_system_scene(sm, window, shader_manager);
+    scenes_["Sponza"] = load_sponza_scene(sm, window, shader_manager);
 
     // Set the initial active scene
-    sm.set_active_scene(scenes_["SolarSystem"]);
-    active_scene_name_ = "SolarSystem";
+    sm.set_active_scene(scenes_["Sponza"]);
+    active_scene_name_ = "Sponza";
 
     // Register scene activation callback with the scene manager
     sm.set_scene_activated_callback([this](DCraft::Scene *scene) {

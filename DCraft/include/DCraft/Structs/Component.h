@@ -17,6 +17,5 @@ namespace DCraft {
         virtual void on_removed() { owner_ = nullptr; }
     private:
         Entity* owner_ = nullptr;
-    
     };
 } // namespace DCraft
