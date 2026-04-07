@@ -164,6 +164,17 @@ namespace DCraft {
             }
         }
 
+        // Material methods (these work for any object that has a mesh)
+        void set_material(Material *material) {
+            if (material && has_mesh()) {
+                get_mesh()->set_material(material);
+            }
+        }
+
+        Material *get_material() const {
+            return has_mesh() ? get_mesh()->get_material() : nullptr;
+        }
+
         void update_world_matrix() {
             const glm::mat4 *parent_world_matrix = nullptr;
             if (parent_ != nullptr) {

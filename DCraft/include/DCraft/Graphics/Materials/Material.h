@@ -1,8 +1,9 @@
 #pragma once
-#include <limits>
 #include <string>
 #include <unordered_map>
-#include <vector>
+#include <unordered_set>
+#include <variant>
+#include <optional>
 #include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
 
@@ -10,120 +11,239 @@
 
 namespace DCraft {
     class Material {
-    protected:
-        std::string name;
-        std::vector<Texture *> textures_;
-        std::unordered_map<TextureType, std::vector<Texture *> > textures_map_;
-        float texture_repeat_x = 1.0f;
-        float texture_repeat_y = 1.0f;
+    public:
+        enum class PropertyType {
+            FLOAT, VEC3, VEC4, TEXTURE, BOOL, INT, MAT3, MAT4
+        };
 
-        using ShaderHandle = uint64_t;
-        static constexpr ShaderHandle INVALID_SHADER = std::numeric_limits<ShaderHandle>::max();
-        ShaderHandle shader_handle = INVALID_SHADER;
-        bool has_diffuse_texture_ = false;
+        struct Property {
+            PropertyType type;
+            std::string name;
+            std::variant<float, glm::vec3, glm::vec4, Texture*, bool, int, glm::mat3, glm::mat4> value;
 
-        glm::vec3 ambient_color_ = glm::vec3(0.1f);
-        glm::vec3 diffuse_color_ = glm::vec3(1.0f);
+            std::string uniform_name;
 
-        virtual void on_diffuse_texture_set(Texture *texture) {
-        }
+            Property(const std::string& name, float value, const std::string& uniform = "") : type(PropertyType::FLOAT), name(name), value(value), uniform_name(uniform.empty() ? name : uniform) {}
+            Property(const std::string& name, const glm::vec3& value, const std::string& uniform = "") : type(PropertyType::VEC3), value(value), uniform_name(uniform.empty() ? name : uniform), name(name) {}
+            Property(const std::string& name, const glm::vec4& value, const std::string& uniform = "") : name(name), type(PropertyType::VEC4), value(value), uniform_name(uniform.empty() ? name : uniform){}
+            Property(const std::string& name, Texture* value, const std::string& uniform = "") : name(name), type(PropertyType::TEXTURE), value(value), uniform_name(uniform.empty() ? name : uniform){}
+            Property(const std::string& name, bool value, const std::string& uniform = "") : name(name), type(PropertyType::BOOL), value(value), uniform_name(uniform.empty() ? name : uniform){}
+            Property(const std::string& name, int value, const std::string& uniform = "") : name(name), type(PropertyType::INT), value(value), uniform_name(uniform.empty() ? name : uniform){}
+            Property(const std::string& name, const glm::mat3& value, const std::string& uniform = "") : name(name), type(PropertyType::MAT3), value(value), uniform_name(uniform.empty() ? name : uniform){}
+            Property(const std::string& name, const glm::mat4& value, const std::string& uniform = "") : name(name), type(PropertyType::MAT4), value(value), uniform_name(uniform.empty() ? name : uniform){}
+        };
 
-        virtual void on_specular_texture_set(Texture *texture) {
-        }
+        struct ShaderInfo {
+            std::string vertex_path;
+            std::string fragment_path;
+            std::optional<std::string> geometry_path;  // Optional geometry shader
+            std::unordered_set<std::string> defines;   // Preprocessor defines
+            std::unordered_map<std::string, std::string> uniform_mappings; // Property name -> uniform name
+            
+            bool is_valid() const {
+                return !vertex_path.empty() && !fragment_path.empty();
+            }
+        };
+
+    private:
+        std::string name_;
+        std::unordered_map<std::string, Property> properties_;
+
+        // ===Shader information===
+        std::optional<ShaderInfo> custom_shader_info_;
+        uint32_t compiled_shader_id_ = 0;
+        
+        // ===Built-in material type (fallback if no custom shader)===
+        int builtin_material_type_ = 0; // 0=Lambert, 1=Phong, 2=PBR
 
     public:
-        Material(const std::string &name);
+        Material(const std::string& name) : name_(name) {}
 
-        virtual ~Material() = default;
-
-        glm::vec3 get_ambient_color() const { return ambient_color_; };
-        glm::vec3 get_diffuse_color() const { return diffuse_color_; };
-
-        void set_ambient_color(const glm::vec3 &color) { ambient_color_ = color; }
-        void set_diffuse_color(const glm::vec3 &color) { diffuse_color_ = color; }
-
-        void set_diffuse_texture(std::string &path) { set_texture(path, TextureType::DIFFUSE); }
-
-        void set_diffuse_texture(Texture *texture) {
-            set_texture(texture);
-            has_diffuse_texture_ = true;
+        // ===Generic property setters===
+        void set_property(const std::string& name, const float value, const std::string& uniform_name = "") {
+            properties_[name] = Property(name, value, uniform_name);
         }
 
-        Texture *get_diffuse_texture() {
-            auto &diffuseTextures = textures_map_[TextureType::DIFFUSE];
-            return diffuseTextures.empty() ? nullptr : diffuseTextures[0];
+        void set_property(const std::string& name, const glm::vec3& value, const std::string& uniform_name = "") {
+            properties_[name] = Property(name, value, uniform_name);
         }
 
-        void remove_texture(TextureType type) {
-            // Clear textures of the specified type from the map
-            auto it = textures_map_.find(type);
-            if (it != textures_map_.end()) {
-                // If we're removing diffuse textures, update the flag
-                if (type == TextureType::DIFFUSE) {
-                    has_diffuse_texture_ = false;
-                }
+        void set_property(const std::string& name, const glm::vec4& value, const std::string& uniform_name = "") {
+            properties_[name] = Property(name, value, uniform_name);
+        }
+        
+        void set_property(const std::string& name, Texture* value, const std::string& uniform_name = "") {
+            properties_[name] = Property(name, value, uniform_name);
+        }
 
-                // Remove the textures of this type from the main textures_ collection
-                for (auto *texture: it->second) {
-                    auto texIt = std::find(textures_.begin(), textures_.end(), texture);
-                    if (texIt != textures_.end()) {
-                        textures_.erase(texIt);
-                    }
-                }
+        void set_property(const std::string& name, const bool value, const std::string& uniform_name = "") {
+            properties_[name] = Property(name, value, uniform_name);
+        }
 
-                // Unbind the texture
-                for (auto* texture : it->second) {
-                    // Unbind the texture
-                    texture->unbind();
-            
-                    // Remove from the main vector
-                    auto texIt = std::find(textures_.begin(), textures_.end(), texture);
-                    if (texIt != textures_.end()) {
-                        textures_.erase(texIt);
-                    }
-                }
+        void set_property(const std::string& name, const int value, const std::string& uniform_name = "") {
+            properties_[name] = Property(name, value, uniform_name);
+        }
 
-                // Clear this type's vector in the map
-                it->second.clear();
+        void set_property(const std::string& name, const glm::mat3& value, const std::string& uniform_name = "") {
+            properties_[name] = Property(name, value, uniform_name);
+        }
+
+        void set_property(const std::string& name, const glm::mat4& value, const std::string& uniform_name = "") {
+            properties_[name] = Property(name, value, uniform_name);
+        }
+
+        // ===Custom shader support===
+        void set_custom_shader(const std::string& vertex_path, const std::string& fragment_path) {
+            custom_shader_info_ = ShaderInfo{vertex_path, fragment_path};
+        }
+        
+        void set_custom_shader(const ShaderInfo& shader_info) {
+            custom_shader_info_ = shader_info;
+        }
+        
+        void add_shader_define(const std::string& define) {
+            if (custom_shader_info_) {
+                custom_shader_info_->defines.insert(define);
+            }
+        }
+        
+        void set_uniform_mapping(const std::string& property_name, const std::string& uniform_name) {
+            if (custom_shader_info_) {
+                custom_shader_info_->uniform_mappings[property_name] = uniform_name;
+            }
+        }
+        
+        bool has_custom_shader() const {
+            return custom_shader_info_ && custom_shader_info_->is_valid();
+        }
+        
+        const ShaderInfo* get_shader_info() const {
+            return custom_shader_info_ ? &*custom_shader_info_ : nullptr;
+        }
+        
+        void set_compiled_shader_id(uint32_t shader_id) {
+            compiled_shader_id_ = shader_id;
+        }
+        
+        uint32_t get_compiled_shader_id() const {
+            return compiled_shader_id_;
+        }
+        
+        // === BUILT-IN MATERIAL TYPE ===
+        void set_builtin_material_type(int type) {
+            builtin_material_type_ = type;
+        }
+        
+        int get_builtin_material_type() const {
+            return builtin_material_type_;
+        }
+        
+        // ===Convenience methods===
+        void set_diffuse_color(const glm::vec3& color) { set_property("diffuseColor", color); }
+        void set_ambient_color(const glm::vec3& color) { set_property("ambientColor", color); }
+        void set_specular_color(const glm::vec3& color) { set_property("specularColor", color); }
+        void set_shininess(const float shininess) { set_property("shininess", shininess); }
+        void set_diffuse_texture(const Texture* texture) { set_property("diffuseTexture", texture); }
+
+        void set_diffuse_texture(Texture* texture) { 
+            set_property("diffuseTexture", texture); 
+            set_property("useDiffuseTexture", texture != nullptr);
+        }
+        
+        void set_texture(const std::string& path, TextureType type) {
+            auto* texture = new Texture(path, type);
+            if (type == TextureType::DIFFUSE) {
+                set_diffuse_texture(texture);
             }
         }
 
-        void remove_all_textures() {
-            // Clear all textures
-            textures_.clear();
-            textures_map_.clear();
-            has_diffuse_texture_ = false;
+        // === Getters ===
+        template<typename T>
+        T get_property(const std::string& name, const T& default_value = T{}) const {
+            auto it = properties_.find(name);
+            if (it != properties_.end()) {
+                if (auto* val = std::get_if<T>(&it->second.value)) {
+                    return *val;
+                }
+            }
+            return default_value;
         }
 
-        void remove_diffuse_texture() {
-            remove_texture(TextureType::DIFFUSE);
+        const auto& get_properties() const { return properties_; }
+        const std::string& get_name() const { return name_; }
+
+        // Backwards compatibility
+        glm::vec3 get_ambient_color() const { return get_property<glm::vec3>("ambientColor", glm::vec3(0.1f)); }
+        glm::vec3 get_diffuse_color() const { return get_property<glm::vec3>("diffuseColor", glm::vec3(0.8f)); }
+        glm::vec3 get_specular_color() const { return get_property<glm::vec3>("specularColor", glm::vec3(0.5f)); }
+        float get_shininess() const { return get_property<float>("shininess", 32.0f); }
+    };
+
+
+    class MaterialBuilder {
+            public:
+        static std::unique_ptr<Material> create_lambert(const std::string& name) {
+            auto material = std::make_unique<Material>(name);
+            material->set_builtin_material_type(0);
+            material->set_diffuse_color(glm::vec3(0.8f));
+            material->set_ambient_color(glm::vec3(0.1f));
+            return material;
         }
-
-
-        void set_texture(const std::string &path, TextureType type);
-
-        void set_texture(Texture *texture);
-
-        const std::vector<Texture *> &get_textures() const;
-
-        const std::string &get_name() const;
-
-        bool has_texture() const;
-
-        void set_texture_repeat(float repeat_x, float repeat_y);
-
-        std::tuple<float, float> get_texture_repeat();
-
-        void set_shader(uint32_t shader_id);
-
-        uint32_t get_shader() const;
-
-        bool has_custom_shader() const;
-
-        bool has_diffuse_texture() const { return has_diffuse_texture_; }
-
-        virtual void bind(void *renderer_context) = 0;
-
-        void set_name(const std::string &value) { name = value; }
+        
+        static std::unique_ptr<Material> create_phong(const std::string& name) {
+            auto material = std::make_unique<Material>(name);
+            material->set_builtin_material_type(1);
+            material->set_diffuse_color(glm::vec3(0.8f));
+            material->set_ambient_color(glm::vec3(0.1f));
+            material->set_specular_color(glm::vec3(0.5f));
+            material->set_shininess(32.0f);
+            return material;
+        }
+        
+        static std::unique_ptr<Material> create_pbr(const std::string& name) {
+            auto material = std::make_unique<Material>(name);
+            material->set_builtin_material_type(2);
+            material->set_diffuse_color(glm::vec3(0.8f));
+            material->set_property("metallic", 0.0f);
+            material->set_property("roughness", 0.5f);
+            material->set_property("ao", 1.0f);
+            return material;
+        }
+        
+        // Create material with custom shader
+        static std::unique_ptr<Material> create_custom(const std::string& name, 
+                                                      const std::string& vertex_path,
+                                                      const std::string& fragment_path) {
+            auto material = std::make_unique<Material>(name);
+            material->set_custom_shader(vertex_path, fragment_path);
+            return material;
+        }
+        
+        // Create material from shader template
+        static std::unique_ptr<Material> create_from_template(const std::string& name,
+                                                             const std::string& template_name) {
+            auto material = std::make_unique<Material>(name);
+            
+            // Built-in templates
+            if (template_name == "toon") {
+                material->set_custom_shader("assets/shaders/toon.vert", "assets/shaders/toon.frag");
+                material->set_property("toonSteps", 4.0f);
+                material->set_property("outlineWidth", 0.02f);
+            }
+            else if (template_name == "water") {
+                material->set_custom_shader("assets/shaders/water.vert", "assets/shaders/water.frag");
+                material->set_property("waveSpeed", 1.0f);
+                material->set_property("waveAmplitude", 0.1f);
+                material->add_shader_define("ANIMATED_WAVES");
+            }
+            else if (template_name == "hologram") {
+                material->set_custom_shader("assets/shaders/hologram.vert", "assets/shaders/hologram.frag");
+                material->set_property("scanlineSpeed", 2.0f);
+                material->set_property("glitchIntensity", 0.1f);
+                material->set_property("hologramColor", glm::vec3(0.0f, 1.0f, 1.0f));
+            }
+            
+            return material;
+        }
     };
 }
