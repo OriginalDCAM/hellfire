@@ -195,4 +195,8 @@ namespace hellfire {
                 break;
         }
     }
+
+    void GLFWWindow::enable_vsync(const bool vsync) {
+        glfwSwapInterval(vsync);
+    }
 }
