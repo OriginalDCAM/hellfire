@@ -1,14 +1,12 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.14...3.29)
 project(CustomEngine VERSION 1.1)
 
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Configure paths to external libraries
-set(GLEW_ROOT_DIR "C:/Libraries/glew-2.0.0-win32/glew-2.0.0" CACHE PATH "GLEW root directory")
-set(GLUT_ROOT_DIR "C:/Libraries/freeglut-MSVC-3.0.0-2.mp/freeglut" CACHE PATH "GLUT root directory")
-set(GLM_ROOT_DIR "C:/Libraries/glm-0.9.6.3/glm" CACHE PATH "GLM root directory")
+# Include FetchContent module
+include(FetchContent)
 
 # If we have multiple cores, use them for building
 include(ProcessorCount)
@@ -17,49 +15,80 @@ if (NOT N EQUAL 0)
     set(CMAKE_BUILD_PARALLEL_LEVEL ${N})
 endif ()
 
-list(APPEND CMAKE_PREFIX_PATH ${GLEW_ROOT_DIR} ${GLUT_ROOT_DIR} ${GLM_ROOT_DIR})
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+# Use the cache for repeat builds
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+endif()
 
-# Create GLM target 
-if (NOT TARGET GLM::GLM AND EXISTS "${GLM_ROOT_DIR}")
-    add_library(GLM::GLM INTERFACE IMPORTED)
-    set_target_properties(GLM::GLM PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${GLM_ROOT_DIR}"
+# Set minimum policy version for dependencies to avoid CMake version errors
+set(CMAKE_POLICY_DEFAULT_CMP0000 NEW)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
+# Fetch GLEW using a more reliable CMake-native approach
+FetchContent_Declare(
+        glew
+        URL https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip
+        URL_HASH SHA256=a9046a913774395a095edcc0b0ac2d81c3aacca61787b39839b941e9be14e0d4
+)
+
+FetchContent_GetProperties(glew)
+if(NOT glew_POPULATED)
+    FetchContent_MakeAvailable(glew)
+
+    # Create GLEW library manually
+    add_library(libglew_static STATIC
+            ${glew_SOURCE_DIR}/src/glew.c
     )
-    set(GLM_FOUND TRUE)
-endif ()
 
-# Define GLEW target
-if (NOT TARGET GLEW::GLEW AND EXISTS "${GLEW_ROOT_DIR}")
-    set(GLEW_INCLUDE_DIR "${GLEW_ROOT_DIR}/include")
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)  # 64-bit
-        set(GLEW_LIBRARY "${GLEW_ROOT_DIR}/lib/Release/x64/glew32.lib")
-    else ()  # 32-bit
-        set(GLEW_LIBRARY "${GLEW_ROOT_DIR}/lib/Release/Win32/glew32.lib")
-    endif ()
-
-    add_library(GLEW::GLEW UNKNOWN IMPORTED)
-    set_target_properties(GLEW::GLEW PROPERTIES
-            IMPORTED_LOCATION "${GLEW_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${GLEW_INCLUDE_DIR}"
+    target_include_directories(libglew_static PUBLIC
+            ${glew_SOURCE_DIR}/include
     )
-endif ()
 
-# Define GLUT target
-if (NOT TARGET GLUT::GLUT AND EXISTS "${GLUT_ROOT_DIR}")
-    set(GLUT_INCLUDE_DIR "${GLUT_ROOT_DIR}/include")
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)  # 64-bit
-        set(GLUT_LIBRARY "${GLUT_ROOT_DIR}/lib/x64/freeglut.lib") 
-    else ()  # 32-bit
-        set(GLUT_LIBRARY "${GLUT_ROOT_DIR}/lib/freeglut.lib")
-    endif ()
-
-    add_library(GLUT::GLUT UNKNOWN IMPORTED)
-    set_target_properties(GLUT::GLUT PROPERTIES
-            IMPORTED_LOCATION "${GLUT_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${GLUT_INCLUDE_DIR}"
+    target_compile_definitions(libglew_static PUBLIC
+            GLEW_STATIC
+            GLEW_NO_GLU
     )
-endif ()
+
+    if(WIN32)
+        target_link_libraries(libglew_static PUBLIC opengl32)
+    else()
+        target_link_libraries(libglew_static PUBLIC GL)
+    endif()
+
+    # Set target properties
+    set_target_properties(libglew_static PROPERTIES
+            OUTPUT_NAME "glew32s"
+            PREFIX ""
+    )
+endif()
+
+# Fetch FreeGLUT
+FetchContent_Declare(
+        freeglut
+        GIT_REPOSITORY https://github.com/freeglut/freeglut.git
+        GIT_TAG v3.6.0
+)
+
+# Configure FreeGLUT build options
+set(FREEGLUT_BUILD_DEMOS OFF CACHE BOOL "" FORCE)
+set(FREEGLUT_BUILD_STATIC_LIBS ON CACHE BOOL "" FORCE)
+set(FREEGLUT_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+# Suppress policy warnings from FreeGLUT
+set(CMAKE_WARN_DEPRECATED OFF)
+
+FetchContent_MakeAvailable(freeglut)
+
+# Re-enable warnings for your own code
+set(CMAKE_WARN_DEPRECATED ON)
+
+# Create GLM target from vendor directory
+add_library(GLM::GLM INTERFACE IMPORTED)
+set_target_properties(GLM::GLM PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm"
+)
 
 # Add the vendor directory to the include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
@@ -83,25 +112,21 @@ add_library(imgui STATIC
         ${IMGUI_DIR}/backends/imgui_impl_glut.cpp
         ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 )
+
 target_include_directories(imgui PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor
         ${IMGUI_DIR}
         ${IMGUI_DIR}/backends
-        ${GLEW_INCLUDE_DIR}
-        ${GLUT_INCLUDE_DIR}
+        ${glew_SOURCE_DIR}/include # GLEW headers
+        ${freeglut_SOURCE_DIR}/include # FreeGLUT headers
 )
 
-# link against OpenGL, GLEW, and GLUT
+# Link against OpenGL, GLEW, and GLUT using the fetched libraries
 target_link_libraries(imgui PUBLIC
         opengl32
-        GLEW::GLEW
-        GLUT::GLUT
+        libglew_static  # GLEW static library from FetchContent
+        freeglut_static # FreeGLUT static library from FetchContent
 )
-
-
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set_property(TARGET DCraft PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-endif()
 
 # Assimp build options
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
@@ -109,8 +134,8 @@ set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)  
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)  
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_MINIZIP OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_IFC_IMPORTER OFF CACHE BOOL "" FORCE)
 
@@ -118,13 +143,6 @@ set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
 set(ASSIMP_UNITY_BUILD OFF CACHE BOOL "" FORCE)
-
-# Use the cache for repeat builds
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
-    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
-endif()
 
 set(CMAKE_CXX_FLAGS_OLD ${CMAKE_CXX_FLAGS})
 string(REPLACE "-Werror" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -134,8 +152,17 @@ set(ASSIMP_BUILD_PCH ON CACHE BOOL "" FORCE)
 
 add_subdirectory(vendor/assimp)
 
-add_subdirectory(DCraft)
+add_subdirectory(Editor)
+add_subdirectory(Engine)
 add_subdirectory(Sandbox)
+
+# Configure release build optimizations after target creation
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    # Apply IPO to your main targets
+    set_property(TARGET imgui PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    # Add other targets as needed:
+    # set_property(TARGET YourMainTarget PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 if (MSVC)
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Sandbox)
@@ -143,8 +170,9 @@ if (MSVC)
     # Create directories and dummy exe at configure time
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Sandbox/Debug")
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Sandbox/Release")
-    
-    # Create dummy exe to prevent VS errors
+
+    # Create dummy exe to prevent VS errors (you'll need to define APP_NAME)
+    set(APP_NAME "CustomEngine") # Define this or pass it from somewhere
     set(DUMMY_EXE "${CMAKE_BINARY_DIR}/Sandbox/Debug/${APP_NAME}.exe")
     if(NOT EXISTS ${DUMMY_EXE})
         file(WRITE "${DUMMY_EXE}.temp" "")
