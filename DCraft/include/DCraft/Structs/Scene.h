@@ -18,7 +18,7 @@ namespace DCraft
         // Object management
         Object3D* create_object(const std::string& name);
 
-        virtual void draw(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program) override;
+        virtual void draw(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program, void* renderer_context) override;
 
         template<typename CameraType, typename... Args>
         CameraType* create_camera(const std::string& name, Args&& ... args)

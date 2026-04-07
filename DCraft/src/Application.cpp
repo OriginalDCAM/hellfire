@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-#include "Dcraft/Graphics/GL/glsl.h"
+#include "Dcraft/Graphics/OGL/glsl.h"
 #include <iostream>
 
 namespace DCraft {

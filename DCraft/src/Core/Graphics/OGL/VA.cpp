@@ -1,4 +1,4 @@
-#include "DCraft/Graphics/GL/VA.h"
+#include "DCraft/Graphics/OGL/VA.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>

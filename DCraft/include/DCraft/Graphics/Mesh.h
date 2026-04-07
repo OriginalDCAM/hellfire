@@ -1,8 +1,8 @@
 #pragma once
 #include "Vertex.h"
-#include "GL/IB.h"
-#include "GL/VA.h"
-#include "GL/VB.h"
+#include "OGL/IB.h"
+#include "OGL/VA.h"
+#include "OGL/VB.h"
 #include "Materials/Material.h"
 
 namespace DCraft {
@@ -20,7 +20,7 @@ namespace DCraft {
         Material *material = nullptr;
 
         void set_material(Material *mat) { material = mat; }
-        Material *get_material() const { return material; }
+        Material *get_material() const { return material ? material : nullptr; }
 
         bool is_wireframe = false;
 

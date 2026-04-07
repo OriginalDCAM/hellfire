@@ -82,7 +82,7 @@ namespace DCraft
         // Override from Object3D
         void update(float dt) override {}
 
-        void draw_self(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program) override {}
+        void draw_self(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program, void* renderer_context) override {}
 
         virtual void set_aspect_ratio(float aspect_ratio) = 0;
         virtual float get_aspect_ratio() const = 0;
