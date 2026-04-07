@@ -3,12 +3,11 @@
 //
 
 #include "Utils/AnimationInputHandler.h"
-#include "../../../Engine/src/hellfire/core/Application.h"
+#include "hellfire/core/Application.h"
 #include <iostream>
 #include <algorithm>
 
 #include "hellfire/utilities/ServiceLocator.h"
-#include "Utils/InputHandler.h"
 
 void AnimationInputHandler::register_orbit_controller(OrbitController* controller) {
     orbit_controllers_.push_back(controller);

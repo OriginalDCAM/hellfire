@@ -28,7 +28,7 @@ namespace hellfire {
         virtual bool on_key_down(int key) { return false; }
         virtual bool on_key_up(int key) { return false; }
         virtual bool on_mouse_button(int button, bool pressed) { return false; }
-        virtual bool on_mouse_move(float x, float y) { return false; }
+        virtual bool on_mouse_move(float x, float y, float x_offset, float y_offset) { return false; }
         virtual bool on_mouse_wheel(float delta) { return false; }
 
         // Window events

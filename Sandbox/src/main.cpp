@@ -1,5 +1,6 @@
+#include "GamePlugin.h"
 #include "hellfire-core.h"
-#include "../../Engine/src/hellfire/scene/CameraFactory.h"
+#include "hellfire/scene/CameraFactory.h"
 #include "hellfire/graphics/Geometry/Cube.h"
 
 /**
@@ -51,7 +52,7 @@ int main() {
 
     // Register our HelloCube plugin with the application
     // The plugin system allows us to extend the engine's functionality
-    app.register_plugin(std::make_unique<HelloCubePlugin>());
+    app.register_plugin(std::make_unique<GamePlugin>());
 
     // Initialize all engine systems (graphics, input, etc.)
     app.initialize();
