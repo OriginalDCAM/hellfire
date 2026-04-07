@@ -46,11 +46,11 @@ namespace hellfire::editor {
             }
             emit_progress("[INFO] Created Scenes/SampleScene.hfscene", 0.8f);
             emit_progress("[INFO] Initializing editor...", 0.9f);
+            
             // Switch to main thread for final setup
-            // add_to_recent(name, current_project_ );
-
             context_.queue_main_thread([this, p = std::move(project)]() mutable {
                 current_project_ = std::move(p);
+                current_project_->initialize_managers();
                 add_to_recent(current_project_->get_name(), current_project_->get_project_root() / "project.hfproj");
                 emit_progress("[INFO] Done!", 1.0f);
                 event_bus_.dispatch<ProjectLoadCompleteEvent>();

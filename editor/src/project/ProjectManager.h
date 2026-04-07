@@ -38,8 +38,8 @@ namespace hellfire::editor {
         explicit ProjectManager(EventBus &event_bus, EditorContext &context);
 
         // Current project
-        Project *get_current_project() { return current_project_.get(); }
-        bool has_project() { return current_project_ != nullptr; }
+        Project *get_current_project() const { return current_project_.get(); }
+        bool has_project() const { return current_project_ != nullptr; }
 
         // Project create/open/close
         void create_project_async(const std::string &name,
