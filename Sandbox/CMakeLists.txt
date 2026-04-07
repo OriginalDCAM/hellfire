@@ -63,9 +63,6 @@ set_target_properties(${APP_NAME} PROPERTIES
 )
 
 if (MSVC)
-    # Set this project as the startup project
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${APP_NAME})
-    
     # Try additional VS properties for working directory
     set_target_properties(${APP_NAME} PROPERTIES
         VS_DEBUGGER_COMMAND_ARGUMENTS ""
