@@ -213,6 +213,11 @@ namespace DCraft {
         return shader_id;
     }
 
+    uint32_t ShaderManager::get_shader(const std::string &key) const {
+        const auto it = compiled_shaders_.find(key);
+        return (it != compiled_shaders_.end()) ? it->second : 0;
+    }
+
     void ShaderManager::add_automatic_defines(const Material &material, std::unordered_set<std::string> &defines) {
         if (material.get_property<Texture*>("diffuseTexture", nullptr)) {
             defines.insert("HAS_DIFFUSE_TEXTURE");

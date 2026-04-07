@@ -22,8 +22,8 @@ namespace DCraft {
     public:
         virtual ~Entity() {
             cleanup_scripts();
-            
-            for (auto *child: children_) {
+
+            for (const auto *child: children_) {
                 std::clog << "Deleting child named: " << child->get_name() << ", from the parent: " << get_name() <<
                         '\n';
                 delete child;
@@ -35,22 +35,26 @@ namespace DCraft {
             add_component<TransformComponent>();
         }
 
+
         // Add an entity component
         void add(Entity *child) {
-            auto entity = std::find(children_.begin(), children_.end(), child);
-            if (entity == children_.end()) {
+            if (const auto entity = std::find(children_.begin(), children_.end(), child); entity == children_.end()) {
                 if (child->parent_ != nullptr) {
                     child->parent_->remove(child);
                 }
 
                 children_.push_back(child);
                 child->parent_ = this;
+
+                if (initialized_) {
+                    child->setup_recursive();
+                }
             }
         }
 
+
         void remove(Entity *child) {
-            const auto entity = std::find(children_.begin(), children_.end(), child);
-            if (entity != children_.end()) {
+            if (const auto entity = std::find(children_.begin(), children_.end(), child); entity != children_.end()) {
                 // Remove from children's list
                 children_.erase(entity);
                 child->parent_ = nullptr;
@@ -58,9 +62,9 @@ namespace DCraft {
         }
 
         // Getters
-        const std::string &get_name() const { return name_; }
-        const std::vector<Entity *> &get_children() const { return children_; }
-        Entity *get_parent() const { return parent_; }
+        [[nodiscard]] const std::string &get_name() const { return name_; }
+        [[nodiscard]] const std::vector<Entity *> &get_children() const { return children_; }
+        [[nodiscard]] Entity *get_parent() const { return parent_; }
 
         // Component management
         template<typename T, typename... Args>
@@ -77,7 +81,7 @@ namespace DCraft {
             if constexpr (std::is_base_of_v<ScriptComponent, T>) {
                 script_components_.push_back(component_ptr);
                 if (initialized_) {
-                    component_ptr->init(); // Initialize immediately if entity is already initialized
+                    component_ptr->init();
                 }
             }
 
@@ -85,9 +89,8 @@ namespace DCraft {
         }
 
         template<typename T>
-        T *get_component() const {
-            auto it = components_.find(std::type_index(typeid(T)));
-            if (it != components_.end()) {
+        [[nodiscard]] T *get_component() const {
+            if (const auto it = components_.find(std::type_index(typeid(T))); it != components_.end()) {
                 return static_cast<T *>(it->second.get());
             }
             return nullptr;
@@ -100,9 +103,9 @@ namespace DCraft {
 
         template<typename T>
         bool remove_component() {
-            auto it = components_.find(std::type_index(typeid(T)));
+            const auto it = components_.find(std::type_index(typeid(T)));
             if (it != components_.end()) {
-                T* component_ptr = static_cast<T*>(it->second.get());
+                T *component_ptr = static_cast<T *>(it->second.get());
 
                 // Special handling for ScriptComponents
                 if constexpr (std::is_base_of_v<ScriptComponent, T>) {
@@ -113,7 +116,7 @@ namespace DCraft {
                         script_components_.erase(script_it);
                     }
                 }
-                
+
                 if constexpr (std::is_base_of_v<Component, T>) {
                     component_ptr->on_removed();
                 }
@@ -123,69 +126,115 @@ namespace DCraft {
             return false;
         }
 
-        const std::vector<ScriptComponent*>& get_script_components() const {
+        [[nodiscard]] const std::vector<ScriptComponent *> &get_script_components() const {
             return script_components_;
+        }
+
+        void setup_recursive() {
+            if (!initialized_) {
+                setup();
+            }
+        }
+
+        // Recursive cleanup method
+        void cleanup_recursive() {
+            // Cleanup children first
+            for (auto *child: children_) {
+                child->cleanup_recursive();
+            }
+
+            // Then cleanup self
+            cleanup_scripts();
+            initialized_ = false;
+        }
+
+        void setup_children_recursive() const {
+            for (auto *child: children_) {
+                child->setup_recursive();
+            }
+        }
+
+        void update_children_recursive(const float delta_time) const {
+            for (auto *child: children_) {
+                child->update(delta_time);
+            }
         }
 
         // Lifecycle management
         virtual void setup() {
             initialize_scripts();
             initialized_ = true;
+
+            setup_children_recursive();
         }
 
-        virtual void update(float delta_time) {
+        virtual void update(const float delta_time) {
             update_scripts(delta_time);
+
+            update_children_recursive(delta_time);
         }
 
-        void update_world_matrices() {
+        void update_world_matrices() const {
             auto *transform = get_component<TransformComponent>();
             if (transform) {
                 const glm::mat4 *parent_world = nullptr;
                 if (parent_ && parent_->has_component<TransformComponent>()) {
                     parent_world = &parent_->get_component<TransformComponent>()->get_world_matrix();
                 }
-                transform-> update_world_matrix(parent_world);
+                transform->update_world_matrix(parent_world);
             }
 
             // Update children
-            for (auto *child: children_) {
+            for (const auto *child: children_) {
                 child->update_world_matrices();
             }
         }
 
         // Script specific methods
-        void initialize_scripts() {
-            for (auto* script : script_components_) {
+        void initialize_scripts() const {
+            for (auto *script: script_components_) {
                 script->init();
             }
         }
 
-        void update_scripts(float delta_time) {
-            for (auto* script : script_components_) {
+        void update_scripts(const float delta_time) const {
+            for (auto *script: script_components_) {
                 script->update(delta_time);
             }
         }
 
-        void cleanup_scripts() {
-            for (auto* script : script_components_) {
+        void cleanup_scripts() const {
+            for (auto *script: script_components_) {
                 script->remove();
             }
         }
 
         // Event broadcasting to all script components
-        void broadcast_event(const std::string& event_name, void* data = nullptr) {
-            for (auto* script : script_components_) {
+        void broadcast_event(const std::string &event_name, void *data = nullptr, const bool recursive = false) const {
+            for (auto *script: script_components_) {
                 script->trigger_event(event_name, data);
+            }
+
+            // Optionally broadcast to children
+            if (recursive) {
+                for (const auto* child : children_) {
+                    child->broadcast_event(event_name, data, true);
+                }
             }
         }
 
         // Send event to a specific script component type
         template<typename T>
-        void send_event_to_script(const std::string& event_name, void* data = nullptr) {
+        void send_event_to_script(const std::string &event_name, void *data = nullptr, const bool recursive = false) {
             static_assert(std::is_base_of_v<ScriptComponent, T>, "T must derive from ScriptComponent");
-            auto* script = get_component<T>();
-            if (script) {
+            if (auto *script = get_component<T>()) {
                 script->trigger_event(event_name, data);
+            }
+
+            if (recursive) {
+                for (auto* child : children_) {
+                    child->send_event_to_script<T>(event_name, data, true);
+                }
             }
         }
 
@@ -203,14 +252,14 @@ namespace DCraft {
             return comp;
         }
 
-        const TransformComponent *transform() const { return get_component<TransformComponent>(); }
+        [[nodiscard]] const TransformComponent *transform() const { return get_component<TransformComponent>(); }
 
     private:
         std::unordered_map<std::type_index, std::unique_ptr<Component> > components_;
         std::vector<Entity *> children_;
-        std::vector<ScriptComponent*> script_components_; // Quick access to script components
+        std::vector<ScriptComponent *> script_components_;
         Entity *parent_ = nullptr;
         std::string name_;
-        bool initialized_ = false; // Track if entity has been initialized
+        bool initialized_ = false; 
     };
 } // namespace DCraft

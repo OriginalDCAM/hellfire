@@ -184,11 +184,6 @@ namespace DCraft {
     
         bool is_transparent() const;
 
-        // Quick presets for common tiling patterns
-        void set_brick_tiling() { set_uv_tiling(4.0f, 2.0f); }
-        void set_tile_pattern() { set_uv_tiling(8.0f, 8.0f); }
-        void set_wood_planks() { set_uv_tiling(1.0f, 4.0f); }
-
         void set_diffuse_texture(Texture* texture) { 
             set_property("diffuseTexture", texture); 
             set_property("useDiffuseTexture", texture != nullptr);

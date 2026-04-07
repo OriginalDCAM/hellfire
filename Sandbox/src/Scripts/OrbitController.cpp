@@ -42,5 +42,4 @@ void OrbitController::on_update(float delta_time) {
     // Update planet rotation (spinning on its own axis)
     current_rotation_ += rotation_speed_ * delta_time;
     transform->set_rotation(0.0f, glm::degrees(current_rotation_), 0.0f);
-    
 }

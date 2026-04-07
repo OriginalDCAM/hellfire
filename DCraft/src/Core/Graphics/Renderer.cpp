@@ -7,31 +7,34 @@
 #include <algorithm>
 
 
+#include "DCraft/Application.h"
 #include "DCraft/Components/CameraComponent.h"
+#include "DCraft/Components/InstancedRenderableComponent.h"
 #include "DCraft/Components/LightComponent.h"
 #include "DCraft/Graphics/Renderers/SkyboxRenderer.h"
 #include "DCraft/Structs/Scene.h"
 
 namespace DCraft {
-    Renderer::Renderer(uint32_t fallback_program_id) : fallback_program_id_(fallback_program_id),
+    Renderer::Renderer(uint32_t fallback_program_id) : shader_registry_(&shader_manager_), fallback_shader_(nullptr),
+                                                       fallback_program_(fallback_program_id),
                                                        render_to_framebuffer_(false), framebuffer_width_(800),
                                                        framebuffer_height_(600) {
-        OGLRendererContext *ogl_context = new OGLRendererContext();
+        auto *ogl_context = new OGLRendererContext();
         ogl_context->default_shader_program = fallback_program_id;
         context_ = static_cast<void *>(ogl_context);
     }
 
     Renderer::Renderer()
-        : fallback_program_id_(0), render_to_framebuffer_(false),
+        : shader_registry_(nullptr), fallback_shader_(nullptr), fallback_program_(0), render_to_framebuffer_(false),
           framebuffer_width_(800), framebuffer_height_(600) {
-        OGLRendererContext *ogl_context = new OGLRendererContext();
+        auto *ogl_context = new OGLRendererContext();
         ogl_context->default_shader_program = 0;
         context_ = static_cast<void *>(ogl_context);
     }
 
     Renderer::~Renderer() {
         if (context_) {
-            OGLRendererContext *ogl_context = static_cast<OGLRendererContext *>(context_);
+            const auto *ogl_context = static_cast<OGLRendererContext *>(context_);
             delete ogl_context;
             context_ = nullptr;
         }
@@ -48,7 +51,7 @@ namespace DCraft {
         skybox_renderer_.initialize();
     }
 
-    void Renderer::render(Scene &scene) {
+    void Renderer::render(Scene &scene, float time) {
         CameraComponent *camera = scene.get_active_camera();
         if (!camera) {
             std::cerr << "No active camera in scene!" << std::endl;
@@ -71,21 +74,23 @@ namespace DCraft {
 
         opaque_objects_.clear();
         transparent_objects_.clear();
+        opaque_instanced_objects_.clear();
+        transparent_instanced_objects_.clear();
     }
 
     void Renderer::end_frame() {
         glFlush();
     }
 
-    uint32_t Renderer::get_default_shader() const {
-        return fallback_program_id_;
+    Shader *Renderer::get_default_shader() const {
+        return fallback_shader_;
     }
 
     void *Renderer::get_context() const {
         return context_;
     }
 
-    void Renderer::store_lights_in_context(const std::vector<Entity *> &light_entities, CameraComponent &camera) {
+    void Renderer::store_lights_in_context(const std::vector<Entity *> &light_entities, CameraComponent &camera) const {
         OGLRendererContext *ogl_context = static_cast<OGLRendererContext *>(context_);
         if (!ogl_context) return;
 
@@ -109,7 +114,7 @@ namespace DCraft {
                     }
                     break;
                 case LightComponent::LightType::SPOT:
-                    // Handle spot lights if needed
+                    // TODO: Handle spot lights
                     break;
             }
         }
@@ -159,20 +164,39 @@ namespace DCraft {
     void Renderer::collect_render_commands_recursive(Entity *entity, const glm::vec3 &camera_pos) {
         // Check if this entity is renderable
         if (auto *renderable = entity->get_component<RenderableComponent>()) {
-            if (auto *transform = entity->get_component<TransformComponent>()) {
+            if (const auto *transform = entity->get_component<TransformComponent>()) {
                 if (renderable->has_mesh()) {
-                    Material *material = renderable->get_material();
-                    if (material) {
-                        glm::vec3 object_pos = transform->get_world_position();
-                        float distance = glm::length(camera_pos - object_pos);
-                        bool is_transparent = is_material_transparent(material);
+                    if (Material *material = renderable->get_material()) {
+                        const glm::vec3 object_pos = transform->get_world_position();
+                        const float distance = glm::length(camera_pos - object_pos);
+                        const bool is_transparent = is_material_transparent(material);
 
-                        RenderCommand cmd = {entity, renderable, material, distance, is_transparent};
+                        const RenderCommand cmd = {entity, renderable, material, distance, is_transparent};
 
                         if (is_transparent) {
                             transparent_objects_.push_back(cmd);
                         } else {
                             opaque_objects_.push_back(cmd);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (auto* instanced_renderable = entity->get_component<InstancedRenderableComponent>()) {
+            if (auto* transform = entity->get_component<TransformComponent>()) {
+                if (instanced_renderable->has_mesh() && instanced_renderable->get_instance_count() > 0) {
+                    if (Material* material = instanced_renderable->get_material()) {
+                        glm::vec3 object_pos = transform->get_world_position();
+                        float distance = glm::length(camera_pos - object_pos);
+                        bool is_transparent = is_material_transparent(material);
+                    
+                        InstancedRenderCommand cmd = {entity, instanced_renderable, material, distance, is_transparent};
+                    
+                        if (is_transparent) {
+                            transparent_instanced_objects_.push_back(cmd);
+                        } else {
+                            opaque_instanced_objects_.push_back(cmd);
                         }
                     }
                 }
@@ -185,10 +209,10 @@ namespace DCraft {
     }
 
 
-    bool Renderer::is_material_transparent(Material *material) {
-        float transparency = material->get_property<float>("transparency", 1.0f);
-        float alpha = material->get_property<float>("alpha", 1.0f);
-        bool use_transparency = material->get_property<bool>("useTransparency", false);
+    bool Renderer::is_material_transparent(const Material *material) {
+        const auto transparency = material->get_property<float>("transparency", 1.0f);
+        const auto alpha = material->get_property<float>("alpha", 1.0f);
+        const bool use_transparency = material->get_property<bool>("useTransparency", false);
         return transparency < 1.0f || alpha < 1.0f || use_transparency;
     }
 
@@ -203,7 +227,18 @@ namespace DCraft {
                   });
 
         for (const auto &cmd: opaque_objects_) {
-            cmd.renderable->draw(view, projection, fallback_program_id_, context_);
+            if (Shader* shader_to_use = get_shader_for_material(cmd.material)) {
+                cmd.renderable->draw(view, projection, *shader_to_use, context_);
+            } else {
+                // Fallback to old method if no shader wrapper available
+                cmd.renderable->draw(view, projection, *fallback_shader_, context_);
+            }
+        }
+
+        for (const auto& cmd : opaque_instanced_objects_) {
+            if (Shader* shader_to_use = get_shader_for_material(cmd.material)) {
+                cmd.instanced_renderable->draw(view, projection, *shader_to_use, context_);
+            }
         }
     }
 
@@ -219,7 +254,18 @@ namespace DCraft {
                   });
 
         for (const auto &cmd: transparent_objects_) {
-            cmd.renderable->draw(view, projection, fallback_program_id_, context_);
+            if (Shader* shader_to_use = get_shader_for_material(cmd.material)) {
+                cmd.renderable->draw(view, projection, *shader_to_use, context_);
+            } else {
+                // Fallback to old method if no shader wrapper available
+                cmd.renderable->draw(view, projection, *fallback_shader_, context_);
+            }
+        }
+
+        for (const auto& cmd : transparent_instanced_objects_) {
+            if (Shader* shader_to_use = get_shader_for_material(cmd.material)) {
+                cmd.instanced_renderable->draw(view, projection, *shader_to_use, context_);
+            }
         }
 
         glDepthMask(GL_TRUE);
@@ -285,12 +331,64 @@ namespace DCraft {
         glFlush();
     }
 
-    void Renderer::set_fallback_shader(uint32_t shader_program_id) {
-        fallback_program_id_ = shader_program_id;
+    void Renderer::set_fallback_shader(Shader &fallback_shader) {
+        fallback_shader_ = &fallback_shader;
 
         if (context_) {
-            OGLRendererContext *ogl_context = static_cast<OGLRendererContext *>(context_);
-            ogl_context->default_shader_program = shader_program_id;
+            auto *ogl_context = static_cast<OGLRendererContext *>(context_);
+            ogl_context->default_shader_program = fallback_shader.get_program_id();
         }
+    }
+
+    Shader *Renderer::get_shader_for_material(Material *material) {
+        if (!material) {
+            return fallback_shader_;
+        }
+
+        // Check if material has a compiled shader ID
+        uint32_t material_shader_id = material->get_compiled_shader_id();
+        if (material_shader_id != 0) {
+            // Get shader wrapper from the ID
+            Shader *material_shader = shader_registry_.get_shader_from_id(material_shader_id);
+            if (material_shader) {
+                return material_shader;
+            }
+        }
+
+        // Check if material needs compilation
+        if (material->has_custom_shader()) {
+            // Try to compile the material's shader
+            uint32_t compiled_id = compile_material_shader(material);
+            if (compiled_id != 0) {
+                material->set_compiled_shader_id(compiled_id);
+                return shader_registry_.get_shader_from_id(compiled_id);
+            }
+        }
+
+        // Fall back to default shader
+        return fallback_shader_;
+    }
+
+    uint32_t Renderer::compile_material_shader(Material *material) {
+        if (!material || !material->has_custom_shader()) {
+            return 0;
+        }
+
+        const Material::ShaderInfo *shader_info = material->get_shader_info();
+        if (!shader_info) {
+            return 0;
+        }
+
+        // Create shader variant with material's settings
+        ShaderManager::ShaderVariant variant;
+        variant.vertex_path = shader_info->vertex_path;
+        variant.fragment_path = shader_info->fragment_path;
+        variant.defines = shader_info->defines;
+
+        // Add automatic defines based on material properties
+        shader_manager_.add_automatic_defines(*material, variant.defines);
+
+        // Compile using shader manager
+        return shader_manager_.load_shader(variant);
     }
 }
