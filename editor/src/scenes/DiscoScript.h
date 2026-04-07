@@ -19,7 +19,7 @@ class DiscoScript : public hellfire::ScriptComponent {
 
     void on_update(const float delta_time) override {
         if (should_play) {
-            if (auto light_comp = get_owner().get_component<hellfire::LightComponent>()) {
+            if (const auto light_comp = get_owner().get_component<hellfire::LightComponent>()) {
                 auto current_color = light_comp->get_color();
                 current_color += play_speed * delta_time;
                 light_comp->set_color(glm::mod(current_color, glm::vec3(1.0f)));
