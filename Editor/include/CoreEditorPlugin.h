@@ -21,6 +21,8 @@ namespace hellfire::editor {
 
         void on_end_frame() override;
 
+        void render_menu_bar();
+
         void on_render() override;
 
         void render_test_windows();
