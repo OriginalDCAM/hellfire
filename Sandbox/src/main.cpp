@@ -14,5 +14,7 @@ int main(int argc, char **argv) {
     app.initialize(argc, argv);
     app.run();
 
+    std::clog << "Terminating the application" << std::endl;
+
     return 0;
 }

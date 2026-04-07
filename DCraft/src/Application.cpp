@@ -2,18 +2,20 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include "imgui/backends/imgui_impl_glut.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
+#include "imgui/imgui.h"
 
 #include "Dcraft/Graphics/OGL/glsl.h"
 #include <iostream>
 
 namespace DCraft {
-    Application::Application(int width, int height, const std::string &title) :
-        title_(title) {
+    Application::Application(int width, int height, const std::string &title) : title_(title) {
         if (instance_ != nullptr) {
             throw std::runtime_error("Singleton Application already created");
         }
 
-       // Set the structs properties 
+        // Set the structs properties 
         window_info_.width = width;
         window_info_.height = height;
         window_info_.is_fullscreen = false;
@@ -23,12 +25,19 @@ namespace DCraft {
     }
 
     Application::~Application() {
+        // Clean up ImGui
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGLUT_Shutdown();
+        ImGui::DestroyContext();
+
+        // Cleanup renderer
         delete renderer_;
 
         for (auto *camera: cameras_) {
             delete camera;
         }
 
+        // Cleanup the shader programs
         for (uint32_t sp: shader_programs_) {
             glDeleteProgram(sp);
         }
@@ -44,12 +53,12 @@ namespace DCraft {
     uint32_t Application::create_shader_program(const std::string &vertex_path, const std::string &fragment_path) {
         std::string base_path = "";
 
-        #ifdef _WIN32
+#ifdef _WIN32
         char exePath[MAX_PATH];
         GetModuleFileNameA(NULL, exePath, MAX_PATH);
         base_path = std::string(exePath);
         base_path = base_path.substr(0, base_path.find_last_of("\\/")) + "/";
-        #endif
+#endif
 
         std::string abs_vertex_path = base_path + vertex_path;
         std::string abs_fragment_path = base_path + fragment_path;
@@ -118,16 +127,33 @@ namespace DCraft {
         }
         std::clog << "GLEW initialization succeeded" << '\n';
 
-        glutSetCursor(GLUT_CURSOR_NONE);
-        glutWarpPointer(window_info_.width / 2, window_info_.height / 2);
+        // Setup GLUT callbacks
+        setup_callbacks();
+        std::clog << "GLUT callbacks setup succeeded" << '\n';
+
+        // Initialize ImGui
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+        (void) io;
+        // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; 
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+
+        io.DisplaySize.x = static_cast<float>(window_info_.width);
+        io.DisplaySize.y = static_cast<float>(window_info_.height);
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+
+        // Setup Platform/Renderer backends
+        ImGui_ImplGLUT_Init();
+        ImGui_ImplOpenGL3_Init("#version 330"); // Specify GLSL version
+        
+        glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_CONTINUE_EXECUTION);
 
         // Setup OpenGL state
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
-
-        // Setup GLUT callbacks
-        setup_callbacks();
-        std::clog << "GLUT callbacks setup succeeded" << '\n';
 
         if (callbacks_.init) {
             callbacks_.init(*this);
@@ -153,10 +179,11 @@ namespace DCraft {
         glutMotionFunc(mouse_motion_callback);
         glutPassiveMotionFunc(mouse_passive_motion_callback);
         glutMouseWheelFunc(mouse_wheel_callback);
+        
     }
 
     void Application::run() {
-        glutMainLoop();
+            glutMainLoop();
     }
 
     void Application::update() {
@@ -177,6 +204,15 @@ namespace DCraft {
     }
 
     void Application::render_frame() const {
+        // Start the ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGLUT_NewFrame();
+        ImGui::NewFrame();
+
+        if (!game_mode_) {
+            ImGui::ShowDemoWindow(nullptr); // Pass nullptr to not allow closing
+        }
+
         // Clear the screen
         renderer_->begin_frame();
 
@@ -184,34 +220,86 @@ namespace DCraft {
 
         renderer_->end_frame();
 
+        // Render ImGui
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         glutSwapBuffers();
     }
 
     void Application::on_key_down(unsigned char key) {
+        if (key == '`') {
+            keys_['`'] = true;
+            return;
+        }
+
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard) {
+            return;
+        }
+
         keys_[key] = true;
     }
 
     void Application::on_key_up(unsigned char key) {
+        if (key == '`') {
+            keys_['`'] = false;
+            return;
+        }
+
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard) {
+            return;
+        }
         keys_[key] = false;
     }
 
     void Application::on_special_key_down(int key) {
+        if (key == '`') {
+            keys_['`'] = true;
+            return;
+        }
+
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard) {
+            return;
+        }
         keys_[key + 256] = true;
     }
 
     void Application::on_special_key_up(int key) {
+        if (key == '`') {
+            keys_['`'] = false;
+            return;
+        }
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard) {
+            return;
+        }
         keys_[key + 256] = false;
     }
 
     void Application::on_mouse_button(int button, int state, int x, int y) {
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureMouse) {
+            return;
+        }
     }
 
     void Application::on_mouse_motion(int x, int y) {
-        // For now
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureMouse) {
+            return;
+        }
+        
         on_mouse_passive_motion(x, y);
     }
 
     void Application::on_mouse_passive_motion(int x, int y) {
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureMouse || !game_mode_) {
+            return;
+        }
         // if first mouse store the last x and y position.
         if (first_mouse_) {
             last_mouse_x_ = x;
@@ -238,7 +326,6 @@ namespace DCraft {
             callbacks_.on_mouse_moved(x_offset, y_offset);
         }
 
-
         // Warp when getting close to edges
         if (x < 100 || x > window_info_.width - 100 || y < 100 || y > window_info_.height - 100) {
             glutWarpPointer(window_info_.width / 2, window_info_.height / 2);
@@ -246,6 +333,10 @@ namespace DCraft {
     }
 
     void Application::on_mouse_wheel(int wheel, int direction, int x, int y) {
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.WantCaptureMouse) {
+            return;
+        }
     }
 
     void Application::on_window_resize(int width, int height) {
@@ -256,9 +347,13 @@ namespace DCraft {
 
         window_info_.aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
 
+        ImGuiIO &io = ImGui::GetIO();
+        io.DisplaySize.x = static_cast<float>(width);
+        io.DisplaySize.y = static_cast<float>(height);
+
         glViewport(0, 0, width, height);
 
-        for (auto& camera : scene_manager_.get_cameras()) {
+        for (auto &camera: scene_manager_.get_cameras()) {
             camera->set_aspect_ratio(window_info_.aspect_ratio);
         }
     }
@@ -272,17 +367,31 @@ namespace DCraft {
     }
 
     void Application::process_input() {
-
         if (callbacks_.process_input) {
             callbacks_.process_input(*this, delta_time_);
         }
 
-        if (keys_[27]) { // ESC key
-
-            glutLeaveMainLoop(); 
+        // Check for a key that was just pressed (not held down)
+        if (keys_['`'] && !prev_keys_['`']) {
+            game_mode_ = !game_mode_;
+            if (game_mode_) {
+                glutSetCursor(GLUT_CURSOR_NONE);
+                glutWarpPointer(window_info_.width / 2, window_info_.height / 2);
+            } else {
+                glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+            }
         }
 
+        // Standard exit with ESC
+        if (keys_[27]) {
+            // is_running = false;
+            glutLeaveMainLoop();
+        }
 
+        // At the end of the frame, copy current keys to previous keys
+        for (int i = 0; i < 512; i++) {
+            prev_keys_[i] = keys_[i];
+        }
     }
 
     void Application::toggle_fullscreen() {
@@ -290,7 +399,7 @@ namespace DCraft {
         if (is_transitioning) return;
 
         is_transitioning = true;
-        
+
         static int prev_width = window_info_.width;
         static int prev_height = window_info_.height;
         static int prev_x = glutGet(GLUT_WINDOW_X);
@@ -317,8 +426,6 @@ namespace DCraft {
         glutTimerFunc(200, [](int value) {
             if (value == 1) is_transitioning = false;
         }, 1);
-
-
     }
 
     Application *Application::instance_ = nullptr;

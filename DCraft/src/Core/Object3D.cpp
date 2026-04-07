@@ -13,6 +13,22 @@ namespace DCraft {
         return nullptr;
     }
 
+    
+
+    void Object3D::match_orientation(const Object3D &other) {
+        transform_.match_orientation(other.get_transform());
+    }
+
+    void Object3D::look_at(const glm::vec3 &target, const glm::vec3 &up) {
+        transform_.look_at(target, up);
+    }
+
+    glm::vec3 Object3D::get_default_front() const {
+        // Towards positive z axis
+        return glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+
+
     const glm::vec3 Object3D::get_world_position() const {
         glm::mat4 world_matrix = get_world_matrix();
 

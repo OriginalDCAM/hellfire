@@ -63,6 +63,30 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 add_library(stb_image INTERFACE)
 target_include_directories(stb_image INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb)
 
+set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
+add_library(imgui STATIC
+        ${IMGUI_DIR}/imgui.cpp
+        ${IMGUI_DIR}/imgui_demo.cpp
+        ${IMGUI_DIR}/imgui_draw.cpp
+        ${IMGUI_DIR}/imgui_tables.cpp
+        ${IMGUI_DIR}/imgui_widgets.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_glut.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+target_include_directories(imgui PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor
+        ${IMGUI_DIR}
+        ${IMGUI_DIR}/backends  # Add this to find the backend header files
+        ${GLEW_INCLUDE_DIR}    # Add this for GLEW includes
+        ${GLUT_INCLUDE_DIR}    # Add this for GLUT includes
+)
+
+# Link against the targets you've created, not the variables
+target_link_libraries(imgui PUBLIC
+        opengl32
+        GLEW::GLEW
+        GLUT::GLUT
+)
 
 add_subdirectory(DCraft)
 add_subdirectory(Sandbox)

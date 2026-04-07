@@ -38,6 +38,7 @@ target_link_libraries(${LIBRARY_NAME}
         GLUT::GLUT
         GLM::GLM
         OpenGL::GL
+        imgui
         PRIVATE
         stb_image
 )

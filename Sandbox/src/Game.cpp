@@ -29,10 +29,9 @@ void Game::setup_callbacks(DCraft::Application &app) {
 }
 
 void Game::init(DCraft::Application &app) {
+    glDisable(GL_CULL_FACE);
     glutSetCursor(GLUT_CURSOR_NONE);
     glutWarpPointer(app.get_window_width() / 2, app.get_window_height() / 2);
-
-    glDisable(GL_CULL_FACE);
 
     uint32_t shader_program = app.create_shader_program("assets/shaders/vertexshader.vert",
                                                         "assets/shaders/fragmentshader.frag");
@@ -125,34 +124,24 @@ void Game::process_mouse_movement(float x_offset, float y_offset) {
 void Game::process_camera_movement() {
     if (!main_camera_ || !drone_camera_ || !main_camera_visual_ || !drone_camera_visual_) return;
 
+    // update position
     main_camera_visual_->set_position(main_camera_->get_position());
 
-    // Get the camera's orientation vectors
-    glm::vec3 main_front = main_camera_->get_front_vector();
-    glm::vec3 main_right = main_camera_->get_right_vector();
-    glm::vec3 main_up = main_camera_->get_up_vector();
+    glm::vec3 camera_pos = main_camera_->get_position();
+    glm::vec3 camera_target = camera_pos + main_camera_->get_front_vector();
+    main_camera_visual_->look_at(camera_target, main_camera_->get_up_vector());
 
-    // Create rotation matrix from the camera orientation
-    glm::mat4 main_rotation(1.0f);
-    main_rotation[0] = glm::vec4(main_right, 0.0f);
-    main_rotation[1] = glm::vec4(main_up, 0.0f);
-    main_rotation[2] = glm::vec4(main_front, 0.0f);
-    
-    // Apply rotation to visual indicator
-    main_camera_visual_->set_rotation_matrix(main_rotation);
+    main_camera_visual_->match_orientation(*main_camera_);
+
     
     drone_camera_visual_->set_position(drone_camera_->get_position());
-    
-    glm::vec3 drone_front = drone_camera_->get_front_vector();
-    glm::vec3 drone_right = drone_camera_->get_right_vector();
-    glm::vec3 drone_up = drone_camera_->get_up_vector();
-    
-    glm::mat4 drone_rotation(1.0f);
-    drone_rotation[0] = glm::vec4(drone_right, 0.0f);
-    drone_rotation[1] = glm::vec4(drone_up, 0.0f);
-    drone_rotation[2] = glm::vec4(drone_front, 0.0f);
-    
-    drone_camera_visual_->set_rotation_matrix(drone_rotation);
+
+    glm::vec3 drone_pos = drone_camera_->get_position();
+    glm::vec3 drone_target = drone_pos + drone_camera_->get_front_vector();
+    drone_camera_visual_->look_at(drone_target, drone_camera_->get_up_vector());
+
+    drone_camera_visual_->match_orientation(*drone_camera_);
+
 
 }
 

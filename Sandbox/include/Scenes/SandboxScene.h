@@ -15,12 +15,12 @@ MaterialMap load_material_map() {
     // Create Lambert materials (diffuse only)
     auto* mossy_material = new DCraft::LambertMaterial("Mossy");
     mossy_material->set_texture("assets/textures/mossy_brick.jpg", DCraft::TextureType::DIFFUSE);
-    mossy_material->set_ambient_color(glm::vec3(0.5f, 0.5f, 0.5f));
+    mossy_material->set_ambient_color(glm::vec3(0.1f, 0.1f, 0.1f));
     mossy_material->set_diffuse_color(glm::vec3(0.8f, 0.8f, 0.8f));
     
     auto* pavement_material = new DCraft::LambertMaterial("Pavement");
     pavement_material->set_texture("assets/textures/brick_pavement.jpg", DCraft::TextureType::DIFFUSE);
-    pavement_material->set_ambient_color(glm::vec3(0.5f, 0.5f, 0.5f));
+    pavement_material->set_ambient_color(glm::vec3(0.4f, 0.4f, 0.4f));
     pavement_material->set_diffuse_color(glm::vec3(0.7f, 0.7f, 0.7f));
     
     // Create basic photo materials
@@ -40,10 +40,10 @@ MaterialMap load_material_map() {
     
     auto* plastic_blue_material = new DCraft::PhongMaterial("PlasticBlue");
     plastic_blue_material->set_texture("assets/textures/plastic_blue.jpg", DCraft::TextureType::DIFFUSE);
-    plastic_blue_material->set_ambient_color(glm::vec3(0.0f, 0.0f, 0.1f));
+    plastic_blue_material->set_ambient_color(glm::vec3(0.0f, 0.0f, 1.0f));
     plastic_blue_material->set_diffuse_color(glm::vec3(0.0f, 0.0f, 0.8f));
     plastic_blue_material->set_specular_color(glm::vec3(0.9f));
-    plastic_blue_material->set_shininess(32.0f);
+    plastic_blue_material->set_shininess(128.0f);
     
     return {
         {"PLASTIC_BLUE_MATERIAL", plastic_blue_material}, 
@@ -66,29 +66,30 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     // Setup lighting
     // Main directional light (sun)
     auto* sun = new DCraft::DirectionalLight("Sun");
-    sun->set_direction(glm::vec3(-1.0f, -1.0f, -0.0f));
-    sun->set_position(glm::vec3(100.0f, 100.0f, 0.0f));
+    sun->set_direction(glm::vec3(-0.2f, -0.3f, -0.2f));
+    sun->set_position(glm::vec3(20.0f, 30.0f, 20.0f));
     sun->set_color(glm::vec3(1.0f, 0.95f, 0.9f)); // Slightly warm sunlight
-    sun->set_intensity(2.0f);
+    sun->set_intensity(3.0f);
     scene->add(sun);
-    
+
+    // Visual for sunlight
     auto* sun_light_visual = new DCraft::Cube();
     sun_light_visual->set_name("Sun Light Visual");
-    sun_light_visual->set_scale(glm::vec3(10.0f));
+    sun_light_visual->set_scale(glm::vec3(1.0f));
     sun_light_visual->set_position(sun->get_position());
     sun_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
     scene->add(sun_light_visual);
-    //
-    // // Add a blue point light
+    
+    // Blue point light
     auto* blue_light = new DCraft::PointLight("Blue Light");
     blue_light->set_position(5.0f, 2.0f, 5.0f);
     blue_light->set_color(glm::vec3(0.2f, 0.4f, 1.0f)); // Blue light
-    blue_light->set_intensity(2.0f);
+    blue_light->set_intensity(5.0f);
     blue_light->set_range(20.0f);
     blue_light->set_attenuation(1.0f);
     scene->add(blue_light);
     
-    // Add a red point light
+    // Green point light
     auto* green_light = new DCraft::PointLight("Red Light");
     green_light->set_position(-5.0f, 1.0f, -5.0f);
     green_light->set_color(glm::vec3(0.2f, 1.0f, 0.1f)); // Red light
@@ -97,7 +98,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     green_light->set_attenuation(1.0f);
     scene->add(green_light);
     
-    // Create a visual indicator for the blue light
+    // Visual indicator for blue light
     auto* blue_light_visual = new DCraft::Cube();
     blue_light_visual->set_name("Blue Light Visual");
     blue_light_visual->set_scale(glm::vec3(0.2f));
@@ -105,7 +106,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     blue_light_visual->set_material(materials["PLASTIC_BLUE_MATERIAL"]);
     scene->add(blue_light_visual);
     
-    // Create a visual indicator for the red light
+    // Visual indicator for green light
     auto* green_light_visual = new DCraft::Cube();
     green_light_visual->set_name("Red Light Visual");
     green_light_visual->set_scale(glm::vec3(0.2f));
@@ -120,7 +121,7 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     scene->add(main_camera);
     scene->set_active_camera(main_camera);
 
-    // Create the drone camera
+    // drone camera
     DCraft::PerspectiveCamera *drone_camera = scene->create_camera<DCraft::PerspectiveCamera>(
         "Drone Camera", 70.0f, window.aspect_ratio, 0.1f, 400.0f);
     drone_camera->set_position(10.0f, 25.0f, 10.0f);
@@ -131,14 +132,14 @@ DCraft::Scene *load_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInf
     cube->set_name("Cool cube");
     cube->set_rotation(90, glm::vec3(1.0f, 0.0f, 0.0f));
     cube->set_scale(glm::vec3(1.0f, 1.0f, 1.0f));
-    cube->set_position(0.0f, 1.0f, 0.0f);
+    cube->set_position(0.0f, 4.0f, 0.0f);
     cube->set_material(materials["MOSSY_MATERIAL"]);
     scene->add(cube);
 
     // Plane primitive object
     auto *floor = new DCraft::Plane();
     floor->set_name("Ground");
-    floor->set_position(0, -10, 0);
+    floor->set_position(0, 0, 0);
     floor->set_scale(glm::vec3(100.0f, 100.0f, 100.0f));
     floor->set_rotation(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
     floor->set_material(materials["PAVEMENT_MATERIAL"]);

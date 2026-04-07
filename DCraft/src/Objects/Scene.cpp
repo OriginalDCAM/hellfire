@@ -9,10 +9,6 @@ namespace DCraft
 
     Scene::~Scene()
     {
-        for (auto* camera : cameras_)
-        {
-            delete camera;
-        }
         cameras_.clear();
     }
 

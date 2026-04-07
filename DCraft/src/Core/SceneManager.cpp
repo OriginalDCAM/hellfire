@@ -52,6 +52,8 @@ namespace DCraft {
     void SceneManager::clear() {
         Object3D *root = root_node_;
 
+        std::clog << "Clearing " << root->get_name() << " Node" << '\n';
+
         // Clear all children of the root node
         while (!root->get_children().empty()) {
             Object3D *child = root->get_children()[0];
