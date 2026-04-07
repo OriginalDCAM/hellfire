@@ -70,16 +70,25 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Libraries\glm-0.9.6.3\glm;C:\Libraries\glew-2.0.0-win32\glew-2.0.0\include;C:\Libraries\freeglut-MSVC-3.0.0-2.mp\freeglut\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Libraries\freeglut-MSVC-3.0.0-2.mp\freeglut\lib;C:\Libraries\glew-2.0.0-win32\glew-2.0.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Libraries\glm-0.9.6.3\glm;C:\Libraries\glew-2.0.0-win32\glew-2.0.0\include;C:\Libraries\freeglut-MSVC-3.0.0-2.mp\freeglut\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Libraries\freeglut-MSVC-3.0.0-2.mp\freeglut\lib;C:\Libraries\glew-2.0.0-win32\glew-2.0.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -127,17 +136,41 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Engine\Core\Object3D.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\Renderer.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Cube.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\GL\IB.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\GL\glsl.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\Material.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\Mesh.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\Model.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\Texture.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\Textures.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\Vertex.h" />
     <ClInclude Include="src\Engine\Helpers\PerspectiveCamera.h" />
     <ClInclude Include="src\Engine\Lighting\AmbientLight.h" />
     <ClInclude Include="src\Engine\Helpers\Camera.h" />
     <ClInclude Include="src\Engine\Lighting\DirectionalLight.h" />
     <ClInclude Include="src\Engine\Core\Entity.h" />
     <ClInclude Include="src\Engine\Lighting\Light.h" />
-    <ClInclude Include="src\Engine\Core\Shader.h" />
-    <ClInclude Include="src\Engine\Core\VAO.h" />
-    <ClInclude Include="src\Engine\Core\VBO.h" />
-    <ClInclude Include="src\Engine\Core\Window.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\Shader.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\GL\VA.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\GL\VB.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\Window.h" />
     <ClInclude Include="src\Engine\Core\World.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Engine\Core\Object3D.cpp" />
+    <ClCompile Include="src\Engine\Core\Graphics\Renderer.cpp" />
+    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Cube.cpp" />
+    <ClCompile Include="src\Engine\Core\Graphics\GL\IB.cpp" />
+    <ClCompile Include="src\Engine\Core\Graphics\GL\glsl.cpp" />
+    <ClCompile Include="src\Engine\Core\Graphics\Mesh.cpp" />
+    <ClCompile Include="src\Engine\Core\Graphics\GL\VA.cpp" />
+    <ClCompile Include="src\Engine\Core\Graphics\GL\VB.cpp" />
+    <ClCompile Include="src\Engine\Helpers\Camera.cpp" />
+    <ClCompile Include="src\Engine\Helpers\PerspectiveCamera.cpp" />
+    <ClCompile Include="src\Game\Application.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
