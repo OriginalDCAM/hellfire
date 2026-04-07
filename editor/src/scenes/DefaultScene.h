@@ -24,24 +24,33 @@ inline void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
     cube_entity->add_component<RotateScript>();
 
     auto *skybox = new hellfire::Skybox();
+    // skybox->set_cubemap_faces({
+    //     "assets/skyboxes/px.png", // +X
+    //     "assets/skyboxes/nx.png", // -X
+    //     "assets/skyboxes/py.png", // +Y
+    //     "assets/skyboxes/ny.png", // -Y
+    //     "assets/skyboxes/pz.png", // +Z
+    //     "assets/skyboxes/nz.png" // -Z
+    // });
+    
     skybox->set_cubemap_faces({
-        "assets/skyboxes/px.png", // +X
-        "assets/skyboxes/nx.png", // -X
-        "assets/skyboxes/py.png", // +Y
-        "assets/skyboxes/ny.png", // -Y
-        "assets/skyboxes/pz.png", // +Z
-        "assets/skyboxes/nz.png" // -Z
+        "assets/skyboxes/space_right.png",
+        "assets/skyboxes/space_left.png",
+        "assets/skyboxes/space_top.png",
+        "assets/skyboxes/space_bottom.png",
+        "assets/skyboxes/space_front.png",
+        "assets/skyboxes/space_back.png"
     });
 
     scene->environment()->set_skybox(*skybox);
 }
 
-inline void create_default_scene() {
+inline void create_default_scene(const hellfire::Project& proj) {
     const auto sm = hellfire::ServiceLocator::get_service<hellfire::SceneManager>();
     hellfire::Utility::FileFilter scene_ext_filter = {"Hellfire Scene", "*.hfscene"};
     
     std::string scene_name; // Name gets passed as a reference to the save_file method of the file dialog
-    const std::string save_path = hellfire::Utility::FileDialog::save_file(scene_name, "Untitled", {scene_ext_filter});
+    const std::string save_path = hellfire::Utility::FileDialog::save_file(scene_name, "Untitled", {scene_ext_filter}, proj.get_assets_path());
     
     if (!scene_name.empty()) {
         const auto new_scene = sm->create_scene(scene_name);

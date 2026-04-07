@@ -5,6 +5,7 @@
 #include "RuntimePlugin.h"
 
 #include "GLFW/glfw3.h"
+#include "hellfire/core/Project.h"
 #include "Scenes/SolarSystemScene.h"
 #include "Scenes/SponzaScene.h"
 #include "Scripts/PlayerController.h"
@@ -15,9 +16,13 @@ void RuntimePlugin::on_initialize(hellfire::Application &app) {
     im->set_cursor_mode(hellfire::DISABLED);
     
     app_info_ = &app.get_window_info();
-    scene_manager_ = hellfire::ServiceLocator::get_service<hellfire::SceneManager>();
     
     // Scene loading with code behind
+    auto project = hellfire::Project::load_data(R"(C:\Dev\Cpp\Hellfire Engine\sandbox\project.hfproj)");
+    project->initialize_managers();
+    
+    scene_manager_ = hellfire::ServiceLocator::get_service<hellfire::SceneManager>();
+    
     scenes_["BoatScene"] = load_sponza_scene(*app_info_);
     scene_manager_->set_active_scene(scenes_["BoatScene"]);
 }
@@ -58,9 +63,9 @@ void RuntimePlugin::process_mouse_movement(float x_offset, float y_offset) const
     }
 
     // Look for the "Main Camera" entity 
-    if (const auto *camera_entity = active_scene->find_entity_by_name("Main Camera")) {
-        if (auto *player_controller = camera_entity->get_component<PlayerController>()) {
-            player_controller->handle_mouse_movement(x_offset, y_offset);
-        }
-    }
+    // if (const auto *camera_entity = active_scene->find_entity_by_name("Main Camera")) {
+    //     if (auto *player_controller = camera_entity->get_component<PlayerController>()) {
+    //         player_controller->handle_mouse_movement(x_offset, y_offset);
+    //     }
+    // }
 }

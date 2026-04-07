@@ -70,7 +70,7 @@ namespace hellfire::editor {
 
     void MenuBarComponent::handle_new_scene() {
         if (ImGui::MenuItem("New Scene")) {
-            create_default_scene();
+            create_default_scene(*context_->project_manager->get_current_project());
         }
     }
 
@@ -78,7 +78,7 @@ namespace hellfire::editor {
         if (ImGui::MenuItem("Open Scene")) {
             const auto sm = ServiceLocator::get_service<SceneManager>();
             Utility::FileFilter scene_ext_filter = {"Hellfire Scene", "*.hfscene"};
-            const std::string filepath = Utility::FileDialog::open_file({scene_ext_filter});
+            const std::string filepath = Utility::FileDialog::open_file({scene_ext_filter}, context_->project_manager->get_current_project()->get_assets_path());
             if (!filepath.empty()) {
                 const auto scene = sm->load_scene(filepath);
                 sm->set_active_scene(scene);

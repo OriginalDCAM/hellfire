@@ -42,7 +42,7 @@ namespace hellfire {
 
     class Application : public IWindowEventHandler {
     public:
-        explicit Application(int width = 800, int height = 600, std::string title = "hellfire Application");
+        explicit Application(int width = 800, int height = 600, const std::string& title = "hellfire Application");
 
         ~Application() override;
 

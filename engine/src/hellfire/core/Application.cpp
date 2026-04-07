@@ -6,7 +6,7 @@
 #include "hellfire/scene/Scene.h"
 
 namespace hellfire {
-    Application::Application(int width, int height, std::string title) : shader_registry_(&shader_manager_) {
+    Application::Application(const int width, const int height, const std::string& title) : shader_registry_(&shader_manager_) {
         window_info_.width = width;
         window_info_.height = height;
         window_info_.aspect_ratio = static_cast<float>(width) / height;
@@ -132,10 +132,10 @@ namespace hellfire {
         call_plugins([](IApplicationPlugin &plugin) {
             plugin.on_begin_frame();
         });
-        if (auto renderer = ServiceLocator::get_service<Renderer>()) {
+        if (const auto renderer = ServiceLocator::get_service<Renderer>()) {
             renderer->begin_frame();
 
-            if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+            if (const auto sm = ServiceLocator::get_service<SceneManager>()) {
                 if (auto *active_scene = sm->get_active_scene()) {
                     Entity *camera_override = nullptr;
 
@@ -156,7 +156,7 @@ namespace hellfire {
             plugin.on_render();
         });
 
-        if (auto renderer = ServiceLocator::get_service<Renderer>()) {
+        if (const auto renderer = ServiceLocator::get_service<Renderer>()) {
             renderer->end_frame();
         }
         // Plugin end_frame
