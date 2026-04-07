@@ -119,9 +119,9 @@ Index of this file:
 // About overriding column sizing policy and width/weight with TableSetupColumn():
 // We use a default parameter of -1 for 'init_width'/'init_weight'.
 //   - with ImGuiTableColumnFlags_WidthFixed,    init_width  <= 0 (default)  --> width is automatic
-//   - with ImGuiTableColumnFlags_WidthFixed,    init_width  >  0 (explicit) --> width is Custom
+//   - with ImGuiTableColumnFlags_WidthFixed,    init_width  >  0 (explicit) --> width is custom
 //   - with ImGuiTableColumnFlags_WidthStretch,  init_weight <= 0 (default)  --> weight is 1.0f
-//   - with ImGuiTableColumnFlags_WidthStretch,  init_weight >  0 (explicit) --> weight is Custom
+//   - with ImGuiTableColumnFlags_WidthStretch,  init_weight >  0 (explicit) --> weight is custom
 // Widths are specified _without_ CellPadding. If you specify a width of 100.0f, the column will be cover (100.0f + Padding * 2.0f)
 // and you can fit a 100.0f wide item in it without clipping and with padding honored.
 //-----------------------------------------------------------------------------
@@ -481,7 +481,7 @@ bool    ImGui::BeginTableEx(const char* name, ImGuiID id, int columns_count, ImG
     if (inner_window != outer_window)
     {
         // FIXME: Because inner_window's Scrollbar doesn't know about border size, since it's not encoded in window->WindowBorderSize,
-        // it already overlaps it and doesn't need an extra offset. Ideally we should be able to pass Custom border size with
+        // it already overlaps it and doesn't need an extra offset. Ideally we should be able to pass custom border size with
         // different x/y values to BeginChild().
         if (flags & ImGuiTableFlags_BordersOuterV)
         {
@@ -3037,7 +3037,7 @@ float ImGui::TableGetHeaderRowHeight()
     // Caring for a minor edge case:
     // Calculate row height, for the unlikely case that some labels may be taller than others.
     // If we didn't do that, uneven header height would highlight but smaller one before the tallest wouldn't catch input for all height.
-    // In your Custom header row you may omit this all together and just call TableNextRow() without a height...
+    // In your custom header row you may omit this all together and just call TableNextRow() without a height...
     ImGuiContext& g = *GImGui;
     ImGuiTable* table = g.CurrentTable;
     float row_height = g.FontSize;
@@ -3062,8 +3062,8 @@ float ImGui::TableGetHeaderAngledMaxLabelWidth()
 
 // [Public] This is a helper to output TableHeader() calls based on the column names declared in TableSetupColumn().
 // The intent is that advanced users willing to create customized headers would not need to use this helper
-// and can create their own! For example: TableHeader() may be preceded by Checkbox() or other Custom widgets.
-// See 'Demo->Tables->Custom headers' for a demonstration of implementing a Custom version of this.
+// and can create their own! For example: TableHeader() may be preceded by Checkbox() or other custom widgets.
+// See 'Demo->Tables->custom headers' for a demonstration of implementing a custom version of this.
 // This code is intentionally written to not make much use of internal functions, to give you better direction
 // if you need to write your own.
 // FIXME-TABLE: TableOpenContextMenu() and TableGetHeaderRowHeight() are not public.
@@ -3257,7 +3257,7 @@ void ImGui::TableHeader(const char* label)
         TableOpenContextMenu(column_n);
 }
 
-// Unlike TableHeadersRow() it is not expected that you can reimplement or customize this with Custom widgets.
+// Unlike TableHeadersRow() it is not expected that you can reimplement or customize this with custom widgets.
 // FIXME: No hit-testing/button on the angled header.
 void ImGui::TableAngledHeadersRow()
 {
@@ -3477,7 +3477,7 @@ bool ImGui::TableBeginContextMenuPopup(ImGuiTable* table)
 // - ImGuiTableFlags_Reorderable -> display "Reset Order"
 ////- ImGuiTableFlags_Sortable   -> display sorting options (disabled)
 // - ImGuiTableFlags_Hideable    -> display columns visibility menu items
-// It means if you have a Custom context menus you can call this section and omit some sections, and add your own.
+// It means if you have a custom context menus you can call this section and omit some sections, and add your own.
 void ImGui::TableDrawDefaultContextMenu(ImGuiTable* table, ImGuiTableFlags flags_for_section_to_display)
 {
     ImGuiContext& g = *GImGui;

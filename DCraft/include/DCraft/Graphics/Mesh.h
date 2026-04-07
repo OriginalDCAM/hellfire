@@ -6,7 +6,7 @@
 #include "Materials/Material.h"
 
 namespace DCraft {
-    struct Mesh {
+    class Mesh {
     public:
         Mesh();
         Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices);
@@ -15,9 +15,9 @@ namespace DCraft {
 
         void cleanup();
 
-        void bind();
+        void bind() const;
 
-        void unbind();
+        void unbind() const;
 
         // mesh data
         std::vector<Vertex> vertices;

@@ -35,7 +35,7 @@ namespace DCraft {
                              0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
                 stbi_image_free(data);
             } else {
-                std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+                std::cout << "cubemaps texture failed to load at path: " << faces[i] << std::endl;
                 stbi_image_free(data);
             }
         }

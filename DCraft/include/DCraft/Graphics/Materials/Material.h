@@ -60,7 +60,7 @@ namespace DCraft {
         std::optional<ShaderInfo> custom_shader_info_;
         uint32_t compiled_shader_id_ = 0;
         
-        // ===Built-in material type (fallback if no Custom shader)===
+        // ===Built-in material type (fallback if no custom shader)===
         int builtin_material_type_ = 0; // 0=Lambert, 1=Phong, 2=PBR
 
     public:
@@ -103,7 +103,7 @@ namespace DCraft {
             properties_[name] = Property(name, value, uniform_name);
         }
 
-        // ===Custom shader support===
+        // ===custom shader support===
         void set_custom_shader(const std::string& vertex_path, const std::string& fragment_path) {
             custom_shader_info_ = ShaderInfo{vertex_path, fragment_path};
         }
@@ -227,7 +227,7 @@ namespace DCraft {
 
         static std::unique_ptr<Material> create_pbr(const std::string& name);
 
-        // Create material with Custom shader
+        // Create material with custom shader
         static std::unique_ptr<Material> create_custom(const std::string& name, 
                                                       const std::string& vertex_path,
                                                       const std::string& fragment_path);

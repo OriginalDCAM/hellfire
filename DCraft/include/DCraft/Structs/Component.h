@@ -10,7 +10,7 @@ namespace DCraft {
     public:
         virtual ~Component() = default;
 
-        Entity* get_owner() const { return owner_; }
+        [[nodiscard]] Entity* get_owner() const { return owner_; }
 
         // Lifecycle hooks
         virtual void on_added(Entity* owner) { owner_ = owner; }
