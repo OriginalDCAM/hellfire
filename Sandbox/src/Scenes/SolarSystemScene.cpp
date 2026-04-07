@@ -173,7 +173,7 @@ DCraft::Scene *load_solar_system_scene(DCraft::SceneManager &scene_manager, DCra
 
     auto *main_camera = DCraft::PerspectiveCamera::create("Main Camera", 70.0f, window.aspect_ratio, 0.1f, 1000.0f);
 
-    main_camera->transform()->set_position(20.0f, 30.0f, 120.0f);
+    main_camera->transform()->set_position(20.0f, 30.0f, 200.0f);
     main_camera->get_component<DCraft::CameraComponent>()->look_at(glm::vec3(0.0f, 0.0f, 0.0f));
     main_camera->add_component<PlayerController>(7.5f);
     world->add(main_camera);
