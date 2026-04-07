@@ -9,16 +9,20 @@
 
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
+#include "DCraft/Addons/ImportedModel3D.h"
 #include "DCraft/Graphics/Materials/LambertMaterial.h"
 #include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 #include "DCraft/Structs/Scene.h"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 namespace DCraft::Addons {
     std::unordered_map<std::string, Mesh *> ModelLoader::mesh_cache;
     std::vector<ModelLoader::MaterialMap> ModelLoader::textures_loaded;
 
-    Shape3D *ModelLoader::load(const std::string &filepath, Scene *target_scene) {
+    ImportedModel3D *ModelLoader::load(const std::string &filepath, Scene *target_scene) {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(
             filepath,
@@ -40,14 +44,28 @@ namespace DCraft::Addons {
             filename = filepath.substr(last_slash + 1);
         }
 
-        Object3D *rootObj = process_node(scene->mRootNode, scene, defaultMaterial);
-        rootObj->set_name(filename);
+        ImportedModel3D *imported_shape = process_node(scene->mRootNode, scene, defaultMaterial);
+        imported_shape->set_name(filename);
 
-        if (target_scene) {
-            target_scene->add(rootObj);
+        fs::path absolute_path = filepath;
+        fs::path assets_dir = "assets";
+
+        // Check if assets_dir is part of the path
+        std::string path_str = absolute_path.string();
+        size_t pos = path_str.find(assets_dir.string());
+
+        if (pos != std::string::npos) {
+            std::string relative_path = path_str.substr(pos);
+            imported_shape->set_file_path(relative_path);
+        } else {
+            imported_shape->set_file_path(path_str);
         }
 
-        return static_cast<Shape3D *>(rootObj);
+        if (target_scene) {
+            target_scene->add(imported_shape);
+        }
+
+        return imported_shape;
     }
 
     glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4 &from) {
@@ -72,8 +90,8 @@ namespace DCraft::Addons {
     }
 
 
-    Shape3D *ModelLoader::process_node(aiNode *node, const aiScene *scene, Material *default_material) {
-        Shape3D *obj = new Shape3D(node->mName.length > 0 ? node->mName.C_Str() : "Node");
+    ImportedModel3D *ModelLoader::process_node(aiNode *node, const aiScene *scene, Material *default_material) {
+        ImportedModel3D *obj = new ImportedModel3D(node->mName.length > 0 ? node->mName.C_Str() : "Node");
 
         std::cout << "Node: " << node->mName.C_Str() << ", Meshes: " << node->mNumMeshes
                 << ", Children: " << node->mNumChildren << std::endl;
@@ -201,16 +219,6 @@ namespace DCraft::Addons {
             if (material->Get(AI_MATKEY_COLOR_AMBIENT, ambient) == AI_SUCCESS) {
                 lambert_material->set_ambient_color(glm::vec3(ambient.r, ambient.g, ambient.b));
             }
-
-            // aiColor3D specular(0.5f, 0.5f, 0.5f);
-            // if (material->Get(AI_MATKEY_COLOR_SPECULAR, specular) == AI_SUCCESS) {
-            //     lambert_material->set_specular_color(glm::vec3(specular.r, specular.g, specular.b));
-            // }
-
-            // float shininess = 32.0f;
-            // if (material->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS) {
-            //     lambert_material->set_shininess(shininess);
-            // }
 
             // Load textures if exist
             std::vector<MaterialMap> diffuseMaps = load_material_textures(

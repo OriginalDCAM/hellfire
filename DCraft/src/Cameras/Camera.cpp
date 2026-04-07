@@ -50,6 +50,21 @@ namespace DCraft {
         zoom_ = std::min(zoom_, 45.0f);
     }
 
+    json Camera::to_json() {
+        json j = Object3D::to_json();
+        j["type"] = "camera";
+        j["movement_speed"] = movement_speed_;
+        j["mouse_sensitivity"] = mouse_sensitivity_;
+        j["yaw"] = yaw_;
+        j["pitch"] = pitch_;
+        j["target"] = {target_.x, target_.y, target_.z };
+        j["front"] = {front_.x, front_.y, front_.z};
+        j["up"] = { up_.x, up_.y, up_.z};
+        j["world_up"] = { world_up_.x, world_up_.y, world_up_.z};
+        
+        return j;
+    }
+
     void Camera::update_camera_vectors() {
         // Calculate the new front vector
         glm::vec3 front;

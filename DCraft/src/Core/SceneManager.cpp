@@ -1,8 +1,16 @@
 #include "DCraft/Addons/SceneManager.h"
 
+#include <fstream>
+
+#include "DCraft/Addons/ImportedModel3D.h"
 #include "DCraft/Addons/PerspectiveCamera.h"
+#include "DCraft/Graphics/Lights/DirectionalLight.h"
+#include "DCraft/Graphics/Lights/PointLight.h"
+#include "DCraft/Graphics/Materials/LambertMaterial.h"
+#include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Structs/Scene.h"
 #include "DCraft/Graphics/Primitives/Cube.h"
+#include "DCraft/Graphics/Primitives/Plane.h"
 
 namespace DCraft {
     SceneManager::SceneManager() : active_scene_(nullptr) {
@@ -37,8 +45,89 @@ namespace DCraft {
         return true;
     }
 
-    bool SceneManager::save_scene(const std::string &filename) {
+    bool SceneManager::save_scene(const std::string &filepath, Scene* scene = nullptr) {
+        if (!scene) scene = get_active_scene();
+        
+        json scene_data = serialize_node(scene);
+        scene_data["name"] = scene->get_name();
+
+        std::ofstream file(filepath);
+        if (!file) {
+            std::cerr << "FILE::ERROR Something went wrong creating file the file!" << std::endl; 
+            return false;
+        }
+
+        file << std::setw(4) << scene_data << std::endl;
         return true;
+    }
+
+    json SceneManager::serialize_node(Object3D *node) {
+        if (!node) return json(); // Return empty JSON
+
+        json node_data;
+
+        if (auto* cube = dynamic_cast<Cube*>(node)) {
+            node_data = cube->to_json();
+        } else if (auto* plane = dynamic_cast<Plane*>(node)) {
+            node_data = plane->to_json();
+        } else if (auto* imported_model = dynamic_cast<ImportedModel3D*>(node)) {
+            node_data = imported_model->to_json();
+        } else if (auto* camera = dynamic_cast<PerspectiveCamera*>(node)) {
+            node_data = camera->to_json();
+        } else if (auto* dir_light = dynamic_cast<DirectionalLight*>(node)) {
+            node_data = dir_light->to_json();
+        } else if (auto* point_light = dynamic_cast<PointLight*>(node)) {
+            node_data = point_light->to_json();
+        }
+
+        if (auto* shape = dynamic_cast<Shape3D*>(node)) {
+            if (Material* material = shape->get_material()) {
+                node_data["material"] = serialize_material(material);
+            }
+        }
+
+        // Recursively serialize children
+        json children = json::array();
+        for (auto* child : node->get_children()) {
+            children.push_back(serialize_node(child));
+        }
+        if (!children.empty()) {
+            node_data["children"] = children;
+        }
+
+        return node_data;
+    }
+
+    json SceneManager::serialize_material(Material *material) {
+        json mat_data;
+
+        mat_data["name"] = material->get_name();
+
+        if (auto* lambert = dynamic_cast<LambertMaterial*>(material)) {
+            mat_data["type"] = "lambert";
+            mat_data["ambient"] = {lambert->get_ambient_color().r, lambert->get_ambient_color().g, lambert->get_ambient_color().b};
+            mat_data["diffuse"] = {lambert->get_diffuse_color().r, lambert->get_diffuse_color().g, lambert->get_diffuse_color().b};
+        } else if (auto* phong = dynamic_cast<PhongMaterial*>(material)) {
+            mat_data["type"] = "phong";
+            mat_data["ambient"] = {phong->get_ambient_color().r, phong->get_ambient_color().b, phong->get_ambient_color().b};
+            mat_data["diffuse"] = {phong->get_diffuse_color().r, phong->get_diffuse_color().g, phong->get_diffuse_color().b};
+            mat_data["specular"] = {phong->get_specular_color().r, phong->get_specular_color().g, phong->get_specular_color().b};
+            mat_data["shininess"] = phong->get_shininess();
+        }
+
+        json textures = json::array();
+        for (const auto& texture : material->get_textures()) {
+            json tex_data;
+            tex_data["path"] = texture->get_path();
+            tex_data["type"] = texture->get_type();
+            textures.push_back(tex_data);
+        }
+
+        if (!textures.empty()) {
+            mat_data["textures"] = textures;
+        }
+
+        return mat_data;
     }
 
     void SceneManager::update(float delta_time) {
@@ -123,6 +212,8 @@ namespace DCraft {
 
         delete object;
     }
+
+
 
     void SceneManager::set_active_scene(Scene *scene) {
         if (std::find(objects_.begin(), objects_.end(), scene) != objects_.end()) {

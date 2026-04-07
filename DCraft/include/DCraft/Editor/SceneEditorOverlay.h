@@ -32,6 +32,8 @@ namespace DCraft::Editor {
 
         void setup_docking_space();
 
+        std::string save_file_dialog(const std::string& str);
+
         void render_menu_bar();
 
         void render_light_properties(Light * light) const;

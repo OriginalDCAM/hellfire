@@ -7,4 +7,11 @@
 namespace DCraft {
     Light::Light(const std::string &name) : Object3D(name) {
     }
+
+    json Light::to_json() {
+        json j = Object3D::to_json();
+        j["color"] = { color.r, color.g, color.b };
+        j["intensity"] = intensity;
+        return j;
+    }
 }

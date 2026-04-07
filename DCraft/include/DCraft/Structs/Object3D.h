@@ -5,12 +5,16 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <glm/fwd.hpp>
 
-#include "DCraft/Structs/Transform3D.h"
+#include <nlohmann/json.hpp>
+
+#include "Transform3D.h"
+using json = nlohmann::json;
+
 #include "DCraft/Graphics/Mesh.h"
 
 namespace DCraft {
-    
     class alignas(16) Object3D {
     public:
         virtual ~Object3D() {
@@ -195,6 +199,13 @@ namespace DCraft {
 
         // Access to transform for advanced operations
         const Transform3D& get_transform() const { return transform_; }
+
+        virtual json to_json() {
+            json j;
+            j["name"] = get_name();
+            j["transform"] = transform_.to_json();
+            return j;
+        }
 
     private:
         std::vector<Object3D *> children_;

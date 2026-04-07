@@ -48,4 +48,10 @@ namespace DCraft {
 
     void Plane::set_uvs() {
     }
+
+    json Plane::to_json() {
+        json j = Object3D::to_json();
+        j["geometry"] = "plane";
+        return j;
+    }
 }

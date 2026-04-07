@@ -1,5 +1,9 @@
 #include "DCraft/Structs/Scene.h"
 
+#include <fstream>
+
+#include "Dcraft/Graphics/Primitives/Cube.h"
+
 namespace DCraft 
 {
     Scene::Scene(const std::string& name) : Object3D(), is_active_(false), active_camera_(nullptr)
@@ -25,6 +29,8 @@ namespace DCraft
         }
         // Object3D::update(delta_time);
     }
+
+
 
     Object3D* Scene::create_object(const std::string& name = "GameObject")
     {

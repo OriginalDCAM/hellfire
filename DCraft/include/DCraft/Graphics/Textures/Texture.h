@@ -28,6 +28,7 @@ namespace DCraft
 
         TextureType get_type() const { return type_; }
         uint32_t get_id() { return texture_id_; }
+        std::string get_path() { return path_; }
 
     private:
         TextureType type_;

@@ -1,5 +1,4 @@
 #include "DCraft/Structs/Object3D.h"
-
 #include <glm/gtc/quaternion.hpp>
 
 namespace DCraft {
@@ -14,8 +13,6 @@ namespace DCraft {
         }
         return nullptr;
     }
-
-    
 
     void Object3D::match_orientation(const Object3D &other) {
         transform_.match_orientation(other.get_transform());

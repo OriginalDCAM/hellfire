@@ -90,6 +90,8 @@ namespace DCraft
         virtual void set_aspect_ratio(float aspect_ratio) = 0;
         virtual float get_aspect_ratio() const = 0;
 
+        virtual json to_json() override;
+
     protected:
         // Update camera vectors based on Euler angles
         void update_camera_vectors();

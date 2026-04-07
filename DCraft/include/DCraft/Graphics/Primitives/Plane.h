@@ -44,5 +44,7 @@ namespace DCraft
         void set_vertices() override;
         void set_colors() override;
         void set_uvs() override;
+
+        json to_json() override;
     };
 }
