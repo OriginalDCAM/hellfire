@@ -3,7 +3,9 @@
 #include <glm/glm.hpp>
 
 #include "hellfire/ecs/RenderableComponent.h"
+#include "hellfire/ecs/components/MeshComponent.h"
 #include "hellfire/graphics/Mesh.h"
+#include "hellfire/scene/Scene.h"
 
 namespace hellfire {
 // Static geometry data
@@ -75,29 +77,39 @@ namespace hellfire {
         20, 21, 22,   22, 23, 20
     };
 
-    Entity* Cube::create(const std::string& name, const glm::vec3& color) {
-        // Create the entity
-        auto* entity = new Entity(name);
+    EntityID Cube::create(Scene* scene, const std::string& name, const Config& config) {
+        EntityID id = scene->create_entity(name);
+        Entity* entity = scene->get_entity(id);
+        
+        // Add mesh component
+        auto* mesh_comp = entity->add_component<MeshComponent>();
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        get_cube_data(vertices, indices, config.color);
+        mesh_comp->set_mesh(std::make_shared<Mesh>(vertices, indices));
         
         // Add renderable component
         auto* renderable = entity->add_component<RenderableComponent>();
+        if (config.material) {
+            renderable->set_material(config.material);
+        } else {
+            auto material = MaterialBuilder::create_lambert("Cube Material");
+            renderable->set_material(material);
+        }
         
-        // Generate cube mesh data
+        // Apply transform
+        entity->transform()->set_position(config.position);
+        entity->transform()->set_rotation(config.rotation);
+        entity->transform()->set_scale(config.scale);
+        
+        return id;
+    }
+
+    std::shared_ptr<Mesh> Cube::create_mesh() {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-        get_cube_data(vertices, indices, color);
-        
-        // Create and set mesh
-        auto mesh = std::make_shared<Mesh>(vertices, indices);
-        renderable->set_mesh(mesh);
-
-        auto material = MaterialBuilder::create_lambert("Cube Material");
-        renderable->set_material(material);
-        
-        // Update world matrices
-        entity->update_world_matrices();
-        
-        return entity;
+        get_cube_data(vertices, indices);
+        return std::make_shared<Mesh>(vertices, indices);
     }
     
     void Cube::get_cube_data(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 

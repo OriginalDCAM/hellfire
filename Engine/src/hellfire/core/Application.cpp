@@ -2,6 +2,7 @@
 
 #include "hellfire/utilities/ServiceLocator.h"
 #include "../platform/windows_linux/GLFWWindow.h"
+#include "hellfire/scene/Scene.h"
 
 namespace hellfire {
     Application::Application(int width, int height, std::string title) : shader_registry_(&shader_manager_) {
@@ -217,8 +218,14 @@ namespace hellfire {
         glViewport(0, 0, width, height);
 
         // Update cameras
-        for (const auto &camera: scene_manager_.get_camera_entities()) {
-            camera->get_component<CameraComponent>()->set_aspect_ratio(window_info_.aspect_ratio);
+        if (Scene* active_scene = scene_manager_.get_active_scene()) {
+            for (const EntityID camera_id : scene_manager_.get_camera_entities()) {
+                if (const Entity* camera_entity = active_scene->get_entity(camera_id)) {
+                    if (auto* camera_comp = camera_entity->get_component<CameraComponent>()) {
+                        camera_comp->set_aspect_ratio(window_info_.aspect_ratio);
+                    }
+                }
+            }
         }
 
         call_plugins([width, height](IApplicationPlugin &plugin) {

@@ -4,54 +4,74 @@
 #include <hellfire/graphics/geometry/Sphere.h>
 
 #include "hellfire/ecs/RenderableComponent.h"
-#include "hellfire/ecs/Entity.h"
+#include "hellfire/ecs/components/MeshComponent.h"
+#include "hellfire/scene/Scene.h"
 
 namespace hellfire {
-    Entity *Sphere::create(const std::string &name, const glm::vec3 &color, int rings, int sectors) {
-        // Create the entity
-        auto *entity = new Entity(name);
+    EntityID Sphere::create(Scene *scene, const std::string &name, const Config &config) {
+        EntityID id = scene->create_entity(name);
+        Entity* entity = scene->get_entity(id);
 
-        // Add renderable component
-        auto *renderable = entity->add_component<RenderableComponent>();
-
-        // Generate sphere mesh data
+        // Add mesh component
+        auto* mesh_comp = entity->add_component<MeshComponent>();
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-        get_sphere_data(vertices, indices, color, rings, sectors);
 
-        // Create and set the mesh
-        auto mesh = std::make_shared<Mesh>(vertices, indices);
-        renderable->set_mesh(mesh);
+        // Generate sphere geometry
+        get_sphere_data(vertices, indices, 1.0f, config.rings, config.sectors);
 
-        // Update world matrices
-        entity->update_world_matrices();
+        // Apply color to vertices
+        for (auto& vertex : vertices) {
+            vertex.color = config.color;
+        }
 
-        return entity;
+        mesh_comp->set_mesh(std::make_shared<Mesh>(vertices, indices));
+
+        // Add renderable component
+        auto* renderable = entity->add_component<RenderableComponent>();
+        if (config.material) {
+            renderable->set_material(config.material);
+        } else {
+            auto material = MaterialBuilder::create_lambert("Sphere Material");
+            renderable->set_material(material);
+        }
+        
+        // Apply transform
+        entity->transform()->set_position(config.position);
+        entity->transform()->set_scale(config.scale);
+        
+        return id;
     }
 
-    void Sphere::get_sphere_data(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices,
-                                 const glm::vec3 &color, int rings, int sectors) {
+    std::shared_ptr<Mesh> Sphere::create_mesh(int rings, int sectors) {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        get_sphere_data(vertices, indices, 1.0f, rings, sectors);
+        return std::make_shared<Mesh>(vertices, indices);
+    }
+
+    void Sphere::get_sphere_data(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices,
+                                 float radius, int rings, int sectors) {
         vertices.clear();
         indices.clear();
 
         const float PI = 3.14159265359f; // 16 bit precision
-        const float radius = 1.0f;
 
         // Generate vertices
         for (int ring = 0; ring <= rings; ++ring) {
-            float phi = PI * ring / rings; // Vertical angle from top
+            float phi = PI * ring / rings; 
             float y = cos(phi);
             float ring_radius = sin(phi);
 
             for (int sector = 0; sector <= sectors; ++sector) {
-                float theta = 2.0f * PI * sector / sectors; // Horizontal angle
+                float theta = 2.0f * PI * sector / sectors; 
                 float x = ring_radius * cos(theta);
                 float z = ring_radius * sin(theta);
 
                 Vertex vertex;
                 vertex.position = glm::vec3(x, y, z) * radius;
-                vertex.normal = glm::normalize(vertex.position); // For sphere, normal = normalized position
-                vertex.color = color;
+                vertex.normal = glm::normalize(vertex.position); 
+                vertex.color = glm::vec3(1.0f);
 
                 // UV coordinates
                 vertex.texCoords = glm::vec2(

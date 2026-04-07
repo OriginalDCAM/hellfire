@@ -6,12 +6,15 @@
 #include "ModelLoader.h"
 
 namespace hellfire {
+    class Scene;
+    using EntityID = uint32_t;
+    
     class Asset {
     public:
         Asset() = default;
-        static Entity* load(const std::filesystem::path& file_path) {
-            // Simple for now only model loading later other types of asset loading like scenes.
-            return Addons::ModelLoader::load_model(file_path).release();
+        
+        static EntityID load(Scene* scene, const std::filesystem::path& file_path) {
+            return Addons::ModelLoader::load_model(scene, file_path);
         }
         
     };

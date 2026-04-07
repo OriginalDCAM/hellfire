@@ -12,5 +12,11 @@
 #include "hellfire/graphics/Mesh.h"
 #include "hellfire/assets/AnimationSystem.h"
 #include "hellfire/graphics/Skybox.h"
+#include "hellfire/assets/Asset.h"
+#include "hellfire/scene/CameraFactory.h"
+#include "hellfire/graphics/Geometry/Quad.h"
+#include "hellfire/graphics/lighting/DirectionalLight.h"
+#include "hellfire/graphics/Skybox.h"
+#include "Scripts/PlayerController.h"
 
 #endif //DCRAFT_H

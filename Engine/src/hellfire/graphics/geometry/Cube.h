@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -6,15 +7,25 @@
 
 namespace hellfire
 {
+    class Mesh;
+    class Material;
+    class Scene;
     class Entity;
+    using EntityID = uint32_t;
 
     class Cube 
     {
-
     public:
-        static Entity* create(const std::string& name,  const glm::vec3& color = glm::vec3(1.0f));
-
-        // Helper method to get cube geometry data
+        struct Config {
+            glm::vec3 color = glm::vec3(1.0f);
+            std::shared_ptr<Material> material = nullptr;
+            glm::vec3 position = glm::vec3(0.0f);
+            glm::vec3 rotation = glm::vec3(0.0f);
+            glm::vec3 scale = glm::vec3(1.0f);
+        };
+        
+        static EntityID create(Scene* scene, const std::string& name, const Config& config);
+        static std::shared_ptr<Mesh> create_mesh();
         static void get_cube_data(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 
                                  const glm::vec3& color = glm::vec3(1.0f));
         

@@ -17,9 +17,7 @@
 
         if constexpr (std::is_base_of_v<ScriptComponent, T>) {
             script_components_.push_back(component_ptr);
-            if (initialized_) {
-                component_ptr->init();
-            }
+            component_ptr->init();
         }
 
         return component_ptr;
@@ -59,16 +57,10 @@
     }
 
     template<typename T>
-    void Entity::send_event_to_script(const std::string &event_name, void *data, const bool recursive) {
+    void Entity::send_event_to_script(const std::string &event_name, void *data) {
         static_assert(std::is_base_of_v<ScriptComponent, T>, "T must derive from ScriptComponent");
         if (auto *script = get_component<T>()) {
             script->trigger_event(event_name, data);
-        }
-
-        if (recursive) {
-            for (auto *child: children_) {
-                child->send_event_to_script<T>(event_name, data, true);
-            }
         }
     }
 

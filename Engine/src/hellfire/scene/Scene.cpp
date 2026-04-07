@@ -1,144 +1,217 @@
 #include "Scene.h"
 
 #include "../graphics/Skybox.h"
+#include "hellfire/assets/AnimationSystem.h"
+#include "hellfire/assets/AnimationSystem.h"
 #include "hellfire/ecs/CameraComponent.h"
 
 namespace hellfire {
-    Scene::Scene(const std::string &name) : name_(name), is_active_(false), active_camera_entity_(nullptr),
-                                            skybox_(nullptr) {
+    Scene::Scene(const std::string &name) : name_(name), is_active_(false), active_camera_entity_id_(0) {
     }
 
     Scene::~Scene() {
-        // Clean up all entities
-        for (const Entity *entity: entities_) {
-            delete entity;
+        entities_.clear();
+    }
+
+    EntityID Scene::create_entity(const std::string &name) {
+        EntityID id = next_id_++;
+        auto entity = std::make_unique<Entity>(id, name);
+
+        entity->add_component<TransformComponent>();
+        
+        entities_[id] = std::move(entity);
+        root_entities_.push_back(id);
+
+        // Initialize scripts
+        entities_[id]->initialize_scripts();
+
+        return id;
+    }
+
+    void Scene::destroy_entity(EntityID id) {
+        const auto it = entities_.find(id);
+        if (it == entities_.end()) return;
+
+        // Cleanup scripts first
+        it->second->cleanup_scripts();
+
+        if (id == active_camera_entity_id_) {
+            active_camera_entity_id_ = 0;
         }
 
-        entities_.clear();
+        // Recursively destroy children
+        const std::vector<EntityID> children = get_children(id);
+        for (const EntityID child_id: children) {
+            destroy_entity(child_id);
+        }
 
-        if (skybox_) {
-            delete skybox_;
-            skybox_ = nullptr;
+        // Remove from parent's children list
+        if (const auto parent_it = parent_map_.find(id); parent_it != parent_map_.end()) {
+            const EntityID parent_id = parent_it->second;
+            auto &siblings = children_map_[parent_id];
+            siblings.erase(std::remove(siblings.begin(), siblings.end(), id), siblings.end());
+            parent_map_.erase(parent_it);
+        } else {
+            // Remove from roots
+            root_entities_.erase(std::remove(root_entities_.begin(), root_entities_.end(), id), root_entities_.end());
+        }
+
+        // Remove children mapping
+        children_map_.erase(id);
+
+        // Delete the entity
+        entities_.erase(it);
+    }
+
+    Entity *Scene::get_entity(EntityID id) {
+        const auto it = entities_.find(id);
+        return it != entities_.end() ? it->second.get() : nullptr;
+    }
+
+    const Entity *Scene::get_entity(EntityID id) const {
+        const auto it = entities_.find(id);
+        return it != entities_.end() ? it->second.get() : nullptr;
+    }
+
+    void Scene::set_parent(EntityID child_id, EntityID parent_id) {
+        if (entities_.find(child_id) == entities_.end()) return;
+        if (parent_id != 0 && entities_.find(parent_id) == entities_.end()) return;
+
+        // Remove from current parent
+        if (auto it = parent_map_.find(child_id); it != parent_map_.end()) {
+            EntityID old_parent = it->second;
+            auto &siblings = children_map_[old_parent];
+            siblings.erase(std::remove(siblings.begin(), siblings.end(), child_id), siblings.end());
+        } else {
+            // Was a root entity
+            root_entities_.erase(std::remove(root_entities_.begin(), root_entities_.end(), child_id),
+                                 root_entities_.end());
+        }
+
+        // Set new parent
+        if (parent_id != 0) {
+            parent_map_[child_id] = parent_id;
+            children_map_[parent_id].push_back(child_id);
+        } else {
+            // Moving to root
+            parent_map_.erase(child_id);
+            root_entities_.push_back(child_id);
         }
     }
 
+    void Scene::set_as_root(EntityID entity_id) {
+        set_parent(entity_id, 0);
+    }
+
+    EntityID Scene::get_parent(EntityID entity_id) const {
+        const auto it = parent_map_.find(entity_id);
+        return it != parent_map_.end() ? it->second : 0;
+    }
+
+    std::vector<EntityID> Scene::get_children(EntityID parent_id) const {
+        const auto it = children_map_.find(parent_id);
+        return it != children_map_.end() ? it->second : std::vector<EntityID>{};
+    }
+
     void Scene::initialize() {
-        // Initialize all entities
-        for (Entity *entity: entities_) {
-            entity->setup();
+        for (const EntityID root_id: root_entities_) {
+            if (const Entity *entity = get_entity(root_id)) {
+                entity->initialize_scripts();
+            }
         }
     }
 
     void Scene::update(float delta_time) {
-        // Update all entities
-        for (Entity *entity: entities_) {
-            entity->update(delta_time);
+        for (const EntityID root_id: root_entities_) {
+            update_hierarchy(root_id, delta_time);
         }
-
-        // Update world matrices for the entire hierarchy
         update_world_matrices();
     }
 
-    void Scene::add_entity(Entity *entity) {
-        if (entity && std::find(entities_.begin(), entities_.end(), entity) == entities_.end()) {
-            entities_.push_back(entity);
-            entity->setup();
+    void Scene::update_world_matrices() {
+        for (const EntityID root_id: root_entities_) {
+            update_world_matrices_recursive(root_id, glm::mat4(1.0f));
         }
-    }
-
-    void Scene::remove_entity(const Entity *entity) {
-        auto it = std::find(entities_.begin(), entities_.end(), entity);
-        if (it != entities_.end()) {
-            // If this entity was the active camera, clear it
-            if (entity == active_camera_entity_) {
-                active_camera_entity_ = nullptr;
-            }
-
-            entities_.erase(it);
-        }
-    }
-
-    Entity *Scene::create_entity(const std::string &name) {
-        auto *entity = new Entity(name);
-        add_entity(entity);
-        return entity;
     }
 
     Entity *Scene::find_entity_by_name(const std::string &name) {
-        Entity *result = nullptr;
-        find_entity_by_name_recursive(entities_, name, result);
-        return result;
+        for (const auto &[id, entity]: entities_) {
+            if (entity->get_name() == name)
+                return entity.get();
+        }
+        return nullptr;
     }
 
-    void Scene::find_entity_by_name_recursive(const std::vector<Entity *> &entities,
-                                              const std::string &name, Entity *&result) {
-        if (result) return; // already found
+    void Scene::set_active_camera(const EntityID camera_id) {
+        Entity* entity = get_entity(camera_id);
+        if (entity && entity->has_component<CameraComponent>()) {
+            active_camera_entity_id_ = camera_id;
+        }
+    }
 
-        for (Entity *entity: entities) {
-            if (entity->get_name() == name) {
-                result = entity;
-                return;
+    CameraComponent *Scene::get_active_camera() const {
+        if (active_camera_entity_id_ == 0) return nullptr;
+        const Entity* entity = const_cast<Scene*>(this)->get_entity(active_camera_entity_id_);
+        return entity ? entity->get_component<CameraComponent>() : nullptr;
+    }
+
+    std::vector<EntityID> Scene::get_camera_entities() const {
+        std::vector<EntityID> cameras;
+        for (const auto& [id, entity] : entities_) {
+            if (entity->has_component<CameraComponent>()) {
+                cameras.push_back(id);
             }
-            // Recurse through children
-            find_entity_by_name_recursive(entity->get_children(), name, result);
-            if (result) return;
         }
-    }
-
-    std::vector<Entity*> Scene::find_entities_with_component(const std::type_index& component_type) {
-        std::vector<Entity*> results;
-        // TODO:
-        // This would need a more complex implementation to work with type_index
-        // For now, use the template version instead
-        return results;
-    }
-
-    void Scene::set_active_camera(Entity* camera_entity) {
-        // Verify the entity has a camera component
-        if (camera_entity && camera_entity->has_component<CameraComponent>()) {
-            active_camera_entity_ = camera_entity;
-        }
-    }
-
-    std::vector<Entity *> Scene::get_camera_entities() const {
-        std::vector<Entity*> cameras;
-
-        std::function<void(const std::vector<Entity*>&)> find_cameras =
-            [&](const std::vector<Entity*>& entities) {
-                for (Entity* entity : entities) {
-                    if (entity->has_component<CameraComponent>()) {
-                        cameras.push_back(entity);
-                    }
-                    // Recurse through children
-                    find_cameras(entity->get_children());
-                }
-            };
-
-        find_cameras(entities_);
         return cameras;
     }
 
-    void Scene::update_world_matrices() const {
-        // Update world matrices for all root entities
-        // Their children will be updated recursively
-        for (Entity* entity : entities_) {
-            entity->update_world_matrices();
+    void Scene::set_skybox(Skybox *skybox) {
+        skybox_.reset(skybox);
+    }
+
+    void Scene::update_hierarchy(EntityID entity_id, float delta_time) {
+        Entity* entity = get_entity(entity_id);
+        if (!entity) return;
+
+        entity->update_scripts(delta_time);
+
+        for (EntityID child_id : get_children(entity_id)) {
+            update_hierarchy(child_id, delta_time);
         }
     }
 
-    nlohmann::json Scene::to_json() {
-        nlohmann::json j;
-        j["name"] = name_;
-        j["type"] = "Scene";
-        
-        // Serialize entities
-        nlohmann::json entities_array = nlohmann::json::array();
-        for (Entity* entity : entities_) {
-            // TODO: need to implement Entity::to_json()
-            // entities_array.push_back(entity->to_json());
+    void Scene::update_world_matrices_recursive(EntityID entity_id, const glm::mat4& parent_world) {
+        Entity* entity = get_entity(entity_id);
+        if (!entity) return;
+
+        TransformComponent* transform = entity->get_component<TransformComponent>();
+        if (!transform) {
+            std::cerr << "CRITICAL: Entity '" << entity->get_name() 
+                      << "' (ID: " << entity_id << ") missing TransformComponent!\n";
+            assert(false);
+            return; 
         }
-        j["entities"] = entities_array;
-        
-        return j;
+
+        transform->update_world_matrix(parent_world);
+
+        // Recurse into children with this entity's world matrix
+        const glm::mat4& this_world = transform->get_world_matrix();
+        for (EntityID child_id : get_children(entity_id)) {
+            update_world_matrices_recursive(child_id, this_world);
+        }
+    }
+
+    void Scene::find_entities_recursive(EntityID entity_id, const std::function<bool(Entity *)> &predicate,
+                                        std::vector<EntityID> &results) {
+        Entity* entity = get_entity(entity_id);
+        if (!entity) return;
+
+        if (predicate(entity)) {
+            results.push_back(entity_id);
+        }
+
+        for (EntityID child_id : get_children(entity_id)) {
+            find_entities_recursive(child_id, predicate, results);
+        }
     }
 }
