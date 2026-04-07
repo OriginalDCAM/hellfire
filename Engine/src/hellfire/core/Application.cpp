@@ -1,8 +1,5 @@
 #include "Application.h"
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "../platform/windows_linux/GLFWWindow.h"
 
@@ -187,12 +184,6 @@ namespace hellfire {
     }
 
     void Application::on_mouse_move(float x, float y) {
-        bool consumed = call_plugins_until_consumed([x, y](IApplicationPlugin &plugin) {
-            return plugin.on_mouse_move(x, y);
-        });
-
-        if (consumed) return;
-
         input_manager_->on_mouse_move(x, y);
 
         if (handle_first_mouse_movement(x, y)) return;
@@ -202,12 +193,20 @@ namespace hellfire {
 
         window_info_.mouse_pos.x = x;
         window_info_.mouse_pos.y = y;
-
+        
         // Skip large jumps (window focus, etc)
         if (abs(x_offset) > 100 || abs(y_offset) > 100) return;
+
+        bool consumed = call_plugins_until_consumed([x, y, x_offset, y_offset](IApplicationPlugin &plugin) {
+            return plugin.on_mouse_move(x, y, x_offset, y_offset);
+        });
+
+        if (consumed) return;
         
         // Warp when getting close to edges
         handle_cursor_warping(x, y);
+
+
     }
 
     void Application::on_window_resize(const int width, const int height) {
