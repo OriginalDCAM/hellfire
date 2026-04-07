@@ -6,7 +6,6 @@
 #include "core/ApplicationState.h"
 #include "ui/PanelManager.h"
 #include "ui/Panels/MenuBar/MenuBarComponent.h"
-#include "ui/Panels/Projects/NewProjectPanel.h"
 #include "ui/Panels/Viewport/ViewportPanel.h"
 
 namespace hellfire::editor {

@@ -7,6 +7,7 @@
 #include "hellfire/graphics/renderer/Renderer.h"
 #include "hellfire/scene/SceneManager.h"
 #include "scenes/DefaultScene.h"
+#include "ui/Panels/AssetExplorer/AssetExplorer.h"
 #include "ui/Panels/Inspector/InspectorPanel.h"
 #include "ui/Panels/MenuBar/MenuBarComponent.h"
 #include "ui/Panels/SceneHierarchy/SceneHierarchyPanel.h"
@@ -24,6 +25,7 @@ namespace hellfire::editor {
         panel_manager_.add_panel<SceneHierarchyPanel>();
         panel_manager_.add_panel<InspectorPanel>();
         panel_manager_.add_panel<RendererSettingsPanel>();
+        panel_manager_.add_panel<AssetExplorer>();
         viewport_panel_ = panel_manager_.add_panel<ViewportPanel>();
         
         panel_manager_.set_context(context_);
