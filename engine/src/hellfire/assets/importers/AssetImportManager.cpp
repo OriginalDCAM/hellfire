@@ -8,6 +8,11 @@
 #include "hellfire/serializers/ModelSerializer.h"
 #include "hellfire/serializers/TextureSerializer.h"
 
+#include <thread>
+#include <mutex>
+#include <vector>
+#include <future>
+
 namespace hellfire {
     TextureType infer_texture_type(const std::string& name) {
         std::string lower_name = name;
@@ -58,22 +63,40 @@ namespace hellfire {
     void AssetImportManager::import_all_models() {
         auto models = registry_.get_assets_by_type(AssetType::MODEL);
 
+        std::vector<AssetMetadata> to_import;
+
         for (const auto &meta: models) {
             // Skip already-imported internal formats
             std::string ext = meta.filepath.extension().string();
             std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
 
-            if (ext == ".hfmodel" || ext == ".hfmesh") {
-                continue; // Already internal format
-            }
+            if (ext == ".hfmodel" || ext == ".hfmesh") continue; 
 
             if (needs_import(meta.uuid)) {
-                std::cout << "Importing model: " << meta.name << std::endl;
-                import_model(meta);
-            } else {
-                std::cout << "Skipping (already imported): " << meta.name << std::endl;
+                to_import.push_back(meta);
             }
         }
+
+        // Parallel import
+        std::mutex output_mutex;
+        std::mutex registry_mutex;
+
+        auto worker = [&](const AssetMetadata& meta) {
+            bool success = import_model_threaded(meta, registry_mutex);
+        
+            std::lock_guard lock(output_mutex);
+            if (success) {
+                std::cout << "Imported: " << meta.name << std::endl;
+            } else {
+                std::cerr << "Failed: " << meta.name << std::endl;
+            }
+        };
+
+        std::vector<std::future<void>> futures;
+        for (const auto& meta : to_import) {
+            futures.push_back(std::async(std::launch::async, worker, meta));
+        }
+        for (auto& f : futures) f.get();
     }
 
     void AssetImportManager::import_all_textures() {
@@ -175,6 +198,51 @@ namespace hellfire {
         std::cout << "  Materials: " << result.created_material_assets.size() << std::endl;
         std::cout << "  Textures: " << result.created_texture_assets.size() << std::endl;
 
+        return true;
+    }
+
+    bool AssetImportManager::import_model_threaded(
+    const AssetMetadata& meta, 
+    std::mutex& registry_mutex) 
+    {
+        auto source_path = project_root_ / meta.filepath;
+
+        if (!std::filesystem::exists(source_path)) {
+            std::cerr << "Source file not found: " << source_path << std::endl;
+            return false;
+        }
+
+        // Create output directory for this model's assets
+        auto model_output_dir = import_output_dir_ / meta.name;
+        std::filesystem::create_directories(model_output_dir);
+
+        // Import using ModelImporter
+        ModelImporter importer(registry_, model_output_dir);
+        ImportSettings settings;
+        settings.generate_normals = true;
+        settings.generate_tangents = true;
+        settings.optimize_meshes = true;
+
+        ImportResult result = importer.import(source_path, settings);
+
+        if (!result.success) {
+            std::cerr << "Failed to import model: " << meta.name
+                    << " - " << result.error_message << std::endl;
+            return false;
+        }
+
+        // Save the ImportResult as .hfmodel
+        auto model_path = model_output_dir / (meta.name + ".hfmodel");
+        if (!ModelSerializer::save(model_path, result)) {
+            std::cerr << "Failed to save .hfmodel: " << model_path << std::endl;
+            return false;
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(registry_mutex);
+            registry_.register_asset(model_path, AssetType::MODEL);
+        }
+    
         return true;
     }
 

@@ -199,7 +199,7 @@ namespace hellfire {
         }
 
         // Serialize to file
-        Mesh mesh(vertices, indices);
+        Mesh mesh(vertices, indices, true); // defer building, because opengl isn't thread safe
         const std::string filename = make_unique_name(base_name_, "mesh", mesh_index) + ".hfmesh";
         const auto filepath = output_dir_ / filename;
 

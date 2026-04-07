@@ -5,6 +5,8 @@
 
 #include <iostream>
 #include "imgui.h"
+#include "imgui_internal.h"
+#include "events/StateEvents.h"
 #include "hellfire/core/Project.h"
 #include "hellfire/ecs/ComponentRegistration.h"
 #include "hellfire/scene/CameraFactory.h"
@@ -20,17 +22,22 @@ namespace hellfire::editor {
         if (ImGui::BeginMenuBar()) {
             render_file_menu();
             render_scene_menu();
+            render_layout_menu();
             ImGui::EndMenuBar();
         }
     }
 
     void MenuBarComponent::render_file_menu() {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("New Project")) {
+            if (ImGui::MenuItem("Open Project")) {
                 context_->event_bus.dispatch<OpenNewProjectWindowEvent>();
             }
             if (ImGui::MenuItem("Save Project")) {
                 context_->project_manager->get_current_project()->save();
+            }
+            if (ImGui::MenuItem("Quit to Project Hub")) {
+                
+                context_->event_bus.dispatch<CloseProjectEvent>();
             }
             ImGui::EndMenu();
         }
@@ -44,6 +51,19 @@ namespace hellfire::editor {
             ImGui::Separator();
 
             render_scene_list();
+            ImGui::EndMenu();
+        }
+    }
+
+    void MenuBarComponent::render_layout_menu() {
+        if (ImGui::BeginMenu("Editor")) {
+            if (ImGui::BeginMenu("Layouts")) {
+                if (ImGui::MenuItem("Default")) {
+                    ImGui::ClearIniSettings();
+                    ImGui::LoadIniSettingsFromDisk("assets/layouts/default.ini");
+                }
+                ImGui::EndMenu();
+            }
             ImGui::EndMenu();
         }
     }

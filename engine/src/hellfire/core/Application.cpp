@@ -84,18 +84,17 @@ namespace hellfire {
         }
 
         // Register services
-        ServiceLocator::register_service<Renderer>(&renderer_);
         ServiceLocator::register_service<InputManager>(input_manager_.get());
         ServiceLocator::register_service<ShaderManager>(&shader_manager_);
         ServiceLocator::register_service<IWindow>(window_.get());
 
         // Initialize engine systems
         Time::init();
-        renderer_.init();
+        // renderer_.init();
 
         // Create fallback shader
-        Shader *fallback = ensure_fallback_shader();
-        renderer_.set_fallback_shader(*fallback);
+        // Shader *fallback = ensure_fallback_shader();
+        // renderer_.set_fallback_shader(*fallback);
 
         call_plugins([this](IApplicationPlugin &plugin) {
             plugin.on_initialize(*this);
@@ -104,26 +103,26 @@ namespace hellfire {
 
     void Application::run() {
         // while (!should_exit()) {
-            while (!window_->should_close()) {
-                if (window_info_.minimized) {
-                    window_->wait_for_events();
-                    continue;
-                }
-
-                // Poll the window for events (mouse inputs, keys, window stuff, etc.)
-                window_->poll_events();
-                // Make sure the timer is updated
-                Time::update();
-
-                input_manager_->update();
-
-                // Update scene
-                if (auto sm = ServiceLocator::get_service<SceneManager>()) {
-                    sm->update(Time::delta_time);
-                }
-
-                on_render();
+        while (!window_->should_close()) {
+            if (window_info_.minimized) {
+                window_->wait_for_events();
+                continue;
             }
+
+            // Poll the window for events (mouse inputs, keys, window stuff, etc.)
+            window_->poll_events();
+            // Make sure the timer is updated
+            Time::update();
+
+            input_manager_->update();
+
+            // Update scene
+            if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+                sm->update(Time::delta_time);
+            }
+
+            on_render();
+        }
         // }
     }
 
@@ -133,29 +132,33 @@ namespace hellfire {
         call_plugins([](IApplicationPlugin &plugin) {
             plugin.on_begin_frame();
         });
-        renderer_.begin_frame();
-        
-        if (auto sm = ServiceLocator::get_service<SceneManager>()) {
-            if (auto *active_scene = sm->get_active_scene()) {
-                Entity *camera_override = nullptr;
+        if (auto renderer = ServiceLocator::get_service<Renderer>()) {
+            renderer->begin_frame();
 
-                call_plugins([&camera_override](IApplicationPlugin &plugin) {
-                    if (!camera_override) {
-                        camera_override = plugin.get_render_camera_override();
-                    }
-                });
+            if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+                if (auto *active_scene = sm->get_active_scene()) {
+                    Entity *camera_override = nullptr;
 
-                renderer_.render(*active_scene, camera_override);
+                    call_plugins([&camera_override](IApplicationPlugin &plugin) {
+                        if (!camera_override) {
+                            camera_override = plugin.get_render_camera_override();
+                        }
+                    });
+
+                    renderer->render(*active_scene, camera_override);
+                }
             }
         }
+
 
         // Plugin render
         call_plugins([](IApplicationPlugin &plugin) {
             plugin.on_render();
         });
 
-        
-            renderer_.end_frame();
+        if (auto renderer = ServiceLocator::get_service<Renderer>()) {
+            renderer->end_frame();
+        }
         // Plugin end_frame
         call_plugins([](IApplicationPlugin &plugin) {
             plugin.on_end_frame();
@@ -268,11 +271,11 @@ namespace hellfire {
     void Application::set_exit_condition(std::function<bool()> condition) {
         exit_condition_ = std::move(condition);
     }
-    
+
     void Application::request_exit() {
         should_exit_ = true;
     }
-    
+
     bool Application::should_exit() const {
         if (should_exit_) return true;
         if (exit_condition_ && exit_condition_()) return true;

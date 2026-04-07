@@ -13,21 +13,28 @@ namespace hellfire {
      */
     class ModelInstantiator {
     public:
-        ModelInstantiator(Scene& scene, AssetManager& assets);
+        ModelInstantiator(AssetManager& assets, AssetRegistry& registry);
 
-        EntityID instantiate(const ImportResult& result, EntityID parent = 0);
+        // Instantiate from AssetID (looks up .hfmodel file)
+        EntityID instantiate(Scene& scene, AssetID model_asset_id, EntityID parent = INVALID_ENTITY);
 
-        // Instantiate a single mesh as an entity
-        EntityID instantiate_mesh(AssetID mesh_asset, 
-                         AssetID material_asset = INVALID_ASSET_ID,
-                         EntityID parent = 0);
+        // Instantiate from path directly
+        EntityID instantiate(Scene& scene, const std::filesystem::path& hfmodel_path, EntityID parent = INVALID_ENTITY);
+
+        // Instantiate from already-loaded ImportResult
+        EntityID instantiate(Scene& scene, const ImportResult& model, EntityID parent = INVALID_ENTITY);
 
     private:
-        Scene& scene_;
         AssetManager& assets_;
+        AssetRegistry& registry_;
 
-        EntityID instantiate_node(const ImportResult& result,
-                         size_t node_index,
-                         EntityID parent);
+        EntityID instantiate_node(Scene& scene, 
+                                  const ImportResult& model,
+                                  size_t node_index, 
+                                  EntityID parent);
+
+        void attach_mesh_components(Entity *entity, const ImportedMesh &mesh_ref);
     };
+
+
 }

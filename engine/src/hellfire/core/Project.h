@@ -8,6 +8,7 @@
 
 #include "hellfire/assets/AssetManager.h"
 #include "hellfire/assets/AssetRegistry.h"
+#include "hellfire/graphics/renderer/Renderer.h"
 #include "hellfire/scene/SceneManager.h"
 
 namespace hellfire {
@@ -59,6 +60,7 @@ namespace hellfire {
         std::unique_ptr<SceneManager> scene_manager_ = nullptr;
         std::unique_ptr<AssetRegistry> asset_registry_ = nullptr;
         std::unique_ptr<AssetManager> asset_manager_ = nullptr;
+        std::unique_ptr<Renderer> scene_renderer_ = nullptr;
         
         std::vector<std::filesystem::path> recent_scenes_;
 

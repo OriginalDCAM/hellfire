@@ -29,6 +29,10 @@ namespace hellfire {
             return nullptr;
         }
 
+        if (mesh && !mesh->is_built()) {
+            mesh->build();  
+        }
+
         mesh_cache_[id] = mesh;
         return mesh;
     }

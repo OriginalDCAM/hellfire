@@ -16,7 +16,7 @@ namespace hellfire {
         bool generate_normals = true;
         bool generate_tangents = true;
         bool triangulate = true;
-        bool flip_uvs = false;
+        bool flip_uvs = true;
         bool optimize_meshes = true;
         float scale_factor = 1.0f;
     };

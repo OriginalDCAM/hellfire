@@ -262,11 +262,8 @@ namespace hellfire::editor {
         ImGui::SetNextWindowPos(default_pos, ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSizeConstraints(ImVec2(320, 180), ImVec2(FLT_MAX, FLT_MAX));
 
-        const std::string window_name = context_->active_scene
-                                            ? ICON_FA_EYE " " + context_->active_scene->get_name()
-                                            : "Viewport";
 
-        if (ui::Window window{window_name}) {
+        if (ui::Window window{"Scene Viewport"}) {
             if (!context_->active_scene) return;
             // Store the viewport bound for outside usage
             viewport_pos_ = ImGui::GetWindowPos();

@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#include <mutex>
+
 #include "hellfire/assets/AssetManager.h"
 #include "hellfire/assets/AssetRegistry.h"
 
@@ -32,7 +34,10 @@ private:
     std::filesystem::path import_output_dir_;
 
     bool import_model(const AssetMetadata& meta);
-    bool import_texture(const AssetMetadata& meta);
+
+   bool import_model_threaded(const AssetMetadata &meta, std::mutex &registry_mutex);
+
+   bool import_texture(const AssetMetadata& meta);
 
     // Check if imported version exists
     bool has_imported_mesh(AssetID original_id) const;

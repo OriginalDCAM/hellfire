@@ -4,6 +4,7 @@
 #pragma once
 
 #include "RotateScript.h"
+#include "hellfire/assets/models/ModelInstantiator.h"
 #include "hellfire/graphics/Skybox.h"
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Sphere.h"
