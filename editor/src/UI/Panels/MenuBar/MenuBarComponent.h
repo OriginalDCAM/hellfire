@@ -8,6 +8,7 @@
 namespace hellfire::editor {
 class MenuBarComponent : public EditorPanel {
 public:
+    MenuBarComponent(EditorContext* ctx) : EditorPanel(ctx) {}
     void render() override;
 private:
     void render_file_menu();

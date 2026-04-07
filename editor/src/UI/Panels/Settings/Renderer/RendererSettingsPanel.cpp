@@ -9,14 +9,11 @@
 #include "UI/ui.h"
 
 namespace hellfire::editor {
-void RendererSettingsPanel::render() {
-    if (ImGui::Begin("Renderer Settings")) {
-        if (auto renderer = ServiceLocator::get_service<Renderer>()) {
-            ui::float_input("Shadow Bias", &renderer->get_shadow_settings().bias, 0.001);
+    void RendererSettingsPanel::render() {
+        if (ui::Window window{"Renderer Settings"}) {
+            if (const auto renderer = ServiceLocator::get_service<Renderer>()) {
+                ui::float_input("Shadow Bias", &renderer->get_shadow_settings().bias, 0.001);
+            }
         }
-        ImGui::End();
     }
-        
 }
-}
-    

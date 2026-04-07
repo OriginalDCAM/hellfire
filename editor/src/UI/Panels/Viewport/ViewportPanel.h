@@ -17,6 +17,8 @@ namespace hellfire::editor {
     public:
         ViewportPanel();
 
+        Framebuffer *get_picking_fbo();
+
         ~ViewportPanel() override;
 
         /**
@@ -36,12 +38,12 @@ namespace hellfire::editor {
          * @param mouse_y Y coordinate in screen space
          * @return EntityID at the given postion, or 0 if none
          */
-        uint32_t pick_object_at_mouse(int mouse_x, int mouse_y) const;
+        uint32_t pick_object_at_mouse(int mouse_x, int mouse_y);
 
         /**
          * @brief Handles mouse-based entity selection using the picking framebuffer
          */
-        void handle_object_picking() const;
+        void handle_object_picking();
 
         Entity *get_editor_camera() const { return editor_camera_; }
         bool is_editor_camera_active() const { return camera_active_; }
