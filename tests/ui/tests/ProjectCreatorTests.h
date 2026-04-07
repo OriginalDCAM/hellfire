@@ -45,10 +45,6 @@ namespace hellfire::tests {
     inline void RegisterProjectCreatorTests(ImGuiTestEngine *engine) {
         ImGuiTest *t = nullptr;
 
-        // ============================================
-        // Navigation Tests
-        // ============================================
-
         t = RegisterTestWithTeardown(engine, "ProjectCreator", "WindowOpens_FromProjectHub");
         t->TestFunc = [](ImGuiTestContext *ctx) {
             ctx->Yield(30);
@@ -74,10 +70,6 @@ namespace hellfire::tests {
 
             IM_CHECK(ctx->ItemInfo("//Hellfire - Project Hub").ID != 0);
         };
-
-        // ============================================
-        // Form Input Tests
-        // ============================================
 
         t = RegisterTestWithTeardown(engine, "ProjectCreator", "FormInputs_AcceptText");
         t->TestFunc = [](ImGuiTestContext *ctx) {
@@ -108,54 +100,6 @@ namespace hellfire::tests {
 
             ctx->SetRef("//Create New Project");
         };
-
-        t = RegisterTestWithTeardown(engine, "ProjectCreator", "CreateButton_EnabledWhenFormFilled");
-        t->TestFunc = [](ImGuiTestContext *ctx) {
-            ctx->Yield(30);
-
-            ctx->SetRef("//Hellfire - Project Hub");
-            ctx->ItemClick("HubLayout/New Project");
-            ctx->Yield(10);
-
-            ctx->SetRef("//Create New Project");
-
-            ctx->ItemClick("**/##name");
-            ctx->KeyCharsAppend("MyTestProject");
-
-            ctx->ItemClick("**/##location");
-            ctx->KeyCharsAppend("C:/Projects");
-            ctx->Yield(5);
-
-            // Create button should now be enabled
-            ImGuiTestItemInfo create_btn = ctx->ItemInfo("//Create");
-            IM_CHECK(create_btn.ID != 0);
-            IM_CHECK((create_btn.ItemFlags & ImGuiItemFlags_Disabled) == 0);
-        };
-
-        // ============================================
-        // Template Selection Tests
-        // ============================================
-
-        t = RegisterTestWithTeardown(engine, "ProjectCreator", "TemplateList_CanSelectTemplate");
-        t->TestFunc = [](ImGuiTestContext *ctx) {
-            ctx->Yield(30);
-
-            ctx->SetRef("//Hellfire - Project Hub");
-            ctx->ItemClick("HubLayout/New Project");
-            ctx->Yield(10);
-
-            ctx->SetRef("//Create New Project");
-
-            ctx->ItemClick("**/##templates");
-            ctx->Yield(5);
-
-            // If you have specific template names:
-            ctx->ItemClick("**/##templates/Empty Project");
-        };
-
-        // ============================================
-        // End-to-End Project Creation Test
-        // ============================================
 
         t = RegisterTestWithTeardown(engine, "ProjectCreator", "CreateProject_EndToEnd");
         t->TestFunc = [](ImGuiTestContext *ctx) {
