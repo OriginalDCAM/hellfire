@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="BackendCodeEditorMiscSettings">
-    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="15" type="long" />
-    <option name="/Default/Environment/UserInterface/HierarchyView/ViewStyle/@EntryValue" value="SuperTypes" type="string" />
+    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="105" type="long" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
-    <option name="/Default/Housekeeping/OptionsDialog/SelectedPageId/@EntryValue" value="CppCodeGeneration" type="string" />
+    <option name="/Default/RiderDebugger/RiderRestoreDecompile/RestoreDecompileSetting/@EntryValue" value="false" type="bool" />
   </component>
   <component name="CMakePresetLoader">{
   &quot;useNewFormat&quot;: true
@@ -21,60 +20,60 @@
   <component name="CMakeRunConfigurationManager">
     <generated>
       <config projectName="CustomEngine" targetName="DCraft" />
-      <config projectName="CustomEngine" targetName="imgui" />
-      <config projectName="CustomEngine" targetName="assimp" />
       <config projectName="CustomEngine" targetName="zlibstatic" />
       <config projectName="CustomEngine" targetName="Sandbox" />
+      <config projectName="CustomEngine" targetName="assimp" />
+      <config projectName="CustomEngine" targetName="imgui" />
+      <config projectName="CustomEngine" targetName="UpdateAssimpLibsDebugSymbolsAndDLLs" />
     </generated>
   </component>
-  <component name="CMakeSettings">
+  <component name="CMakeSettings" AUTO_RELOAD="true">
     <configurations>
-      <configuration PROFILE_NAME="Debug-MinGW" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="MinGW" />
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="556e4ab8-241b-4e6b-b84d-6223cac85f81" name="Changes" comment="- Fixed an issue with cull settings being set to an undefined uniform">
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/models/carrier/1378c35f.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/models/carrier/6bef6eb8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/models/carrier/7cfc9e4e.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/models/carrier/a0326c1d.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/models/carrier/carrier.mtl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/models/carrier/d8a55a9f.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/skyboxes/nx.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/skyboxes/ny.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/skyboxes/nz.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/skyboxes/px.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/skyboxes/py.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Sandbox/assets/skyboxes/pz.png" afterDir="false" />
+    <list default="true" id="762fe770-3d52-496e-84d4-7a5060a0c66b" name="Changes" comment=".">
+      <change afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/Cameras.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/final_assignment_computer_graphics.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/ModelLoader.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Addons/ModelLoader.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Components/CameraComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Components/CameraComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Components/InstancedRenderableComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Components/InstancedRenderableComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Components/RenderableComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Components/RenderableComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Components/ScriptComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Components/ScriptComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Components/TransformComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Components/TransformComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Managers/ShaderManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Managers/ShaderManager.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/Material.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/MaterialBuilder.hpp" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/MaterialRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Materials/MaterialRenderer.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Mesh.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Mesh.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Renderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Renderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Renderers/SkyboxRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Renderers/SkyboxRenderer.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/RenderingUtils.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/RenderingUtils.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Shader/Shader.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Shader/Shader.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Textures/Texture.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Graphics/Textures/Texture.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Component.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Component.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Entity.h" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/include/DCraft/Structs/Entity.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Addons/ModelLoader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Components/ScriptComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Components/ScriptComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Managers/ShaderManager.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Material.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Material.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/OGL/Textures/Texture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/OGL/Textures/Texture.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderers/MaterialRenderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/Graphics/Renderers/MaterialRenderer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/SShuttle_Exterior-Medium_resolution.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/SShuttle_Exterior-Medium_resolution.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/shuttle/SShuttle_Exterior-Medium_resolution.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/models/shuttle/SShuttle_Exterior-Medium_resolution.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/lambert.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Core/SceneManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Core/SceneManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DCraft/src/Objects/SkyboxRenderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DCraft/src/Objects/SkyboxRenderer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sandbox/assets/shaders/skybox.frag" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/assets/shaders/skybox.frag" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/include/Scenes/SolarSystemScene.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Scenes/SolarSystemScene.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/include/Scripts/PlayerController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Scripts/PlayerController.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sandbox/include/Utils/AsteroidBeltFactory.h" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/include/Utils/AsteroidBeltFactory.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/src/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Game.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SolarSystemScene.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scenes/SponzaScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scenes/SponzaScene.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sandbox/src/Utils/AsteroidBeltFactory.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Utils/AsteroidBeltFactory.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vendor/imguizmo" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/imguizmo" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sandbox/src/Scripts/PlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Sandbox/src/Scripts/PlayerController.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +83,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug-MinGW" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -94,6 +93,9 @@
     &quot;assignee&quot;: &quot;OriginalDCAM&quot;
   }
 }</component>
+  <component name="GithubDefaultAccount">
+    <option name="defaultAccountId" value="188d7b98-3f65-4422-961d-7761810a980f" />
+  </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;git@github.com:OriginalDCAM/final_assignment_computer_graphics.git&quot;,
@@ -101,68 +103,25 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/DCraft/src/Core/Graphics/GL/Geometry/Cube.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/DCraft/src/Core/Graphics/GL/Geometry/Cube.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/include/Utils/AsteroidBeltFactory.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/include/Utils/AsteroidBeltFactory.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/src/Game.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/src/Game.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/src/Game.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/src/Game.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/src/Scenes/SolarSystemScene.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/src/Scenes/SolarSystemScene.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/src/Utils/AsteroidBeltFactory.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Dev/Cpp/Hellfire Engine/sandbox/src/Utils/AsteroidBeltFactory.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../Program Files (x86)/Windows Kits/10/Include/10.0.22000.0/um/shellapi.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../Program Files (x86)/Windows Kits/10/Include/10.0.22000.0/um/winnt.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.43.34808/include/memory" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.43.34808/include/vector" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="wHWl1mH6" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -171,9 +130,10 @@
     <option name="productBranch" value="Classic" />
   </component>
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 8
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
 }</component>
-  <component name="ProjectId" id="31bFttIqHEgDOC3U2l6WjKqj4nU" />
+  <component name="ProjectId" id="31QfvwcsWViih5LUiErO3QkQHa8" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -189,104 +149,108 @@
     "RunOnceActivity.west.config.association.type.startup.service": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "new__ui__overhaul",
-    "last_opened_file_path": "C:/Dev/Cpp/School/final_assignment_computer_graphics/Sandbox/assets/models",
+    "ctest.advertisement.all.test.configuration.is.created": "true",
+    "git-widget-placeholder": "Merging ",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "CPPToolchains",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Dev\Cpp\School\final_assignment_computer_graphics\Sandbox\assets\models" />
+      <recent name="C:\Dev\Cpp\Hellfire Engine\sandbox" />
+      <recent name="C:\Dev\Cpp\Hellfire Engine\editor\src\UI\Panels\Settings\Renderer" />
+      <recent name="C:\Dev\Cpp\Hellfire Engine\editor\assets\shaders" />
+      <recent name="C:\Dev\Cpp\Hellfire Engine\sandbox\assets" />
+      <recent name="C:\Dev\Cpp\School\Hellfire Engine\Editor\assets\shaders" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Dev\Cpp\School\final_assignment_computer_graphics\Sandbox\assets\models\carrier" />
-      <recent name="C:\Dev\Cpp\School\final_assignment_computer_graphics\Sandbox\assets\skyboxes" />
-      <recent name="C:\Dev\Cpp\School\final_assignment_computer_graphics\Sandbox\assets\models" />
-      <recent name="C:\Dev\Cpp\School\final_assignment_computer_graphics\Sandbox\assets\models\sponza" />
+      <recent name="C:\Dev\Cpp\Hellfire Engine\engine\src\hellfire\assets\loaders" />
+      <recent name="C:\Dev\Cpp\Hellfire Engine\vendor\imgui" />
+      <recent name="C:\Dev\Cpp\Hellfire Engine\editor\assets\thumbnails" />
+      <recent name="C:\Dev\Cpp\Hellfire Engine\tests\unit" />
+      <recent name="C:\Dev\Cpp\Hellfire Engine\editor\src\States\ProjectHub" />
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.Sandbox">
-    <configuration name="DCraft" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="DCraft" CONFIG_NAME="Debug-MinGW">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DCraft" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="DCraft" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Sandbox" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="Sandbox" CONFIG_NAME="Debug-MinGW" RUN_TARGET_PROJECT_NAME="CustomEngine" RUN_TARGET_NAME="Sandbox">
+    <configuration name="Sandbox" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="Sandbox" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="CustomEngine" RUN_TARGET_NAME="Sandbox">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="assimp" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="assimp" CONFIG_NAME="Debug-MinGW">
+    <configuration name="UpdateAssimpLibsDebugSymbolsAndDLLs" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="UpdateAssimpLibsDebugSymbolsAndDLLs" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="imgui" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="imgui" CONFIG_NAME="Debug-MinGW">
+    <configuration name="assimp" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="assimp" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="zlibstatic" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="zlibstatic" CONFIG_NAME="Debug-MinGW">
+    <configuration name="imgui" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="imgui" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="zlibstatic" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CustomEngine" TARGET_NAME="zlibstatic" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="All CTest" type="CTestRunConfiguration" factoryName="CTestRun" PROGRAM_PARAMS="--extra-verbose" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$CMakeCurrentLocalGenerationDir$" PASS_PARENT_ENVS_2="true" RUN_PATH="$CTestCurrentExecutableName$" EXPLICIT_BUILD_TARGET_NAME="all" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
     <list>
-      <item itemvalue="CMake Application.imgui" />
       <item itemvalue="CMake Application.DCraft" />
       <item itemvalue="CMake Application.Sandbox" />
+      <item itemvalue="CMake Application.UpdateAssimpLibsDebugSymbolsAndDLLs" />
       <item itemvalue="CMake Application.assimp" />
+      <item itemvalue="CMake Application.imgui" />
       <item itemvalue="CMake Application.zlibstatic" />
+      <item itemvalue="CTest Application.All CTest" />
     </list>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration>C:\Users\denze\AppData\Roaming\Subversion</configuration>
+    <option name="sshConnectionType" value="PRIVATE_KEY" />
+    <option name="sshPrivateKeyPath" value="C:\Users\denze\.ssh\id_rsa" />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="556e4ab8-241b-4e6b-b84d-6223cac85f81" name="Changes" comment="" />
-      <created>1755785083163</created>
+      <changelist id="762fe770-3d52-496e-84d4-7a5060a0c66b" name="Changes" comment="" />
+      <created>1755461451747</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1755785083163</updated>
-      <workItem from="1755785085990" duration="6809000" />
-      <workItem from="1755845152749" duration="3964000" />
-      <workItem from="1755931109105" duration="3578000" />
-      <workItem from="1756284726439" duration="1285000" />
-      <workItem from="1756362729565" duration="13416000" />
-      <workItem from="1756922209871" duration="6622000" />
-      <workItem from="1757012619736" duration="5985000" />
-      <workItem from="1757082084119" duration="5614000" />
-      <workItem from="1757504865967" duration="9664000" />
+      <updated>1755461451747</updated>
+      <workItem from="1755461453305" duration="2601000" />
     </task>
-    <task id="LOCAL-00001" summary="- Added sponza as a test scene to the examples">
+    <task id="LOCAL-00001" summary="- Final commit">
       <option name="closed" value="true" />
-      <created>1756925390534</created>
+      <created>1755464002208</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1756925390534</updated>
+      <updated>1755464002208</updated>
     </task>
-    <task id="LOCAL-00002" summary="- Fixed an issue with uniforms">
-      <option name="closed" value="true" />
-      <created>1756926465099</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1756926465099</updated>
-    </task>
-    <task id="LOCAL-00003" summary="- Fixed an issue with cull settings being set to an undefined uniform">
-      <option name="closed" value="true" />
-      <created>1756928673661</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1756928673661</updated>
-    </task>
-    <option name="localTasksCounter" value="4" />
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -298,20 +262,7 @@
     <isAutomaticReloadCMake value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="- Added sponza as a test scene to the examples" />
-    <MESSAGE value="- Fixed an issue with uniforms" />
-    <MESSAGE value="- Fixed an issue with cull settings being set to an undefined uniform" />
-    <option name="LAST_COMMIT_MESSAGE" value="- Fixed an issue with cull settings being set to an undefined uniform" />
-  </component>
-  <component name="XDebuggerManager">
-    <watches-manager>
-      <configuration name="CMakeRunConfiguration">
-        <watch expression="sponza_model-&gt;children_[1]-&gt;components_[0].second.get()-&gt;mesh_.get()" />
-      </configuration>
-    </watches-manager>
-  </component>
-  <component name="XSLT-Support.FileAssociations.UIState">
-    <expand />
-    <select />
+    <MESSAGE value="- Final commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Final commit" />
   </component>
 </project>

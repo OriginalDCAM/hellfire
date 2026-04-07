@@ -4,6 +4,7 @@
 
 #include <DCraft/Components/ScriptComponent.h>
 #include "DCraft/Components/TransformComponent.h"
+#include <DCraft/Structs/Entity.h>
 
 namespace DCraft {
     TransformComponent * ScriptComponent::get_transform() const {

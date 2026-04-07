@@ -16,16 +16,16 @@ namespace DCraft {
             std::cerr << "Warning: Material " << material.get_name() << " has no compiled shader!" << std::endl;
             return;
         }
-
-        material.bind();
-    }
-
-    void MaterialRenderer::bind_property_to_shader(const Material::Property &property, uint32_t shader_program, int &texture_unit) {
-        bind_property(property, shader_program, texture_unit);
+            
+        int texture_unit = 0;
+            
+        for (const auto& [name, property] : material.get_properties()) {
+            bind_property(property, shader_program, texture_unit);
+        }
     }
 
     void MaterialRenderer::bind_property(const Material::Property &property, uint32_t shader_program,
-                                         int &texture_unit) {
+        int &texture_unit) {
         const std::string& uniform_name = property.uniform_name;
             
         switch (property.type) {
@@ -67,32 +67,29 @@ namespace DCraft {
                 
             case Material::PropertyType::TEXTURE: {
                 Texture* texture = std::get<Texture*>(property.value);
-
-                if (texture && texture->is_valid()) {
-                    texture->bind(texture_unit);
-
+                if (texture) {
+                    glActiveTexture(GL_TEXTURE0 + texture_unit);
+                    
+                    texture->bind(texture->get_slot());
+                        
                     GLint location = glGetUniformLocation(shader_program, uniform_name.c_str());
                     if (location != -1) {
                         glUniform1i(location, texture_unit);
-                    } 
-
-                    std::string use_flag = create_use_flag(uniform_name);
-                    GLint flag_location = glGetUniformLocation(shader_program, use_flag.c_str());
+                    }
+                        
+                    std::string_view use_flag = "use" + capitalize_first(uniform_name);
+                    GLint flag_location = glGetUniformLocation(shader_program, use_flag.data());
                     if (flag_location != -1) {
                         glUniform1i(flag_location, 1);
                     }
-
+                        
                     texture_unit++;
                 } else {
-                    // Handle invalid/missing texture
-                    std::string use_flag = create_use_flag(uniform_name);
-                    GLint flag_location = glGetUniformLocation(shader_program, use_flag.c_str());
+                    // Set usage flag to false if no texture
+                    std::string_view use_flag = "use" + capitalize_first(uniform_name);
+                    GLint flag_location = glGetUniformLocation(shader_program, use_flag.data());
                     if (flag_location != -1) {
                         glUniform1i(flag_location, 0);
-                    }
-        
-                    if (texture) {
-                        std::cout << "Warning: Invalid texture for " << uniform_name << std::endl;
                     }
                 }
                 break;
@@ -136,8 +133,10 @@ namespace DCraft {
         }
     }
 
-    std::string MaterialRenderer::create_use_flag(const std::string &uniform_name) {
-        return "use" + uniform_name;
+    std::string MaterialRenderer::capitalize_first(const std::string &str) {
+        if (str.empty()) return str;
+        std::string result = str;
+        result[0] = std::toupper(result[0]);
+        return result;
     }
-
 }

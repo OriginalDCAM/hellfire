@@ -140,11 +140,6 @@ namespace DCraft {
     void Texture::bind(unsigned int slot) const {
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, texture_id_);
-
-        GLenum error = glGetError();
-        if (error != GL_NO_ERROR) {
-            std::cerr << "OpenGL error in texture bind: " << error << std::endl;
-        }
     }
 
     void Texture::unbind() const {
@@ -210,19 +205,17 @@ namespace DCraft {
             if (shared_texture) {
                 return shared_texture;
             } else {
-                cache_.erase(it);
+                cache_.erase(it); // Remove expired weak_ptr
             }
         }
 
         // Create new texture
-        auto texture = std::make_shared<Texture>(path, type);
+        auto texture = std::make_shared<Texture>(path, type, settings);
         if (texture->is_valid()) {
             cache_[cache_key] = texture;
-            return texture; 
-        } else {
-            std::cerr << "Failed to create valid texture from: " << path << std::endl;
-            return nullptr; 
         }
+
+        return texture;
     }
 
     void TextureCache::clear_cache() {

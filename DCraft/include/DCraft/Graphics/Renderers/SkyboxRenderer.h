@@ -19,7 +19,7 @@ namespace DCraft {
         ~SkyboxRenderer();
 
         void initialize();
-        void render(const Skybox *skybox, const CameraComponent *camera) const;
+        void render(Skybox *skybox, CameraComponent *camera) const;
 
     private:
         void setup_skybox_geometry();
