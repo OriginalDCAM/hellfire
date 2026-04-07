@@ -10,15 +10,15 @@
 #include "Scenes/SandboxScene.h"
 
 
-void Game::setup_callbacks(Application &app) {
+void Game::setup_callbacks(DCraft::Application &app) {
     DCraft::ApplicationCallbacks application_callbacks;
 
-    application_callbacks.init = [this](Application &app) { init(app); };
-    application_callbacks.setup = [this](SceneManager &sm, const DCraft::WindowInfo &info) {
+    application_callbacks.init = [this](DCraft::Application &app) { init(app); };
+    application_callbacks.setup = [this](DCraft::SceneManager &sm, const DCraft::WindowInfo &info) {
         setup(sm, info);
     };
     application_callbacks.update = [this](float dt) { update(dt); };
-    application_callbacks.process_input = [this](Application &app, float dt) {
+    application_callbacks.process_input = [this](DCraft::Application &app, float dt) {
         handle_input(app, dt);
     };
     application_callbacks.on_mouse_moved = [this](float x_offset, float y_offset) {
@@ -28,7 +28,7 @@ void Game::setup_callbacks(Application &app) {
     app.set_callbacks(application_callbacks);
 }
 
-void Game::init(Application &app) {
+void Game::init(DCraft::Application &app) {
     glDisable(GL_CULL_FACE);
     glutSetCursor(GLUT_CURSOR_NONE);
     glutWarpPointer(app.get_window_width() / 2, app.get_window_height() / 2);
@@ -43,7 +43,7 @@ void Game::init(Application &app) {
 // Animation setup 
 void Game::setup_animations() {
     // God creature animation
-    Object3D* god = scenes_["Terrain"]->find_object_by_name("Godly Creature");
+    DCraft::Object3D* god = scenes_["Terrain"]->find_object_by_name("Godly Creature");
     if (god) {
         if (auto* icosphere = god->find_object_by_name("Icosphere")) {
             animation_system_.create_rotation(
@@ -74,7 +74,7 @@ void Game::setup_animations() {
         animation_system_.create_rotation("mars rotation around itself", mars, 0.0f, 10.0f, 0.0f);
     }
 
-    Light* point_light = static_cast<Light*>(
+    DCraft::Light* point_light = static_cast<DCraft::Light*>(
     scenes_["Terrain"]->find_object_by_name("Green Light"));
     
     if (point_light) {
@@ -88,7 +88,7 @@ void Game::setup_animations() {
     }
 }
 
-void Game::on_scene_activated(Scene *scene) {
+void Game::on_scene_activated(DCraft::Scene *scene) {
     // Find the scene name from the scene pointer
     std::string scene_name;
     for (const auto &pair: scenes_) {
@@ -141,8 +141,8 @@ void Game::setup_cameras_for_scene(const std::string &scene_name) {
     SceneCameras cameras;
 
     // Find cameras and their visual representations in this scene
-    cameras.main_camera = dynamic_cast<PerspectiveCamera *>(scene->find_object_by_name("Main Camera"));
-    cameras.drone_camera = dynamic_cast<PerspectiveCamera *>(scene->find_object_by_name("Drone Camera"));
+    cameras.main_camera = dynamic_cast<DCraft::PerspectiveCamera *>(scene->find_object_by_name("Main Camera"));
+    cameras.drone_camera = dynamic_cast<DCraft::PerspectiveCamera *>(scene->find_object_by_name("Drone Camera"));
     cameras.main_camera_visual = scene->find_object_by_name("Main Camera Visual");
     cameras.drone_camera_visual = scene->find_object_by_name("Drone Camera Visual");
 
@@ -160,13 +160,13 @@ void Game::setup_cameras_for_scene(const std::string &scene_name) {
 }
 
 
-void Game::setup(SceneManager &sm, WindowInfo window) {
+void Game::setup(DCraft::SceneManager &sm, DCraft::WindowInfo window) {
     scene_manager_ = &sm;
 
     // Scene loading with code behind
     scenes_["Sandbox"] = load_scene(sm, window);
     // Scene loading from file path
-    scenes_["Terrain"] = sm.load_scene("assets/scenes/Terrain Scene.json");
+    scenes_["Terrain"] = sm.load_scene("assets/scenes/Test Scene.json");
 
     setup_cameras_for_scene("Sandbox");
     setup_cameras_for_scene("Terrain");
@@ -179,7 +179,7 @@ void Game::setup(SceneManager &sm, WindowInfo window) {
     setup_animations();
 
     // Register scene activation callback with the scene manager
-    sm.set_scene_activated_callback([this](Scene *scene) {
+    sm.set_scene_activated_callback([this](DCraft::Scene *scene) {
         on_scene_activated(scene);
     });
 }
@@ -188,7 +188,7 @@ Game::SceneCameras &Game::get_active_scene_cameras() {
     return scene_cameras_[active_scene_name_];
 }
 
-void Game::handle_input(Application &app, float delta_time) {
+void Game::handle_input(DCraft::Application &app, float delta_time) {
     if (drone_toggle_timer > 0.0f) {
         drone_toggle_timer -= delta_time;
     }
@@ -251,7 +251,7 @@ void Game::handle_input(Application &app, float delta_time) {
     scene_manager_->set_active_scene(scenes_["Sandbox"]);
     }
 
-    if (app.is_special_key_pressed(GLUT_KEY_F11 + 256)) {
+    if (app.is_special_key_pressed(static_cast<char>(GLUT_KEY_F11 + 256))) {
         app.toggle_fullscreen();
     }
 }

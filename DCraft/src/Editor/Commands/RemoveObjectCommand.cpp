@@ -2,6 +2,8 @@
 // Created by denzel on 09/04/2025.
 //
 #include "DCraft/Editor/Commands/RemoveObjectCommand.h"
+#include "DCraft/Addons/SceneManager.h"
+#include "DCraft/Structs/Scene.h"
 
 namespace DCraft::Editor {
     RemoveObjectCommand::RemoveObjectCommand(SceneManager& sm, Object3D *parent,

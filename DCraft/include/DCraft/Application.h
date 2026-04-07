@@ -1,19 +1,19 @@
 #pragma once
+#include <cstdint>
 #include <functional>
 #include <imgui_impl_glut.h>
 #include <string>
 
-#include "DCraft/Addons/SceneManager.h"
-#include "DCraft/Graphics/Renderer.h"
-#include "DCraft/Addons/PerspectiveCamera.h"
+#include "Addons/SceneManager.h"
 #include "Editor/SceneEditorOverlay.h"
 
-// READ: The application class relies on the freeGLUT api to handle windows, callbacks.
-// freeGLUT is an ancient api that shouldn't be used in modern days. But had to use this
-
-// TODO: Abstract the window into its own class, so that it could be used with multiple windowing apis like win32, glfw, sdl, etc.
 
 namespace DCraft {
+    class Renderer;
+    class PerspectiveCamera;
+    class Object3D;
+    class Camera;
+    
     struct WindowInfo {
         // Dimensions
         int width;

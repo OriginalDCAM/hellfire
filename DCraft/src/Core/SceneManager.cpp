@@ -3,17 +3,12 @@
 #include <fstream>
 
 #include "DCraft/Utility/ObjectDeserializer.h"
+#include "DCraft/Utility/ObjectSerializer.h"
 
-#include "DCraft/Addons/ImportedModel3D.h"
-#include "DCraft/Addons/ModelLoader.h"
 #include "DCraft/Addons/PerspectiveCamera.h"
-#include "DCraft/Graphics/Lights/DirectionalLight.h"
-#include "DCraft/Graphics/Lights/PointLight.h"
 #include "DCraft/Graphics/Materials/LambertMaterial.h"
-#include "DCraft/Graphics/Materials/PhongMaterial.h"
 #include "DCraft/Structs/Scene.h"
 #include "DCraft/Graphics/Primitives/Cube.h"
-#include "DCraft/Graphics/Primitives/Plane.h"
 
 namespace DCraft {
     SceneManager::SceneManager() : active_scene_(nullptr) {
@@ -214,22 +209,30 @@ namespace DCraft {
         delete object;
     }
 
+    std::vector<Camera *> SceneManager::get_cameras() { return active_scene_->get_cameras(); }
+
+    void SceneManager::set_active_camera(Camera *camera) const {
+        active_scene_->set_active_camera(camera);
+    }
+
+    Camera *SceneManager::get_active_camera() const {
+        if (!active_scene_->get_active_camera()) return nullptr;
+
+        return active_scene_->get_active_camera();
+    }
+
 
     void SceneManager::set_active_scene(Scene *scene) {
+        // Early exit to prevent having to perform an unnecessary search
+        if (scene == active_scene_) return;
+
         if (std::find(objects_.begin(), objects_.end(), scene) != objects_.end()) {
             active_scene_ = scene;
             scene->set_active(true);
             if (scene_activated_callback_) {
                 scene_activated_callback_(scene);
             }
-#if 0
-            std::cout << "Debugging the active scene: " << active_scene_->get_name() << '\n';
 
-            for (auto *obj: active_scene_->get_children()) {
-                std::cout << obj->get_name() << " is registered" << '\n';
-            }
-
-#endif
             if (scene->get_active_camera()) {
                 set_active_camera(scene->get_active_camera());
             }

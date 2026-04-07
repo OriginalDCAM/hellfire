@@ -8,10 +8,8 @@
 #include "DCraft/Addons/ModelLoader.h"
 #include "DCraft/Editor/Components/UIComponent.h"
 #include "DCraft/Utility/FileDialog.h"
-
-namespace DCraft {
-    class SceneManager;
-}
+#include "DCraft/Addons/SceneManager.h"
+#include "DCraft/Structs/Scene.h"
 
 namespace DCraft {
     class MenuBarComponent : public UIComponent {

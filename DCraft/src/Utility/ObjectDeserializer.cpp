@@ -11,6 +11,7 @@
 #include "DCraft/Graphics/Primitives/Plane.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 #include "DCraft/Addons/SceneManager.h"
+#include "DCraft/Structs/Scene.h"
 
 using namespace DCraft;
 

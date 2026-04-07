@@ -140,6 +140,7 @@ void main() {
         specularValue = specularColor;
     }
 
+
     // Normalize the normal
     vec3 normal = normalize(vNormal);
     // Get view direction

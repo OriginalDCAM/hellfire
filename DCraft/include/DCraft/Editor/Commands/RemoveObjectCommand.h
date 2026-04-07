@@ -3,7 +3,11 @@
 //
 
 #include "EditorCommand.h"
-#include "DCraft/Addons/SceneManager.h"
+
+namespace DCraft {
+    class SceneManager;
+    class Object3D;
+}
 
 namespace DCraft::Editor {
 class RemoveObjectCommand : public EditorCommand {
