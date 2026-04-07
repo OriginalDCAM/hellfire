@@ -7,6 +7,5 @@
 
 int main() {
     std::cout << "Hello this is the editor!" << std::endl;
-    
     return 0;
 }

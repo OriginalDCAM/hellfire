@@ -27,8 +27,9 @@ void Game::setup_callbacks(hellfire::Application &app) {
     app.set_callbacks(application_callbacks);
 }
 
-void Game::on_scene_activated(hellfire::Scene *scene) const {
+void Game::on_scene_activated(hellfire::Scene *scene) {
     // Find the scene name from the scene pointer
+    active_scene_ = scene;
     std::string scene_name;
     for (const auto &pair: scenes_) {
         if (pair.second == scene) {
@@ -45,10 +46,10 @@ void Game::on_scene_activated(hellfire::Scene *scene) const {
     std::clog << "Activated scene: " << scene_name << "\n";
 }
 
-void Game::setup(hellfire::SceneManager &sm, const hellfire::AppInfo& window, hellfire::ShaderManager &shader_manager) {
+void Game::setup(hellfire::SceneManager &sm, const hellfire::AppInfo &window, hellfire::ShaderManager &shader_manager) {
     auto im = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
-    im->set_cursor_mode(hellfire::HIDDEN); 
-    
+    im->set_cursor_mode(hellfire::HIDDEN);
+
     scene_manager_ = &sm;
     app_info_ = &window;
 
@@ -73,7 +74,7 @@ void Game::handle_input(float delta_time) {
     if (input_manager->is_key_pressed(GLFW_KEY_2)) {
         if (!scenes_["SolarSystem"]) // Lazy initialization
             scenes_["SolarSystem"] = load_solar_system_scene(*app_info_);
-        
+
         scene_manager_->set_active_scene(scenes_["SolarSystem"]);
     }
 
@@ -102,6 +103,9 @@ void Game::process_mouse_movement(float x_offset, float y_offset) const {
 void Game::update(float delta_time) {
     handle_input(delta_time);
     for (auto &scene: scenes_) {
-        scene.second->update(delta_time);
+        if (scene.second == active_scene_) {
+            scene.second->update(delta_time);
+            
+        }
     }
 }
