@@ -8,7 +8,7 @@ namespace DCraft
     {
         std::vector<Vertex> vertices_data;
         std::vector<unsigned int> indices_data;
-        std::vector<Texture> texture_data = {};
+        std::vector<Texture*> texture_data = {};
 
         // Define the cube vertex data
         for (size_t i = 0; i < 4; ++i)
@@ -28,9 +28,9 @@ namespace DCraft
 
         Mesh cubeMesh(vertices_data, indices_data, texture_data);
 
-        get_model().add_mesh(cubeMesh);
+        get_model()->add_mesh(cubeMesh);
 
-        get_model().transform = glm::mat4(1.0f);
+        get_model()->transform = glm::mat4(1.0f);
         world_matrix_ = glm::mat4(1.0f);
 
         update_model_matrix();
@@ -43,11 +43,11 @@ namespace DCraft
         unsigned int mvpLoc = glGetUniformLocation(shader_program, "MVP");
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
-        if (!get_model().meshes.empty())
+        if (!get_model()->meshes.empty())
         {
-            for (auto& mesh : get_model().meshes)
+            for (auto& mesh : get_model()->meshes)
             {
-                mesh.draw_mesh();
+                mesh.draw_mesh(shader_program);
             }
         }
 

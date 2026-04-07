@@ -28,6 +28,14 @@ namespace DCraft
             2, 3, 1,
         };
 
+        // uvs
+        const std::vector<float> uvs = {
+            1.0, 1.0,  // top-right
+            0.0, 1.0,  // top-left
+            1.0, 0.0,  // bottom-right
+            0.0, 0.0   // bottom-left
+        };
+
     public:
         Plane();
 

@@ -15,7 +15,7 @@ set(GLM_ROOT_DIR "C:/Libraries/glm-0.9.6.3/glm" CACHE PATH "GLM root directory")
 list(APPEND CMAKE_PREFIX_PATH ${GLEW_ROOT_DIR} ${GLUT_ROOT_DIR} ${GLM_ROOT_DIR})
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Create GLM target manually - note the root directory is one level up from where glm/glm is
+# Create GLM target manually - note the root directory is one level up from where glm is
 if(NOT TARGET GLM::GLM AND EXISTS "${GLM_ROOT_DIR}")
     add_library(GLM::GLM INTERFACE IMPORTED)
     set_target_properties(GLM::GLM PROPERTIES
@@ -56,10 +56,13 @@ if(NOT TARGET GLUT::GLUT AND EXISTS "${GLUT_ROOT_DIR}")
     )
 endif()
 
+# Add the vendor directory to the include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
+# Add the stb_image library
 add_library(stb_image INTERFACE)
 target_include_directories(stb_image INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb)
+
 
 add_subdirectory(DCraft)
 add_subdirectory(Sandbox)
