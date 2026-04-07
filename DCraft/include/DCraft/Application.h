@@ -12,8 +12,6 @@
 
 namespace DCraft {
     class Renderer;
-    class PerspectiveCamera;
-    class Object3D;
     class Camera;
     
     struct WindowInfo {
@@ -140,7 +138,6 @@ namespace DCraft {
         static Application &get_instance() { return *instance_; }
     protected:
         SceneManager scene_manager_;
-        PerspectiveCamera *camera_ = nullptr;
         Renderer renderer_;
     private:
         static Application *instance_;
