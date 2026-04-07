@@ -1,27 +1,27 @@
-#include "Cube.h"
+#include "Plane.h"
 
-#include <glm/gtc/type_ptr.inl>
+#include <glm/gtc/type_ptr.hpp>
 
-Cube::Cube(float width = 1, float height = 1, float depth = 1)
+Plane::Plane()
 {
     std::vector<Vertex> vertices_data;
     std::vector<unsigned int> indices_data;
     std::vector<Texture> texture_data = {};
 
     // Define the cube vertex data
-    for (size_t i = 0; i < 8; ++i)
+    for (size_t i = 0; i < 4; ++i)
     {
         Vertex v;
-        v.position = glm::vec3(vertices[i * 3] * width, vertices[i * 3 + 1] * height, vertices[i * 3 + 2] * depth);
+        v.position = glm::vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
         v.color = glm::vec3(colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2]);
         v.normal = glm::vec3(0.0f);
         vertices_data.push_back(v);
     }
 
     // Convert element array to vector
-    for (size_t i = 0; i < std::size(cube_elements); ++i)
+    for (size_t i = 0; i < std::size(plane_elements); ++i)
     {
-        indices_data.push_back(static_cast<unsigned int>(cube_elements[i]));
+        indices_data.push_back(static_cast<unsigned int>(plane_elements[i]));
     }
 
     Mesh cubeMesh(vertices_data, indices_data, texture_data);
@@ -34,8 +34,7 @@ Cube::Cube(float width = 1, float height = 1, float depth = 1)
     update_model_matrix();
 }
 
-
-void Cube::draw_self(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program)
+void Plane::draw_self(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program)
 {
     glm::mat4 mvp = projection * view * get_world_matrix();
 
@@ -53,7 +52,7 @@ void Cube::draw_self(const glm::mat4& view, const glm::mat4& projection, uint32_
 }
 
 
-void Cube::update()
+void Plane::update()
 {
     // Get the current rotation angle in degrees (convert from radians)
     float current_degrees = get_rotation_angle() * 180.0f / glm::pi<float>();
@@ -68,18 +67,19 @@ void Cube::update()
     set_rotation(current_degrees, glm::vec3(1.0, 1.0, 0.0));
 }
 
-void Cube::set_vertices()
+void Plane::set_vertices()
 {
 }
 
-void Cube::set_colors()
+void Plane::set_colors()
 {
 	
 }
 
-void Cube::set_uvs()
+void Plane::set_uvs()
 {
 	
 }
+
 
 
