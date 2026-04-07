@@ -5,7 +5,7 @@
 #pragma once
 #include <vector>
 
-#include "DCraft/Components/InstancedRenderableComponent.h"
+#include "hellfire/ecs/InstancedRenderableComponent.h"
 
 namespace hellfire {
     class Material;

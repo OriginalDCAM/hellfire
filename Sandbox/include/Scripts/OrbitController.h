@@ -5,7 +5,7 @@
 #include <glm/detail/type_vec.hpp>
 #include <glm/detail/type_vec3.hpp>
 
-#include "DCraft/Components/ScriptComponent.h"
+#include "hellfire/ecs/ScriptComponent.h"
 
 class OrbitController : public hellfire::ScriptComponent {
 public:

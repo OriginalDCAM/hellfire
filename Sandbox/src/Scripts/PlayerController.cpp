@@ -4,9 +4,9 @@
 
 #include "Scripts/PlayerController.h"
 
-#include "DCraft/Application.h"
-#include "DCraft/Components/CameraComponent.h"
-#include "DCraft/Utility/ServiceLocator.h"
+#include "../../../Engine/src/hellfire/core/Application.h"
+#include "hellfire/ecs/CameraComponent.h"
+#include "hellfire/utilities/ServiceLocator.h"
 #include "GLFW/glfw3.h"
 
 PlayerController::PlayerController(float movement_speed, float mouse_sensitivity) 

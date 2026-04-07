@@ -4,8 +4,8 @@
 #include "Scripts/OrbitController.h"
 #include <iostream>
 #include <cmath>
-#include "DCraft/Components/TransformComponent.h"
-#include "DCraft/Structs/Entity.h"
+#include "hellfire/ecs/TransformComponent.h"
+#include "../../../Engine/src/hellfire/ecs/Entity.h"
 #include "Utils/AnimationInputHandler.h"
 
 void OrbitController::on_init() {

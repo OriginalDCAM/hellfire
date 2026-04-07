@@ -4,13 +4,13 @@
 
 #include "Scenes/SponzaScene.h"
 
-#include "DCraft/Application.h"
-#include "DCraft/Addons/Asset.h"
-#include "DCraft/Addons/CameraFactory.h"
-#include "DCraft/Graphics/Geometry/Quad.h"
-#include "DCraft/Graphics/Lighting/DirectionalLight.h"
-#include "DCraft/Structs/Scene.h"
-#include "DCraft/Structs/Skybox.h"
+#include "../../../Engine/src/hellfire/core/Application.h"
+#include "hellfire/assets/Asset.h"
+#include "../../../Engine/src/hellfire/scene/CameraFactory.h"
+#include "hellfire/graphics/Geometry/Quad.h"
+#include "hellfire/graphics/lighting/DirectionalLight.h"
+#include "../../../Engine/src/hellfire/scene/Scene.h"
+#include "../../../Engine/src/hellfire/graphics/Skybox.h"
 #include "Scripts/PlayerController.h"
 
 hellfire::Scene *load_sponza_scene(const hellfire::AppInfo& window) {

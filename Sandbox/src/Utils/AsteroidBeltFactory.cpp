@@ -7,9 +7,9 @@
 #include <random>
 
 #include "assimp/contrib/poly2tri/poly2tri/common/utils.h"
-#include "DCraft/Addons/Asset.h"
-#include "DCraft/Components/InstancedRenderableComponent.h"
-#include "DCraft/Components/RenderableComponent.h"
+#include "hellfire/assets/Asset.h"
+#include "hellfire/ecs/InstancedRenderableComponent.h"
+#include "hellfire/ecs/RenderableComponent.h"
 
 hellfire::Entity * AsteroidBeltFactory::create_asteroid_belt(const size_t quantity) {
     // Load all asteroid types

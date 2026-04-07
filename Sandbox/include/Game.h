@@ -5,7 +5,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <DCraft.h>
+#include <hellfire-core.h>
 
 class Game {
 public:

@@ -2,7 +2,7 @@
 // Created by denzel on 10/08/2025.
 //
 #pragma once
-#include "DCraft/Components/ScriptComponent.h"
+#include "hellfire/ecs/ScriptComponent.h"
 #include <glm/detail/type_vec3.hpp>
 
 class PlayerController final : public hellfire::ScriptComponent {
