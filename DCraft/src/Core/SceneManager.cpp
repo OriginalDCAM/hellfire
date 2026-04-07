@@ -173,8 +173,9 @@ namespace DCraft {
                 if (node_data.contains("yaw")) camera->set_yaw(node_data["yaw"]);
                 if (node_data.contains("pitch")) camera->set_pitch(node_data["pitch"]);
                 if (node_data.contains("movement_speed")) camera->set_movement_speed(node_data["movement_speed"]);
-                if (node_data.contains("mouse_sensitivity")) camera->set_mouse_sensitivity(
-                    node_data["mouse_sensitivity"]);
+                if (node_data.contains("mouse_sensitivity"))
+                    camera->set_mouse_sensitivity(
+                        node_data["mouse_sensitivity"]);
 
                 obj = camera;
             } else {
@@ -187,15 +188,63 @@ namespace DCraft {
                 std::string path = node_data["path"];
                 // Get current scene to pass to the model loader
                 Scene *current_scene = get_active_scene();
+
+                // Create model with ModelLoader
                 obj = Addons::ModelLoader::load(path, current_scene);
 
-                // If we successfully loaded the model, set its name
-                if (obj && node_data.contains("name")) {
-                    obj->set_name(node_data["name"]);
+                // If we successfully loaded the model, set its name and transform
+                if (obj) {
+                    if (node_data.contains("name")) {
+                        obj->set_name(node_data["name"]);
+                    }
+
+                    // Set transform
+                    if (node_data.contains("transform")) {
+                        const auto &transform = node_data["transform"];
+
+                        // Set position
+                        if (transform.contains("position") && transform["position"].is_array() && transform["position"].
+                            size() == 3) {
+                            glm::vec3 position(
+                                transform["position"][0],
+                                transform["position"][1],
+                                transform["position"][2]
+                            );
+                            obj->set_position(position);
+                        }
+
+                        // Set rotation
+                        if (transform.contains("rotation") && transform["rotation"].is_array() && transform["rotation"].
+                            size() == 3) {
+                            glm::vec3 rotation(
+                                transform["rotation"][0],
+                                transform["rotation"][1],
+                                transform["rotation"][2]
+                            );
+                            obj->set_rotation(rotation);
+                        }
+
+                        // Set scale
+                        if (transform.contains("scale") && transform["scale"].is_array() && transform["scale"].size() ==
+                            3) {
+                            glm::vec3 scale(
+                                transform["scale"][0],
+                                transform["scale"][1],
+                                transform["scale"][2]
+                            );
+                            obj->set_scale(scale);
+                        }
+                    }
+
+                    // Important: Return here to skip processing children for loaded models
+                    return obj;
                 }
             } else {
+                // It's a child model component without its own path
                 obj = new ImportedModel3D();
-                obj->set_name(node_data["name"]);
+                if (node_data.contains("name")) {
+                    obj->set_name(node_data["name"]);
+                }
             }
         } else if (type == "Light") {
             // Check if it's a light
@@ -305,12 +354,18 @@ namespace DCraft {
             }
         }
 
-        // Process children
+        // Process child nodes
         if (node_data.contains("children") && node_data["children"].is_array()) {
-            for (const auto &child_data: node_data["children"]) {
-                Object3D *child = deserialize_node(child_data);
-                if (child) {
-                    obj->add(child);
+            // Skip processing children for models that were loaded from files
+            bool skipChildren = (type == "Model" && node_data.contains("path") && 
+                                !node_data["path"].get<std::string>().empty());
+    
+            if (!skipChildren) {
+                for (const auto &child_data: node_data["children"]) {
+                    Object3D *child = deserialize_node(child_data);
+                    if (child) {
+                        obj->add(child);
+                    }
                 }
             }
         }
