@@ -7,11 +7,11 @@
 #include <random>
 
 #include "assimp/contrib/poly2tri/poly2tri/common/utils.h"
-#include "DCraft/Addons/Asset.h"
-#include "DCraft/Components/InstancedRenderableComponent.h"
-#include "DCraft/Components/RenderableComponent.h"
+#include "hellfire/assets/Asset.h"
+#include "hellfire/ecs/InstancedRenderableComponent.h"
+#include "hellfire/ecs/RenderableComponent.h"
 
-DCraft::Entity * AsteroidBeltFactory::create_asteroid_belt(const size_t quantity) {
+hellfire::Entity * AsteroidBeltFactory::create_asteroid_belt(const size_t quantity) {
     // Load all asteroid types
     const std::vector materials = {
         create_rocky_instanced_material(),
@@ -21,18 +21,18 @@ DCraft::Entity * AsteroidBeltFactory::create_asteroid_belt(const size_t quantity
         create_dusty_instanced_material()
     };
     
-    auto asteroid_normal = DCraft::Asset::load("assets/models/asteroid_normal.obj");
-    auto asteroid_metal_big = DCraft::Asset::load("assets/models/asteroid_metal_big.obj");
-    auto asteroid_rocky = DCraft::Asset::load("assets/models/asteroid_rocky.obj");
-    auto asteroid_crystal = DCraft::Asset::load("assets/models/asteroid_crystal.obj");
-    auto asteroid_less_rocky = DCraft::Asset::load("assets/models/asteroid_less_rocky.obj");
+    auto asteroid_normal = hellfire::Asset::load("assets/models/asteroid_normal.obj");
+    auto asteroid_metal_big = hellfire::Asset::load("assets/models/asteroid_metal_big.obj");
+    auto asteroid_rocky = hellfire::Asset::load("assets/models/asteroid_rocky.obj");
+    auto asteroid_crystal = hellfire::Asset::load("assets/models/asteroid_crystal.obj");
+    auto asteroid_less_rocky = hellfire::Asset::load("assets/models/asteroid_less_rocky.obj");
 
     // Helper function to extract mesh
-    auto extract_mesh = [](DCraft::Entity* entity) -> std::shared_ptr<DCraft::Mesh> {
-        std::shared_ptr<DCraft::Mesh> mesh = nullptr;
-        std::function<void(DCraft::Entity *)> find_mesh = [&](DCraft::Entity *e) {
+    auto extract_mesh = [](hellfire::Entity* entity) -> std::shared_ptr<hellfire::Mesh> {
+        std::shared_ptr<hellfire::Mesh> mesh = nullptr;
+        std::function<void(hellfire::Entity *)> find_mesh = [&](hellfire::Entity *e) {
             if (mesh) return;
-            auto *renderable = e->get_component<DCraft::RenderableComponent>();
+            auto *renderable = e->get_component<hellfire::RenderableComponent>();
             if (renderable && renderable->has_mesh()) {
                 mesh = renderable->get_mesh_shared();
                 return;
@@ -54,23 +54,23 @@ DCraft::Entity * AsteroidBeltFactory::create_asteroid_belt(const size_t quantity
         extract_mesh(asteroid_less_rocky)
     };
     
-    auto *asteroid_belt = new DCraft::Entity("Asteroid Belt");
+    auto *asteroid_belt = new hellfire::Entity("Asteroid Belt");
         const size_t total_asteroids = quantity;
     size_t asteroids_per_type = total_asteroids / asteroid_meshes.size();
     
     // Create separate child entity for each asteroid type
     for (size_t i = 0; i < asteroid_meshes.size(); ++i) {
         std::string type_name = "Asteroid Type " + std::to_string(i);
-        auto *type_entity = new DCraft::Entity(type_name);
+        auto *type_entity = new hellfire::Entity(type_name);
         
         // Add instanced component to child entity
-        auto *instanced_comp = type_entity->add_component<DCraft::InstancedRenderableComponent>(
+        auto *instanced_comp = type_entity->add_component<hellfire::InstancedRenderableComponent>(
             asteroid_meshes[i], asteroids_per_type
         );
         instanced_comp->set_material(materials[i]);
         
         // Generate instances for this type
-        std::vector<DCraft::InstancedRenderableComponent::InstanceData> asteroids = 
+        std::vector<hellfire::InstancedRenderableComponent::InstanceData> asteroids = 
             generate_asteroid_belt_data(asteroids_per_type);
         instanced_comp->set_instances(asteroids);
         
@@ -81,9 +81,9 @@ DCraft::Entity * AsteroidBeltFactory::create_asteroid_belt(const size_t quantity
     return asteroid_belt;
 }
 
-std::vector<DCraft::InstancedRenderableComponent::InstanceData> AsteroidBeltFactory::generate_asteroid_belt_data(
+std::vector<hellfire::InstancedRenderableComponent::InstanceData> AsteroidBeltFactory::generate_asteroid_belt_data(
     const size_t quantity) {
-    std::vector<DCraft::InstancedRenderableComponent::InstanceData> asteroids;
+    std::vector<hellfire::InstancedRenderableComponent::InstanceData> asteroids;
 
     // Setup random number generation
     std::random_device rd;
@@ -140,14 +140,14 @@ std::vector<DCraft::InstancedRenderableComponent::InstanceData> AsteroidBeltFact
 }
 
 
-std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_rocky_instanced_material() {
-    auto material = DCraft::MaterialBuilder::create_custom(
+std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_rocky_instanced_material() {
+    auto material = hellfire::MaterialBuilder::create_custom(
         "Rocky Instanced Material",
         "assets/shaders/instanced.vert",
         "assets/shaders/instanced.frag"
     );
     
-    material->set_texture("assets/textures/planets/surfaces/moon.jpg", DCraft::TextureType::DIFFUSE);
+    material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
     material->set_property("baseColor", glm::vec3(0.4f, 0.35f, 0.3f));   
     material->set_property("roughness", 0.8f);                         
     material->set_property("metallic", 0.0f);                          
@@ -155,15 +155,15 @@ std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_rocky_instanced_ma
     return material;
 }
 
-std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_metallic_instanced_material() {
-    auto material = DCraft::MaterialBuilder::create_custom(
+std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_metallic_instanced_material() {
+    auto material = hellfire::MaterialBuilder::create_custom(
         "Metallic Instanced Material", 
         "assets/shaders/instanced.vert",
         "assets/shaders/instanced.frag"
     );
 
     
-    material->set_texture("assets/textures/planets/surfaces/moon.jpg", DCraft::TextureType::DIFFUSE);
+    material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
     material->set_property("baseColor", glm::vec3(0.3f, 0.3f, 0.35f));   
     material->set_property("roughness", 0.2f);                         
     material->set_property("metallic", 0.9f);                            
@@ -171,32 +171,32 @@ std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_metallic_instanced
     return material;
 }
 
-std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_icy_instanced_material() {
-    auto material = DCraft::MaterialBuilder::create_custom(
+std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_icy_instanced_material() {
+    auto material = hellfire::MaterialBuilder::create_custom(
         "Icy Instanced Material",
         "assets/shaders/instanced.vert", 
         "assets/shaders/instanced.frag"
     );
 
     
-    material->set_texture("assets/textures/planets/surfaces/moon.jpg", DCraft::TextureType::DIFFUSE);
+    material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
     material->set_property("baseColor", glm::vec3(0.7f, 0.8f, 0.9f));    
     material->set_property("roughness", 0.1f);                          
     material->set_property("metallic", 0.0f);                           
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
-    material->set_property("transparency", 0.8f);
+    material->set_property("uTransparency", 0.8f);
     return material;
 }
 
-std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_crystal_instanced_material() {
-    auto material = DCraft::MaterialBuilder::create_custom(
+std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_crystal_instanced_material() {
+    auto material = hellfire::MaterialBuilder::create_custom(
         "Crystal Instanced Material",
         "assets/shaders/instanced.vert",
         "assets/shaders/instanced.frag"  
     );
 
     
-    material->set_texture("assets/textures/planets/surfaces/moon.jpg", DCraft::TextureType::DIFFUSE);
+    material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
     material->set_property("baseColor", glm::vec3(0.6f, 0.3f, 0.8f));   
     material->set_property("roughness", 0.0f);                          
     material->set_property("metallic", 0.3f);                           
@@ -204,14 +204,14 @@ std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_crystal_instanced_
     return material;
 }
 
-std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_dusty_instanced_material() {
-    auto material = DCraft::MaterialBuilder::create_custom(
+std::shared_ptr<hellfire::Material> AsteroidBeltFactory::create_dusty_instanced_material() {
+    auto material = hellfire::MaterialBuilder::create_custom(
         "Dusty Instanced Material",
         "assets/shaders/instanced.vert",
         "assets/shaders/instanced.frag"
     );
 
-    material->set_texture("assets/textures/planets/surfaces/moon.jpg", DCraft::TextureType::DIFFUSE);
+    material->set_texture("assets/textures/planets/surfaces/moon.jpg", hellfire::TextureType::DIFFUSE);
     material->set_property("baseColor", glm::vec3(0.5f, 0.4f, 0.25f));   
     material->set_property("roughness", 0.9f);                          
     material->set_property("metallic", 0.0f);                           
