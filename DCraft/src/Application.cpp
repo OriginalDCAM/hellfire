@@ -77,10 +77,10 @@ namespace DCraft {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
-        (void) io;
         io.IniFilename = "editorconfig.ini";
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
         io.DisplaySize.x = static_cast<float>(window_info_.width);
         io.DisplaySize.y = static_cast<float>(window_info_.height);
@@ -216,13 +216,8 @@ namespace DCraft {
     }
 
     void Application::on_special_key_down(int key) {
-        if (key == '`') {
-            keys_['`'] = true;
-            return;
-        }
-
         ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard) {
+        if (io.WantCaptureKeyboard && key != '`') {
             return;
         }
         keys_[key + 256] = true;

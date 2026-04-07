@@ -16,10 +16,10 @@
 #include "DCraft/Graphics/Primitives/MeshRenderer.h"
 #include "DCraft/Editor/Components/MenuBarComponent.h"
 #include "DCraft/Graphics/Renderer.h"
-#include "DCraft/Structs/Camera.h" // ✅ Add this include for Camera_Movement enum
+#include "DCraft/Structs/Camera.h" // 
 
 #include <filesystem>
-#include <iostream> // ✅ Add this for std::cout
+#include <iostream>  
 
 namespace fs = std::filesystem;
 
@@ -68,7 +68,6 @@ namespace DCraft::Editor {
 
         bool needs_render = check_if_render_needed();
 
-        // ✅ FIX: Only render when needed, not every frame
         if (active_scene_ && active_camera_ && renderer_ && needs_render) {
             renderer_->render_to_texture(*active_scene_, *active_camera_, 
                                        static_cast<uint32_t>(viewport_size_.x), 
@@ -82,7 +81,6 @@ namespace DCraft::Editor {
             last_camera_rotation_ = active_camera_->get_rotation();
         }
 
-        // ✅ Always display the cached texture (whether we just rendered or not)
         if (cached_scene_texture_ > 0) {
             ImTextureID tex_id = (ImTextureID)(intptr_t)cached_scene_texture_;
             ImGui::Image(tex_id, viewport_size_, ImVec2(0, 1), ImVec2(1, 0));
@@ -102,7 +100,6 @@ namespace DCraft::Editor {
         ImGui::End();
     }
 
-    // ✅ FIX: Make this a member function
     bool SceneEditorOverlay::check_if_render_needed() {
         if (!active_camera_) return false;
         
@@ -140,7 +137,6 @@ namespace DCraft::Editor {
         return false;
     }
 
-    // ✅ FIX: Make these member functions
     void SceneEditorOverlay::mark_scene_dirty() {
         scene_changed_ = true;
     }
@@ -206,7 +202,7 @@ namespace DCraft::Editor {
                             active_scene_ = nullptr;
                         }
 
-                        mark_scene_dirty(); // ✅ Mark for re-render when scene is removed
+                        mark_scene_dirty(); 
 
                         ImGui::CloseCurrentPopup();
                         ImGui::EndPopup();
@@ -284,7 +280,6 @@ namespace DCraft::Editor {
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         }
         
-        // ✅ Handle keyboard movement with speed modifiers
         if (viewport_focused_) {
             float original_speed = active_camera_->get_movement_speed();
             float speed_multiplier = 1.0f;
@@ -331,7 +326,6 @@ namespace DCraft::Editor {
             camera_changed = true;
         }
 
-        // ✅ Only mark viewport dirty when camera actually changed
         if (camera_changed) {
             mark_viewport_dirty();
         }
@@ -351,7 +345,7 @@ namespace DCraft::Editor {
         if (current_command_index_ >= 0 && current_command_index_ < static_cast<int>(command_history_.size())) {
             command_history_[current_command_index_]->undo();
             current_command_index_--;
-            mark_scene_dirty(); // ✅ Mark for re-render after undo
+            mark_scene_dirty();  
         }
     }
 
@@ -359,7 +353,7 @@ namespace DCraft::Editor {
         if (current_command_index_ + 1 < static_cast<int>(command_history_.size())) {
             current_command_index_++;
             command_history_[current_command_index_]->execute();
-            mark_scene_dirty(); // ✅ Mark for re-render after redo
+            mark_scene_dirty();
         }
     }
 
@@ -372,19 +366,18 @@ namespace DCraft::Editor {
         strcpy(buffer, name.c_str());
         if (ImGui::InputText("Name", buffer, sizeof(buffer))) {
             object->set_name(buffer);
-            // ✅ You might want to mark scene dirty here if name changes affect rendering
         }
 
         glm::vec3 position = object->get_position();
         if (ImGui::DragFloat3("Position", &position[0], 0.1f)) {
             object->set_position(position);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when transform changes
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); 
         }
 
         glm::vec3 scale = object->get_scale();
         if (ImGui::DragFloat3("Scale", &scale[0], 0.1f)) {
             object->set_scale(scale);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when transform changes
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
         }
 
         glm::vec3 rotation = object->get_rotation();
@@ -394,7 +387,7 @@ namespace DCraft::Editor {
                 while (rotation[i] < -180.0f) rotation[i] += 360.0f;
             }
             object->set_rotation(rotation);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when transform changes
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty();
         }
 
         if (auto *light = dynamic_cast<Light *>(object)) {
@@ -417,13 +410,13 @@ namespace DCraft::Editor {
         glm::vec3 color = light->get_color();
         if (ImGui::ColorPicker3("Light", &color[0], ImGuiColorEditFlags_Float)) {
             light->set_color(color);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when light changes
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); 
         }
 
         float intensity = light->get_intensity();
         if (ImGui::DragFloat("Intensity", &intensity)) {
             light->set_intensity(intensity);
-            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); // ✅ Mark dirty when light changes
+            const_cast<SceneEditorOverlay*>(this)->mark_scene_dirty(); 
         }
 
         if (auto *dir_light = dynamic_cast<DirectionalLight *>(light)) {
@@ -462,7 +455,7 @@ namespace DCraft::Editor {
             glm::vec3 target = perspective_cam->get_target();
             if (ImGui::DragFloat3("Target", &target[0], 0.1f)) {
                 perspective_cam->set_target(target.x, target.y, target.z);
-                const_cast<SceneEditorOverlay*>(this)->mark_viewport_dirty(); // ✅ Mark dirty when camera changes
+                const_cast<SceneEditorOverlay*>(this)->mark_viewport_dirty(); 
             }
         }
     }
