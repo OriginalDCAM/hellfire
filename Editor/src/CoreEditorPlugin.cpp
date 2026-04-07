@@ -5,10 +5,10 @@
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "../../Engine/src/hellfire/core/Application.h"
-#include "../../Engine/src/hellfire/platform/IWindow.h"
+#include "hellfire/core/Application.h"
+#include "hellfire/platform/IWindow.h"
 #include "hellfire/utilities/ServiceLocator.h"
-#include "../../Engine/src/hellfire/platform/windows_linux/GLFWWindow.h"
+#include "hellfire/platform/windows_linux/GLFWWindow.h"
 
 namespace hellfire::editor {
     void CoreEditorPlugin::on_initialize(Application &app) {
@@ -179,7 +179,7 @@ namespace hellfire::editor {
         return false;
     }
 
-    bool CoreEditorPlugin::on_mouse_move(float x, float y) {
+    bool CoreEditorPlugin::on_mouse_move(float x, float y, float x_offset, float y_offset) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureMouse) {
             return true;

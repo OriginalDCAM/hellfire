@@ -4,7 +4,7 @@
 
 #pragma once
 #include "hellfire/Interfaces/IApplicationPlugin.h"
-#include "../../Engine/src/hellfire/platform/IWindow.h"
+#include "hellfire/platform/IWindow.h"
 
 namespace hellfire::editor {
     class CoreEditorPlugin final : public IApplicationPlugin {
@@ -33,7 +33,7 @@ namespace hellfire::editor {
 
         bool on_mouse_button(int button, bool pressed) override;
 
-        bool on_mouse_move(float x, float y) override;
+        bool on_mouse_move(float x, float y, float x_offset, float y_offset) override;
 
         bool on_mouse_wheel(float delta) override;
 

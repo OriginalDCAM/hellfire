@@ -2,7 +2,7 @@
 // Created by denzel on 17/09/2025.
 //
 
-#include "../../Engine/src/hellfire/core/Application.h"
+#include "hellfire/core/Application.h"
 
 #ifdef HELLFIRE_EDITOR_ENABLED
 #include "CoreEditorPlugin.h"
