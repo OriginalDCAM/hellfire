@@ -6,6 +6,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
+# Maximize compiler warnings
+#if(MSVC)
+#    add_compile_options(/W4 /WX)
+#else()
+#    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+#endif()
+
 # Build the documentation only option
 option(BUILD_DOCS_ONLY "Only build documentation" OFF)
 

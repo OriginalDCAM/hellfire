@@ -6,6 +6,7 @@
 #include <iostream>
 #include "imgui.h"
 #include "hellfire/core/Project.h"
+#include "hellfire/ecs/ComponentRegistration.h"
 #include "hellfire/scene/CameraFactory.h"
 #include "hellfire/scene/Scene.h"
 #include "hellfire/scene/SceneManager.h"
@@ -27,6 +28,10 @@ namespace hellfire::editor {
             if (ImGui::MenuItem("New Project")) {
                 Project::create("Test", "G:\\Dev\\Games");
                 std::cout << "Clicked on button New Project" << std::endl;
+            }
+            if (ImGui::MenuItem("Save Project")) {
+                register_all_components();
+                ServiceLocator::get_service<SceneManager>()->save_scene("G:\\Dev\\Games\\Test\\assets\\cool_scene.hfscene", context_->active_scene);
             }
             ImGui::EndMenu();
         }
