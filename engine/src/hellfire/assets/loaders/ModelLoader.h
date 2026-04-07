@@ -85,7 +85,7 @@ namespace hellfire::Addons {
         static void process_mesh_vertices(aiMesh *mesh, std::vector<Vertex> &vertices,
                                           std::vector<unsigned int> &indices);
 
-        static std::shared_ptr<Mesh> process_mesh(aiMesh *mesh, const aiScene *scene, const std::string &filepath);
+        static std::shared_ptr<Mesh> process_mesh(aiMesh *mesh, const std::string &filepath);
 
         // Material processing
         static void preprocess_materials(const aiScene *scene, const std::string &filepath);

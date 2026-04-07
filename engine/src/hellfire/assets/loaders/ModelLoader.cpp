@@ -7,7 +7,7 @@
 
 #include "assimp/Importer.hpp"
 #include "hellfire/ecs/RenderableComponent.h"
-#include "../ecs/Entity.h"
+#include "../../ecs/Entity.h"
 #include "hellfire/ecs/TransformComponent.h"
 #include "hellfire/ecs/components/MeshComponent.h"
 #include "hellfire/scene/Scene.h"
@@ -162,7 +162,7 @@ namespace hellfire::Addons {
                 unsigned int mesh_index = node->mMeshes[i];
                 aiMesh *ai_mesh = ai_scene->mMeshes[mesh_index];
 
-                std::shared_ptr<Mesh> processed_mesh = process_mesh(ai_mesh, ai_scene, filepath);
+                std::shared_ptr<Mesh> processed_mesh = process_mesh(ai_mesh, filepath);
 
                 // Get material
                 std::shared_ptr<Material> material = nullptr;
@@ -294,7 +294,7 @@ namespace hellfire::Addons {
                (material_name.length > 0 ? material_name.C_Str() : "unnamed");
     }
 
-    std::shared_ptr<Mesh> ModelLoader::process_mesh(aiMesh *mesh, const aiScene *scene, const std::string &filepath) {
+    std::shared_ptr<Mesh> ModelLoader::process_mesh(aiMesh *mesh, const std::string &filepath) {
         // Create mesh key and check cache
         const std::string mesh_key = create_mesh_key(mesh, filepath);
         const auto cached = mesh_cache.find(mesh_key);
