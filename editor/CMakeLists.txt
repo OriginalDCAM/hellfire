@@ -8,7 +8,6 @@ add_library(imguizmo STATIC
 )
 
 target_link_libraries(imguizmo PRIVATE imgui)
-
 target_include_directories(imguizmo
         PUBLIC ${IMGUIZMO_DIR}
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
@@ -17,9 +16,8 @@ target_include_directories(imguizmo
 file(GLOB_RECURSE LIB_SOURCES "src/*.cpp")
 file(GLOB_RECURSE LIB_HEADERS "src/*.h" "src/*.hpp")
 
-# Remove main.cpp from library sources 
+# Exclude main.cpp from library sources 
 list(FILTER LIB_SOURCES EXCLUDE REGEX ".*main\\.cpp$")
-
 add_library(${LIB_NAME} STATIC ${LIB_SOURCES} ${LIB_HEADERS})
 
 target_include_directories(${LIB_NAME}
