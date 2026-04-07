@@ -370,3 +370,5 @@ CG - Final Assignment - Evaluation Form.xlsx
 build
 cmake-build-debug-visual-studio
 cmake-build-release-visual-studio
+
+CMakeSettings.json
