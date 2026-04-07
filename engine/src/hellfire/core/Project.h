@@ -16,7 +16,7 @@ namespace hellfire {
         std::string engine_version;
         std::string created_at;
         std::string last_opened;
-        std::filesystem::path last_scene;
+        std::optional<AssetID> last_scene;
         std::filesystem::path default_scene;
         std::filesystem::path renderer_settings;
     };
@@ -25,9 +25,12 @@ namespace hellfire {
     public:
         explicit Project(const std::string &name);
         explicit Project(const ProjectMetadata &metadata);
+        ~Project();
 
         static std::unique_ptr<Project> create(const std::string &name, const std::filesystem::path &location);
-        static std::unique_ptr<Project> load(const std::filesystem::path &project_file);
+        static std::unique_ptr<Project> load_data(const std::filesystem::path &project_file);
+
+        void initialize_managers();
 
         bool save();
         void close();
@@ -57,11 +60,11 @@ namespace hellfire {
         std::vector<std::filesystem::path> recent_scenes_;
 
     private:
-        bool serialize() const;
         void create_directory_structure() const;
         void initialize_default_assets();
-        void initialize_managers();
+        void cleanup_managers();
 
-        std::string get_current_timestamp() const;
+
+        static std::string get_current_timestamp();
     };
 }
