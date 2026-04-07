@@ -25,5 +25,14 @@ namespace hellfire {
             delta_time = current_time - last_frame_time;
             last_frame_time = current_time;
         }
+
+        
+        static std::string get_current_timestamp() {
+            auto now = std::chrono::system_clock::now();
+            auto time_t_now = std::chrono::system_clock::to_time_t(now);
+            std::stringstream ss;
+            ss << std::put_time(std::gmtime(&time_t_now), "%Y-%m-%dT%H:%M:%SZ");
+            return ss.str();
+        }
     };
 }
