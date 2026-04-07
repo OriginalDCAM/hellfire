@@ -21,7 +21,6 @@ namespace DCraft {
             set_diffuse_texture(texture);
         }
     }
-
     
     void Material::set_texture(const std::shared_ptr<Texture> &texture) {
         if (texture->get_type() == TextureType::DIFFUSE) {
