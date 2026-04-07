@@ -36,6 +36,7 @@ namespace hellfire {
 
         MousePos mouse_pos;
         bool should_warp_cursor = true;
+        bool minimized = false;
     };
 
     class Application : public IWindowEventHandler {
@@ -84,6 +85,8 @@ namespace hellfire {
         void on_mouse_move(float x, float y) override;
 
         void on_window_resize(int width, int height) override;
+
+        void on_window_minimize(bool minimized) override;
 
     private:
         // Managers
