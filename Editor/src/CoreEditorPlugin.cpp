@@ -3,6 +3,7 @@
 //
 #include "CoreEditorPlugin.h"
 
+#include "CoreEditorStyles.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui.h"
@@ -45,7 +46,7 @@ namespace hellfire::editor {
         io.ConfigViewportsNoAutoMerge = false;
 
         // Setup style
-        ImGui::StyleColorsDark();
+        styles::SetupDarkRedModeStyle();
 
         ImGuiStyle &style = ImGui::GetStyle();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
