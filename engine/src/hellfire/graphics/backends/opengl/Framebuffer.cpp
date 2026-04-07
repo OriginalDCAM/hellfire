@@ -70,7 +70,7 @@ namespace hellfire {
 
         // Override format settings for depth texture
         const GLenum internal_format = settings.internal_format == GL_RGBA8
-                                           ? GL_DEPTH_COMPONENT24
+                                           ? GL_DEPTH_COMPONENT32F
                                            : settings.internal_format;
         constexpr GLenum format = GL_DEPTH_COMPONENT;
         const GLenum type = settings.type == GL_UNSIGNED_BYTE ? GL_FLOAT : settings.type;

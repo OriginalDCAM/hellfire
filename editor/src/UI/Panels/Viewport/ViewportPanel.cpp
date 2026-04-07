@@ -127,7 +127,7 @@ namespace hellfire::editor {
 
         if (constexpr float RESIZE_DELAY = 0.016f; (viewport_size.x != last_size.x || viewport_size.y != last_size.y) &&
                                                    (current_time - last_resize_time_) > RESIZE_DELAY) {
-            engine_renderer_->resize_scene_framebuffer(
+            engine_renderer_->resize_main_framebuffer(
                 static_cast<uint32_t>(viewport_size.x),
                 static_cast<uint32_t>(viewport_size.y)
             );
@@ -143,7 +143,7 @@ namespace hellfire::editor {
             }
         }
         // Render using editor camera
-        const uint32_t scene_texture = engine_renderer_->get_scene_texture();
+        const uint32_t scene_texture = engine_renderer_->get_main_output_texture();
 
         if (!context_->active_scene) {
             ImGui::SetCursorPos(ImVec2(
