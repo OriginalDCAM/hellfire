@@ -5,7 +5,7 @@
 #include "OGL/VB.h"
 #include "Materials/Material.h"
 
-namespace DCraft {
+namespace hellfire {
     class Mesh {
     public:
         Mesh();

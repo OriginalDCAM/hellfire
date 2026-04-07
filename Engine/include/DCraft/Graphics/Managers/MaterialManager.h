@@ -5,12 +5,12 @@
 #include <string>
 #include <algorithm>
 
-#include "Material.h"
+#include "../Materials/Material.h"
 
-namespace DCraft {
+namespace hellfire {
     class Material;
 
-    class MaterialRenderer {
+    class MaterialManager {
     public:
         static void bind_material(const Material& material);
 

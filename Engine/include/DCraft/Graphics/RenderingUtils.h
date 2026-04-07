@@ -11,7 +11,7 @@
 #include "DCraft/Components/CameraComponent.h"
 #include "Shader/Shader.h"
 
-namespace DCraft {
+namespace hellfire {
     /// Utility class containing shared rendering functionality.
     /// Used by composition in both RenderableComponent and InstancedRenderableComponent.
     class RenderingUtils {

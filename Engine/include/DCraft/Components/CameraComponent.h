@@ -8,7 +8,7 @@
 #include "DCraft/Structs/Component.h"
 #include "DCraft/Structs/Entity.h"
 
-namespace DCraft {
+namespace hellfire {
     enum class CameraType {
         PERSPECTIVE,
         ORTHOGRAPHIC

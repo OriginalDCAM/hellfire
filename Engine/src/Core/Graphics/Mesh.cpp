@@ -2,13 +2,12 @@
 
 #include <iostream>
 #include <unordered_map>
-#include <GL/glut.h>
 
 #include "DCraft/Application.h"
 #include "DCraft/Graphics/Vertex.h"
 #include "DCraft/Graphics/Materials/Material.h"
 
-namespace DCraft {
+namespace hellfire {
     Mesh::Mesh() : index_count_(0) {
     }
 

@@ -5,10 +5,10 @@
 #include "DCraft/Structs/Component.h"
 #include "DCraft/Components/TransformComponent.h"
 #include "DCraft/Graphics/Mesh.h"
-#include "DCraft/Graphics/Materials/MaterialRenderer.h"
+#include "../Graphics/Managers/MaterialManager.h"
 #include "DCraft/Graphics/RenderingUtils.h"
 
-namespace DCraft {
+namespace hellfire {
     /// Renderable Component used for single mesh rendering
     class RenderableComponent final : public Component {
     public:

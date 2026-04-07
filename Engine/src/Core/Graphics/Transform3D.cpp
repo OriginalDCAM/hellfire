@@ -6,7 +6,7 @@
 
 #include <glm/gtc/quaternion.hpp>
 
-namespace DCraft {
+namespace hellfire {
     void Transform3D::look_at(const glm::vec3 &target, const glm::vec3 &up) {
         // Calculate Direction vectors
         glm::vec3 direction = glm::normalize(target - get_position());

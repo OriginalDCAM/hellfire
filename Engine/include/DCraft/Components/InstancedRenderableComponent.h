@@ -11,13 +11,13 @@
 
 #include "DCraft/Graphics/Mesh.h"
 #include "DCraft/Graphics/RenderingUtils.h"
-#include "DCraft/Graphics/Materials/MaterialRenderer.h"
+#include "../Graphics/Managers/MaterialManager.h"
 #include "DCraft/Structs/Component.h"
 
 #define Color glm::vec3
 #define Transform glm::mat4
 
-namespace DCraft {
+namespace hellfire {
     struct Mesh;
 
     /// Instanced Renderable Component used for instanced mesh rendering
@@ -138,7 +138,7 @@ namespace DCraft {
             RenderingUtils::set_standard_uniforms(shader, glm::mat4(1.0f), view, projection, time);
 
             // Bind material
-            MaterialRenderer::bind_material(*mesh->get_material());
+            MaterialManager::bind_material(*mesh->get_material());
 
             mesh->bind();
             setup_instanced_vertex_attributes();

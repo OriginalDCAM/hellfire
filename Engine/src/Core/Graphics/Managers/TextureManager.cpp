@@ -5,14 +5,14 @@
 #include "DCraft/Graphics/Managers/TextureManager.h"
 
 // Singleton class instance
-DCraft::TextureManager &DCraft::TextureManager::get_instance() {
+hellfire::TextureManager &hellfire::TextureManager::get_instance() {
     if (!instance_) {
         instance_ = new TextureManager();
     }
     return *instance_;
 }
 
-DCraft::Texture *DCraft::TextureManager::get_texture(const std::string &path) {
+hellfire::Texture *hellfire::TextureManager::get_texture(const std::string &path) {
     auto it = textures_.find(path);
     if (it != textures_.end()) {
         return it->second;
@@ -20,11 +20,11 @@ DCraft::Texture *DCraft::TextureManager::get_texture(const std::string &path) {
     return nullptr;
 }
 
-void DCraft::TextureManager::clear() {
+void hellfire::TextureManager::clear() {
     for (auto &pair: textures_) {
         delete pair.second;
     }
     textures_.clear();
 }
 
-DCraft::TextureManager *DCraft::TextureManager::instance_ = nullptr;
+hellfire::TextureManager *hellfire::TextureManager::instance_ = nullptr;

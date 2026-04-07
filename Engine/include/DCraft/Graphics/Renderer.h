@@ -10,11 +10,11 @@
 #include "DCraft/Graphics/Renderers/SkyboxRenderer.h"
 #include "Shader/ShaderRegistry.h"
 
-namespace DCraft {
+namespace hellfire {
     class InstancedRenderableComponent;
 }
 
-namespace DCraft {
+namespace hellfire {
     class Scene;
 
     struct RenderCommand {

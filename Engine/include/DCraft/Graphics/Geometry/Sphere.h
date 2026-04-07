@@ -9,7 +9,7 @@
 
 struct Vertex;
 
-namespace DCraft {
+namespace hellfire {
     class Entity;
 
     class Sphere {

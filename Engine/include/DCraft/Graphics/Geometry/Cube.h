@@ -4,7 +4,7 @@
 
 #include "DCraft/Graphics/Vertex.h"
 
-namespace DCraft
+namespace hellfire
 {
     class Entity;
 

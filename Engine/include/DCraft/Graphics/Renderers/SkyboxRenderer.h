@@ -7,12 +7,12 @@
 
 #include "DCraft/Components/CameraComponent.h"
 
-namespace DCraft {
+namespace hellfire {
     class Skybox;
     class Camera;
 }
 
-namespace DCraft {
+namespace hellfire {
     class SkyboxRenderer {
     public:
         SkyboxRenderer() = default;

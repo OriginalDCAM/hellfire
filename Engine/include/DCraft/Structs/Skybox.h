@@ -7,7 +7,7 @@
 #include <string>
 #include <glm/glm.hpp>
 
-namespace DCraft {
+namespace hellfire {
     class Skybox {
     public:
         Skybox() = default;

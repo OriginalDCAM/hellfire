@@ -7,11 +7,11 @@
 #include <unordered_set>
 #include <regex>
 
-namespace DCraft {
+namespace hellfire {
     class Application;
 }
 
-namespace DCraft {
+namespace hellfire {
     class Material;
 
     class ShaderManager {

@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <vector>
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 
 class VB
 {

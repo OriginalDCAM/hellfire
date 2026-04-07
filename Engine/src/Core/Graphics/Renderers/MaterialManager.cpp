@@ -1,7 +1,7 @@
 ﻿//
 // Created by denzel on 13/08/2025.
 //
-#include "DCraft/Graphics/Materials/MaterialRenderer.h"
+#include "../../../../include/DCraft/Graphics/Managers/MaterialManager.h"
 
 #include <iostream>
 #include <glm/glm.hpp>
@@ -9,23 +9,23 @@
 
 #include "DCraft/Graphics/Materials/Material.h"
 
-namespace DCraft {
-    void MaterialRenderer::bind_material(const Material &material) {
+namespace hellfire {
+    void MaterialManager::bind_material(const Material &material) {
         uint32_t shader_program = material.get_compiled_shader_id();
         if (shader_program == 0) {
             std::cerr << "Warning: Material " << material.get_name() << " has no compiled shader!" << std::endl;
             return;
         }
-            
-        int texture_unit = 0;
-            
-        for (const auto& [name, property] : material.get_properties()) {
-            bind_property(property, shader_program, texture_unit);
-        }
+
+        material.bind();
     }
 
-    void MaterialRenderer::bind_property(const Material::Property &property, uint32_t shader_program,
-        int &texture_unit) {
+    void MaterialManager::bind_property_to_shader(const Material::Property &property, uint32_t shader_program, int &texture_unit) {
+        bind_property(property, shader_program, texture_unit);
+    }
+
+    void MaterialManager::bind_property(const Material::Property &property, uint32_t shader_program,
+                                         int &texture_unit) {
         const std::string& uniform_name = property.uniform_name;
             
         switch (property.type) {
@@ -67,29 +67,32 @@ namespace DCraft {
                 
             case Material::PropertyType::TEXTURE: {
                 Texture* texture = std::get<Texture*>(property.value);
-                if (texture) {
-                    glActiveTexture(GL_TEXTURE0 + texture_unit);
-                    
-                    texture->bind(texture->get_slot());
-                        
+
+                if (texture && texture->is_valid()) {
+                    texture->bind(texture_unit);
+
                     GLint location = glGetUniformLocation(shader_program, uniform_name.c_str());
                     if (location != -1) {
                         glUniform1i(location, texture_unit);
-                    }
-                        
-                    std::string_view use_flag = "use" + capitalize_first(uniform_name);
-                    GLint flag_location = glGetUniformLocation(shader_program, use_flag.data());
+                    } 
+
+                    std::string use_flag = create_use_flag(uniform_name);
+                    GLint flag_location = glGetUniformLocation(shader_program, use_flag.c_str());
                     if (flag_location != -1) {
                         glUniform1i(flag_location, 1);
                     }
-                        
+
                     texture_unit++;
                 } else {
-                    // Set usage flag to false if no texture
-                    std::string_view use_flag = "use" + capitalize_first(uniform_name);
-                    GLint flag_location = glGetUniformLocation(shader_program, use_flag.data());
+                    // Handle invalid/missing texture
+                    std::string use_flag = create_use_flag(uniform_name);
+                    GLint flag_location = glGetUniformLocation(shader_program, use_flag.c_str());
                     if (flag_location != -1) {
                         glUniform1i(flag_location, 0);
+                    }
+        
+                    if (texture) {
+                        std::cout << "Warning: Invalid texture for " << uniform_name << std::endl;
                     }
                 }
                 break;
@@ -133,10 +136,8 @@ namespace DCraft {
         }
     }
 
-    std::string MaterialRenderer::capitalize_first(const std::string &str) {
-        if (str.empty()) return str;
-        std::string result = str;
-        result[0] = std::toupper(result[0]);
-        return result;
+    std::string MaterialManager::create_use_flag(const std::string &uniform_name) {
+        return "use" + uniform_name;
     }
+
 }

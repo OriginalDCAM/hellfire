@@ -6,16 +6,16 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "assimp/Importer.hpp"
-#include "assimp/postprocess.h"
 #include "DCraft/Components/RenderableComponent.h"
 #include "DCraft/Structs/Entity.h"
 
 namespace fs = std::filesystem;
 
-namespace DCraft::Addons {
+namespace hellfire::Addons {
     // Static member definitions
     std::unordered_map<std::string, std::shared_ptr<Mesh> > ModelLoader::mesh_cache;
     std::unordered_map<std::string, std::shared_ptr<Material> > ModelLoader::material_cache;
+    std::unordered_map<std::string, std::shared_ptr<Texture>> ModelLoader::texture_cache;
 
     std::unique_ptr<Entity> ModelLoader::load_model(const std::filesystem::path &filepath, unsigned int import_flags) {
         auto start_time = std::chrono::high_resolution_clock::now();
@@ -55,6 +55,7 @@ namespace DCraft::Addons {
 
     void ModelLoader::debug_scene_info(const aiScene *scene, const std::string &filepath) {
         std::cout << "=== Scene Debug Info for " << fs::path(filepath).filename() << " ===" << std::endl;
+        std::cout << "Size: " << fs::file_size(filepath) / 1024 << "(KB)" << std::endl; 
         std::cout << "Materials: " << scene->mNumMaterials << std::endl;
         std::cout << "Meshes: " << scene->mNumMeshes << std::endl;
         std::cout << "Embedded Textures: " << scene->mNumTextures << std::endl;
@@ -480,20 +481,35 @@ namespace DCraft::Addons {
 
         for (const auto& test_path : possible_paths) {
             if (std::filesystem::exists(test_path)) {
-                try {
-                    if (const auto texture = new Texture(test_path, dcr_type); texture->is_valid()) {
-                        material.add_texture(*texture, property_name, 0);
-                        std::cout << "Loaded external texture: " << property_name << " from " << test_path << std::endl;
-                        return true;
-                    }
-                } catch (const std::exception& e) {
-                    std::cerr << "Failed to load texture from " << test_path << ": " << e.what() << std::endl;
-                    continue;
+                auto texture = load_cached_texture(test_path, dcr_type);
+                if (texture) {
+                    material.add_texture(*texture, property_name, 0);
+                    std::cout << "Loaded external texture: " << property_name << " from " << test_path << std::endl;
+                    return true;
                 }
             }
         }
-
         return false;
+    }
+
+    std::shared_ptr<Texture> ModelLoader::load_cached_texture(const std::string& path, TextureType type) {
+        auto it = texture_cache.find(path);
+        if (it != texture_cache.end()) {
+            std::cout << "Using cached texture: " << path << std::endl;
+            return it->second;
+        }
+    
+        try {
+            auto texture = std::make_shared<Texture>(path, type);
+            if (texture->is_valid()) {
+                texture_cache[path] = texture;
+                return texture;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Failed to load texture " << path << ": " << e.what() << std::endl;
+        }
+    
+        return nullptr;
     }
 
         std::string ModelLoader::capitalize_first(const std::string &str) {
@@ -502,11 +518,11 @@ namespace DCraft::Addons {
         result[0] = std::toupper(result[0]);
         return result;
     }
-    
 
     void ModelLoader::clear_cache() {
         mesh_cache.clear();
         material_cache.clear();
+        texture_cache.clear();
         std::cout << "ModelLoader caches cleared" << std::endl;
     }
 

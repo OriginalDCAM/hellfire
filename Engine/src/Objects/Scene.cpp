@@ -3,7 +3,7 @@
 #include "DCraft/Structs/Skybox.h"
 #include "DCraft/Components/CameraComponent.h"
 
-namespace DCraft {
+namespace hellfire {
     Scene::Scene(const std::string &name) : name_(name), is_active_(false), active_camera_entity_(nullptr),
                                             skybox_(nullptr) {
     }

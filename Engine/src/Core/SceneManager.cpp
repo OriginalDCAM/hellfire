@@ -10,7 +10,7 @@
 #include "DCraft/Graphics/Geometry/Cube.h"
 #include "DCraft/Structs/Scene.h"
 
-namespace DCraft {
+namespace hellfire {
     SceneManager::SceneManager() : active_scene_(nullptr) {
         // object_deserializer_ = std::make_unique<ObjectDeserializer>(this, nullptr);
         // object_serializer_ = std::make_unique<ObjectSerializer>(this);

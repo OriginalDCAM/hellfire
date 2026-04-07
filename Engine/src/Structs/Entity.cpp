@@ -7,7 +7,7 @@
 
 #include <glm/detail/type_mat.hpp>
 
-namespace DCraft {
+namespace hellfire {
     Entity::Entity(const std::string &name) {
         set_name(name);
         add_component<TransformComponent>();

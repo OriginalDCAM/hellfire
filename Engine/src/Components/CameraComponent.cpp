@@ -6,7 +6,7 @@
 
 #include "DCraft/Structs/Entity.h"
 
-namespace DCraft {
+namespace hellfire {
     CameraComponent::CameraComponent(CameraType type): camera_type_(type) {
         update_camera_vectors();
     }

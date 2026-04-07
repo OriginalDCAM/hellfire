@@ -5,7 +5,7 @@
 #pragma once
 #include "ModelLoader.h"
 
-namespace DCraft {
+namespace hellfire {
     class Asset {
     public:
         Asset() = default;

@@ -6,7 +6,7 @@
 
 #include "DCraft/Structs/Entity.h"
 
-namespace DCraft {
+namespace hellfire {
     Entity * PerspectiveCamera::create(const std::string &name, float fov, float aspect, float near_plane,
         float far_plane, const glm::vec3 &position) {
             

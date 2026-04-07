@@ -1,7 +1,6 @@
 #include "DCraft/Graphics/OGL/VA.h"
 
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 #include <glm/detail/type_int.hpp>
 
 VA::VA()

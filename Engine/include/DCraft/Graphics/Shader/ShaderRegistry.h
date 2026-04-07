@@ -6,7 +6,7 @@
 #include "Shader.h"
 #include "DCraft/Graphics/Managers/ShaderManager.h"
 
-namespace DCraft {
+namespace hellfire {
     class ShaderRegistry {
     public:
         ShaderRegistry(ShaderManager* manager) : shader_manager_(manager) {}

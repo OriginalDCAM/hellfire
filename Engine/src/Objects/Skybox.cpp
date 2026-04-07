@@ -8,7 +8,7 @@
 
 #include <stb_image.h>
 
-namespace DCraft {
+namespace hellfire {
     Skybox::~Skybox() {
         if (cubemap_texture_ != 0) glDeleteTextures(1, &cubemap_texture_);
     }
