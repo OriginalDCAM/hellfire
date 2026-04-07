@@ -8,7 +8,7 @@
 namespace DCraft {
     class Asset {
     public:
-        Asset() {};
+        Asset() = default;
         static Entity* load(const std::filesystem::path& file_path) {
             // Simple for now only model loading later other types of asset loading like scenes.
             return Addons::ModelLoader::load_model(file_path).release();

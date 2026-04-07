@@ -33,7 +33,7 @@ namespace DCraft::Addons {
         return imported_model;
     }
 
-    // This method converts an Assimp Matrix which is row-major-matrix to glms matrix
+    // This method converts assimp matrix struct to glm matrix struct
     glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4 &from) {
         glm::mat4 to;
         to[0][0] = from.a1;
@@ -79,13 +79,13 @@ namespace DCraft::Addons {
             std::shared_ptr<Mesh> processed_mesh = process_mesh(mesh, scene, filepath);
 
             if (node->mNumMeshes == 1) {
-                RenderableComponent *renderable_component = entity->add_component<RenderableComponent>();
+                auto renderable_component = entity->add_component<RenderableComponent>();
                 renderable_component->set_mesh(processed_mesh);
             } else {
                 // Multiple meshes: create child entity for each mesh
                 std::string mesh_name = mesh->mName.length > 0 ? mesh->mName.C_Str() : ("Mesh_" + std::to_string(i));
                 std::unique_ptr<Entity> mesh_entity = std::make_unique<Entity>(mesh_name);
-                RenderableComponent *renderable_component = mesh_entity->add_component<RenderableComponent>();
+                auto renderable_component = mesh_entity->add_component<RenderableComponent>();
                 renderable_component->set_mesh(processed_mesh);
                 entity->add(mesh_entity.release());
             }
@@ -102,6 +102,7 @@ namespace DCraft::Addons {
 
     void ModelLoader::process_mesh_vertices(aiMesh *mesh, std::vector<Vertex> &vertices,
                                             std::vector<unsigned int> &indices) {
+        // Store vertex data in vector
         for (size_t i = 0; i < mesh->mNumVertices; i++) {
             Vertex v;
             v.position.x = mesh->mVertices[i].x;
@@ -140,6 +141,7 @@ namespace DCraft::Addons {
         }
     }
 
+    /// Helper method to create a key for a mesh, format: meshName_meshMaterialIndex (teapot.obj_13432)
     std::string create_mesh_key(aiMesh *mesh, const std::string &filepath) {
         return filepath + "_" +
                std::string(mesh->mName.C_Str()) + "_" +
@@ -193,7 +195,7 @@ namespace DCraft::Addons {
         // === COLORS ===
         aiColor3D color;
 
-        // Diffuse/Albedo (both names for compatibility)
+        // Diffuse/Albedo 
         if (ai_material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
             material.set_property("diffuse", glm::vec3(color.r, color.g, color.b));
             material.set_property("albedo", glm::vec3(color.r, color.g, color.b)); // PBR name
@@ -247,7 +249,7 @@ namespace DCraft::Addons {
     }
 
     void ModelLoader::load_material_textures(const aiMaterial *ai_material, Material &material) {
-        // Helper to load texture using your TextureCache
+        // Helper lambda to load texture using TextureCache functionality 
         auto load_texture = [&](aiTextureType ai_type, TextureType dcr_type, const std::string& property_name) {
             if (ai_material->GetTextureCount(ai_type) > 0) {
                 aiString texture_path;
