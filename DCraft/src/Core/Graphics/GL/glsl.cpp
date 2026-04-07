@@ -35,14 +35,13 @@ bool glsl::compiledStatus(GLint shaderID)
     if (compiled) {
         return true;
     }
-    else {
-        GLint logLength;
-        glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &logLength);
-        std::vector<char> msgBuffer(logLength);
-        glGetShaderInfoLog(shaderID, logLength, NULL, msgBuffer.data());
-        std::cerr << "Shader compilation error: " << msgBuffer.data() << std::endl;
-        return false;
-    }
+    
+    GLint logLength;
+    glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &logLength);
+    std::vector<char> msgBuffer(logLength);
+    glGetShaderInfoLog(shaderID, logLength, NULL, msgBuffer.data());
+    std::cerr << "Shader compilation error: " << msgBuffer.data() << std::endl;
+    return false;
 }
 
 GLuint glsl::makeVertexShader(const char* shaderSource)
@@ -53,7 +52,7 @@ GLuint glsl::makeVertexShader(const char* shaderSource)
     }
     
     GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShaderID, 1, (const GLchar**)&shaderSource, NULL);
+    glShaderSource(vertexShaderID, 1, &shaderSource, NULL);
     glCompileShader(vertexShaderID);
     bool compiledCorrectly = compiledStatus(vertexShaderID);
     if (compiledCorrectly) {
@@ -73,7 +72,7 @@ GLuint glsl::makeFragmentShader(const char* shaderSource)
     }
     
     GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShaderID, 1, (const GLchar**)&shaderSource, NULL);
+    glShaderSource(fragmentShaderID, 1, &shaderSource, NULL);
     glCompileShader(fragmentShaderID);
     bool compiledCorrectly = compiledStatus(fragmentShaderID);
     if (compiledCorrectly) {
@@ -115,6 +114,8 @@ GLuint glsl::makeShaderProgram(GLuint vertexShaderID, GLuint fragmentShaderID)
     // Detach shaders after successful linking
     glDetachShader(programID, vertexShaderID);
     glDetachShader(programID, fragmentShaderID);
+
+    std::clog << "Shader program created successfully id: " << programID << std::endl;
     
     return programID;
 }
