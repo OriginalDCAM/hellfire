@@ -17,8 +17,9 @@
 #include "DCraft/Editor/SceneEditorOverlay.h"
 
 namespace DCraft {
-    Application::Application(int width, int height, std::string title) : title_(std::move(title)),
-        scene_editor_overlay_(scene_manager_, selected_node_) {
+    Application::Application(int width, int height, std::string title) : renderer_(), title_(std::move(title)),
+                                                                         editor_overlay_(&renderer_, scene_manager_),
+                                                                         editor_mode_(false), game_mode_(true) {
         if (instance_ != nullptr) {
             throw std::runtime_error("Singleton Application already created");
         }
@@ -38,13 +39,9 @@ namespace DCraft {
         ImGui_ImplGLUT_Shutdown();
         ImGui::DestroyContext();
 
-        // Cleanup renderer
-        delete renderer_;
-
         for (auto *camera: cameras_) {
             delete camera;
         }
-
 
         // Cleanup application
         if (instance_ == this) {
@@ -92,19 +89,21 @@ namespace DCraft {
 
         // Setup Platform/Renderer backends
         ImGui_ImplGLUT_Init();
-        ImGui_ImplOpenGL3_Init("#version 330"); // Specify GLSL version
+        ImGui_ImplOpenGL3_Init("#version 330");
 
         glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_CONTINUE_EXECUTION);
-
 
         if (callbacks_.init) {
             callbacks_.init(*this);
         }
 
         uint32_t fallback_shader = ensure_fallback_shader();
-        renderer_ = new Renderer(fallback_shader);
-        renderer_->init();
+        renderer_.set_fallback_shader(fallback_shader);
+        renderer_.init();
         std::clog << "Renderer setup succeeded" << '\n';
+
+        // Create initial framebuffer for editor
+        renderer_.create_scene_framebuffer(800, 600);
 
         load_scene();
 
@@ -152,20 +151,37 @@ namespace DCraft {
         ImGui_ImplGLUT_NewFrame();
         ImGui::NewFrame();
 
-        if (!game_mode_) {
-            scene_editor_overlay_.render();
+        Scene *active_scene = scene_manager_.get_active_scene();
+        if (!active_scene) {
+            std::cerr << "No active scene to render!" << std::endl;
+            return;
         }
 
-        // Application render
-        renderer_->begin_frame();
+        Camera *active_camera = active_scene->get_active_camera();
+        if (!active_camera) {
+            std::cerr << "No active camera in scene!" << std::endl;
+            return;
+        }
 
-        renderer_->render(*scene_manager_.get_active_scene(), *scene_manager_.get_active_scene()->get_active_camera());
+        if (!game_mode_) {
+            // Editor mode - render scene to framebuffer and show UI
+            editor_overlay_.set_active_scene(active_scene);
+            editor_overlay_.set_active_camera(active_camera);
 
-        renderer_->end_frame();
+            renderer_.set_render_to_framebuffer(true);
 
-        // Render ImGui
+            editor_overlay_.render();
+        } else {
+            renderer_.set_render_to_framebuffer(false);
+
+            renderer_.begin_frame();
+
+            renderer_.render(*active_scene, *active_camera);
+
+            renderer_.end_frame();
+        }
+
         ImGui::Render();
-
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glutSwapBuffers();
@@ -317,23 +333,24 @@ namespace DCraft {
 
         // Handle switching to the Editor UI
         if (keys_['`'] && !prev_keys_['`']) {
-            game_mode_ = !game_mode_;
-            if (game_mode_) {
-                glutSetCursor(GLUT_CURSOR_NONE);
-                glutWarpPointer(window_info_.width / 2, window_info_.height / 2);
-            } else {
-                glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
-            }
+            toggle_editor_mode();
         }
 
-            // Standard exit with ESC
-            if (keys_[27] && game_mode_) {
-                glutLeaveMainLoop();
-            }
+        if ((keys_[GLUT_KEY_F1 + 256] && !prev_keys_[GLUT_KEY_F1 + 256]) || // F1
+            (keys_['t'] && !prev_keys_['t']) || // T key
+            (keys_[9] && !prev_keys_[9])) {
+            // TAB key
+            toggle_editor_mode();
+        }
 
-            for (int i = 0; i < 512; i++) {
-                prev_keys_[i] = keys_[i];
-            }
+        // Standard exit with ESC
+        if (keys_[27] && game_mode_) {
+            glutLeaveMainLoop();
+        }
+
+        for (int i = 0; i < 512; i++) {
+            prev_keys_[i] = keys_[i];
+        }
     }
 
     void Application::toggle_fullscreen() {
@@ -377,12 +394,29 @@ namespace DCraft {
                 "assets/shaders/standard.vert",
                 "assets/shaders/lambert.frag"
             );
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Warning: Could not load default shaders: " << e.what() << std::endl;
             std::cerr << "Using minimal fallback shader" << std::endl;
-        
+
             // Create a very basic shader programmatically or return 0
             return 0;
+        }
+    }
+
+    void Application::toggle_editor_mode() {
+        game_mode_ = !game_mode_;
+
+        if (game_mode_) {
+            glutSetCursor(GLUT_CURSOR_NONE);
+            glutWarpPointer(window_info_.width / 2, window_info_.height / 2);
+            first_mouse_ = true; // Reset mouse tracking
+
+            glViewport(0, 0, window_info_.width, window_info_.height);
+            std::clog << "Switched to Game Mode" << std::endl;
+        } else {
+            glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+
+            std::clog << "Switched to Editor Mode" << std::endl;
         }
     }
 

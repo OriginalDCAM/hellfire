@@ -4,6 +4,7 @@
 #include "DCraft/Structs/Camera.h"
 #include "Lights/DirectionalLight.h"
 #include "Lights/PointLight.h"
+#include "OGL/Framebuffer.h"
 
 
 namespace DCraft
@@ -45,6 +46,11 @@ namespace DCraft
     private:
         uint32_t fallback_program_id_;
         void* context_;
+
+        std::unique_ptr<Framebuffer> scene_framebuffer_;
+        bool render_to_framebuffer_;
+        uint32_t framebuffer_width_;
+        uint32_t framebuffer_height_;
         
         // Render command lists
         std::vector<RenderCommand> opaque_objects_;
@@ -52,6 +58,8 @@ namespace DCraft
         
     public:
         Renderer(uint32_t fallback_program_id);
+        Renderer();
+ 
         ~Renderer();
         
         void init();
@@ -62,7 +70,16 @@ namespace DCraft
         uint32_t get_default_shader() const;
         void *get_context() const;
 
+        // Framebuffer management
+        void create_scene_framebuffer(uint32_t width, uint32_t height);
+        void set_render_to_framebuffer(bool enable) { render_to_framebuffer_ = enable; }
+        uint32_t get_scene_texture() const;
+        void resize_scene_framebuffer(uint32_t width, uint32_t height);
 
+        void render_to_texture(Object3D &scene, Camera &camera, uint32_t width, uint32_t height);
+        void render_scene_to_framebuffer(Object3D &scene, Camera &camera);
+
+        void set_fallback_shader(uint32_t shader_program_id);
 
     private:
         // Collection methods
@@ -70,14 +87,16 @@ namespace DCraft
         void collect_lights(Object3D *object_3d, std::vector<DirectionalLight *> &dir_lights,
                            std::vector<PointLight *> &point_lights);
 
-        
+        // Data storage methods
         void store_lights_in_context(const std::vector<DirectionalLight *> &dir_lights,
                                      const std::vector<PointLight *> &point_lights, Camera &camera);
-        
+
+        void render_internal(Object3D& scene, Camera &camera);
         // Rendering passes
+        void render_shadow_pass(const glm::mat4& light_view, const glm::mat4& light_projection);
         void render_opaque_pass(const glm::mat4& view, const glm::mat4& projection);
         void render_transparent_pass(const glm::mat4& view, const glm::mat4& projection);
-        
+
         // Utility methods
         bool is_material_transparent(Material *material);
     };
