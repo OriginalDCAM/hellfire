@@ -3,23 +3,23 @@
 //
 #include "EditorApplication.h"
 
-#include "EditorStyles.h"
+#include "../EditorStyles.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
-#include "UI/Panels/EditorPanel.h"
-#include "UI/Panels/MenuBar/MenuBarComponent.h"
-#include "UI/Panels/SceneHierarchy/SceneHierarchyPanel.h"
+#include "../UI/Panels/EditorPanel.h"
 #include "hellfire/core/Application.h"
 #include "hellfire/platform/IWindow.h"
 #include "hellfire/utilities/ServiceLocator.h"
 #include "hellfire/platform/windows_linux/GLFWWindow.h"
-#include "UI/Panels/Viewport/SceneCameraScript.h"
-#include "UI/Panels/Viewport/ViewportPanel.h"
-#include "IconsFontAwesome6.h"
-#include "Scenes/DefaultScene.h"
-#include "UI/Panels/Settings/Renderer/RendererSettingsPanel.h"
+#include "../IconsFontAwesome6.h"
+#include "../Scenes/DefaultScene.h"
+#include "Events/StateEvents.h"
+#include "../States/Editor/EditorState.h"
+#include "../States/ProjectHub/ProjectHubState.h"
+#include "States/ProjectCreator/ProjectCreatorState.h"
+#include "States/ProjectLoading/ProjectLoadingState.h"
 
 namespace hellfire::editor {
     void EditorApplication::on_initialize(Application &app) {
@@ -35,30 +35,44 @@ namespace hellfire::editor {
 
         initialize_imgui(window);
 
-        // Make sure the renderer render's the scene to a framebuffer
-        ServiceLocator::get_service<Renderer>()->set_render_to_framebuffer(true);
+        state_manager_.register_state<ProjectHubState>();
+        state_manager_.register_state<ProjectCreatorState>();
+        state_manager_.register_state<ProjectLoadingState>();
+        state_manager_.register_state<EditorState>();
+        state_manager_.set_context(&editor_context_);
+        editor_context_.project_manager = std::make_unique<ProjectManager>(editor_context_.event_bus, editor_context_);
 
-        // Initialize and set context for UI components
-        menu_bar_ = std::make_unique<MenuBarComponent>();
-        menu_bar_->set_context(&editor_context_);
+        auto* pm = editor_context_.project_manager.get();
+        // Subscribe to state transitions
+        editor_context_.event_bus.subscribe<OpenProjectCreatorEvent>([this](const auto&) {
+            state_manager_.switch_to<ProjectCreatorState>();
+        });
+    
+        editor_context_.event_bus.subscribe<CancelProjectCreatorEvent>([this](const auto&) {
+            state_manager_.switch_to<ProjectHubState>();
+        });
+    
+        editor_context_.event_bus.subscribe<CreateProjectEvent>([this, pm](const CreateProjectEvent& e) {
+            state_manager_.switch_to<ProjectLoadingState>();
+            pm->create_project_async(e.name, e.location, e.template_id);
+        });
+    
+        editor_context_.event_bus.subscribe<OpenProjectEvent>([this, pm](const OpenProjectEvent& e) {
+            state_manager_.switch_to<ProjectLoadingState>();
+            pm->open_project_async(e.path);
+        });
+    
+        editor_context_.event_bus.subscribe<ProjectLoadCompleteEvent>([this](const auto&) {
+            state_manager_.switch_to<EditorState>();
+        });
+    
+        editor_context_.event_bus.subscribe<CloseProjectEvent>([this, pm](const auto&) {
+            pm->close_project();
+            state_manager_.switch_to<ProjectHubState>();
+        });
 
-        scene_hierarchy_ = std::make_unique<SceneHierarchyPanel>();
-        scene_hierarchy_->set_context(&editor_context_);
-
-        scene_viewport_ = std::make_unique<ViewportPanel>();
-        scene_viewport_->set_context(&editor_context_);
-
-        inspector_panel_ = std::make_unique<InspectorPanel>();
-        inspector_panel_->set_context(&editor_context_);
-
-        renderer_settings_panel_ = std::make_unique<RendererSettingsPanel>();
-        renderer_settings_panel_->set_context(&editor_context_);
-
-        // TEMP:
-        const auto sm = ServiceLocator::get_service<SceneManager>();
-        const auto new_scene = sm->create_scene("Test");
-        setup_default_scene_with_default_entities(new_scene);
-        sm->set_active_scene(new_scene, false); // Don't play in editor mode as default
+        // Start with project selection state
+        state_manager_.switch_to<ProjectHubState>();
     }
 
     void EditorApplication::initialize_imgui(IWindow *window) {
@@ -69,7 +83,7 @@ namespace hellfire::editor {
 
         // Load default font
         io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 16.0f);
-        static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+        static constexpr ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
         ImFontConfig icons_config;
         icons_config.MergeMode = true;
         icons_config.PixelSnapH = true;
@@ -86,6 +100,8 @@ namespace hellfire::editor {
         io.ConfigViewportsNoDecoration = false;
         io.ConfigViewportsNoTaskBarIcon = false;
         io.ConfigViewportsNoAutoMerge = false;
+        
+        io.ConfigErrorRecoveryEnableAssert = true;
 
         // Setup style
         styles::SetupDarkRedModeStyle();
@@ -103,7 +119,7 @@ namespace hellfire::editor {
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(glfw_window, true);
-        ImGui_ImplOpenGL3_Init("#version 330");
+        ImGui_ImplOpenGL3_Init("#version 440");
 
         imgui_initialized_ = true;
     }
@@ -138,7 +154,7 @@ namespace hellfire::editor {
 
         // Handle multi-viewport
         if (const ImGuiIO &io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            IWindow *window = ServiceLocator::get_service<IWindow>();
+            auto *window = ServiceLocator::get_service<IWindow>();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
             window->make_current();
@@ -154,99 +170,32 @@ namespace hellfire::editor {
 
     void EditorApplication::on_render() {
         if (!imgui_initialized_) return;
+        editor_context_.process_main_thread_queue();
 
         // Sync editor context with scene manager
         sync_editor_context();
 
-        // Create main dockspace
-        create_dockspace();
-
-        inspector_panel_->render();
-        renderer_settings_panel_->render();
-        scene_viewport_->render();
-        scene_hierarchy_->render();
-    }
-
-    void EditorApplication::create_dockspace() {
-        ImGuiViewport *viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->Pos);
-        ImGui::SetNextWindowSize(viewport->Size);
-        ImGui::SetNextWindowViewport(viewport->ID);
-
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking |
-                                        ImGuiWindowFlags_NoTitleBar |
-                                        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-                                        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
-                                        ImGuiWindowFlags_NoNavFocus;
-
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-        ImGui::Begin("DockSpace", nullptr, window_flags);
-        ImGui::PopStyleVar(3);
-
-        menu_bar_->render();
-        // Create dockspace
-        ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-
-        ImGui::End();
+        state_manager_.render();
     }
 
     bool EditorApplication::on_key_down(int key) {
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard) {
-            return true; // ImGui consumed the input
-        }
-
-        return false;
+        return state_manager_.on_key_down(key);
     }
 
     bool EditorApplication::on_key_up(int key) {
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard) {
-            return true;
-        }
-
-        return false;
+        return state_manager_.on_key_up(key);
     }
 
     bool EditorApplication::on_mouse_button(int button, bool pressed) {
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureMouse) {
-            return true;
-        }
-
-        return false;
+        return state_manager_.on_mouse_button(button, pressed);
     }
 
     bool EditorApplication::on_mouse_move(float x, float y, float x_offset, float y_offset) {
-        if (scene_viewport_->is_editor_camera_active()) {
-            // Update camera with offset
-            if (const auto *camera = scene_viewport_->get_editor_camera()) {
-                if (auto *script = camera->get_component<SceneCameraScript>()) {
-                    script->handle_mouse_movement(x_offset, y_offset);
-                }
-            }
-            return true; // consumed
-        }
-
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureMouse) {
-            return true;
-        }
-
-        return false;
+        return state_manager_.on_mouse_move(x, y, x_offset, y_offset);
     }
 
     bool EditorApplication::on_mouse_wheel(float delta) {
-        ImGuiIO &io = ImGui::GetIO();
-        if (io.WantCaptureMouse) {
-            return true;
-        }
-
-        return false;
+        return state_manager_.on_mouse_wheel(delta);
     }
 
     void EditorApplication::on_window_resize(int width, int height) {
@@ -258,6 +207,6 @@ namespace hellfire::editor {
     }
 
     Entity *EditorApplication::get_render_camera_override() {
-        return scene_viewport_->get_editor_camera();
+        return state_manager_.get_render_camera_override();
     }
 }

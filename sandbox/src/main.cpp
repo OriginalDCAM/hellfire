@@ -3,7 +3,7 @@
 #include "hellfire/scene/CameraFactory.h"
 #include "hellfire/graphics/Geometry/Cube.h"
 
-void main() {
+int main() {
     // Create the main application window
     // Parameters: width (pixels), height (pixels), window title
     hellfire::Application app(800, 600, "Custom Engine - Hellfire");

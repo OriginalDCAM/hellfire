@@ -7,17 +7,7 @@
 
 #include "hellfire/ecs/TransformComponent.h"
 #include "hellfire/scene/Scene.h"
-
-// GLM Helper extensions
-namespace glm {
-    inline void to_json(nlohmann::json& j, const vec3& v) {
-        j = {v.x, v.y, v.z};
-    }
-    
-    inline void from_json(const nlohmann::json& j, vec3& v) {
-        v = {j[0].get<float>(), j[1].get<float>(), j[2].get<float>()};
-    }
-}
+#include "hellfire/utilities/SerializerUtils.h"
 
 namespace hellfire {
     template<typename T>
@@ -30,8 +20,8 @@ namespace hellfire {
     struct Serializer<TransformComponent> {
         static bool serialize(std::ostream& output, const TransformComponent* obj) {
             if (obj == nullptr) return false;
-            
-            nlohmann::json j = {
+
+            const nlohmann::json j = {
                 {"position", obj->get_position()},
                 {"rotation", obj->get_rotation()},
                 {"scale", obj->get_scale()}
@@ -47,9 +37,17 @@ namespace hellfire {
                 
                 nlohmann::json j;
                 input >> j;
-                obj->set_position(j.at("position").get<glm::vec3>());
-                obj->set_rotation(j.at("rotation").get<glm::vec3>());
-                obj->set_scale(j.at("scale").get<glm::vec3>());
+
+                const auto position = json_get_vec3(j, "position");
+                const auto rotation = json_get_vec3(j, "rotation");
+                const auto scale = json_get_vec3(j, "scale");
+
+                if (!position || !rotation || !scale) return false;
+                
+                obj->set_position(*position);
+                obj->set_rotation(*rotation);
+                obj->set_scale(*scale);
+                
                 return true;
             } catch (...) {
                 return false;

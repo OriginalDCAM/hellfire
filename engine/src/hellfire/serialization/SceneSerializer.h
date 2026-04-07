@@ -81,7 +81,9 @@ namespace hellfire {
             }
 
             Entity* entity = scene.get_entity(new_id);
-            ComponentRegistry::instance().deserialize_all_components(*entity, entity_json);
+            if (entity_json.contains("components")) {
+            ComponentRegistry::instance().deserialize_all_components(*entity, entity_json.at("components"));
+            }
 
             if (entity_json.contains("children")) {
                 for (const auto& child_json : entity_json.at("children")) {
