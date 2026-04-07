@@ -115,7 +115,6 @@ namespace DCraft {
         int get_slot() { return slot_ ; }
         void set_slot(int slot) { slot_ = slot; }
         
-        bool is_valid() const { return texture_id_ != 0; }
 
         // Texture parameters
         void set_wrap_mode(TextureWrap wrap_s, TextureWrap wrap_t);
@@ -127,14 +126,18 @@ namespace DCraft {
 
         static std::string get_uniform_name(TextureType type);
 
+        [[nodiscard]] bool is_valid() const;
+
     private:
         TextureType type_;
         std::string path_;
         uint32_t texture_id_;
         TextureSettings settings_;
         int slot_ = 0;
+        bool is_valid_;
 
         void load_texture_data();
+
 
         GLenum get_gl_wrap_mode(TextureWrap wrap) const;
 

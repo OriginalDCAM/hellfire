@@ -175,6 +175,7 @@ namespace DCraft {
         active_scene_ = scene;
         if (scene) {
             scene->set_active(true);
+            set_active_camera(active_scene_->get_active_camera_entity());
             if (scene_activated_callback_) {
                 scene_activated_callback_(scene);
             }
@@ -197,6 +198,6 @@ namespace DCraft {
         if (active_scene_) {
             return active_scene_->get_camera_entities();
         }
-        return std::vector<Entity*>();
+        return {};
     }
 }

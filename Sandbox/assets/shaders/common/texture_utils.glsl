@@ -25,7 +25,7 @@ vec4 sampleTexture(sampler2D tex, vec2 uv) {
 }
 
 vec4 sampleDiffuseTexture(vec2 texCoords) {
-    return useUDiffuseTexture ? sampleTexture(uDiffuseTexture, texCoords) : vec4(diffuseColor, 1.0);
+    return useUDiffuseTexture ? sampleTexture(uDiffuseTexture, texCoords) : vec4(uDiffuseColor, 1.0);
 }
 
 vec4 applyVertexColors(vec4 diffuseValue, vec3 vertexColor) {
@@ -42,7 +42,7 @@ vec3 calculateSurfaceNormal(vec2 texCoords, vec3 vertexNormal, mat3 tbn) {
 }
 
 float calculateFinalAlpha(float baseAlpha) {
-    return useTransparency ? baseAlpha * alpha * transparency : baseAlpha;
+    return useTransparency ? baseAlpha * uAlpha * uTransparency : baseAlpha;
 }
 
 vec3 applyGammaCorrection(vec3 color) {

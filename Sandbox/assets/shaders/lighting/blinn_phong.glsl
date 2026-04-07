@@ -7,7 +7,7 @@
     float diff = max(dot(normal, lightDir), 0.0);
 
     // Specular shading (Blinn-Phong)
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), uShininess);
 
     // Combine results
     vec3 diffuseResult = light.color * light.intensity * diff * diffuse;
@@ -25,7 +25,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse, v
     float diff = max(dot(normal, lightDir), 0.0);
 
     // Specular shading (Blinn-Phong)
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), uShininess);
 
     // Attenuation
     float distance = length(light.position - fragPos);
@@ -41,16 +41,16 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 diffuse, v
 }
 
 vec3 calculateBlinnPhongLighting(vec3 normal, vec3 baseColor, vec3 fragPos) {
-    vec3 result = ambientColor * baseColor;
+    vec3 result = uAmbientColor * baseColor;
 
     // Add directional lights
     for (int i = 0; i < min(numDirectionalLights, MAX_DIRECTIONAL_LIGHTS); i++) {
-        result += calcDirectionalLight(directionalLights[i], normal, fragPos, baseColor, specularColor);
+        result += calcDirectionalLight(directionalLights[i], normal, fragPos, baseColor, uSpecularColor);
     }
 
     // Add point lights
     for (int i = 0; i < min(numPointLights, MAX_POINT_LIGHTS); i++) {
-        result += calcPointLight(pointLights[i], normal, fragPos, baseColor, specularColor);
+        result += calcPointLight(pointLights[i], normal, fragPos, baseColor, uSpecularColor);
     }
 
     return result;

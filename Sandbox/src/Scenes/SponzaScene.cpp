@@ -14,15 +14,27 @@
 #include "DCraft/Structs/Skybox.h"
 #include "Scripts/PlayerController.h"
 
-DCraft::Scene * load_sponza_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInfo window,
-                                  DCraft::ShaderManager &shader_manager) {
-    auto* scene = new DCraft::Scene("Sponza Scene");
-    DCraft::Entity* sponza_model = DCraft::Asset::load("assets/models/shuttle/Orbiter_Space_Shuttle_OV-103_Discovery-150k-4096.gltf");
-    sponza_model->transform()->set_scale(0.1f);
-    scene->add_entity(sponza_model);
+DCraft::Scene *load_sponza_scene(DCraft::WindowInfo window) {
+    auto *scene = new DCraft::Scene("Sponza Scene");
+    DCraft::Entity *spaceshuttle_model = DCraft::Asset::load(
+        "assets/models/shuttle/Orbiter_Space_Shuttle_OV-103_Discovery-150k-4096.gltf");
+    spaceshuttle_model->transform()->set_scale(0.1f);
+    scene->add_entity(spaceshuttle_model);
 
-    
-    DCraft::Entity* carrier_model = DCraft::Asset::load("assets/models/carrier/carrier.obj");
+    DCraft::Entity *backpack_model = DCraft::Asset::load("assets/models/backpack/scene.gltf");
+    backpack_model->transform()->set_position(30, 1, 30);
+    backpack_model->transform()->set_scale(0.1f);
+    scene->add_entity(backpack_model);
+
+
+    DCraft::Entity *character_model = DCraft::Asset::load("assets/models/guy/scene.gltf");
+    character_model->transform()->set_position(0.9, 0, 0);
+    character_model->transform()->set_scale(0.1f);
+    character_model->transform()->set_rotation(-90, 0, 0);
+    scene->add_entity(character_model);
+
+
+    DCraft::Entity *carrier_model = DCraft::Asset::load("assets/models/carrier/carrier.obj");
     carrier_model->transform()->set_position(0, -2.15, 0);
     carrier_model->transform()->set_scale(0.1f);
     scene->add_entity(carrier_model);
@@ -31,8 +43,9 @@ DCraft::Scene * load_sponza_scene(DCraft::SceneManager &scene_manager, DCraft::W
     // water_plane->transform()->set_scale(100);
     // water_plane->transform()->set_position(0, -7, 0);
     // scene->add_entity(water_plane);
-    
-    auto *sunlight = DCraft::DirectionalLight::create("Sol Light", glm::vec3(-0.22f, -1.0f, 0.0f), glm::vec3(1.0f), 1.2f);
+
+    auto *sunlight = DCraft::DirectionalLight::create("Sol Light", glm::vec3(-0.22f, -1.0f, 0.0f), glm::vec3(1.0f),
+                                                      1.2f);
     sunlight->get_component<DCraft::LightComponent>()->set_intensity(1.2f);
     scene->add_entity(sunlight);
 

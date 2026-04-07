@@ -28,9 +28,8 @@ public:
 private:
     DCraft::SceneManager *scene_manager_;
     std::unordered_map<std::string, DCraft::Scene *> scenes_;
-    std::string active_scene_name_ = "Sandbox";
 
-    void on_scene_activated(DCraft::Scene *scene);
+    void on_scene_activated(DCraft::Scene *scene) const;
 };
 
 

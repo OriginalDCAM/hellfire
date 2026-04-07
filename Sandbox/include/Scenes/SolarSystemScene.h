@@ -24,7 +24,7 @@ typedef std::unordered_map<std::string, std::shared_ptr<DCraft::Material>> Mater
 
 // Function declarations only
 MaterialMap load_material_map();
-DCraft::Scene* load_solar_system_scene(DCraft::SceneManager& scene_manager, DCraft::WindowInfo window, DCraft::ShaderManager& shader_manager);
+DCraft::Scene* load_solar_system_scene( DCraft::WindowInfo window);
 
 #endif // SANDBOXSCENE_H
 
