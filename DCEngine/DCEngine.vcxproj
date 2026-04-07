@@ -136,6 +136,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Shape.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Pyramid.h" />
+    <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Plane.h" />
     <ClInclude Include="src\Engine\Core\Object3D.h" />
     <ClInclude Include="src\Engine\Core\Graphics\Renderer.h" />
     <ClInclude Include="src\Engine\Core\Graphics\GL\Geometry\Cube.h" />
@@ -160,6 +163,9 @@
     <ClInclude Include="src\Engine\Core\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Shape.cpp" />
+    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Pyramid.cpp" />
+    <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Plane.cpp" />
     <ClCompile Include="src\Engine\Core\Object3D.cpp" />
     <ClCompile Include="src\Engine\Core\Graphics\Renderer.cpp" />
     <ClCompile Include="src\Engine\Core\Graphics\GL\Geometry\Cube.cpp" />
