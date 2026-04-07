@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 
+#include "DCraft/Application.h"
 #include "DCraft/Addons/ImportedModel3D.h"
 #include "DCraft/Addons/ModelLoader.h"
 #include "DCraft/Editor/Components/UIComponent.h"
@@ -118,7 +119,7 @@ namespace DCraft {
     }
 
     inline void MenuBarComponent::import_model(const std::string &filepath) {
-        auto model = Addons::ModelLoader::load(filepath, scene_manager_->get_active_scene());
+        auto model = Addons::ModelLoader::load(filepath, scene_manager_->get_active_scene(), Application::get_instance().get_shader_manager());
 
         if (model) {
             scene_manager_->get_active_scene()->add(model);

@@ -37,7 +37,7 @@ namespace DCraft {
 
     struct ApplicationCallbacks {
         std::function<void(Application &)> init = nullptr;
-        std::function<void(SceneManager &, const WindowInfo &)> setup = nullptr;
+        std::function<void(SceneManager &, const WindowInfo &, ShaderManager&)> setup = nullptr;
         std::function<void(float)> update = nullptr;
         std::function<void()> render = nullptr;
         std::function<void(Application &, float)> process_input = nullptr;
@@ -47,7 +47,6 @@ namespace DCraft {
     class Application {
     public:
         explicit Application(int width = 800, int height = 600, std::string title = "OpenGL Application");
-
 
         ~Application();
 
@@ -120,6 +119,8 @@ namespace DCraft {
 
         void process_input();
         void toggle_fullscreen();
+
+        uint32_t ensure_fallback_shader();
 
         // Accessor methods
         [[nodiscard]] const WindowInfo &get_window_info() const { return window_info_; }

@@ -3,7 +3,6 @@
 //
 
 #include "DCraft.h"
-#include "DCraft/Graphics/OGL/StandardMaterial.h"
 
 #ifndef SANDBOXSCENE_H
 #define SANDBOXSCENE_H
@@ -21,11 +20,11 @@ namespace DCraft {
 }
 
 // Typedef for readability
-typedef std::unordered_map<std::string, DCraft::Material *> MaterialMap;
+typedef std::unordered_map<std::string, std::unique_ptr<DCraft::Material>> MaterialMap;
 
 // Function declarations only
 MaterialMap load_material_map();
-DCraft::Scene* load_scene(DCraft::SceneManager& scene_manager, DCraft::WindowInfo window);
+DCraft::Scene* load_scene(DCraft::SceneManager& scene_manager, DCraft::WindowInfo window, DCraft::ShaderManager& shader_manager);
 
 #endif // SANDBOXSCENE_H
 

@@ -6,7 +6,6 @@
 #include "DCraft/Utility/ObjectSerializer.h"
 
 #include "DCraft/Addons/PerspectiveCamera.h"
-#include "DCraft/Graphics/Materials/LambertMaterial.h"
 #include "DCraft/Structs/Scene.h"
 #include "DCraft/Graphics/Primitives/Cube.h"
 

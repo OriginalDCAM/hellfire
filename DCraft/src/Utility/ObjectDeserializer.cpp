@@ -3,6 +3,7 @@
 //
 #include "DCraft/Utility/ObjectDeserializer.h"
 
+#include "DCraft/Application.h"
 #include "DCraft/Addons/ImportedModel3D.h"
 #include "DCraft/Addons/PerspectiveCamera.h"
 #include "DCraft/Graphics/Lights/DirectionalLight.h"
@@ -10,7 +11,6 @@
 #include "DCraft/Graphics/Primitives/Cube.h"
 #include "DCraft/Graphics/Primitives/Quad.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
-#include "DCraft/Addons/SceneManager.h"
 #include "DCraft/Structs/Scene.h"
 
 using namespace DCraft;
@@ -156,7 +156,7 @@ Object3D *ObjectDeserializer::create_model(const json &data) {
         std::string path = data["path"];
         
         // Create model
-        Object3D* obj = Addons::ModelLoader::load(path, scene_);
+        Object3D* obj = Addons::ModelLoader::load(path, scene_, Application::get_instance().get_shader_manager());
         
         if (obj) {
             if (data.contains("name")) {

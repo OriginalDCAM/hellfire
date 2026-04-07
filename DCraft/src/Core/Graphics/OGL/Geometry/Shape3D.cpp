@@ -1,8 +1,8 @@
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 
-#include <glm/gtc/type_ptr.inl>
-
 #include "DCraft/Graphics/Managers/TextureManager.h"
+#include "DCraft/Graphics/Materials/Material.h"
+#include "DCraft/Graphics/Materials/MaterialRenderer.h"
 
 namespace DCraft {
     Texture *Shape3D::get_texture() const {
@@ -20,7 +20,6 @@ namespace DCraft {
             }
         }
     }
-    
 
     Material *Shape3D::get_material() const {
         Mesh* mesh = get_mesh();
@@ -42,11 +41,9 @@ namespace DCraft {
 
         // Determine which shader to use
         uint32_t actual_shader;
-        if (material->has_custom_shader() && material->get_compiled_shader_id() != 0) {
-            // Use material's custom shader
+        if (material->get_compiled_shader_id() != 0) {
             actual_shader = material->get_compiled_shader_id();
         } else {
-            // Fall back to provided shader program
             actual_shader = shader_program;
         }
 
@@ -56,14 +53,7 @@ namespace DCraft {
         // Set standard uniforms that all shaders expect
         set_standard_uniforms(actual_shader, model, view, projection, mvp);
 
-        // Bind material properties to shader uniforms
-        if (material->has_custom_shader()) {
-            // For custom shaders, use the new material renderer
-            MaterialRenderer::bind_material(*material);
-        } else {
-            // For legacy materials, use the old binding method
-            material->bind(renderer_context);
-        }
+        MaterialRenderer::bind_material(*material);
 
         // Draw the mesh
         mesh->draw();
