@@ -1,17 +1,17 @@
 ﻿//
 // Created by denzel on 23/09/2025.
 //
-#include "EditorPlugin.h"
+#include "CoreEditorPlugin.h"
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "DCraft/Application.h"
-#include "DCraft/IWindow.h"
-#include "DCraft/Utility/ServiceLocator.h"
-#include "DCraft/Window/GLFWWindow.h"
+#include "../../Engine/src/hellfire/core/Application.h"
+#include "../../Engine/src/hellfire/platform/IWindow.h"
+#include "hellfire/utilities/ServiceLocator.h"
+#include "../../Engine/src/hellfire/platform/windows_linux/GLFWWindow.h"
 
 namespace hellfire::editor {
-    void EditorPlugin::on_initialize(Application &app) {
+    void CoreEditorPlugin::on_initialize(Application &app) {
         app_ = &app;
         app_->get_window_info().should_warp_cursor = false;
 
@@ -23,7 +23,7 @@ namespace hellfire::editor {
         initialize_imgui(window);
     }
 
-    void EditorPlugin::initialize_imgui(IWindow *window) {
+    void CoreEditorPlugin::initialize_imgui(IWindow *window) {
         // Setup ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -54,11 +54,11 @@ namespace hellfire::editor {
         imgui_initialized_ = true;
     }
 
-    EditorPlugin::~EditorPlugin() {
+    CoreEditorPlugin::~CoreEditorPlugin() {
         cleanup_imgui();
     }
 
-    void EditorPlugin::cleanup_imgui() {
+    void CoreEditorPlugin::cleanup_imgui() {
         if (imgui_initialized_) {
             ImGui_ImplOpenGL3_Shutdown();
             ImGui_ImplGlfw_Shutdown();
@@ -67,7 +67,7 @@ namespace hellfire::editor {
         }
     }
 
-    void EditorPlugin::on_begin_frame() {
+    void CoreEditorPlugin::on_begin_frame() {
         if (!imgui_initialized_) return;
 
         ImGui_ImplOpenGL3_NewFrame();
@@ -75,7 +75,7 @@ namespace hellfire::editor {
         ImGui::NewFrame();
     }
 
-    void EditorPlugin::on_end_frame() {
+    void CoreEditorPlugin::on_end_frame() {
         if (!imgui_initialized_) return;
 
         ImGui::Render();
@@ -91,7 +91,7 @@ namespace hellfire::editor {
         }
     }
 
-    void EditorPlugin::on_render() {
+    void CoreEditorPlugin::on_render() {
         if (!imgui_initialized_) return;
 
         // Create main dockspace
@@ -104,7 +104,7 @@ namespace hellfire::editor {
         render_test_windows();
     }
 
-    void EditorPlugin::render_test_windows() {
+    void CoreEditorPlugin::render_test_windows() {
         // Test window 3 - Game Viewport
         if (ImGui::Begin("Game Viewport")) {
             ImVec2 size = ImGui::GetContentRegionAvail();
@@ -127,7 +127,7 @@ namespace hellfire::editor {
         ImGui::End();
     }
 
-    void EditorPlugin::create_dockspace() {
+    void CoreEditorPlugin::create_dockspace() {
         ImGuiViewport *viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
@@ -152,7 +152,7 @@ namespace hellfire::editor {
         ImGui::End();
     }
 
-    bool EditorPlugin::on_key_down(int key) {
+    bool CoreEditorPlugin::on_key_down(int key) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureKeyboard) {
             return true; // ImGui consumed the input
@@ -161,7 +161,7 @@ namespace hellfire::editor {
         return false;
     }
 
-    bool EditorPlugin::on_key_up(int key) {
+    bool CoreEditorPlugin::on_key_up(int key) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureKeyboard) {
             return true; // ImGui consumed the input
@@ -170,7 +170,7 @@ namespace hellfire::editor {
         return false;
     }
 
-    bool EditorPlugin::on_mouse_button(int button, bool pressed) {
+    bool CoreEditorPlugin::on_mouse_button(int button, bool pressed) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureMouse) {
             return true;
@@ -179,7 +179,7 @@ namespace hellfire::editor {
         return false;
     }
 
-    bool EditorPlugin::on_mouse_move(float x, float y) {
+    bool CoreEditorPlugin::on_mouse_move(float x, float y) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureMouse) {
             return true;
@@ -188,7 +188,7 @@ namespace hellfire::editor {
         return false;
     }
 
-    bool EditorPlugin::on_mouse_wheel(float delta) {
+    bool CoreEditorPlugin::on_mouse_wheel(float delta) {
         ImGuiIO &io = ImGui::GetIO();
         if (io.WantCaptureMouse) {
             return true;
@@ -197,11 +197,11 @@ namespace hellfire::editor {
         return false;
     }
 
-    void EditorPlugin::on_window_resize(int width, int height) {
+    void CoreEditorPlugin::on_window_resize(int width, int height) {
         IApplicationPlugin::on_window_resize(width, height);
     }
 
-    void EditorPlugin::on_window_focus(bool focused) {
+    void CoreEditorPlugin::on_window_focus(bool focused) {
         IApplicationPlugin::on_window_focus(focused);
     }
 }

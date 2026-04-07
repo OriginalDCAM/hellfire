@@ -3,17 +3,17 @@
 //
 
 #pragma once
-#include "DCraft/Interfaces/IApplicationPlugin.h"
-#include "DCraft/IWindow.h"
+#include "hellfire/Interfaces/IApplicationPlugin.h"
+#include "../../Engine/src/hellfire/platform/IWindow.h"
 
 namespace hellfire::editor {
-    class EditorPlugin final : public IApplicationPlugin {
+    class CoreEditorPlugin final : public IApplicationPlugin {
     public:
         void on_initialize(Application &app) override;
 
         void initialize_imgui(IWindow *window);
 
-        ~EditorPlugin() override;
+        ~CoreEditorPlugin() override;
 
         void cleanup_imgui();
 
