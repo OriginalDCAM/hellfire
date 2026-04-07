@@ -5,6 +5,7 @@ in vec3 vColor;
 in vec2 vTexCoords;
 in vec3 vNormal;
 in vec3 vFragPos;
+in mat3 vTBN;
 
 // Output
 out vec4 fragColor;
@@ -152,8 +153,11 @@ void main() {
     vec3 normal;
     // Normalize the normal
     if (useUNormalTexture) {
-        normal = texture(uNormalTexture, vTexCoords).rgb;
-        normal = normalize(normal * 2.0 - 1.0);
+        vec3 normalMap = texture(uNormalTexture, vTexCoords).rgb;
+        normalMap = normalize(normalMap * 2.0 - 1.0); // Convert from [0, 1] to [-1, 1]
+        
+        normal = normalize(vTBN * normalMap);
+        
     } else {
         normal = normalize(vNormal);
     }

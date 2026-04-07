@@ -17,7 +17,7 @@ namespace DCraft {
 
         switch (type) {
             case TextureType::NORMAL:
-                settings.flip_vertically = false;
+                settings.flip_vertically = true;
                 break;
             case TextureType::ROUGHNESS:
             case TextureType::METALNESS:
