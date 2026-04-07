@@ -11,15 +11,12 @@
 namespace hellfire::editor {
     class EditorContext {
     public:
-        EntityID  selected_entity_id = 0;
+        EntityID  selected_entity_id = INVALID_ENTITY;
         std::vector<EntityID> selected_entity_ids;
         Scene* active_scene = nullptr;
 
-        [[nodiscard]] bool has_selection() const { return selected_entity_id != 0; }
-
-        [[nodiscard]] Entity* get_selected_entity() const {
-            if (!active_scene || selected_entity_id == 0) return nullptr;
-            return active_scene->get_entity(selected_entity_id);
+        EntityID get_primary_selection() const { 
+            return selected_entity_ids.empty() ? 0 : selected_entity_ids.front(); 
         }
 
         void set_window_title(const std::string& title) {

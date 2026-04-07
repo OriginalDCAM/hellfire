@@ -117,7 +117,6 @@ namespace hellfire::editor {
         auto sm = ServiceLocator::get_service<SceneManager>();
         if (sm && editor_context_.active_scene != sm->get_active_scene()) {
             editor_context_.active_scene = sm->get_active_scene();
-            editor_context_.selected_entity_id = 0;
         }
 
         // Create main dockspace
@@ -132,7 +131,6 @@ namespace hellfire::editor {
     }
 
     void CoreEditorPlugin::render_viewport_window() {
-        // Test window 3 - Game Viewport
         if (!editor_context_.active_scene) return;
 
         ImVec2 window_size = ImGui::GetContentRegionAvail();

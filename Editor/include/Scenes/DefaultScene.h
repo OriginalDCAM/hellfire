@@ -13,8 +13,15 @@ void setup_default_scene_with_default_entities(hellfire::Scene *scene) {
     );
 
     scene->set_active_camera(camera_id);
+    for (int i = 0; i < 100; i++) {
+        auto entity_id = hellfire::Cube::create(scene, "Cube_" + std::to_string(i), {.rotation = glm::vec3(-32.0f, 22.0f, 0.0f)});
 
-    hellfire::Cube::create(scene, "Cube", {.rotation = glm::vec3(-32.0f, 22.0f, 0.0f)});
+        if (i % 2 == 0) {
+        auto child_entity_id = hellfire::Cube::create(scene, "Cube_Child_" + std::to_string(i), {.rotation = glm::vec3(-32.0f, 22.0f, 0.0f)});
+            scene->set_parent(child_entity_id, entity_id);
+        }
+        
+    }
 
     auto *skybox = new hellfire::Skybox();
     skybox->set_cubemap_faces({

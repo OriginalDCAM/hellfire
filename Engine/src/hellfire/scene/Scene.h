@@ -5,6 +5,7 @@
 #include "glm/mat4x4.hpp"
 #include "nlohmann/json.hpp"
 
+static constexpr hellfire::EntityID INVALID_ENTITY = 0;
 
 namespace hellfire {
     class CameraComponent;
