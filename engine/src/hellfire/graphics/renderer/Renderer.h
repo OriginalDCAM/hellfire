@@ -49,6 +49,15 @@ namespace hellfire {
         }
     };
 
+    struct ShadowMapData {
+        std::unique_ptr<Framebuffer> framebuffer;
+        glm::mat4 light_view_proj;
+    };
+
+    struct ShadowSettings {
+        float bias = 0.005f;
+    };
+
     class Renderer {
     public:
         Renderer();
@@ -92,6 +101,7 @@ namespace hellfire {
 
         ShaderManager &get_shader_manager() { return shader_manager_; }
         ShaderRegistry &get_shader_registry() { return shader_registry_; }
+        ShadowSettings &get_shadow_settings() { return shadow_settings_; }
 
     private:
         enum RendererFboId : uint32_t {
@@ -121,6 +131,7 @@ namespace hellfire {
         std::vector<InstancedRenderCommand> opaque_instanced_objects_;
         std::vector<InstancedRenderCommand> transparent_instanced_objects_;
         std::unordered_map<Entity *, ShadowMapData> shadow_maps_;
+        ShadowSettings shadow_settings_;
 
         SkyboxRenderer skybox_renderer_;
         std::shared_ptr<Material> shadow_material_;
