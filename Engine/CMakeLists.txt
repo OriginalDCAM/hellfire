@@ -1,4 +1,4 @@
-set(LIBRARY_NAME DCraft)
+set(LIBRARY_NAME HellfireEngine)
 
 # Collect source files
 file(GLOB_RECURSE SOURCES "src/*.cpp")
@@ -6,19 +6,6 @@ file(GLOB_RECURSE HEADERS "include/*.h" "include/*.hpp")
 
 # Create the library
 add_library(${LIBRARY_NAME} ${SOURCES} ${HEADERS})
-
-# Check if the targets exist instead of using find_package
-if (NOT TARGET GLEW::GLEW)
-    message(FATAL_ERROR "GLEW target not found, check your root CMakeLists.txt")
-endif ()
-
-if (NOT TARGET GLUT::GLUT)
-    message(FATAL_ERROR "GLUT target not found, check your root CMakeLists.txt")
-endif ()
-
-if (NOT TARGET GLM::GLM)
-    message(FATAL_ERROR "GLM target not found, check your root CMakeLists.txt")
-endif ()
 
 # Set include directories
 target_include_directories(${LIBRARY_NAME}
@@ -34,8 +21,8 @@ find_package(OpenGL REQUIRED)
 # Link dependencies
 target_link_libraries(${LIBRARY_NAME}
         PUBLIC
-        GLEW::GLEW
-        GLUT::GLUT
+        libglew_static
+        freeglut_static
         GLM::GLM
         OpenGL::GL
         imgui
