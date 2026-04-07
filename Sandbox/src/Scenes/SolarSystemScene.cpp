@@ -4,6 +4,8 @@
 #include "Scenes/SolarSystemScene.h"
 
 #include "DCraft/Graphics/Geometry/Sphere.h"
+#include "DCraft/Graphics/Lighting/PointLight.h"
+#include "Scripts/OrbitController.h"
 #include "Scripts/PlayerController.h"
 
 MaterialMap load_material_map(DCraft::ShaderManager& shader_manager) {
@@ -58,64 +60,68 @@ MaterialMap load_material_map(DCraft::ShaderManager& shader_manager) {
     return materials;
 }
 
+DCraft::Entity* create_planet(const std::string& name, float scale, const glm::vec3& position, 
+                             DCraft::Material* material, float orbit_radius = 0.0f, float orbit_speed = 0.0f) {
+    auto* planet = DCraft::Sphere::create(name, glm::vec3(1.0f), 64, 64);
+    planet->transform()->set_position(position.x, position.y, position.z);
+    planet->transform()->set_scale(scale, scale, scale);
+    planet->get_component<DCraft::RenderableComponent>()->set_material(material);
+    
+    // Add orbit animation if specified
+    if (orbit_radius > 0.0f) {
+        auto* orbit_script = planet->add_component<OrbitController>();
+        orbit_script->set_orbit_radius(orbit_radius);
+        orbit_script->set_orbit_speed(orbit_speed);
+        orbit_script->set_center(glm::vec3(0.0f, 0.0f, 0.0f)); // Orbit around sun
+    }
+    
+    return planet;
+}
 DCraft::Scene *load_solar_system_scene(DCraft::SceneManager &scene_manager, DCraft::WindowInfo window, DCraft::ShaderManager& shader_manager) {
     DCraft::Scene *scene = scene_manager.create_scene("Solar System Scene");
     MaterialMap materials = load_material_map(shader_manager);
 
-    // Setup lighting
-    auto* sunlight = DCraft::DirectionalLight::create("Sol Light", glm::vec3(1, -0.2, 1));
+    // Setup lighting - adjust direction for better planet illumination
+    auto* sunlight = DCraft::PointLight::create("Sol Light", glm::vec3(0.0f), glm::vec3(1.0f), 1.2f, 350.0f);
+    sunlight->get_component<DCraft::LightComponent>()->set_intensity(1.2f); 
     scene->add_entity(sunlight);
 
-    // Planets:
     auto *sun_visual = DCraft::Sphere::create("Sol");
     sun_visual->transform()->set_position(0, 0, 0);
-    sun_visual->transform()->set_scale(109);
+    sun_visual->transform()->set_scale(25.0f); 
     sun_visual->get_component<DCraft::RenderableComponent>()->set_material(materials["SUN_MATERIAL"].release()); 
     scene->add_entity(sun_visual);
 
-    auto *mercury_visual = DCraft::Sphere::create("Mercury");
-    mercury_visual->transform()->set_position(0, 0, 150);
-    mercury_visual->transform()->set_scale(0.33f);
-    mercury_visual->get_component<DCraft::RenderableComponent>()->set_material(materials["MERCURY_MATERIAL"].release()); 
+    auto *mercury_visual = create_planet("Mercury", 0.4f, glm::vec3(0,0,45), 
+                                        materials["MERCURY_MATERIAL"].release(), 45.0f, 0.11f);
     scene->add_entity(mercury_visual);
 
-    
-    auto *venus_visual = DCraft::Sphere::create("Venus");
-    venus_visual->transform()->set_position(0, 0, 175);
-    venus_visual->transform()->set_scale(0.9f);
-    venus_visual->get_component<DCraft::RenderableComponent>()->set_material(materials["VENUS_MATERIAL"].release()); 
+    auto *venus_visual = create_planet("Venus", 0.9f, glm::vec3(0,0,65), 
+                                      materials["VENUS_MATERIAL"].release(), 65.0f, 0.044f);
     scene->add_entity(venus_visual);
 
-    auto *earth_visual = DCraft::Sphere::create("Earth");
-    earth_visual->transform()->set_position(0, 0, 200);
-    earth_visual->transform()->set_rotation(180, 0, 0);
-    earth_visual->transform()->set_scale(1);
-    earth_visual->get_component<DCraft::RenderableComponent>()->set_material(materials["EARTH_MATERIAL"].release()); 
+    auto *earth_visual = create_planet("Earth", 1.0f, glm::vec3(0,0,85), 
+                                      materials["EARTH_MATERIAL"].release(), 85.0f, 0.028f);
     scene->add_entity(earth_visual);
 
-    
-    auto *mars_visual = DCraft::Sphere::create("Mars");
-    mars_visual->transform()->set_position(0, 0, 225);
-    mars_visual->transform()->set_scale(0.5f);
-    mars_visual->get_component<DCraft::RenderableComponent>()->set_material(materials["MARS_MATERIAL"].release()); 
+    auto *mars_visual = create_planet("Mars", 0.5f, glm::vec3(0,0,110), 
+                                     materials["MARS_MATERIAL"].release(), 110.0f, 0.012f);
     scene->add_entity(mars_visual);
 
-    auto *jupiter_visual = DCraft::Sphere::create("Jupiter");
-    jupiter_visual->transform()->set_position(0, 0, 325);
-    jupiter_visual->transform()->set_scale(11);
-    jupiter_visual->get_component<DCraft::RenderableComponent>()->set_material(materials["JUPITER_MATERIAL"].release());
+    auto *jupiter_visual = create_planet("Jupiter", 8.0f, glm::vec3(0,0,180), 
+                                        materials["JUPITER_MATERIAL"].release(), 180.0f, 0.0002f);
     scene->add_entity(jupiter_visual);
 
-    auto *saturn_visual = DCraft::Sphere::create("Saturn");
-    saturn_visual->transform()->set_position(0, 0, 375);
-    saturn_visual->transform()->set_scale(9);
-    saturn_visual->get_component<DCraft::RenderableComponent>()->set_material(materials["SATURN_SURFACE_MATERIAL"].release());
+    auto *saturn_visual = create_planet("Saturn", 7.5f, glm::vec3(0,0,240), 
+                                       materials["SATURN_SURFACE_MATERIAL"].release(), 240.0f, 0.00008f);
     scene->add_entity(saturn_visual);
 
-    // Cameras
-    auto* main_camera = DCraft::PerspectiveCamera::create("Main Camera", 70.0f, window.aspect_ratio, 0.1f, 400.0f);
-    main_camera->transform()->set_position(0.0f, 10.0f, 120.0f);
-    main_camera->add_component<PlayerController>(10);
+    auto* main_camera = DCraft::PerspectiveCamera::create("Main Camera", 70.0f, window.aspect_ratio, 0.1f, 1000.0f);
+    
+    main_camera->transform()->set_position(20.0f, 30.0f, 120.0f);
+    main_camera->get_component<DCraft::CameraComponent>()->look_at(glm::vec3(0.0f, 0.0f, 0.0f));
+    
+    main_camera->add_component<PlayerController>(25.0f); 
     scene->add_entity(main_camera);
     scene->set_active_camera(main_camera);
 
@@ -129,8 +135,27 @@ DCraft::Scene *load_solar_system_scene(DCraft::SceneManager &scene_manager, DCra
         "assets/Skybox/space_back.png"     // -Z
     });
     scene->set_skybox(skybox);
-
-
-
+    
     return scene;
+}
+
+// Enhanced planet creation with rotation
+DCraft::Entity* create_planet_with_rotation(const std::string& name, float scale, const glm::vec3& position, 
+                                           DCraft::Material* material, float orbit_radius = 0.0f, 
+                                           float orbit_speed = 0.0f, float rotation_speed = 1.0f) {
+    auto* planet = DCraft::Sphere::create(name);
+    planet->transform()->set_position(position.x, position.y, position.z);
+    planet->transform()->set_scale(scale, scale, scale);
+    planet->get_component<DCraft::RenderableComponent>()->set_material(material);
+    
+    // Add orbit animation if specified
+    if (orbit_radius > 0.0f) {
+        auto* orbit_script = planet->add_component<OrbitController>();
+        orbit_script->set_orbit_radius(orbit_radius);
+        orbit_script->set_orbit_speed(orbit_speed);
+        orbit_script->set_rotation_speed(rotation_speed); // Planet spinning on axis
+        orbit_script->set_center(glm::vec3(0.0f, 0.0f, 0.0f));
+    }
+    
+    return planet;
 }

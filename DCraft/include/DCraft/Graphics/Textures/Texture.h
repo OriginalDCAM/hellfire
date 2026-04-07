@@ -10,7 +10,7 @@ namespace DCraft
         NORMAL,
         AMBIENT_OCCLUSION,
         ROUGHNESS,
-        METALLNESS
+        METALNESS
     };
     class Texture
     {
