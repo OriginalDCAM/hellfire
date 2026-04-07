@@ -131,6 +131,12 @@ namespace hellfire::editor::ui {
             return ImGui::Checkbox(id, val);
         });
     }
+    
+    inline bool text_input(const std::string &label, char *value, const int buffer) {
+        return Property(label, value, [&](const char *id, char* val) {
+        return ImGui::InputText(id, val, buffer);
+        });
+    }
 
     /**
      * @brief Capitalizes the first character of a string

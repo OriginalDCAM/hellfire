@@ -29,7 +29,9 @@ namespace hellfire {
         [[nodiscard]] std::shared_ptr<Mesh> get_mesh() const { return mesh_; }
         [[nodiscard]] bool has_mesh() const { return mesh_ != nullptr; }
 
-        void set_mesh_asset(AssetID id) { mesh_asset_id_ = id; }
+        void set_mesh_asset(AssetID id) {
+            mesh_asset_id_ = id;
+        }
     
         AssetID get_mesh_asset() const { return mesh_asset_id_; }
 

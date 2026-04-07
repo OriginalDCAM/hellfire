@@ -25,8 +25,8 @@ public:
     
      void render_toolbar();
     void render_asset_tile(const AssetMetadata &asset, float size, ModelInstantiator &instantiator);
-    
-    std::string truncate_string(const std::string & name, int i);
+
+     static std::string truncate_string(const std::string & name, int i);
 
 
      void open_in_explorer(const std::filesystem::path &path);
