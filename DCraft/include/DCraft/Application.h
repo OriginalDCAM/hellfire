@@ -12,7 +12,7 @@
 namespace DCraft {
     class Renderer;
     class Camera;
-    
+
     struct WindowInfo {
         // Dimensions
         int width;
@@ -35,7 +35,7 @@ namespace DCraft {
 
     struct ApplicationCallbacks {
         std::function<void(Application &)> init = nullptr;
-        std::function<void(SceneManager &, const WindowInfo &, ShaderManager&)> setup = nullptr;
+        std::function<void(SceneManager &, const WindowInfo &, ShaderManager &)> setup = nullptr;
         std::function<void(float)> update = nullptr;
         std::function<void()> render = nullptr;
         std::function<void(Application &, float)> process_input = nullptr;
@@ -47,6 +47,10 @@ namespace DCraft {
         explicit Application(int width = 800, int height = 600, std::string title = "OpenGL Application");
 
         ~Application();
+
+        void initialize_glut(int argc, char **argv);
+
+        void initialize_imgui();
 
 
         [[nodiscard]] int get_window_width() const { return window_info_.width; }
@@ -69,6 +73,8 @@ namespace DCraft {
         void update();
 
         void render_frame();
+
+        void check_key_timeouts();
 
         /// public method function: on_key_down
         /// @param key ASCII table keycode
@@ -100,7 +106,7 @@ namespace DCraft {
         /// @param y offset
         void on_mouse_motion(int x, int y);
 
-        
+
         /// public method function: on_mouse_passive_motion
         /// handles passive mouse motion, just regular mouse motion without a holding mouse button
         /// @param x offset
@@ -109,12 +115,12 @@ namespace DCraft {
 
         void on_mouse_wheel(int wheel, int direction, int x, int y);
 
+        void clear_frame_input_flags();
+
         void on_window_resize(int width, int height);
 
-        // Game state methods
-        bool game_mode_changed = false;
-
         void process_input();
+
         void toggle_fullscreen();
 
         Shader *ensure_fallback_shader();
@@ -124,18 +130,30 @@ namespace DCraft {
         // Accessor methods
         [[nodiscard]] const WindowInfo &get_window_info() const { return window_info_; }
         [[nodiscard]] bool is_key_pressed(unsigned char key) const { return keys_[key]; }
+        [[nodiscard]] bool is_key_just_pressed(unsigned char key) const { return keys_just_pressed_[key]; }
+        [[nodiscard]] bool is_key_just_released(unsigned char key) const { return keys_just_released_[key]; }
         // Add the 256 index offset to special keys
         [[nodiscard]] bool is_special_key_pressed(unsigned char key) const { return keys_[key + 256]; }
+
+        [[nodiscard]] bool is_special_key_just_pressed(unsigned char key) const {
+            return keys_just_pressed_[key + 256];
+        }
+
+        [[nodiscard]] bool is_special_key_just_released(unsigned char key) const {
+            return keys_just_released_[key + 256];
+        }
+
+        [[nodiscard]] bool is_shift_pressed() const { return shift_pressed_; }
+        [[nodiscard]] bool is_ctrl_pressed() const { return ctrl_pressed_; }
+        [[nodiscard]] bool is_alt_pressed() const { return alt_pressed_; }
+
         [[nodiscard]] float get_delta_time() const { return delta_time_; }
         void set_callbacks(const ApplicationCallbacks &callbacks) { callbacks_ = callbacks; }
-        
-        ShaderManager& get_shader_manager() { return shader_manager_; }
 
-        void toggle_editor_mode();
-        bool is_game_mode() const { return game_mode_; }
-        bool is_editor_mode() const { return !game_mode_; }
-        
+        ShaderManager &get_shader_manager() { return shader_manager_; }
+
         static Application &get_instance() { return *instance_; }
+
     private:
         static Application *instance_;
         ApplicationCallbacks callbacks_;
@@ -147,15 +165,20 @@ namespace DCraft {
         SceneManager scene_manager_;
         Renderer renderer_;
 
-        std::array<bool, 512> active_keys_before_mode_change_; 
-        Entity* selected_node_ = nullptr;
-        // Editor::SceneEditorOverlay editor_overlay_;
+        std::array<bool, 512> active_keys_before_mode_change_;
+        Entity *selected_node_ = nullptr;
 
         // Keys stuff
-        bool editor_mode_;
-        bool game_mode_;
         bool keys_[512] = {false};
         bool prev_keys_[512] = {false};
+        bool keys_just_pressed_[512] = {false};
+        bool keys_just_released_[512] = {false};
+
+        bool shift_pressed_ = false;
+        bool ctrl_pressed_ = false;
+        bool alt_pressed_ = false;
+
+        float key_timers_[512] = {0.0f}; 
         // Window stuff
         bool is_fullscreen_ = false;
         bool warping_ = false;
@@ -190,7 +213,7 @@ namespace DCraft {
         }
 
         static void window_resize_callback(int width, int height) {
-            ImGui_ImplGLUT_ReshapeFunc(width, height); 
+            ImGui_ImplGLUT_ReshapeFunc(width, height);
             if (instance_) instance_->on_window_resize(width, height);
         }
 
@@ -225,7 +248,7 @@ namespace DCraft {
         }
 
         static void mouse_passive_motion_callback(int x, int y) {
-            ImGui_ImplGLUT_MotionFunc(x, y);  // ImGui uses the same handler for both motion types
+            ImGui_ImplGLUT_MotionFunc(x, y); // ImGui uses the same handler for both motion types
             if (instance_) instance_->on_mouse_passive_motion(x, y);
         }
 
