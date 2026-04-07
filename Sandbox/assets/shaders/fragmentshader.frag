@@ -112,7 +112,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
 }
 
 void main() {
-    // Get base diffuse color
+    fragColor = vec4(vNormal, 1.0);
     vec4 diffuseValue;
     if (useDiffuse1 && useDiffuse2) {
         vec4 diff1 = texture(diffuse1, vTexCoords);
@@ -124,7 +124,6 @@ void main() {
         diffuseValue = vec4(diffuseColor, 1.0);
     }
 
-    // Apply vertex color (only if we're using it)
     vec4 baseColor;
     if (vColor.r != 0.0 || vColor.g != 0.0 || vColor.b != 0.0) {
         baseColor = diffuseValue * vec4(vColor, 1.0);
@@ -158,6 +157,6 @@ void main() {
     for (int i = 0; i < numPointLights; i++) {
         result += calcPointLight(pointLights[i], normal, vFragPos, viewDir, baseColor.rgb, specularValue);
     }
-    
+
     fragColor = vec4(result, baseColor.a);
 }

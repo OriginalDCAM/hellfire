@@ -33,7 +33,7 @@ namespace DCraft {
 
         Scene *load_scene(const std::string &filename);
 
-        bool save_scene(const std::string &filename, Scene *scene);
+        bool save_scene(const std::string &filename, Scene *scene) const;
 
         // Scene management
         void update(float delta_time);
@@ -47,7 +47,7 @@ namespace DCraft {
 
         Object3D *find_object_by_name(const std::string &name);
 
-        Object3D *find_object_by_name_recursive(Object3D *parent, const std::string &name);
+        Object3D *find_object_by_name_recursive(const Object3D *parent, const std::string &name);
 
         void destroy_object(Object3D *object);
 
@@ -55,7 +55,7 @@ namespace DCraft {
         Object3D *get_root_node() const { return root_node_; }
         const std::vector<Object3D *> &get_objects() const { return objects_; }
 
-        std::vector<Camera *> get_cameras();
+        std::vector<Camera *> get_cameras() const;
 
 
         void set_active_camera(Camera *camera) const;
@@ -64,7 +64,7 @@ namespace DCraft {
 
         void set_active_scene(Scene *scene);
 
-        void set_active_scene(std::shared_ptr<Scene> scene);
+        void set_active_scene(const std::shared_ptr<Scene> &scene);
 
         Scene *get_active_scene() const {
             if (!active_scene_) return nullptr;
@@ -83,7 +83,7 @@ namespace DCraft {
         // Helper methods
         void register_object(Object3D *object);
 
-        void unregister_object(Object3D *object);
+        void unregister_object(const Object3D *object);
 
         SceneActivatedCallback scene_activated_callback_;
 

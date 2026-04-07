@@ -8,7 +8,7 @@
 #include "DCraft/Graphics/Lights/DirectionalLight.h"
 #include "DCraft/Graphics/Lights/PointLight.h"
 #include "DCraft/Graphics/Primitives/Cube.h"
-#include "DCraft/Graphics/Primitives/Plane.h"
+#include "DCraft/Graphics/Primitives/Quad.h"
 #include "DCraft/Graphics/Primitives/Shape3D.h"
 #include "DCraft/Addons/SceneManager.h"
 #include "DCraft/Structs/Scene.h"
@@ -70,7 +70,7 @@ Object3D *ObjectDeserializer::create_shape(const json &data) {
         if (geometry == "cube") {
             return new Cube("Default cube");
         } else if (geometry == "plane") {
-            return new Plane("Default plane");
+            return new Quad("Default plane");
         } else {
             std::cerr << "GEOMETRY::ERROR Unknown geometry type: " << geometry << std::endl;
             return nullptr;

@@ -26,7 +26,7 @@ void main()
     vTexCoords = texCoords;
 
     mat3 normalMatrix = transpose(inverse(mat3(model)));
-    vNormal = normalize(normalMatrix * normal);  // Also normalize here
+    vNormal = normalize(normalMatrix * normal); 
 
     // Transform vertex position to world space for lighting calculations
     vFragPos = vec3(model * vec4(position, 1.0));

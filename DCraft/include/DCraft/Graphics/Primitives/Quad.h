@@ -4,7 +4,7 @@
 namespace DCraft
 {
 
-    class Plane : public Shape3D
+    class Quad : public Shape3D
     {
         const std::vector<float> vertices = {
             1.0, 1.0, 0.0,
@@ -37,8 +37,8 @@ namespace DCraft
         };
 
     public:
-        Plane() = default;
-        Plane(const std::string& name);
+        Quad() = default;
+        Quad(const std::string& name);
 
         void update(float dt) override;
         void set_vertices() override;

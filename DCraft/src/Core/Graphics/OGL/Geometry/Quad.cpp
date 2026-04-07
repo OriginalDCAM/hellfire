@@ -1,9 +1,9 @@
-#include "DCraft/Graphics/Primitives/Plane.h"
+#include "DCraft/Graphics/Primitives/Quad.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 namespace DCraft {
-    Plane::Plane(const std::string &name) : Shape3D(name) {
+    Quad::Quad(const std::string &name) : Shape3D(name) {
         std::vector<Vertex> vertices_data;
         std::vector<unsigned int> indices_data;
         std::vector<Texture *> texture_data = {};
@@ -37,19 +37,19 @@ namespace DCraft {
         update_world_matrix();
     }
 
-    void Plane::update(float dt) {
+    void Quad::update(float dt) {
     }
 
-    void Plane::set_vertices() {
+    void Quad::set_vertices() {
     }
 
-    void Plane::set_colors() {
+    void Quad::set_colors() {
     }
 
-    void Plane::set_uvs() {
+    void Quad::set_uvs() {
     }
 
-    json Plane::to_json() {
+    json Quad::to_json() {
         json j = Shape3D::to_json();
         j["geometry"] = "plane";
         return j;
