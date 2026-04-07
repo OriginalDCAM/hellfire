@@ -32,14 +32,13 @@ namespace DCraft {
         [[nodiscard]] std::shared_ptr<Mesh> get_mesh_shared() const { return mesh_; }
         [[nodiscard]] bool has_mesh() const { return mesh_ != nullptr; }
 
-        // Material convenience methods
-        void set_material(Material *material) const {
+        void set_material(std::shared_ptr<Material> material) const {
             if (material && has_mesh()) {
                 get_mesh()->set_material(material);
             }
         }
 
-        [[nodiscard]] Material *get_material() const {
+        [[nodiscard]] std::shared_ptr<Material> get_material() const {
             return has_mesh() ? get_mesh()->get_material() : nullptr;
         }
 
@@ -51,21 +50,29 @@ namespace DCraft {
             Mesh *mesh = get_mesh();
             if (!RenderingUtils::validate_mesh_for_rendering(mesh)) return;
 
+            auto material = mesh->get_material();
+            if (!material) return;
+
             const auto *transform = get_owner()->get_component<TransformComponent>();
             if (!transform) return;
 
             const glm::mat4 model = transform->get_world_matrix();
 
-            shader.use();
 
+            // Abstract this away
+            uint32_t shader_id = material->get_compiled_shader_id();
+            glUseProgram(shader_id);
+            auto material_shader = Shader::from_id(shader_id);
+            
             if (renderer_context) {
-                RenderingUtils::upload_lights_to_shader(shader, renderer_context);
+                RenderingUtils::upload_lights_to_shader(material_shader, renderer_context);
             }
 
-            RenderingUtils::set_standard_uniforms(shader, model, view, projection, time);
+            RenderingUtils::set_standard_uniforms(material_shader, model, view, projection, time);
 
-            MaterialRenderer::bind_material(*mesh->get_material());
+            material->bind();
             mesh->draw();
+            material->unbind();
         }
 
     private:

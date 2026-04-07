@@ -171,7 +171,7 @@ namespace DCraft {
         if (auto *renderable = entity->get_component<RenderableComponent>()) {
             if (const auto *transform = entity->get_component<TransformComponent>()) {
                 if (renderable->has_mesh()) {
-                    if (Material *material = renderable->get_material()) {
+                    if (std::shared_ptr<Material> material = renderable->get_material()) {
                         const glm::vec3 object_pos = transform->get_world_position();
                         const float distance = glm::length(camera_pos - object_pos);
                         const bool is_transparent = is_material_transparent(material);
@@ -191,7 +191,7 @@ namespace DCraft {
         if (auto* instanced_renderable = entity->get_component<InstancedRenderableComponent>()) {
             if (auto* transform = entity->get_component<TransformComponent>()) {
                 if (instanced_renderable->has_mesh() && instanced_renderable->get_instance_count() > 0) {
-                    if (Material* material = instanced_renderable->get_material()) {
+                    if (std::shared_ptr<Material> material = instanced_renderable->get_material()) {
                         glm::vec3 object_pos = transform->get_world_position();
                         float distance = glm::length(camera_pos - object_pos);
                         bool is_transparent = is_material_transparent(material);
@@ -214,7 +214,10 @@ namespace DCraft {
     }
 
 
-    bool Renderer::is_material_transparent(const Material *material) {
+    bool Renderer::is_material_transparent(const std::shared_ptr<Material> &material) {
+        if (!material) {
+            return false; 
+        }
         const auto transparency = material->get_property<float>("transparency", 1.0f);
         const auto alpha = material->get_property<float>("alpha", 1.0f);
         const bool use_transparency = material->get_property<bool>("useTransparency", false);
@@ -353,7 +356,7 @@ namespace DCraft {
         }
     }
 
-    Shader *Renderer::get_shader_for_material(Material *material) {
+    Shader *Renderer::get_shader_for_material(std::shared_ptr<Material> material) {
         if (!material) {
             return fallback_shader_;
         }
@@ -382,7 +385,7 @@ namespace DCraft {
         return fallback_shader_;
     }
 
-    uint32_t Renderer::compile_material_shader(Material *material) {
+    uint32_t Renderer::compile_material_shader(std::shared_ptr<Material> material) {
         if (!material || !material->has_custom_shader()) {
             return 0;
         }

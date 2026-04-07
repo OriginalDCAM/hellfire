@@ -70,7 +70,8 @@ namespace DCraft::Addons {
 
         // Material processing
         static void preprocess_materials(const aiScene *scene, const std::string &filepath);
-        static std::unique_ptr<Material> create_material(const aiMaterial* ai_material, const aiScene *scene, const std::string &filepath);
+        static std::shared_ptr<Material> create_material(const aiMaterial *ai_material, const aiScene *scene,
+                                                         const std::string &filepath);
         static void load_essential_material_properties(const aiMaterial* ai_material, Material& material);
         static void load_material_textures(const aiMaterial* ai_material, Material& material, const aiScene *scene, const std::string &filepath);
 

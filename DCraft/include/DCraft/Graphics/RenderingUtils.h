@@ -73,7 +73,7 @@ namespace DCraft {
         static uint32_t get_shader_to_use(Mesh *mesh, uint32_t fallback_shader) {
             if (!mesh) return fallback_shader;
 
-            Material *material = mesh->get_material();
+            const std::shared_ptr<Material> material = mesh->get_material();
             if (!material) return fallback_shader;
 
             return material->get_compiled_shader_id() != 0

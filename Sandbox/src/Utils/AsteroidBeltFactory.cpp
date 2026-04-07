@@ -140,7 +140,7 @@ std::vector<DCraft::InstancedRenderableComponent::InstanceData> AsteroidBeltFact
 }
 
 
-DCraft::Material * AsteroidBeltFactory::create_rocky_instanced_material() {
+std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_rocky_instanced_material() {
     auto material = DCraft::MaterialBuilder::create_custom(
         "Rocky Instanced Material",
         "assets/shaders/instanced.vert",
@@ -152,10 +152,10 @@ DCraft::Material * AsteroidBeltFactory::create_rocky_instanced_material() {
     material->set_property("roughness", 0.8f);                         
     material->set_property("metallic", 0.0f);                          
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
-    return material.release();
+    return material;
 }
 
-DCraft::Material * AsteroidBeltFactory::create_metallic_instanced_material() {
+std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_metallic_instanced_material() {
     auto material = DCraft::MaterialBuilder::create_custom(
         "Metallic Instanced Material", 
         "assets/shaders/instanced.vert",
@@ -168,10 +168,10 @@ DCraft::Material * AsteroidBeltFactory::create_metallic_instanced_material() {
     material->set_property("roughness", 0.2f);                         
     material->set_property("metallic", 0.9f);                            
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
-    return material.release();
+    return material;
 }
 
-DCraft::Material * AsteroidBeltFactory::create_icy_instanced_material() {
+std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_icy_instanced_material() {
     auto material = DCraft::MaterialBuilder::create_custom(
         "Icy Instanced Material",
         "assets/shaders/instanced.vert", 
@@ -185,10 +185,10 @@ DCraft::Material * AsteroidBeltFactory::create_icy_instanced_material() {
     material->set_property("metallic", 0.0f);                           
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
     material->set_property("transparency", 0.8f);
-    return material.release();
+    return material;
 }
 
-DCraft::Material * AsteroidBeltFactory::create_crystal_instanced_material() {
+std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_crystal_instanced_material() {
     auto material = DCraft::MaterialBuilder::create_custom(
         "Crystal Instanced Material",
         "assets/shaders/instanced.vert",
@@ -201,10 +201,10 @@ DCraft::Material * AsteroidBeltFactory::create_crystal_instanced_material() {
     material->set_property("roughness", 0.0f);                          
     material->set_property("metallic", 0.3f);                           
     material->set_property("emissive", glm::vec3(0.1f, 0.05f, 0.15f));   
-    return material.release();
+    return material;
 }
 
-DCraft::Material * AsteroidBeltFactory::create_dusty_instanced_material() {
+std::shared_ptr<DCraft::Material> AsteroidBeltFactory::create_dusty_instanced_material() {
     auto material = DCraft::MaterialBuilder::create_custom(
         "Dusty Instanced Material",
         "assets/shaders/instanced.vert",
@@ -216,5 +216,5 @@ DCraft::Material * AsteroidBeltFactory::create_dusty_instanced_material() {
     material->set_property("roughness", 0.9f);                          
     material->set_property("metallic", 0.0f);                           
     material->set_property("emissive", glm::vec3(0.0f, 0.0f, 0.0f));
-    return material.release();
+    return material;
 }

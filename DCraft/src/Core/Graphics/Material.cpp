@@ -40,6 +40,8 @@ namespace DCraft {
         } else {
             set_property(uniform_name, texture, uniform_name);
         }
+
+        set_texture_usage_flag(uniform_name, true);
         
         return *this;
     }
@@ -56,12 +58,68 @@ namespace DCraft {
         } else {
             set_property(uniform_name, &texture, uniform_name);
         }
+
+        set_texture_usage_flag(uniform_name, true);
         
         return *this;
     }
 
-    std::unique_ptr<Material> MaterialBuilder::create_lambert(const std::string &name) {
-        auto material = std::make_unique<Material>(name);
+    void Material::bind() const {
+        uint32_t shader_program = get_compiled_shader_id();
+        if (shader_program  == 0) {
+            std::cerr << "Warning: Material " << get_name() << " has no compiled shader!" << std::endl;
+            return;
+        }
+
+        int texture_unit = 0;
+
+        if (is_instance()) {
+            bind_base_properties(shader_program, texture_unit);
+
+            for (const auto& [name, property] : overrides_) {
+                MaterialRenderer::bind_property_to_shader(property, shader_program, texture_unit);
+                touched_uniforms_.insert(name);
+            }
+        } else {
+            bind_all_properties(shader_program, texture_unit);
+        }
+    }
+
+    void Material::unbind() const {
+        if (!is_instance()) return; // Only instances need unbinding
+
+        uint32_t shader_program = get_compiled_shader_id();
+        if (shader_program == 0) return;
+
+        int texture_unit = 0;
+
+        for (const std::string& uniform_name : touched_uniforms_) {
+            if (base_material_->has_property(uniform_name)) {
+                auto base_property = base_material_->get_property_object(uniform_name);
+                MaterialRenderer::bind_property_to_shader(base_property, shader_program, texture_unit);
+            }
+        }
+        touched_uniforms_.clear();
+    }
+
+    void Material::set_texture_usage_flag(const std::string &uniform_name, bool value) {
+        if (uniform_name == "uDiffuseTexture") {
+            set_property("useUDiffuseTexture", value);
+        } else if (uniform_name == "uNormalTexture") {
+            set_property("useUNormalTexture", value);
+        } else if (uniform_name == "uSpecularTexture") {
+            set_property("useUSpecularTexture", value);
+        }
+    }
+
+    void Material::bind_all_properties(const uint32_t shader_program, int& texture_unit) const {
+        for (const auto& [name, property] : properties_) {
+            MaterialRenderer::bind_property_to_shader(property, shader_program, texture_unit);
+        }
+    }
+
+    std::shared_ptr<Material> MaterialBuilder::create_lambert(const std::string &name) {
+        auto material = std::make_shared<Material>(name);
         material->set_builtin_material_type(0);
         material->set_diffuse_color(glm::vec3(0.8f));
         material->set_ambient_color(glm::vec3(0.1f));
@@ -84,17 +142,17 @@ namespace DCraft {
         material->set_property("uvRotation", 0.0f);
     
         // Texture usage flags - all false initially
-        material->set_property("useDiffuseTexture", false);
-        material->set_property("useNormalTexture", false);
-        material->set_property("useSpecularTexture", false);
+        material->set_property("useUDiffuseTexture", false);
+        material->set_property("useUNormalTexture", false);
+        material->set_property("useUSpecularTexture", false);
 
         compile_shader_from_material(*material);
 
         return material;
     }
 
-    std::unique_ptr<Material> MaterialBuilder::create_phong(const std::string &name) {
-        auto material = std::make_unique<Material>(name);
+    std::shared_ptr<Material> MaterialBuilder::create_phong(const std::string &name) {
+        auto material = std::make_shared<Material>(name);
         material->set_builtin_material_type(1);
         material->set_diffuse_color(glm::vec3(0.8f));
         material->set_ambient_color(glm::vec3(0.3f));
@@ -109,8 +167,8 @@ namespace DCraft {
         return material;
     }
 
-    std::unique_ptr<Material> MaterialBuilder::create_pbr(const std::string &name) {
-        auto material = std::make_unique<Material>(name);
+    std::shared_ptr<Material> MaterialBuilder::create_pbr(const std::string &name) {
+        auto material = std::make_shared<Material>(name);
         material->set_builtin_material_type(2);
         material->set_diffuse_color(glm::vec3(0.8f));
         material->set_property("metallic", 0.0f);
@@ -125,9 +183,9 @@ namespace DCraft {
         return material;
     }
 
-    std::unique_ptr<Material> MaterialBuilder::create_custom(const std::string &name, const std::string &vertex_path,
+    std::shared_ptr<Material> MaterialBuilder::create_custom(const std::string &name, const std::string &vertex_path,
         const std::string &fragment_path) {
-        auto material = std::make_unique<Material>(name);
+        auto material = std::make_shared<Material>(name);
         material->set_custom_shader(vertex_path, fragment_path);
         
         compile_shader_from_material(*material);
@@ -135,9 +193,9 @@ namespace DCraft {
         return material;
     }
 
-    std::unique_ptr<Material> MaterialBuilder::create_from_template(const std::string &name,
-        const std::string &template_name) {
-        auto material = std::make_unique<Material>(name);
+    std::shared_ptr<Material> MaterialBuilder::create_from_template(const std::string &name,
+                                                                    const std::string &template_name) {
+        auto material = std::make_shared<Material>(name);
             
         // Built-in templates
         if (template_name == "toon") {
@@ -156,34 +214,34 @@ namespace DCraft {
         material.set_compiled_shader_id(shader_id);
     }
 
-    std::unique_ptr<Material> MaterialChain::build() {
+    std::shared_ptr<Material> MaterialChain::build() {
         uint32_t shader_id = shader_manager_.get_shader_for_material(*material_);
         material_->set_compiled_shader_id(shader_id);
-        return std::move(material_);
+        return material_;
     }
 
     MaterialChain lambert(const std::string &name, ShaderManager &shader_manager) {
-        auto material = std::make_unique<Material>(name);
+        auto material = std::make_shared<Material>(name);
         material->set_builtin_material_type(0);
         material->set_diffuse_color(glm::vec3(0.8f));
         material->set_ambient_color(glm::vec3(0.1f));
-        return MaterialChain(std::move(material), shader_manager);
+        return MaterialChain{material, shader_manager};
     }
 
     MaterialChain phong(const std::string &name, ShaderManager &shader_manager) {
-        auto material = std::make_unique<Material>(name);
+        auto material = std::make_shared<Material>(name);
         material->set_builtin_material_type(1);
         material->set_diffuse_color(glm::vec3(0.8f));
         material->set_ambient_color(glm::vec3(0.3f));
         material->set_specular_color(glm::vec3(0.5f));
         material->set_shininess(32.0f);
-        return MaterialChain(std::move(material), shader_manager);
+        return MaterialChain{material, shader_manager};
     }
 
     MaterialChain custom(const std::string &name, const std::string &vertex_path, const std::string &fragment_path,
         ShaderManager &shader_manager) {
-        auto material = std::make_unique<Material>(name);
+        auto material = std::make_shared<Material>(name);
         material->set_custom_shader(vertex_path, fragment_path);
-        return MaterialChain(std::move(material), shader_manager);
+        return MaterialChain{material, shader_manager};
     }
 }

@@ -3,7 +3,6 @@
 //
 #pragma once
 #include <string>
-#include <algorithm>
 
 #include "Material.h"
 
@@ -13,6 +12,8 @@ namespace DCraft {
     class MaterialRenderer {
     public:
         static void bind_material(const Material& material);
+
+        static void bind_property_to_shader(const Material::Property &property, uint32_t shader_program, int &texture_unit);
 
     private:
         static void bind_property(const Material::Property& property, uint32_t shader_program, int& texture_unit);
