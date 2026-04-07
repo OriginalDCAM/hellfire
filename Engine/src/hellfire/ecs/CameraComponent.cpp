@@ -57,8 +57,10 @@ namespace hellfire {
     }
 
     void CameraComponent::set_aspect_ratio(float aspect) {
-        aspect_ratio_ = aspect;
-        projection_dirty_ = true;
+        if (aspect_ratio_ > 0.0f) {
+            aspect_ratio_ = aspect;
+            projection_dirty_ = true;
+        }
     }
 
     void CameraComponent::set_clip_planes(float near_plane, float far_plane) {

@@ -29,6 +29,7 @@ namespace hellfire {
         glfwSetMouseButtonCallback(window_, mouse_button_callback);
         glfwSetCursorPosCallback(window_, cursor_position_callback);
         glfwSetWindowSizeCallback(window_, window_size_callback);
+        glfwSetWindowIconifyCallback(window_, window_iconifiy_callback);
 
         return true;
     }
@@ -55,6 +56,10 @@ namespace hellfire {
         if (window_) {
             glfwPollEvents();
         }
+    }
+
+    void GLFWWindow::wait_for_events() {
+        glfwWaitEvents();
     }
 
     void GLFWWindow::set_title(const std::string &title) {
@@ -150,6 +155,15 @@ namespace hellfire {
 
             if (instance->event_handler_) {
                 instance->event_handler_->on_window_resize(width, height);
+            }
+        }
+    }
+
+    void GLFWWindow::window_iconifiy_callback(GLFWwindow *window, const int iconified) {
+        if (const auto *instance = static_cast<GLFWWindow *>(glfwGetWindowUserPointer(window))) {
+            if (instance->event_handler_) {
+                const bool minimized = iconified == GLFW_TRUE;
+                instance->event_handler_->on_window_minimize(minimized);
             }
         }
     }

@@ -102,6 +102,11 @@ namespace hellfire {
 
     void Application::run() {
         while (!window_->should_close()) {
+            if (window_info_.minimized) {
+                window_->wait_for_events();
+                continue;
+            }
+
             window_->poll_events();
             update_delta_time();
 
@@ -123,7 +128,7 @@ namespace hellfire {
         renderer_.begin_frame();
 
         if (auto *active_scene = scene_manager_.get_active_scene()) {
-            renderer_.render(*active_scene);
+            renderer_.render(*active_scene); 
         }
 
         // Plugin render
@@ -194,7 +199,7 @@ namespace hellfire {
 
         window_info_.mouse_pos.x = x;
         window_info_.mouse_pos.y = y;
-        
+
         // Skip large jumps (window focus, etc)
         if (abs(x_offset) > 100 || abs(y_offset) > 100) return;
 
@@ -203,25 +208,29 @@ namespace hellfire {
         });
 
         if (consumed) return;
-        
+
         // Warp when getting close to edges
         handle_cursor_warping(x, y);
-
-
     }
 
     void Application::on_window_resize(const int width, const int height) {
+        if (width == 0 || height == 0) {
+            return;
+        }
+        
         window_info_.width = width;
         window_info_.height = height;
         window_info_.aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
 
+
+
         glViewport(0, 0, width, height);
 
         // Update cameras
-        if (Scene* active_scene = scene_manager_.get_active_scene()) {
-            for (const EntityID camera_id : scene_manager_.get_camera_entities()) {
-                if (const Entity* camera_entity = active_scene->get_entity(camera_id)) {
-                    if (auto* camera_comp = camera_entity->get_component<CameraComponent>()) {
+        if (Scene *active_scene = scene_manager_.get_active_scene()) {
+            for (const EntityID camera_id: scene_manager_.get_camera_entities()) {
+                if (const Entity *camera_entity = active_scene->get_entity(camera_id)) {
+                    if (auto *camera_comp = camera_entity->get_component<CameraComponent>()) {
                         camera_comp->set_aspect_ratio(window_info_.aspect_ratio);
                     }
                 }
@@ -233,11 +242,13 @@ namespace hellfire {
         });
     }
 
+    void Application::on_window_minimize(bool minimized) {
+        window_info_.minimized = minimized;
+    }
+
     void Application::update_delta_time() {
         const float current_time = window_->get_elapsed_time();
         delta_time_ = current_time - last_frame_time_;
         last_frame_time_ = current_time;
     }
-
-
 }
