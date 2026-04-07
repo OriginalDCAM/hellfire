@@ -179,6 +179,9 @@ namespace hellfire {
         void save();
 
         SceneEnvironment* environment() const { return environment_.get(); }
+
+        std::unordered_map<EntityID, std::unique_ptr<Entity>>& get_all_entities() { return entities_; }
+
     private:
         // All entities owned by scene
         std::unordered_map<EntityID, std::unique_ptr<Entity> > entities_;

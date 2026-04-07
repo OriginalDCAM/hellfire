@@ -49,10 +49,11 @@ extern std::unique_ptr<hellfire::IApplicationConfig> create_application_config()
 
 int main() {
     const auto config = create_application_config();
-
+    
     hellfire::Application app(config->get_window_width(),
                               config->get_window_height(),
                               config->get_title());
+
 
     config->register_plugins(app);
 

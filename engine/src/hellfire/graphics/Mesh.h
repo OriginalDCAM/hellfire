@@ -17,6 +17,8 @@ namespace hellfire {
 
         void unbind() const;
 
+        void build();
+
         // mesh data
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;

@@ -36,6 +36,10 @@ namespace hellfire {
         bool wireframe = false;
     };
 
+    struct ShadowSettings {
+        
+    };
+
     /// Abstract graphics context
     class IGraphicsContext {
     public:

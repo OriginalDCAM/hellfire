@@ -26,7 +26,7 @@ namespace hellfire {
 
         std::vector<Scene*> get_scenes();
 
-        void save_current_scene() const;
+        void save_current_scene();
 
         // Setup callback for when a scene is activated
         using SceneActivatedCallback = std::function<void(Scene *)>;
@@ -44,9 +44,12 @@ namespace hellfire {
 
         std::optional<AssetID> get_scene_asset_id(Scene* scene) const;
         std::optional<AssetID> get_active_scene_asset_id() const;
+
+        bool save_scene(Scene *scene);
+
         void set_scene_asset_id(Scene* scene, AssetID id);
 
-        bool save_scene(const std::string &filename, Scene *scene) const;
+        bool save_scene_as(const std::string &filename, Scene *scene) ;
 
         // Scene management
         void update(float delta_time);

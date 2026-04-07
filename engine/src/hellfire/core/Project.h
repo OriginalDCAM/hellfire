@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <memory>
 
+#include "hellfire/assets/AssetManager.h"
 #include "hellfire/assets/AssetRegistry.h"
 #include "hellfire/scene/SceneManager.h"
 
@@ -57,6 +58,8 @@ namespace hellfire {
 
         std::unique_ptr<SceneManager> scene_manager_ = nullptr;
         std::unique_ptr<AssetRegistry> asset_registry_ = nullptr;
+        std::unique_ptr<AssetManager> asset_manager_ = nullptr;
+        
         std::vector<std::filesystem::path> recent_scenes_;
 
     private:

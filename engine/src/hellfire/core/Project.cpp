@@ -10,6 +10,8 @@
 
 #include "imgui_internal.h"
 #include "json.hpp"
+#include "hellfire/assets/AssetManager.h"
+#include "hellfire/assets/importers/AssetImportManager.h"
 #include "hellfire/scene/Scene.h"
 #include "hellfire/serializers/ProjectSerializer.h"
 #include "hellfire/utilities/ServiceLocator.h"
@@ -143,12 +145,12 @@ namespace hellfire {
     }
 
     void Project::create_directory_structure() const {
-        std::filesystem::create_directories(project_root_path_ / "settings");
-        std::filesystem::create_directories(project_root_path_ / "assets");
-        std::filesystem::create_directories(project_root_path_ / "assets" / "scenes");
-        std::filesystem::create_directories(project_root_path_ / "assets" / "textures");
-        std::filesystem::create_directories(project_root_path_ / "assets" / "models");
-        std::filesystem::create_directories(project_root_path_ / "assets" / "scripts");
+        create_directories(project_root_path_ / "settings");
+        create_directories(project_root_path_ / "assets");
+        create_directories(project_root_path_ / "assets" / "scenes");
+        create_directories(project_root_path_ / "assets" / "textures");
+        create_directories(project_root_path_ / "assets" / "models");
+        create_directories(project_root_path_ / "assets" / "scripts");
     }
 
     void Project::initialize_default_assets() {
@@ -164,6 +166,13 @@ namespace hellfire {
         asset_registry_ = std::make_unique<AssetRegistry>(registry_path, project_root_path_);
         ServiceLocator::register_service<AssetRegistry>(asset_registry_.get());
         asset_registry_->register_directory(get_assets_path(), true);
+
+        asset_manager_ = std::make_unique<AssetManager>(*asset_registry_.get());
+        ServiceLocator::register_service<AssetManager>(asset_manager_.get());
+
+        AssetImportManager import_manager(*asset_registry_, *asset_manager_, project_root_path_);
+        import_manager.import_all_pending();
+        asset_registry_->save();
 
         scene_manager_ = std::make_unique<SceneManager>();
         ServiceLocator::register_service<SceneManager>(scene_manager_.get());
@@ -181,6 +190,7 @@ namespace hellfire {
     void Project::cleanup_managers() {
         ServiceLocator::unregister_service<SceneManager>();
         ServiceLocator::unregister_service<AssetRegistry>();
+        ServiceLocator::unregister_service<AssetManager>();
         scene_manager_.reset();
         asset_registry_.reset();
     }
