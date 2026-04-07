@@ -16,4 +16,4 @@ private:
     void handle_open_scene();
     void render_scene_list();
 };
-};
+}

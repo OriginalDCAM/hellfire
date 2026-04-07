@@ -5,11 +5,12 @@
 
 #include <iostream>
 #include "imgui.h"
-#include "hellfire/platform/IWindow.h"
+#include "hellfire/scene/CameraFactory.h"
 #include "hellfire/scene/Scene.h"
 #include "hellfire/scene/SceneManager.h"
 #include "hellfire/utilities/FileDialog.h"
 #include "hellfire/utilities/ServiceLocator.h"
+#include "Scenes/DefaultScene.h"
 
 namespace hellfire::editor {
     void MenuBarComponent::render() {
@@ -43,15 +44,7 @@ namespace hellfire::editor {
 
     void MenuBarComponent::handle_new_scene() {
         if (ImGui::MenuItem("New Scene")) {
-            auto sm = ServiceLocator::get_service<SceneManager>();
-            Utility::FileFilter scene_ext_filter = {"Hellfire Scene", "*.hfscene"};
-            std::string scene_name;
-            std::string save_path = Utility::FileDialog::save_file(scene_name, "Untitled", {scene_ext_filter});
-            if (!scene_name.empty()) {
-                auto new_scene = sm->create_scene(scene_name);
-
-                sm->save_scene(save_path, new_scene);
-            }
+            create_default_scene();
         }
     }
 
@@ -78,13 +71,12 @@ namespace hellfire::editor {
             if (ImGui::MenuItem(element->get_name().c_str(), nullptr, is_selected)) {
                 if (!is_selected) {
                     sm->set_active_scene(element);
-                    
+
                     if (context_) {
                         context_->set_window_title(element->get_name());
                     }
                 }
             }
         }
-        
     }
 }
