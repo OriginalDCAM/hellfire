@@ -6,7 +6,9 @@
 
 #include <random>
 
-#include "assimp/contrib/poly2tri/poly2tri/common/utils.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include "hellfire/assets/Asset.h"
 #include "hellfire/ecs/InstancedRenderableComponent.h"
 #include "hellfire/ecs/RenderableComponent.h"
@@ -37,13 +39,13 @@ hellfire::EntityID AsteroidBeltFactory::create_asteroid_belt(hellfire::Scene *sc
             if (mesh_comp && mesh_comp->has_mesh()) {
                 mesh = mesh_comp->get_mesh();
             }
-            
+
             // Search children
             for (hellfire::EntityID child_id : scene->get_children(id)) {
                 find_mesh(child_id);
             }
         };
-        
+
         find_mesh(entity_id);
         return mesh;
     };
@@ -69,9 +71,9 @@ hellfire::EntityID AsteroidBeltFactory::create_asteroid_belt(hellfire::Scene *sc
 
     // Create main belt entity
     hellfire::EntityID belt_id = scene->create_entity("Asteroid Belt");
-    
+
     const size_t asteroids_per_type = quantity / asteroid_meshes.size();
-    
+
     // Create child entity for each asteroid type
     for (size_t i = 0; i < asteroid_meshes.size(); ++i) {
         std::string type_name = "Asteroid Type " + std::to_string(i);
@@ -89,7 +91,7 @@ hellfire::EntityID AsteroidBeltFactory::create_asteroid_belt(hellfire::Scene *sc
         instanced_comp->set_material(materials[i % materials.size()]);
 
         // Generate instances
-        std::vector<hellfire::InstancedRenderableComponent::InstanceData> asteroids = 
+        std::vector<hellfire::InstancedRenderableComponent::InstanceData> asteroids =
             generate_asteroid_belt_data(asteroids_per_type);
         instanced_comp->set_instances(asteroids);
 

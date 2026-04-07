@@ -2,7 +2,6 @@
 #include <string>
 
 #include "../ecs/Entity.h"
-#include "assimp/code/Common/Win32DebugLogStream.h"
 #include "glm/mat4x4.hpp"
 #include "nlohmann/json.hpp"
 

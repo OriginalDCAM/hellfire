@@ -8,7 +8,6 @@
 #include <set>
 #include <stb/stb_image.h>
 
-#include "assimp/code/Common/Win32DebugLogStream.h"
 #include "hellfire/graphics/material/Material.h"
 #include "hellfire/utilities/TextureUtils.h"
 
