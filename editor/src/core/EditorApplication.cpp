@@ -31,7 +31,7 @@ namespace hellfire::editor {
         }
 
         // Make sure vsync is enabled by default
-        window->enable_vsync(true);
+        // window->enable_vsync(true);
 
         initialize_imgui(window);
 
