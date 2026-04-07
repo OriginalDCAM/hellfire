@@ -219,7 +219,7 @@ namespace hellfire::Addons {
     }
 
     bool ModelLoader::is_identity_transform(const aiMatrix4x4 &matrix) {
-        const float epsilon = 0.0001f;
+        constexpr float epsilon = 0.0001f;
         return std::abs(matrix.a1 - 1.0f) < epsilon && std::abs(matrix.b2 - 1.0f) < epsilon &&
                std::abs(matrix.c3 - 1.0f) < epsilon && std::abs(matrix.d4 - 1.0f) < epsilon &&
                std::abs(matrix.a2) < epsilon && std::abs(matrix.a3) < epsilon && std::abs(matrix.a4) < epsilon &&
