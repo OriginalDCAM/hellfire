@@ -37,6 +37,7 @@ namespace hellfire {
         MousePos mouse_pos;
         bool should_warp_cursor = true;
         bool minimized = false;
+        std::string title = "Hellfire Engine";
     };
 
     class Application : public IWindowEventHandler {

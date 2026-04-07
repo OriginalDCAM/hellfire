@@ -85,7 +85,9 @@ namespace hellfire {
         void* context_;
         Scene* scene_; // Current scene being rendered
 
-        std::unique_ptr<Framebuffer> scene_framebuffer_;
+        std::unique_ptr<Framebuffer> scene_framebuffers_[2];
+        int current_fb_index_ = 0;
+        
         bool render_to_framebuffer_;
         uint32_t framebuffer_width_;
         uint32_t framebuffer_height_;

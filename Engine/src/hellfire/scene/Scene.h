@@ -5,6 +5,7 @@
 #include "glm/mat4x4.hpp"
 #include "nlohmann/json.hpp"
 
+static constexpr hellfire::EntityID INVALID_ENTITY = 0;
 
 namespace hellfire {
     class CameraComponent;
@@ -60,6 +61,8 @@ namespace hellfire {
 
         std::vector<EntityID> get_camera_entities() const;
 
+        int get_entity_count() const { return entities_.size(); }
+
         // Skybox management
         void set_skybox(Skybox *skybox);
 
@@ -95,7 +98,7 @@ namespace hellfire {
         // Helper methods
         void update_hierarchy(EntityID entity_id, float delta_time);
 
-        void update_world_matrices_recursive(unsigned int entity_id, const glm::mat4& parent_world);
+        void update_world_matrices_recursive(unsigned int entity_id, const glm::mat4 &parent_world);
 
         void find_entities_recursive(EntityID entity_id, const std::function<bool(Entity *)> &predicate,
                                      std::vector<EntityID> &results);

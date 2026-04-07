@@ -12,8 +12,8 @@ namespace hellfire {
             initialized_ = true;
         }
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         window_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
@@ -23,6 +23,8 @@ namespace hellfire {
 
         glfwMakeContextCurrent(window_);
         glfwSetWindowUserPointer(window_, this);
+
+        
 
         // Set callbacks
         glfwSetKeyCallback(window_, key_callback);
@@ -192,5 +194,9 @@ namespace hellfire {
                 glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                 break;
         }
+    }
+
+    void GLFWWindow::enable_vsync(const bool vsync) {
+        glfwSwapInterval(vsync);
     }
 }

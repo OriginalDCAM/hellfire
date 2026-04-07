@@ -9,12 +9,17 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Component.h"
+
 
 namespace hellfire {
     class TransformComponent;
-    class Component;
     class ScriptComponent;
 }
+
+class Test {
+    bool is_looking = true;
+};
 
 namespace hellfire {
     using EntityID = uint32_t;

@@ -43,6 +43,7 @@ MaterialMap load_material_map() {
     auto earth_cloud_material = hellfire::MaterialBuilder::create_lambert("Earth Cloud Material");
     earth_cloud_material->set_texture(planet_surface_dir + "earth_clouds.png", hellfire::TextureType::DIFFUSE);
     earth_cloud_material->set_transparency(0.50f);
+    earth_cloud_material->set_property("useLuminanceAsAlpha", true);
     materials["EARTH_CLOUD_MATERIAL"] = earth_cloud_material;
 
     auto moon_material = hellfire::MaterialBuilder::create_lambert("Moon Material");
@@ -125,7 +126,7 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
                                                 materials["VENUS_MATERIAL"], 65.0f, 0.044f);
     scene->set_parent(venus_id, world_id);
 
-    hellfire::EntityID earth_id = create_planet("Earth", 1.0f, glm::vec3(0, 0, 85),
+    hellfire::EntityID earth_id = create_planet("Earth", 1.0f, glm::vec3(0, 0, 0),
                                                 materials["DYNAMIC_EARTH_MATERIAL"], 85.0f, 0.028f);
     scene->set_parent(earth_id, world_id);
 
@@ -138,6 +139,7 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
                                                             });
     hellfire::Entity *clouds = scene->get_entity(clouds_id);
     auto *clouds_orbit = clouds->add_component<OrbitController>();
+    clouds_orbit->set_orbit_radius(0.0f);
     clouds_orbit->set_rotation_speed(0.12f);
     scene->set_parent(clouds_id, earth_id);
 
@@ -155,11 +157,11 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
     scene->set_parent(asteroid_belt_id, world_id);
 
     hellfire::EntityID jupiter_id = create_planet("Jupiter", 8.0f, glm::vec3(0, 0, 180),
-                                                  materials["JUPITER_MATERIAL"], 180.0f, 0.0002f);
+                                                  materials["JUPITER_MATERIAL"], 180.0f, 0.023f);
     scene->set_parent(jupiter_id, world_id);
 
     hellfire::EntityID saturn_id = create_planet("Saturn", 7.5f, glm::vec3(0, 0, 240),
-                                                 materials["SATURN_SURFACE_MATERIAL"], 240.0f, 0.00008f);
+                                                 materials["SATURN_SURFACE_MATERIAL"], 240.0f, 0.009655f);
     scene->set_parent(saturn_id, world_id);
 
     // Camera
@@ -169,7 +171,7 @@ hellfire::Scene *load_solar_system_scene(const hellfire::AppInfo &window) {
     );
     hellfire::Entity *camera = scene->get_entity(camera_id);
     camera->get_component<hellfire::CameraComponent>()->look_at(glm::vec3(0.0f));
-    camera->add_component<PlayerController>(7.5f);
+    camera->add_component<PlayerController>(12.5f);
     scene->set_parent(camera_id, world_id);
     scene->set_active_camera(camera_id);
 
