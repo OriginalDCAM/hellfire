@@ -185,7 +185,7 @@ namespace hellfire::editor::ui {
             // Thumbnail preview
             if (current_texture && current_texture->is_valid()) {
                 ImGui::Image(
-                    current_texture->get_id(),
+                    current_texture->get_handle(),
                     ImVec2(24, 24), ImVec2(0, 1), ImVec2(1, 0)
                 );
                 ImGui::SameLine();

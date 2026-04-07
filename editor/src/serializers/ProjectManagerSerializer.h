@@ -7,9 +7,10 @@
 #include "project/ProjectManager.h"
 
 namespace hellfire {
+    using MapType = std::unordered_map<std::filesystem::path, editor::RecentProject, editor::PathHash>;
+    
     template<>
-    struct Serializer<std::unordered_map<std::filesystem::path, editor::RecentProject, editor::PathHash>> {
-        using MapType = std::unordered_map<std::filesystem::path, editor::RecentProject, editor::PathHash>;
+    struct Serializer<MapType> {
         
         static bool serialize(std::ostream& output, const MapType* recent_projects) {
             if (recent_projects == nullptr) return false;
@@ -29,6 +30,7 @@ namespace hellfire {
         }
         
         static bool deserialize(std::istream& input, MapType* recent_projects) {
+            assert(recent_projects != nullptr && "Recent projects cannot be null");
             try {
                 nlohmann::json j;
                 input >> j;
@@ -46,7 +48,8 @@ namespace hellfire {
                 }
 
                 return true;
-            } catch (...) {
+            } catch (const std::exception &e) {
+                std::cout << "Failed to deserialize Recent Projects: " << e.what();
                 return false;
             }
         }

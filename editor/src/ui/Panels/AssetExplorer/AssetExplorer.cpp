@@ -79,7 +79,7 @@ namespace hellfire::editor {
                                  bg_color, 4.0f);
 
         // Draw thumbnail
-        draw_list->AddImage(model_texture_->get_id(),
+        draw_list->AddImage(model_texture_->get_handle(),
                             ImVec2(cursor_pos.x + 4, cursor_pos.y + 4),
                             ImVec2(cursor_pos.x + size - 4, cursor_pos.y + size - 4));
 
@@ -100,7 +100,7 @@ namespace hellfire::editor {
         // Drag source for drag-and-drop
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
             ImGui::SetDragDropPayload("ASSET_MODEL", &asset.uuid, sizeof(AssetID));
-            ImGui::Image(model_texture_->get_id(), ImVec2(32, 32));
+            ImGui::Image(model_texture_->get_handle(), ImVec2(32, 32));
             ImGui::SameLine();
             ImGui::Text("%s", asset.name.c_str());
             ImGui::EndDragDropSource();

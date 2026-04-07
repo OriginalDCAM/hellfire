@@ -61,6 +61,12 @@ namespace hellfire::editor {
         // Create main dockspace
         create_dockspace();
         panel_manager_.render_all();
+        
+        if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyReleased(ImGuiKey_S)) {
+            if (const auto proj = context_->project_manager->get_current_project()) {
+                proj->save();
+            }
+        }
     }
 
     void EditorState::create_dockspace() {

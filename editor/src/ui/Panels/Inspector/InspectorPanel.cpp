@@ -215,7 +215,7 @@ namespace hellfire::editor {
                                  bg_color, 4.0f);
 
         // Draw thumbnail
-        draw_list->AddImage(mesh_texture_->get_id(),
+        draw_list->AddImage(mesh_texture_->get_handle(),
                             ImVec2(cursor_pos.x + 4, cursor_pos.y + 4),
                             ImVec2(cursor_pos.x + size - 4, cursor_pos.y + size - 4));
 
@@ -424,6 +424,11 @@ namespace hellfire::editor {
                 if (type == ScriptComponent::PropertyType::VEC3) {
                     auto *vec3_value = static_cast<glm::vec3 *>(data_ptr);
                     ui::vec3_input(name, vec3_value);
+                }
+                
+                if (type == ScriptComponent::PropertyType::FLOAT) {
+                    auto *float_value = static_cast<float*>(data_ptr);
+                    ui::float_input(name, float_value);
                 }
             }
             ImGui::Unindent();
