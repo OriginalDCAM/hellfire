@@ -87,7 +87,7 @@ namespace DCraft {
         }
     }
 
-    void Framebuffer::bind() {
+    void Framebuffer::bind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id_);
         glViewport(0, 0, width_, height_);
     }

@@ -280,7 +280,6 @@ void Game::process_camera_movement() {
 
 void Game::update(float delta_time) {
     animation_system_.update(delta_time);
-    
     process_camera_movement();
 
     for (auto &scene: scenes_) {
