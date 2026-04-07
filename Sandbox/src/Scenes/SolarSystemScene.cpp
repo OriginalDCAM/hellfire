@@ -22,8 +22,7 @@ MaterialMap load_material_map(DCraft::ShaderManager& shader_manager) {
 
     auto mercury_material = DCraft::MaterialBuilder::create_lambert("Mercury Material");
     mercury_material->set_texture(planet_surface_dir + "mercury.jpg", DCraft::TextureType::DIFFUSE);
-    uint32_t mercury_shader = shader_manager.get_shader_for_material(*mercury_material);
-    mercury_material->set_compiled_shader_id(mercury_shader);
+
     materials["MERCURY_MATERIAL"] = std::move(mercury_material);
     
     auto venus_material = DCraft::MaterialBuilder::create_lambert("Venus Material");
@@ -38,6 +37,15 @@ MaterialMap load_material_map(DCraft::ShaderManager& shader_manager) {
     earth_material->set_compiled_shader_id(earth_shader);
     materials["EARTH_MATERIAL"] = std::move(earth_material);
 
+    auto dynamic_earth_material = DCraft::MaterialBuilder::create_custom("Dynamic Earth Material", "assets/Shaders/Custom/earth_day_night.vert", "assets/Shaders/Custom/earth_day_night.frag");
+
+    auto earth_cloud_material = DCraft::MaterialBuilder::create_lambert("Earth Cloud Material");
+    earth_cloud_material->set_texture(planet_surface_dir + "earth_clouds.jpg", DCraft::TextureType::DIFFUSE);
+    earth_cloud_material->set_transparency(0.50f);
+    uint32_t earth_cloud_shader = shader_manager.get_shader_for_material(*earth_cloud_material);
+    earth_cloud_material->set_compiled_shader_id(earth_cloud_shader);
+    materials["EARTH_CLOUD_MATERIAL"] = std::move(earth_cloud_material);
+   
     
     auto mars_material = DCraft::MaterialBuilder::create_lambert("Mars Material");
     mars_material->set_texture(planet_surface_dir + "mars.jpg", DCraft::TextureType::DIFFUSE);
@@ -86,7 +94,7 @@ DCraft::Scene *load_solar_system_scene(DCraft::SceneManager &scene_manager, DCra
     sunlight->get_component<DCraft::LightComponent>()->set_intensity(1.2f); 
     scene->add_entity(sunlight);
 
-    auto *sun_visual = DCraft::Sphere::create("Sol");
+    auto *sun_visual = DCraft::Sphere::create("Sol", glm::vec3(1.0f), 64, 64);
     sun_visual->transform()->set_position(0, 0, 0);
     sun_visual->transform()->set_scale(25.0f); 
     sun_visual->get_component<DCraft::RenderableComponent>()->set_material(materials["SUN_MATERIAL"].release()); 
@@ -103,6 +111,10 @@ DCraft::Scene *load_solar_system_scene(DCraft::SceneManager &scene_manager, DCra
     auto *earth_visual = create_planet("Earth", 1.0f, glm::vec3(0,0,85), 
                                       materials["EARTH_MATERIAL"].release(), 85.0f, 0.028f);
     scene->add_entity(earth_visual);
+    
+    auto *earth_clouds = create_planet("Earth Cloud", 1.05f, glm::vec3(0,0,85), 
+                                      materials["EARTH_CLOUD_MATERIAL"].release(), 85.0f, 0.028f);
+    scene->add_entity(earth_clouds);
 
     auto *mars_visual = create_planet("Mars", 0.5f, glm::vec3(0,0,110), 
                                      materials["MARS_MATERIAL"].release(), 110.0f, 0.012f);
@@ -120,7 +132,6 @@ DCraft::Scene *load_solar_system_scene(DCraft::SceneManager &scene_manager, DCra
     
     main_camera->transform()->set_position(20.0f, 30.0f, 120.0f);
     main_camera->get_component<DCraft::CameraComponent>()->look_at(glm::vec3(0.0f, 0.0f, 0.0f));
-    
     main_camera->add_component<PlayerController>(25.0f); 
     scene->add_entity(main_camera);
     scene->set_active_camera(main_camera);
