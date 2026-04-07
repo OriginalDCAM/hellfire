@@ -4,7 +4,7 @@
 
 namespace DCraft
 {
-    Pyramid::Pyramid(const std::string& name) : Shape3D(name)
+    Pyramid::Pyramid(const std::string& name) : MeshRenderer(name)
     {
         std::vector<Vertex> vertices_data;
         std::vector<unsigned int> indices_data;

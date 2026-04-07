@@ -6,7 +6,7 @@
 #include "Commands/RemoveObjectCommand.h"
 #include "DCraft/Addons/SceneManager.h"
 #include "DCraft/Graphics/Lights/Light.h"
-#include "DCraft/Graphics/Primitives/Shape3D.h"
+#include "DCraft/Graphics/Primitives/MeshRenderer.h"
 
 namespace DCraft::Editor {
     class SceneEditorOverlay {
@@ -28,7 +28,7 @@ namespace DCraft::Editor {
 
         void render_light_properties(Light * light) const;
         void render_camera_properties(Camera * camera) const;
-        void render_shape_properties(Shape3D * shape) const;
+        void render_shape_properties(MeshRenderer * shape) const;
 
         void render_mesh_properties(Mesh * mesh) const;
 

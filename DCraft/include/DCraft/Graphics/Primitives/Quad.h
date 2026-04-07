@@ -1,10 +1,10 @@
 #pragma once
-#include "Shape3D.h"
+#include "MeshRenderer.h"
 
 namespace DCraft
 {
 
-    class Quad : public Shape3D
+    class Quad : public MeshRenderer
     {
         const std::vector<float> vertices = {
             1.0, 1.0, 0.0,

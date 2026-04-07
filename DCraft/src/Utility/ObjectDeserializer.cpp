@@ -10,7 +10,7 @@
 #include "DCraft/Graphics/Lights/PointLight.h"
 #include "DCraft/Graphics/Primitives/Cube.h"
 #include "DCraft/Graphics/Primitives/Quad.h"
-#include "DCraft/Graphics/Primitives/Shape3D.h"
+#include "DCraft/Graphics/Primitives/MeshRenderer.h"
 #include "DCraft/Structs/Scene.h"
 
 using namespace DCraft;
@@ -76,7 +76,7 @@ Object3D *ObjectDeserializer::create_shape(const json &data) {
             return nullptr;
         }
     } else {
-        return new Shape3D();
+        return new MeshRenderer();
     }
 }
 
@@ -220,7 +220,7 @@ void ObjectDeserializer::apply_saved_children_transforms(Object3D* parent, const
             }
             
             // Apply material if it's a shape or model
-            if (auto* shape = dynamic_cast<Shape3D*>(child)) {
+            if (auto* shape = dynamic_cast<MeshRenderer*>(child)) {
                 if (saved_data.contains("material")) {
                     // Replace existing material completely
                     Material* material = MaterialSerializer::deserialize_material(saved_data["material"]);
@@ -303,7 +303,7 @@ void ObjectDeserializer::set_common_properties(Object3D *obj, const json &data) 
     set_transform(obj, data);
 
     // Set material for Shape3D objects
-    if (auto *shape = dynamic_cast<Shape3D *>(obj)) {
+    if (auto *shape = dynamic_cast<MeshRenderer *>(obj)) {
         if (data.contains("material")) {
             Material *material = MaterialSerializer::deserialize_material(data["material"]);
             if (material) {

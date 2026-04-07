@@ -3,11 +3,11 @@
 #include "DCraft/Structs/Object3D.h"
 
 namespace DCraft {
-    class Shape3D : public Object3D {
+    class MeshRenderer : public Object3D {
     public:
-        Shape3D() = default;
+        MeshRenderer() = default;
 
-        Shape3D(const std::string &name) : Object3D(name) {
+        MeshRenderer(const std::string &name) : Object3D(name) {
         }
 
         // Texture Management
@@ -39,7 +39,7 @@ namespace DCraft {
         bool is_wireframe_mode() const;
 
         // Collision detection helpers
-        bool intersects(const Shape3D &other) const;
+        bool intersects(const MeshRenderer &other) const;
 
         float get_bounding_radius();
 
@@ -54,6 +54,8 @@ namespace DCraft {
                                    const glm::mat4 &view,
                                    const glm::mat4 &projection,
                                    const glm::mat4 &mvp);
+
+        void upload_lights_to_current_shader(uint32_t shader_program, void *renderer_context);
 
         json to_json() override;
 

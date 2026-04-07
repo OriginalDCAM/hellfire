@@ -3,7 +3,7 @@
 //
 #include "DCraft/Utility/ObjectSerializer.h"
 
-#include "DCraft/Graphics/Primitives/Shape3D.h"
+#include "DCraft/Graphics/Primitives/MeshRenderer.h"
 #include "DCraft/Utility/MaterialSerializer.h"
 
 namespace DCraft {
@@ -16,7 +16,7 @@ namespace DCraft {
 
         json node_data = obj->to_json();
 
-        if (auto *shape = dynamic_cast<Shape3D *>(obj)) {
+        if (auto *shape = dynamic_cast<MeshRenderer *>(obj)) {
             if (Material *material = shape->get_material()) {
                 node_data["material"] = MaterialSerializer::serialize_material(material);
             }

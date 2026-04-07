@@ -1,11 +1,11 @@
 #pragma once
-#include "Shape3D.h"
+#include "MeshRenderer.h"
 #include "DCraft/Structs/Object3D.h"
 
 namespace DCraft
 {
 
-    class Cube : public Shape3D
+    class Cube : public MeshRenderer
     {
         const std::vector<float> vertices = {
             // Front face
