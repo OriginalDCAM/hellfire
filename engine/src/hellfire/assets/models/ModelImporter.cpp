@@ -361,7 +361,7 @@ namespace hellfire {
 
         const std::string filename = make_unique_name(base_name_, "texture", index)
                                      + "." + extension;
-        const auto filepath = output_dir_ / filename;
+        auto filepath = output_dir_ / filename;
 
         std::ofstream file(filepath, std::ios::binary);
         if (!file) return {};
@@ -377,12 +377,12 @@ namespace hellfire {
     }
 
     glm::mat4 ModelImporter::convert_matrix(const aiMatrix4x4 &m) {
-        return glm::mat4(
+        return {
             m.a1, m.b1, m.c1, m.d1,
             m.a2, m.b2, m.c2, m.d2,
             m.a3, m.b3, m.c3, m.d3,
             m.a4, m.b4, m.c4, m.d4
-        );
+        };
     }
 
     bool ModelImporter::is_identity(const aiMatrix4x4 &m) {

@@ -2,7 +2,7 @@
 // // Created by denzel on 03/04/2025.
 // //
 //
-#include "GamePlugin.h"
+#include "RuntimePlugin.h"
 
 #include "GLFW/glfw3.h"
 #include "Scenes/SolarSystemScene.h"
@@ -10,7 +10,7 @@
 #include "Scripts/PlayerController.h"
 #include "Utils/AnimationInputHandler.h"
 
-void GamePlugin::on_initialize(hellfire::Application &app) {
+void RuntimePlugin::on_initialize(hellfire::Application &app) {
     auto im = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
     im->set_cursor_mode(hellfire::DISABLED);
     
@@ -20,19 +20,18 @@ void GamePlugin::on_initialize(hellfire::Application &app) {
     // Scene loading with code behind
     scenes_["BoatScene"] = load_sponza_scene(*app_info_);
     scene_manager_->set_active_scene(scenes_["BoatScene"]);
-    
 }
 
-void GamePlugin::on_render() {
+void RuntimePlugin::on_render() {
     handle_input();
 }
 
-bool GamePlugin::on_mouse_move(float x, float y, float x_offset, float y_offset) {
+bool RuntimePlugin::on_mouse_move(float x, float y, float x_offset, float y_offset) {
     process_mouse_movement(x_offset, y_offset);
     return false; // consumed
 }
 
-void GamePlugin::handle_input() {
+void RuntimePlugin::handle_input() {
     auto input_manager = hellfire::ServiceLocator::get_service<hellfire::InputManager>();
 
     if (input_manager->is_key_pressed(GLFW_KEY_1)) {
@@ -47,7 +46,7 @@ void GamePlugin::handle_input() {
 
     AnimationInputHandler::get_instance().handle_input();
 }
-void GamePlugin::process_mouse_movement(float x_offset, float y_offset) const {
+void RuntimePlugin::process_mouse_movement(float x_offset, float y_offset) const {
     // Find the camera entity with PlayerController and forward mouse movement
     if (!scene_manager_ || scenes_.empty()) {
         return;

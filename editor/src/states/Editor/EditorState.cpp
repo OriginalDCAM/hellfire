@@ -55,15 +55,11 @@ namespace hellfire::editor {
     void EditorState::on_exit() {
         ApplicationState::on_exit();
         panel_manager_.remove_all_panels();
-        
-
-        
     }
 
     void EditorState::render() {
         // Create main dockspace
         create_dockspace();
-
         panel_manager_.render_all();
     }
 

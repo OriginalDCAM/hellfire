@@ -31,8 +31,7 @@ namespace hellfire {
 
             std::string uniform_name;
 
-            Property() {
-            }
+            Property() = default;
 
             Property(const std::string &name, float value, const std::string &uniform = "") : type(PropertyType::FLOAT),
                 name(name), value(value), uniform_name(uniform.empty() ? name : uniform) {

@@ -127,6 +127,9 @@ namespace hellfire::editor {
         styles::SetupDarkRedModeStyle();
 
         ImGuiStyle &style = ImGui::GetStyle();
+        style.FontScaleDpi = 1.5f;
+        style.ScaleAllSizes(1.5f);
+        
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             style.WindowRounding = 0.0f;
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -152,6 +155,9 @@ namespace hellfire::editor {
 
     void EditorApplication::cleanup_imgui() {
         if (imgui_initialized_) {
+            
+            ImGui::SaveIniSettingsToDisk("imgui.ini");
+            
             ImGui_ImplOpenGL3_Shutdown();
             ImGui_ImplGlfw_Shutdown();
             ImGui::DestroyContext();

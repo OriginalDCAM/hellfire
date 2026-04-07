@@ -1,23 +1,31 @@
-#include "GamePlugin.h"
+#include "RuntimePlugin.h"
 #include "hellfire-core.h"
 #include "hellfire/scene/CameraFactory.h"
 #include "hellfire/graphics/Geometry/Cube.h"
 
-int main() {
-    // Create the main application window
-    // Parameters: width (pixels), height (pixels), window title
-    hellfire::Application app(800, 600, "Custom Engine - Hellfire");
+#include "hellfire/EntryPoint.h"
 
-    // Register our HelloCube plugin with the application
-    // The plugin system allows us to extend the engine's functionality
-    app.register_plugin(std::make_unique<GamePlugin>());
+namespace {
+    class RuntimeConfig : public hellfire::IApplicationConfig {
+    public:
+        int get_window_width() override {
+            return 1280;
+        }
 
-    // Initialize all engine systems (graphics, input, etc.)
-    app.initialize();
+        int get_window_height() override {
+            return 720;
+        }
 
-    // Start the main game loop - this runs until the user closes the window
-    // The loop handles: input processing, scene updates, and rendering
-    app.run();
+        const std::string get_title() const override {
+            return "Sandbox Project";
+        }
 
-    std::clog << "Terminating the application" << std::endl;
+        void register_plugins(hellfire::Application &app) override {
+            app.register_plugin(std::make_unique<RuntimePlugin>());
+        }
+    };
+}
+
+std::unique_ptr<hellfire::IApplicationConfig> create_application_config() {
+        return std::make_unique<RuntimeConfig>();
 }
