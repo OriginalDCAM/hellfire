@@ -10,7 +10,6 @@ int main(int argc, char **argv) {
 
     game.setup_callbacks(app);
 
-
     // Initialize and run
     app.initialize(argc, argv);
     app.run();

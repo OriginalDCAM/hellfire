@@ -32,12 +32,20 @@ public:
     // Input handler
     void handle_input(DCraft::Application &app, float delta_time);
 
-    void update(float delta_time) const;
+    void process_mouse_movement(float x_offset, float y_offset);
+
+    void process_camera_movement();
+
+    void update(float delta_time);
 
 private:
     DCraft::PerspectiveCamera *camera_ = nullptr;
     DCraft::PerspectiveCamera *drone_camera_ = nullptr;
     DCraft::Cube *cube_ = nullptr;
+    
+    DCraft::Cube *main_camera_visual_ = nullptr;
+    DCraft::Cube *drone_camera_visual_ = nullptr;
+    
     DCraft::Scene *initial_scene;
     DCraft::SceneManager *scene_manager_;
 };

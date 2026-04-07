@@ -38,6 +38,7 @@ namespace DCraft {
         std::function<void(float)> update = nullptr;
         std::function<void()> render = nullptr;
         std::function<void(Application &, float)> process_input = nullptr;
+        std::function<void(float, float)> on_mouse_moved = nullptr;
     };
 
     class Application {
@@ -45,7 +46,7 @@ namespace DCraft {
         Application(int width = 800, int height = 600, const std::string &title = "OpenGL Application");
 
         ~Application();
-        
+
 
         int get_window_width() { return window_info_.width; }
         int get_window_height() { return window_info_.height; }
@@ -60,6 +61,8 @@ namespace DCraft {
 
         bool is_ready;
 
+        void load_scene();
+
         // Main application methods
         void initialize(int argc, char **argv);
 
@@ -73,27 +76,27 @@ namespace DCraft {
         /// @param key ASCII table keycode
         /// @param x [Discarded]
         /// @param y [Discarded]
-        void on_key_down(unsigned char key, int x, int y);
+        void on_key_down(unsigned char key);
 
         /// public method function:on_key_up 
         /// @param key ASCII table keycode
         /// @param x [Discarded]
         /// @param y [Discarded]
-        void on_key_up(unsigned char key, int x, int y);
+        void on_key_up(unsigned char key);
 
         /// public method function:on_special_key_down
         /// handles special keys down events
         /// @param key ASCII table keycode
         /// @param x [Discarded]
         /// @param y [Discarded]
-        void on_special_key_down(int key, int x, int y);
+        void on_special_key_down(int key);
 
         /// public method function:on_special_key_up
         /// handles special keys up events
         /// @param key ASCII table keycode
         /// @param x [Discarded]
         /// @param y [Discarded]
-        void on_special_key_up(int key, int x, int y);
+        void on_special_key_up(int key);
 
         // TODO: write JavaDOC comments
         void on_mouse_button(int button, int state, int x, int y);
@@ -111,13 +114,14 @@ namespace DCraft {
         void on_window_resize(int width, int height);
 
         // Game state methods
-        void load_scene();
+        // void load_scene();
 
         void process_input();
+
         void toggle_fullscreen();
 
         // Accessor methods
-        const WindowInfo& get_window_info() const { return  window_info_; }
+        const WindowInfo &get_window_info() const { return window_info_; }
         bool is_key_pressed(unsigned char key) const { return keys_[key]; }
         // Add the 256 index offset to special keys
         bool is_special_key_pressed(unsigned char key) const { return keys_[key + 256]; }
@@ -125,7 +129,7 @@ namespace DCraft {
         void set_callbacks(const ApplicationCallbacks &callbacks) { callbacks_ = callbacks; }
         void set_shader_program(uint32_t shader_program_id) { shader_program_id_ = shader_program_id; }
 
-        static Application& get_instance() { return *instance_; }
+        static Application &get_instance() { return *instance_; }
 
     protected:
         SceneManager scene_manager_;
@@ -138,7 +142,7 @@ namespace DCraft {
         WindowInfo window_info_;
         std::string title_;
         uint32_t shader_program_id_;
-        
+
         // Keys stuff
         bool keys_[512] = {false};
         // Window stuff
@@ -149,17 +153,16 @@ namespace DCraft {
         std::vector<Camera *> cameras_;
         std::vector<uint32_t> shader_programs_;
 
+        // Mouse things
         int last_mouse_x_ = window_info_.width / 2;
         int last_mouse_y_ = window_info_.height / 2;
         bool first_mouse_ = true;
-
-        // Input state
 
         // Timing
         float last_frame_time_ = 0.0f;
         float delta_time_ = 0.0f;
 
-        // Private methods
+        // Setup callbacks method
         void setup_callbacks();
 
         // Static callback methods for GLUT
@@ -169,31 +172,29 @@ namespace DCraft {
 
         static void timer_callback(int value) {
             if (instance_) {
-                
                 instance_->update();
                 glutTimerFunc(1, timer_callback, 0);
             }
         }
-
 
         static void window_resize_callback(int width, int height) {
             if (instance_) instance_->on_window_resize(width, height);
         }
 
         static void key_down_callback(unsigned char key, int x, int y) {
-            if (instance_) instance_->on_key_down(key, x, y);
+            if (instance_) instance_->on_key_down(key);
         }
 
         static void key_up_callback(unsigned char key, int x, int y) {
-            if (instance_) instance_->on_key_up(key, x, y);
+            if (instance_) instance_->on_key_up(key);
         }
 
         static void special_key_down_callback(int key, int x, int y) {
-            if (instance_) instance_->on_special_key_down(key, x, y);
+            if (instance_) instance_->on_special_key_down(key);
         }
 
         static void special_key_up_callback(int key, int x, int y) {
-            if (instance_) instance_->on_special_key_up(key, x, y);
+            if (instance_) instance_->on_special_key_up(key);
         }
 
         static void mouse_button_callback(int button, int state, int x, int y) {

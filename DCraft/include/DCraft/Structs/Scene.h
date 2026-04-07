@@ -40,6 +40,7 @@ namespace DCraft
         void set_active_camera(Camera* camera);
         Camera* get_active_camera() const { return active_camera_; }
         void destroy_camera(Camera* camera);
+        std::vector<Camera*> get_cameras() {return cameras_; }
 
         bool is_active() const { return is_active_; }
         void set_active(const bool active) { is_active_ = active; }
