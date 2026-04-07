@@ -9,7 +9,6 @@
 #include <shellapi.h>
 #endif
 
-#include "IconsFontAwesome6.h"
 #include "imgui.h"
 #include "events/StateEvents.h"
 #include "ui/ui.h"
@@ -18,6 +17,9 @@
 namespace hellfire::editor {
     void ProjectHubState::on_enter() {
         recent_projects_ = context_->project_manager->get_recent_projects();
+        
+        auto *window = ServiceLocator::get_service<IWindow>();
+        window->set_size(800, 600);
     }
 
     void ProjectHubState::render() {
@@ -93,7 +95,7 @@ namespace hellfire::editor {
         }
     }
 
-    void ProjectHubState::render_buttons() {
+    void ProjectHubState::render_buttons() const {
         float button_width = 120.0f;
         float spacing = ImGui::GetContentRegionAvail().x - (button_width * 2) - ImGui::GetStyle().ItemSpacing.x;
         

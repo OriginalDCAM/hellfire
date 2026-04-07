@@ -18,7 +18,7 @@
 
 namespace hellfire::editor {
     void InspectorPanel::render_add_component_context_menu(Entity *selected_entity) {
-        if (ImGui::BeginPopupContextWindow("AddComponentPopup")) {
+        if (ImGui::BeginPopupContextItem("AddComponentPopup")) {
             const bool has_light = selected_entity->has_component<LightComponent>();
             if (ImGui::MenuItem("Light", nullptr, false, !has_light)) {
                 selected_entity->add_component<LightComponent>();

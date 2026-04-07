@@ -5,6 +5,7 @@
 
 #include <iosfwd>
 
+#include "MaterialSerializer.h"
 #include "hellfire/ecs/LightComponent.h"
 #include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/ecs/TransformComponent.h"
@@ -95,7 +96,7 @@ namespace hellfire {
     struct Serializer<RenderableComponent> {
         static bool serialize(std::ostream &output, const RenderableComponent *obj) {
             if (!obj) return false;
-
+            
             nlohmann::json j = {
                 {"material_asset", obj->get_material_asset()},
                 {"cast_shadows", obj->cast_shadows},

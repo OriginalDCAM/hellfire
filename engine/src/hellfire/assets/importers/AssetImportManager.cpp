@@ -14,7 +14,7 @@
 #include <future>
 
 namespace hellfire {
-    TextureType infer_texture_type(const std::string& name) {
+    TextureType infer_texture_type(const std::string &name) {
         std::string lower_name = name;
         std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
 
@@ -22,7 +22,7 @@ namespace hellfire {
             lower_name.find("nrm") != std::string::npos ||
             lower_name.find("_n.") != std::string::npos) {
             return TextureType::NORMAL;
-            }
+        }
         if (lower_name.find("rough") != std::string::npos) {
             return TextureType::ROUGHNESS;
         }
@@ -32,18 +32,18 @@ namespace hellfire {
         if (lower_name.find("ao") != std::string::npos ||
             lower_name.find("occlusion") != std::string::npos) {
             return TextureType::AMBIENT_OCCLUSION;
-            }
+        }
         if (lower_name.find("emissive") != std::string::npos ||
             lower_name.find("emission") != std::string::npos) {
             return TextureType::EMISSIVE;
-            }
+        }
         if (lower_name.find("spec") != std::string::npos) {
             return TextureType::SPECULAR;
         }
 
-        return TextureType::DIFFUSE;  // Default
+        return TextureType::DIFFUSE; // Default
     }
-    
+
     AssetImportManager::AssetImportManager(AssetRegistry &registry, AssetManager &asset_manager,
                                            const std::filesystem::path &project_root) : registry_(registry),
         asset_manager_(asset_manager), project_root_(project_root),
@@ -70,7 +70,7 @@ namespace hellfire {
             std::string ext = meta.filepath.extension().string();
             std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
 
-            if (ext == ".hfmodel" || ext == ".hfmesh") continue; 
+            if (ext == ".hfmodel" || ext == ".hfmesh") continue;
 
             if (needs_import(meta.uuid)) {
                 to_import.push_back(meta);
@@ -81,9 +81,9 @@ namespace hellfire {
         std::mutex output_mutex;
         std::mutex registry_mutex;
 
-        auto worker = [&](const AssetMetadata& meta) {
+        auto worker = [&](const AssetMetadata &meta) {
             bool success = import_model_threaded(meta, registry_mutex);
-        
+
             std::lock_guard lock(output_mutex);
             if (success) {
                 std::cout << "Imported: " << meta.name << std::endl;
@@ -92,11 +92,11 @@ namespace hellfire {
             }
         };
 
-        std::vector<std::future<void>> futures;
-        for (const auto& meta : to_import) {
+        std::vector<std::future<void> > futures;
+        for (const auto &meta: to_import) {
             futures.push_back(std::async(std::launch::async, worker, meta));
         }
-        for (auto& f : futures) f.get();
+        for (auto &f: futures) f.get();
     }
 
     void AssetImportManager::import_all_textures() {
@@ -106,166 +106,166 @@ namespace hellfire {
             // For textures, we just create metadata files if they don't exist
             auto meta_path = registry_.get_absolute_path(meta.uuid).string() + ".meta";
 
-            if (!std::filesystem::exists(meta_path)) {
-                std::cout << "Creating texture metadata: " << meta.name << std::endl;
-
-                // Infer texture type from filename
-                TextureMetadata tex_meta;
-                tex_meta.type = infer_texture_type(meta.name);
-                tex_meta.generate_mipmaps = true;
-                tex_meta.srgb = (tex_meta.type == TextureType::DIFFUSE ||
-                                 tex_meta.type == TextureType::EMISSIVE);
-
-                TextureSerializer::save_metadata(
-                    registry_.get_absolute_path(meta.uuid),
-                    tex_meta
-                );
+            if (std::filesystem::exists(meta_path)) {
+                continue;
             }
+
+
+            // Only Infer texture type for standalone textures not associated with a model
+            std::cout << "Creating texture metadata: " << meta.name << std::endl;
+
+            TextureMetadata tex_meta;
+            tex_meta.type = infer_texture_type(meta.name);
+            tex_meta.generate_mipmaps = true;
+            tex_meta.srgb = (tex_meta.type == TextureType::DIFFUSE ||
+                             tex_meta.type == TextureType::EMISSIVE);
+
+            TextureSerializer::save_metadata(
+                registry_.get_absolute_path(meta.uuid),
+                tex_meta
+            );
         }
     }
 
-    bool AssetImportManager::import_asset(AssetID id) {
-        auto meta = registry_.get_asset(id);
-        if (!meta) return false;
+bool AssetImportManager::import_asset(AssetID id) {
+    auto meta = registry_.get_asset(id);
+    if (!meta) return false;
 
-        switch (meta->type) {
-            case AssetType::MODEL:
-                return import_model(*meta);
-            case AssetType::TEXTURE:
-                return import_texture(*meta);
-            default:
-                return false;
-        }
+    switch (meta->type) {
+        case AssetType::MODEL:
+            return import_model(*meta);
+        case AssetType::TEXTURE:
+            return import_texture(*meta);
+        default:
+            return false;
+    }
+}
+
+bool AssetImportManager::needs_import(AssetID id) const {
+    auto meta = registry_.get_asset(id);
+    if (!meta) return false;
+
+    // Check if .hfmodel file exists for this source
+    auto imported_path = get_imported_path(*meta, ".hfmodel");
+    if (!exists(imported_path)) {
+        return true;
     }
 
-    bool AssetImportManager::needs_import(AssetID id) const {
-        auto meta = registry_.get_asset(id);
-        if (!meta) return false;
+    // Check if source is newer than imported
+    auto source_path = registry_.get_absolute_path(id);
+    auto source_time = last_write_time(source_path);
+    auto imported_time = last_write_time(imported_path);
 
-        // Check if .hfmodel file exists for this source
-        auto imported_path = get_imported_path(*meta, ".hfmodel");
-        if (!exists(imported_path)) {
-            return true;
-        }
+    return source_time > imported_time;
+}
 
-        // Check if source is newer than imported
-        auto source_path = registry_.get_absolute_path(id);
-        auto source_time = last_write_time(source_path);
-        auto imported_time = last_write_time(imported_path);
+bool AssetImportManager::import_model(const AssetMetadata &meta) {
+    auto source_path = project_root_ / meta.filepath;
 
-        return source_time > imported_time;
+    if (!std::filesystem::exists(source_path)) {
+        std::cerr << "Source file not found: " << source_path << std::endl;
+        return false;
     }
 
-    bool AssetImportManager::import_model(const AssetMetadata &meta) {
-        auto source_path = project_root_ / meta.filepath;
+    // Create output directory for this model's assets
+    auto model_output_dir = import_output_dir_ / meta.name;
+    std::filesystem::create_directories(model_output_dir);
 
-        if (!std::filesystem::exists(source_path)) {
-            std::cerr << "Source file not found: " << source_path << std::endl;
-            return false;
-        }
+    // Import using ModelImporter
+    ModelImporter importer(registry_, model_output_dir);
+    ImportSettings settings;
+    settings.generate_normals = true;
+    settings.generate_tangents = true;
+    settings.optimize_meshes = true;
 
-        // Create output directory for this model's assets
-        auto model_output_dir = import_output_dir_ / meta.name;
-        std::filesystem::create_directories(model_output_dir);
+    ImportResult result = importer.import(source_path, settings);
 
-        // Import using ModelImporter
-        ModelImporter importer(registry_, model_output_dir);
-        ImportSettings settings;
-        settings.generate_normals = true;
-        settings.generate_tangents = true;
-        settings.optimize_meshes = true;
+    if (!result.success) {
+        std::cerr << "Failed to import model: " << meta.name
+                << " - " << result.error_message << std::endl;
+        return false;
+    }
 
-        ImportResult result = importer.import(source_path, settings);
+    // Save the ImportResult as .hfmodel
+    auto model_path = model_output_dir / (meta.name + ".hfmodel");
+    if (!ModelSerializer::save(model_path, result)) {
+        std::cerr << "Failed to save .hfmodel: " << model_path << std::endl;
+        return false;
+    }
 
-        if (!result.success) {
-            std::cerr << "Failed to import model: " << meta.name
-                    << " - " << result.error_message << std::endl;
-            return false;
-        }
+    // Register the new .hfmodel in the registry
+    registry_.register_asset(model_path, AssetType::MODEL);
 
-        // Save the ImportResult as .hfmodel
-        auto model_path = model_output_dir / (meta.name + ".hfmodel");
-        if (!ModelSerializer::save(model_path, result)) {
-            std::cerr << "Failed to save .hfmodel: " << model_path << std::endl;
-            return false;
-        }
+    std::cout << "  Created: " << model_path.filename() << std::endl;
+    std::cout << "  Meshes: " << result.created_mesh_assets.size() << std::endl;
+    std::cout << "  Materials: " << result.created_material_assets.size() << std::endl;
+    std::cout << "  Textures: " << result.created_texture_assets.size() << std::endl;
 
-        // Register the new .hfmodel in the registry
+    return true;
+}
+
+bool AssetImportManager::import_model_threaded(
+    const AssetMetadata &meta,
+    std::mutex &registry_mutex) {
+    auto source_path = project_root_ / meta.filepath;
+
+    if (!std::filesystem::exists(source_path)) {
+        std::cerr << "Source file not found: " << source_path << std::endl;
+        return false;
+    }
+
+    // Create output directory for this model's assets
+    auto model_output_dir = import_output_dir_ / meta.name;
+    std::filesystem::create_directories(model_output_dir);
+
+    // Import using ModelImporter
+    ModelImporter importer(registry_, model_output_dir);
+    ImportSettings settings;
+    settings.generate_normals = true;
+    settings.generate_tangents = true;
+    settings.optimize_meshes = true;
+
+    ImportResult result = importer.import(source_path, settings);
+
+    if (!result.success) {
+        std::cerr << "Failed to import model: " << meta.name
+                << " - " << result.error_message << std::endl;
+        return false;
+    }
+
+    // Save the ImportResult as .hfmodel
+    auto model_path = model_output_dir / (meta.name + ".hfmodel");
+    if (!ModelSerializer::save(model_path, result)) {
+        std::cerr << "Failed to save .hfmodel: " << model_path << std::endl;
+        return false;
+    } {
+        std::lock_guard lock(registry_mutex);
         registry_.register_asset(model_path, AssetType::MODEL);
-
-        std::cout << "  Created: " << model_path.filename() << std::endl;
-        std::cout << "  Meshes: " << result.created_mesh_assets.size() << std::endl;
-        std::cout << "  Materials: " << result.created_material_assets.size() << std::endl;
-        std::cout << "  Textures: " << result.created_texture_assets.size() << std::endl;
-
-        return true;
     }
 
-    bool AssetImportManager::import_model_threaded(
-    const AssetMetadata& meta, 
-    std::mutex& registry_mutex) 
-    {
-        auto source_path = project_root_ / meta.filepath;
+    return true;
+}
 
-        if (!std::filesystem::exists(source_path)) {
-            std::cerr << "Source file not found: " << source_path << std::endl;
-            return false;
-        }
+bool AssetImportManager::import_texture(const AssetMetadata &meta) {
+    // Textures don't need conversion, just metadata
+    auto source_path = registry_.get_absolute_path(meta.uuid);
 
-        // Create output directory for this model's assets
-        auto model_output_dir = import_output_dir_ / meta.name;
-        std::filesystem::create_directories(model_output_dir);
+    TextureMetadata tex_meta;
+    tex_meta.type = infer_texture_type(meta.name);
+    tex_meta.generate_mipmaps = true;
+    tex_meta.srgb = (tex_meta.type == TextureType::DIFFUSE);
 
-        // Import using ModelImporter
-        ModelImporter importer(registry_, model_output_dir);
-        ImportSettings settings;
-        settings.generate_normals = true;
-        settings.generate_tangents = true;
-        settings.optimize_meshes = true;
+    return TextureSerializer::save_metadata(source_path, tex_meta);
+}
 
-        ImportResult result = importer.import(source_path, settings);
+bool AssetImportManager::has_imported_mesh(AssetID original_id) const {
+    return asset_manager_.get_mesh(original_id) != nullptr;
+}
 
-        if (!result.success) {
-            std::cerr << "Failed to import model: " << meta.name
-                    << " - " << result.error_message << std::endl;
-            return false;
-        }
-
-        // Save the ImportResult as .hfmodel
-        auto model_path = model_output_dir / (meta.name + ".hfmodel");
-        if (!ModelSerializer::save(model_path, result)) {
-            std::cerr << "Failed to save .hfmodel: " << model_path << std::endl;
-            return false;
-        }
-
-        {
-            std::lock_guard<std::mutex> lock(registry_mutex);
-            registry_.register_asset(model_path, AssetType::MODEL);
-        }
-    
-        return true;
-    }
-
-    bool AssetImportManager::import_texture(const AssetMetadata &meta) {
-        // Textures don't need conversion, just metadata
-        auto source_path = registry_.get_absolute_path(meta.uuid);
-
-        TextureMetadata tex_meta;
-        tex_meta.type = infer_texture_type(meta.name);
-        tex_meta.generate_mipmaps = true;
-        tex_meta.srgb = (tex_meta.type == TextureType::DIFFUSE);
-
-        return TextureSerializer::save_metadata(source_path, tex_meta);
-    }
-
-    bool AssetImportManager::has_imported_mesh(AssetID original_id) const {
-        return asset_manager_.get_mesh(original_id) != nullptr;
-    }
-
-    std::filesystem::path AssetImportManager::get_imported_path(const AssetMetadata &meta,
-                                                                const std::string &extension) const {
-        return import_output_dir_ / meta.name / (meta.name + extension);
-    }
+std::filesystem::path AssetImportManager::get_imported_path(const AssetMetadata &meta,
+                                                            const std::string &extension) const {
+    return import_output_dir_ / meta.name / (meta.name + extension);
+}
 
 
 } // hellfire

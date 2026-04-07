@@ -10,6 +10,7 @@
 #include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/platform/IWindow.h"
 #include "../ui/Panels/Inspector/InspectorPanel.h"
+#include "hellfire/core/Application.h"
 
 namespace hellfire::editor {
     class EditorApplication : public IApplicationPlugin {
