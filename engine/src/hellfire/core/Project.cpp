@@ -11,7 +11,7 @@
 #include "imgui_internal.h"
 #include "json.hpp"
 #include "hellfire/scene/Scene.h"
-#include "hellfire/serialization/ProjectSerializer.h"
+#include "hellfire/serializers/ProjectSerializer.h"
 #include "hellfire/utilities/ServiceLocator.h"
 
 namespace hellfire {

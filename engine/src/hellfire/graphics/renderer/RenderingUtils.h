@@ -3,13 +3,12 @@
 //
 
 #pragma once
-#include <cstdint>
 #include <glm/detail/type_mat.hpp>
 
 #include "RendererContext.h"
-#include "hellfire/assets/AnimationSystem.h"
 #include "hellfire/ecs/CameraComponent.h"
 #include "../shader/Shader.h"
+#include "hellfire/ecs/LightComponent.h"
 
 namespace hellfire {
     /// Utility class containing shared rendering functionality.
@@ -38,10 +37,8 @@ namespace hellfire {
 
             // Upload directional lights
             for (int i = 0; i < renderer_context.num_directional_lights && i < 4; i++) {
-                Entity* light_entity = renderer_context.directional_light_entities[i];
-                if (light_entity) {
-                    auto* light_component = light_entity->get_component<LightComponent>();
-                    if (light_component) {
+                if (const Entity* light_entity = renderer_context.directional_light_entities[i]) {
+                    if (const auto* light_component = light_entity->get_component<LightComponent>()) {
                         light_component->upload_to_shader(shader, i);
                     }
                 }
@@ -49,9 +46,9 @@ namespace hellfire {
 
             // Upload point lights  
             for (int i = 0; i < renderer_context.num_point_lights && i < 8; i++) {
-                Entity* light_entity = renderer_context.point_light_entities[i];
+                const Entity* light_entity = renderer_context.point_light_entities[i];
                 if (light_entity) {
-                    auto* light_component = light_entity->get_component<LightComponent>();
+                    const auto* light_component = light_entity->get_component<LightComponent>();
                     if (light_component) {
                         light_component->upload_to_shader(shader, i);
                     }
@@ -60,7 +57,7 @@ namespace hellfire {
 
             // Upload camera position
             if (renderer_context.camera_component) {
-                auto* camera_transform = renderer_context.camera_component->get_owner().get_component<TransformComponent>();
+                const auto* camera_transform = renderer_context.camera_component->get_owner().get_component<TransformComponent>();
                 if (camera_transform) {
                     shader.set_camera_position(camera_transform->get_world_position());
                 }
