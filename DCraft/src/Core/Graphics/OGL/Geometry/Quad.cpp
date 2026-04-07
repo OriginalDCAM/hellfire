@@ -1,57 +1,74 @@
-#include "DCraft/Graphics/Primitives/Quad.h"
+#include "DCraft/Graphics/Geometry/Quad.h"
 
-#include <glm/gtc/type_ptr.hpp>
+#include <vector>
+
+#include "DCraft/Components/RenderableComponent.h"
+#include "DCraft/Structs/Entity.h"
 
 namespace DCraft {
-    Quad::Quad(const std::string &name) : MeshRenderer(name) {
-        std::vector<Vertex> vertices_data;
-        std::vector<unsigned int> indices_data;
-        std::vector<Texture *> texture_data = {};
+    const std::vector<float> Quad::vertices_ = {
+        1.0, 1.0, 0.0, // top-right
+        -1.0, 1.0, 0.0, // top-left
+        1.0, -1.0, 0.0, // bottom-left
+        -1.0, -1.0, 0.0 // bottom-right
+    };
 
-        glm::vec3 v0 = glm::vec3(vertices[0], vertices[1], vertices[2]);
-        glm::vec3 v1 = glm::vec3(vertices[3], vertices[4], vertices[5]);
-        glm::vec3 v2 = glm::vec3(vertices[6], vertices[7], vertices[8]);
+    // Elements
+    const std::vector<unsigned int> Quad::indices_ = {
+        0, 1, 2, // First triangle
+        2, 3, 1, // Second triangle
+    };
 
-        glm::vec3 edge1 = v1 - v0;
-        glm::vec3 edge2 = v2 - v0;
-        glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
-
-        // Define the plane vertex data
+    // uvs
+    const std::vector<float> Quad::uvs_ = {
+        1.0, 1.0,  // top-right
+        0.0, 1.0,  // top-left
+        1.0, 0.0,  // bottom-right
+        0.0, 0.0   // bottom-left
+    };
+    
+    Entity* Quad::create(const std::string& name, const glm::vec3& color) {
+        // Create the entity
+        auto* entity = new Entity(name);
+        
+        // Add renderable component
+        auto* renderable = entity->add_component<RenderableComponent>();
+        
+        // Generate quad mesh data
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        get_quad_data(vertices, indices, color);
+        
+        // Create and set mesh
+        auto mesh = std::make_shared<Mesh>(vertices, indices);
+        renderable->set_mesh(mesh);
+        
+        // Update world matrices
+        entity->update_world_matrices();
+        
+        return entity;
+    }
+    
+    void Quad::get_quad_data(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 
+                            const glm::vec3& color) {
+        vertices.clear();
+        indices.clear();
+        
+        vertices.reserve(4);
+        indices.assign(indices_.begin(), indices_.end());
+        
+        // Create vertex data
         for (size_t i = 0; i < 4; ++i) {
             Vertex v;
-            v.position = glm::vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
-            v.color = glm::vec3(color_);
-            v.normal = normal;
-            v.texCoords = glm::vec2(uvs[i * 2], uvs[i * 2 + 1]);
-            vertices_data.push_back(v);
+            v.position = glm::vec3(vertices_[i * 3], vertices_[i * 3 + 1], vertices_[i * 3 + 2]);
+            v.color = color;
+            
+            // A quad faces forward (+Z direction)
+            v.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+            
+            v.texCoords = glm::vec2(uvs_[i * 2], uvs_[i * 2 + 1]);
+            vertices.push_back(v);
         }
 
-        // Convert element array to vector
-        for (size_t i = 0; i < std::size(plane_elements); ++i) {
-            indices_data.push_back(static_cast<unsigned int>(plane_elements[i]));
-        }
-
-        Mesh *planeMesh = new Mesh(vertices_data, indices_data);
-        set_mesh(planeMesh);
-
-        update_world_matrix();
-    }
-
-    void Quad::update(float dt) {
-    }
-
-    void Quad::set_vertices() {
-    }
-
-    void Quad::set_colors() {
-    }
-
-    void Quad::set_uvs() {
-    }
-
-    json Quad::to_json() {
-        json j = MeshRenderer::to_json();
-        j["geometry"] = "plane";
-        return j;
     }
 }

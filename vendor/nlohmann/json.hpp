@@ -4954,7 +4954,7 @@ inline void from_json(const BasicJsonType& j, ConstructibleObjectType& obj)
 
 // overload for arithmetic types, not chosen for basic_json template arguments
 // (BooleanType, etc..); note: Is it really necessary to provide explicit
-// overloads for boolean_t etc. in case of a custom BooleanType which is not
+// overloads for boolean_t etc. in case of a Custom BooleanType which is not
 // an arithmetic type?
 template < typename BasicJsonType, typename ArithmeticType,
            enable_if_t <
@@ -12723,11 +12723,11 @@ namespace detail
 /*
 @brief an iterator for primitive JSON types
 
-This class models an iterator for primitive JSON types (boolean, number,
+This class Models an iterator for primitive JSON types (boolean, number,
 string). It's only purpose is to allow the iterator/const_iterator classes
 to "iterate" over primitive values. Internally, the iterator is modeled by
-a `difference_type` variable. Value begin_value (`0`) models the begin,
-end_value (`1`) models past the end.
+a `difference_type` variable. Value begin_value (`0`) Models the begin,
+end_value (`1`) Models past the end.
 */
 class primitive_iterator_t
 {
@@ -13780,7 +13780,7 @@ namespace detail
 
 So that the correct implementations of the copy / move ctors / assign operators
 of @ref basic_json do not require complex case distinctions
-(no base class / custom base class used as customization point),
+(no base class / Custom base class used as customization point),
 @ref basic_json always has a base class.
 By default, this class is used because it is empty and thus has no effect
 on the behavior of @ref basic_json.

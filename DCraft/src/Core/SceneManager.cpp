@@ -2,93 +2,87 @@
 
 #include <fstream>
 
+#include "DCraft/Addons/Cameras.h"
 #include "DCraft/Utility/ObjectDeserializer.h"
 #include "DCraft/Utility/ObjectSerializer.h"
 
-#include "DCraft/Addons/PerspectiveCamera.h"
+#include "DCraft/Components/CameraComponent.h"
+#include "DCraft/Graphics/Geometry/Cube.h"
 #include "DCraft/Structs/Scene.h"
-#include "DCraft/Graphics/Primitives/Cube.h"
 
 namespace DCraft {
     SceneManager::SceneManager() : active_scene_(nullptr) {
-        root_node_ = new Object3D();
-        root_node_->set_name("Root");
-        object_deserializer_ = std::make_unique<ObjectDeserializer>(this, nullptr);
-        object_serializer_ = std::make_unique<ObjectSerializer>(this);
+        // object_deserializer_ = std::make_unique<ObjectDeserializer>(this, nullptr);
+        // object_serializer_ = std::make_unique<ObjectSerializer>(this);
     }
 
     SceneManager::~SceneManager() {
         clear();
-        delete root_node_;
     }
 
     void SceneManager::create_default_scene() {
         clear();
 
-        root_node_ = new Object3D();
-        root_node_->set_name("Root");
+        Scene *default_scene = create_scene("DefaultScene");
+        set_active_scene(default_scene);
 
-        auto *camera_obj = create_object("MainCamera");
-        auto *camera = new PerspectiveCamera("PerspectiveCamera", 45.0f, 16.0f / 9.0f, 0.1f, 100.0f);
-        camera_obj->add(camera);
-        camera_obj->set_position(glm::vec3(0, 0, 10));
+        // Create camera entity
+        auto *camera_entity = default_scene->create_entity("MainCamera");
+        auto *camera_component = camera_entity->add_component<CameraComponent>();
+        camera_component->set_perspective(45.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+        camera_entity->transform()->set_position(0, 0, 10);
 
-        set_active_camera(camera);
+        default_scene->set_active_camera(camera_entity);
 
-        auto *cube_obj = create_object("Cube");
-        Cube *cube = new Cube("Cube");
-        cube_obj->add(cube);
+        auto *cube_entity = Cube::create("Cube");
+        default_scene->add_entity(cube_entity);
     }
 
     Scene *SceneManager::load_scene(const std::string &filename) {
         // Check if already loaded
-        for (auto* scene: get_objects()) {
-            if (dynamic_cast<Scene*>(scene)->get_source_filename() == filename) {
-                std::cout << "Scene already loaded: " << filename << std::endl;
-                return dynamic_cast<Scene*>(scene); 
+        for (Scene *scene: scenes_) {
+            if (scene->get_source_filename() == filename) {
+                std::cout << "Scene already loaded: " << filename << "\n";
+                return scene;
             }
         }
-        
-        // Open and parse the JSON file
+
+        // Open and parse JSON file
         std::ifstream file(filename);
         if (!file.is_open()) {
-            std::cerr << "FILE::ERROR Failed to open scene file: " << filename << std::endl;
+            std::cerr << "Failed to open scene file: " << filename << std::endl;
             return nullptr;
         }
 
-        json scene_data;
+        nlohmann::json scene_data;
         try {
             file >> scene_data;
         } catch (const std::exception &e) {
-            std::cerr << "FILE::ERROR Failed to parse scene file: " << e.what() << std::endl;
+            std::cerr << "Failed to parse scene file: " << e.what() << std::endl;
             return nullptr;
         }
 
-        // Create a new scene
+        // Create scene
         std::string scene_name = scene_data.contains("name") ? scene_data["name"] : "Untitled Scene";
         Scene *new_scene = create_scene(scene_name);
         new_scene->set_source_filename(filename);
 
-        ObjectDeserializer deserializer(this, new_scene);
-
-        // Load objects
-        if (scene_data.contains("objects") && scene_data["objects"].is_array()) {
-            for (const auto &obj_data: scene_data["objects"]) {
-                if (Object3D *obj = deserializer.deserialize_object(obj_data)) {
-                    new_scene->add(obj);
-                }
+        // Load entities
+        if (scene_data.contains("entities") && scene_data["entities"].is_array()) {
+            for (const auto &entity_data: scene_data["entities"]) {
+                // TODO: deserialize entity_data into entity object
             }
         }
 
-        // Find the Main Camera by name and set it as active
-        PerspectiveCamera *main_camera = dynamic_cast<PerspectiveCamera *>(
-            new_scene->find_object_by_name("Main Camera"));
-
-        if (main_camera) {
+        // Find and set active camera
+        Entity *main_camera = new_scene->find_entity_by_name("Main Camera");
+        if (main_camera && main_camera->has_component<CameraComponent>()) {
             new_scene->set_active_camera(main_camera);
         } else {
-            std::cerr << "SCENE::WARNING No 'Main Camera' found in scene, rendering may not work properly." <<
-                    std::endl;
+            auto *default_camera = PerspectiveCamera::create("DefaultCamera", 45.0f, 16.0f / 9.0f, 0.1f, 100.0f,
+                                                             glm::vec3(0, 0, 10));
+            new_scene->add_entity(default_camera);
+            new_scene->set_active_camera(default_camera);
         }
 
         return new_scene;
@@ -105,16 +99,16 @@ namespace DCraft {
             scene_data["version"] = "1.0";
 
             // Scene objects
-            json objects_array = json::array();
-            auto &scene_objects = scene->get_children();
+            json entities_array = json::array();
+            auto &scene_entities = scene->get_entities();
 
-            for (auto *obj: scene_objects) {
-                if (obj) {
-                    objects_array.push_back(object_serializer_->serialize_object(obj));
+            for (auto *entity: scene_entities) {
+                if (entity) {
+                    // entities_array.push_back(object_serializer_->serialize_object(entity));
                 }
             }
 
-            scene_data["objects"] = objects_array;
+            scene_data["entities"] = entities_array;
 
             // Write to file
             std::ofstream file(filepath);
@@ -134,113 +128,55 @@ namespace DCraft {
     }
 
     void SceneManager::update(float delta_time) {
-        for (auto *obj: objects_) {
-            obj->update(delta_time);
+        if (active_scene_) {
+            active_scene_->update(delta_time);
         }
-
-        root_node_->update_world_matrix();
     }
 
     void SceneManager::clear() {
-        Object3D *root = root_node_;
-
-        std::clog << "Clearing " << root->get_name() << " Node" << '\n';
-
-        // Clear all children of the root node
-        while (!root->get_children().empty()) {
-            Object3D *child = root->get_children()[0];
-            destroy_object(child);
+        for (Scene *scene: scenes_) {
+            delete scene;
         }
 
-        objects_.clear();
-
+        scenes_.clear();
         active_scene_ = nullptr;
-
-        // Re-register the root node
-        objects_.push_back(root);
-    }
-
-    Object3D *SceneManager::create_object(const std::string &name) {
-        auto obj = new Object3D();
-        obj->set_name(name);
-        root_node_->add(obj);
-        register_object(obj);
-        return obj;
     }
 
     Scene *SceneManager::create_scene(const std::string &name) {
-        auto scene = new Scene();
-        scene->set_name(name);
-        root_node_->add(scene);
-        register_object(scene);
+        auto scene = new Scene(name);
+        scenes_.push_back(scene);
         return scene;
     }
 
-
-    Object3D *SceneManager::find_object_by_name(const std::string &name) {
-        for (auto *obj: objects_) {
-            if (obj->get_name() == name) return obj;
-
-            if (Object3D *found = find_object_by_name_recursive(obj, name)) return found;
+    Entity *SceneManager::find_entity_by_name(const std::string &name) {
+        if (active_scene_) {
+            return active_scene_->find_entity_by_name(name);
         }
         return nullptr;
     }
 
-    // TODO: Might have to remove from here because this doesn't make sense in here
-    Object3D *SceneManager::find_object_by_name_recursive(const Object3D *parent, const std::string &name) {
-        for (auto *child: parent->get_children()) {
-            if (child->get_name() == name) return child;
+    void SceneManager::set_active_camera(Entity *camera) const {
+        if (active_scene_) {
+            active_scene_->set_active_camera(camera);
+        }
+    }
 
-            if (Object3D *found = find_object_by_name_recursive(child, name)) return found;
+    CameraComponent *SceneManager::get_active_camera() const {
+        if (active_scene_) {
+            return active_scene_->get_active_camera();
         }
         return nullptr;
     }
-
-
-    void SceneManager::destroy_object(Object3D *object) {
-        if (!object) return;
-
-        // If the object has a parent, remove that object from its parent
-        if (object->get_parent()) {
-            object->get_parent()->remove(object);
-        }
-
-        unregister_object(object);
-
-        if (active_scene_->get_active_camera() && objects_contains_camera_component(
-                object, active_scene_->get_active_camera())) {
-            active_scene_->remove(object);
-        }
-
-        delete object;
-    }
-
-    std::vector<Camera *> SceneManager::get_cameras() const { return active_scene_->get_cameras(); }
-
-    void SceneManager::set_active_camera(Camera *camera) const {
-        active_scene_->set_active_camera(camera);
-    }
-
-    Camera *SceneManager::get_active_camera() const {
-        if (!active_scene_->get_active_camera()) return nullptr;
-
-        return active_scene_->get_active_camera();
-    }
-
 
     void SceneManager::set_active_scene(Scene *scene) {
         // Early exit to prevent having to perform an unnecessary search
         if (scene == active_scene_) return;
 
-        if (std::find(objects_.begin(), objects_.end(), scene) != objects_.end()) {
-            active_scene_ = scene;
+        active_scene_ = scene;
+        if (scene) {
             scene->set_active(true);
             if (scene_activated_callback_) {
                 scene_activated_callback_(scene);
-            }
-
-            if (scene->get_active_camera()) {
-                set_active_camera(scene->get_active_camera());
             }
         }
     }
@@ -248,48 +184,19 @@ namespace DCraft {
     void SceneManager::set_active_scene(const std::shared_ptr<Scene> &scene) {
         if (scene.get() != active_scene_) {
             active_scene_ = scene.get();
-            if (scene_activated_callback_) {
-                scene_activated_callback_(scene.get());
-            }
-            if (scene->get_active_camera()) {
-                set_active_camera(scene->get_active_camera());
+            if (scene) {
+                scene->set_active(true);
+                if (scene_activated_callback_) {
+                    scene_activated_callback_(scene.get());
+                }
             }
         }
     }
 
-    void SceneManager::register_object(Object3D *object) {
-        // Add to tracked objects
-        objects_.push_back(object);
-
-        // also register children
-        for (auto *child: object->get_children()) {
-            register_object(child);
+    std::vector<Entity*> SceneManager::get_camera_entities() const {
+        if (active_scene_) {
+            return active_scene_->get_camera_entities();
         }
-    }
-
-    void SceneManager::unregister_object(const Object3D *object) {
-        for (auto *child: object->get_children()) {
-            unregister_object(child);
-        }
-
-        auto iterator = std::find(objects_.begin(), objects_.end(), object);
-        if (iterator != objects_.end()) {
-            objects_.erase(iterator);
-        }
-    }
-
-    bool SceneManager::objects_contains_camera_component(Object3D *object, Camera *target_camera) {
-        if (dynamic_cast<Camera *>(object) == target_camera) {
-            return true;
-        }
-
-        // Check children recursively whether the object contains a camera
-        for (auto *child: object->get_children()) {
-            if (objects_contains_camera_component(child, target_camera)) {
-                return true;
-            }
-        }
-
-        return false;
+        return std::vector<Entity*>();
     }
 }

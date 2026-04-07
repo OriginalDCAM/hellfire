@@ -1,20 +1,20 @@
 #include "DCraft/Structs/Scene.h"
 
-#include <fstream>
-
-#include "Dcraft/Graphics/Primitives/Cube.h"
 #include "DCraft/Structs/Skybox.h"
+#include "DCraft/Components/CameraComponent.h"
 
-namespace DCraft 
-{
-    Scene::Scene(const std::string& name) : Object3D(), is_active_(false), active_camera_(nullptr)
-    {
-        set_name(name);
+namespace DCraft {
+    Scene::Scene(const std::string &name) : name_(name), is_active_(false), active_camera_entity_(nullptr),
+                                            skybox_(nullptr) {
     }
 
-    Scene::~Scene()
-    {
-        cameras_.clear();
+    Scene::~Scene() {
+        // Clean up all entities
+        for (const Entity *entity: entities_) {
+            delete entity;
+        }
+
+        entities_.clear();
 
         if (skybox_) {
             delete skybox_;
@@ -22,83 +22,123 @@ namespace DCraft
         }
     }
 
-    // Scene lifecycle
-    void Scene::initialize()
-    {
-
-    }
-
-    void Scene::update(float delta_time)
-    {
-        for (auto obj: registered_objects_) {
-            obj->update(delta_time);
+    void Scene::initialize() {
+        // Initialize all entities
+        for (Entity *entity: entities_) {
+            entity->setup();
         }
     }
 
-    Object3D* Scene::create_object(const std::string& name = "GameObject")
-    {
-        Object3D* obj = new Object3D();
-        obj->set_name(name);
-        register_object(obj);
-        add(obj);
-        return obj;
-    
+    void Scene::update(float delta_time) {
+        // Update all entities
+        for (Entity *entity: entities_) {
+            entity->update(delta_time);
+        }
+
+        // Update world matrices for the entire hierarchy
+        update_world_matrices();
     }
 
-    void Scene::draw(const glm::mat4& view, const glm::mat4& projection, uint32_t shader_program, void* renderer_context = nullptr)
-    {
-        if (!is_active_ || !active_camera_) return;
-
-        glm::mat4 camera_view = active_camera_->get_view_matrix();
-        glm::mat4 camera_projection = active_camera_->get_projection_matrix();
-
-        Object3D::draw(camera_view, camera_projection, shader_program, renderer_context);
+    void Scene::add_entity(Entity *entity) {
+        if (entity && std::find(entities_.begin(), entities_.end(), entity) == entities_.end()) {
+            entities_.push_back(entity);
+            entity->setup();
+        }
     }
 
-    void Scene::add(Object3D *obj) {
-        Object3D::add(obj);
-
-        // Call the setup method if it has been overridden
-        obj->setup();
-        
-        register_object(obj);
-    }
-
-    void Scene::set_active_camera(Camera* camera)
-    {
-        if (camera) {
-            // Add camera to the list if it's not there already
-            if (std::find(cameras_.begin(), cameras_.end(), camera) == cameras_.end()) {
-                cameras_.push_back(camera);
+    void Scene::remove_entity(const Entity *entity) {
+        auto it = std::find(entities_.begin(), entities_.end(), entity);
+        if (it != entities_.end()) {
+            // If this entity was the active camera, clear it
+            if (entity == active_camera_entity_) {
+                active_camera_entity_ = nullptr;
             }
-            active_camera_ = camera;
+
+            entities_.erase(it);
         }
     }
 
-    void Scene::destroy_camera(Camera* camera)
-    {
+    Entity *Scene::create_entity(const std::string &name) {
+        auto *entity = new Entity(name);
+        add_entity(entity);
+        return entity;
     }
 
-    json Scene::to_json() {
-        json j = Object3D::to_json();
-        // TODO: Add skybox serialization for saving
+    Entity *Scene::find_entity_by_name(const std::string &name) {
+        Entity *result = nullptr;
+        find_entity_by_name_recursive(entities_, name, result);
+        return result;
+    }
+
+    void Scene::find_entity_by_name_recursive(const std::vector<Entity *> &entities,
+                                              const std::string &name, Entity *&result) {
+        if (result) return; // already found
+
+        for (Entity *entity: entities) {
+            if (entity->get_name() == name) {
+                result = entity;
+                return;
+            }
+            // Recurse through children
+            find_entity_by_name_recursive(entity->get_children(), name, result);
+            if (result) return;
+        }
+    }
+
+    std::vector<Entity*> Scene::find_entities_with_component(const std::type_index& component_type) {
+        std::vector<Entity*> results;
+        // TODO:
+        // This would need a more complex implementation to work with type_index
+        // For now, use the template version instead
+        return results;
+    }
+
+    void Scene::set_active_camera(Entity* camera_entity) {
+        // Verify the entity has a camera component
+        if (camera_entity && camera_entity->has_component<CameraComponent>()) {
+            active_camera_entity_ = camera_entity;
+        }
+    }
+
+    std::vector<Entity *> Scene::get_camera_entities() const {
+        std::vector<Entity*> cameras;
+
+        std::function<void(const std::vector<Entity*>&)> find_cameras =
+            [&](const std::vector<Entity*>& entities) {
+                for (Entity* entity : entities) {
+                    if (entity->has_component<CameraComponent>()) {
+                        cameras.push_back(entity);
+                    }
+                    // Recurse through children
+                    find_cameras(entity->get_children());
+                }
+            };
+
+        find_cameras(entities_);
+        return cameras;
+    }
+
+    void Scene::update_world_matrices() const {
+        // Update world matrices for all root entities
+        // Their children will be updated recursively
+        for (Entity* entity : entities_) {
+            entity->update_world_matrices();
+        }
+    }
+
+    nlohmann::json Scene::to_json() {
+        nlohmann::json j;
+        j["name"] = name_;
+        j["type"] = "Scene";
+        
+        // Serialize entities
+        nlohmann::json entities_array = nlohmann::json::array();
+        for (Entity* entity : entities_) {
+            // TODO: need to implement Entity::to_json()
+            // entities_array.push_back(entity->to_json());
+        }
+        j["entities"] = entities_array;
+        
         return j;
-    }
-
-    void Scene::register_object(Object3D* obj)
-    {
-        if (obj && std::find(registered_objects_.begin(), registered_objects_.end(), obj) == registered_objects_.end())
-        {
-            registered_objects_.push_back(obj);
-        }
-    }
-
-    void Scene::unregister_object(Object3D* obj)
-    {
-        auto it = std::find(registered_objects_.begin(), registered_objects_.end(), obj);
-        if (it != registered_objects_.end())
-        {
-            registered_objects_.erase(it);
-        }
     }
 }
