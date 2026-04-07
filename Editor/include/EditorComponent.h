@@ -4,7 +4,9 @@
 
 #pragma once
 #include "hellfire/ecs/Entity.h"
+#include "hellfire/platform/IWindow.h"
 #include "hellfire/scene/Scene.h"
+#include "hellfire/utilities/ServiceLocator.h"
 
 namespace hellfire::editor {
     class EditorContext {
@@ -18,6 +20,12 @@ namespace hellfire::editor {
         [[nodiscard]] Entity* get_selected_entity() const {
             if (!active_scene || selected_entity_id == 0) return nullptr;
             return active_scene->get_entity(selected_entity_id);
+        }
+
+        void set_window_title(const std::string& title) {
+            if (auto window = ServiceLocator::get_service<IWindow>()) {
+                window->set_title(title + " - Hellfire Editor");
+            }
         }
     };
     

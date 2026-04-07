@@ -63,6 +63,10 @@ namespace hellfire::editor {
             if (!filepath.empty()) {
                 auto scene = sm->load_scene(filepath);
                 sm->set_active_scene(scene);
+
+                if (context_) {
+                    context_->set_window_title(scene->get_name());
+                }
             }
         }
     }
@@ -74,6 +78,10 @@ namespace hellfire::editor {
             if (ImGui::MenuItem(element->get_name().c_str(), nullptr, is_selected)) {
                 if (!is_selected) {
                     sm->set_active_scene(element);
+                    
+                    if (context_) {
+                        context_->set_window_title(element->get_name());
+                    }
                 }
             }
         }
