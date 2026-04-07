@@ -29,6 +29,8 @@ namespace hellfire::editor {
 
         void on_render() override;
 
+        void render_viewport_stats_overlay();
+
         void render_viewport_window();
 
         void create_dockspace();

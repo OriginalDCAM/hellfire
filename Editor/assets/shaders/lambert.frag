@@ -9,6 +9,7 @@
 out vec4 fragColor;
 
 void main() {
+
     // Sample base textures
     vec4 diffuseValue = sampleDiffuseTexture(vTexCoords);
     vec4 baseColor = applyVertexColors(diffuseValue, vColor);
