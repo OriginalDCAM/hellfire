@@ -75,7 +75,7 @@ namespace DCraft::Editor {
         void render_object_properties(Object3D* object) const;
         void render_light_properties(Light* light) const;
         void render_camera_properties(Camera* camera) const;
-        void render_shape_properties(MeshRenderer* shape) const;
+        void render_material_properties(MeshRenderer* shape) const;
         void render_mesh_properties(Mesh* mesh) const;
 
         // Input handling
