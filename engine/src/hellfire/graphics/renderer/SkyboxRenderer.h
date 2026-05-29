@@ -22,7 +22,7 @@ namespace hellfire {
         ~SkyboxRenderer() = default;
 
         void initialize();
-        void render(Skybox *skybox, CameraComponent *camera) const;
+        void render(const Skybox &skybox, const CameraComponent *camera) const;
     private:
         void setup_skybox_geometry();
         void load_skybox_shader();

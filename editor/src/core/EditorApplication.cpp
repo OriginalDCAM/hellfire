@@ -5,22 +5,23 @@
 
 #include <fstream>
 
-#include "EditorConfig.h"
 #include "../EditorStyles.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui.h"
-#include "ImGuizmo.h"
-#include "../ui/Panels/EditorPanel.h"
-#include "hellfire/core/Application.h"
-#include "hellfire/platform/IWindow.h"
-#include "hellfire/utilities/ServiceLocator.h"
-#include "hellfire/platform/windows_linux/GLFWWindow.h"
 #include "../IconsFontAwesome6.h"
 #include "../scenes/DefaultScene.h"
-#include "events/StateEvents.h"
 #include "../states/Editor/EditorState.h"
 #include "../states/ProjectHub/ProjectHubState.h"
+#include "../ui/Panels/EditorPanel.h"
+#include "EditorAssetManager.h"
+#include "EditorConfig.h"
+#include "ImGuizmo.h"
+#include "events/StateEvents.h"
+#include "hellfire/core/Application.h"
+#include "hellfire/platform/IWindow.h"
+#include "hellfire/platform/windows_linux/GLFWWindow.h"
+#include "hellfire/utilities/ServiceLocator.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "serializers/EditorSerializer.h"
 #include "states/ProjectCreator/ProjectCreatorState.h"
 #include "states/ProjectLoading/ProjectLoadingState.h"
@@ -42,7 +43,11 @@ namespace hellfire::editor {
         window->enable_vsync(true);
 
         initialize_imgui(window);
-
+      
+        // Register services
+        ServiceLocator::register_service<EditorAssetManager>(&asset_manager_);
+      
+        // Register application states
         state_manager_.register_state<ProjectHubState>();
         state_manager_.register_state<ProjectCreatorState>();
         state_manager_.register_state<ProjectLoadingState>();

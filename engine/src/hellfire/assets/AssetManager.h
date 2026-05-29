@@ -5,6 +5,7 @@
 #pragma once
 #include "AssetRegistry.h"
 #include "hellfire/graphics/Mesh.h"
+#include "hellfire/graphics/material/Material.h"
 
 namespace hellfire {
     class AssetManager {
@@ -15,6 +16,7 @@ namespace hellfire {
         std::shared_ptr<Mesh> get_mesh(AssetID id);
         std::shared_ptr<Material> get_material(AssetID id);
         Texture* get_texture(AssetID id, TextureType type);
+        Texture* get_texture(const std::filesystem::path& path, TextureType type = TextureType::DIFFUSE);
 
         // Cache management
         void unload(AssetID id);

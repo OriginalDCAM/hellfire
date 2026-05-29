@@ -19,10 +19,6 @@ namespace hellfire {
         material.bind();
     }
 
-    void MaterialManager::bind_property_to_shader(const Material::Property &property, uint32_t shader_program,
-                                                  int &texture_unit) {
-        bind_property(property, shader_program, texture_unit);
-    }
 
     void MaterialManager::bind_property(const Material::Property &property, uint32_t shader_program,
                                         int &texture_unit) {

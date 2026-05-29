@@ -19,60 +19,60 @@ MaterialMap load_material_map() {
 
     auto sun_material = hellfire::MaterialBuilder::create_custom("Sun Material", "assets/shaders/custom/sun.vert",
                                                                  "assets/shaders/custom/sun.frag");
-    sun_material->set_texture(planet_surface_dir + "sun.jpg", hellfire::TextureType::DIFFUSE);
-    sun_material->set_uv_tiling(100.0f, 100.0f);
-    materials["SUN_MATERIAL"] = sun_material;
-
-    auto mercury_material = hellfire::MaterialBuilder::create("Mercury Material");
-    mercury_material->set_texture(planet_surface_dir + "mercury.jpg", hellfire::TextureType::DIFFUSE);
-    materials["MERCURY_MATERIAL"] = mercury_material;
-
-    auto venus_material = hellfire::MaterialBuilder::create("Venus Material");
-    venus_material->set_texture(planet_surface_dir + "venus_surface.jpg", hellfire::TextureType::DIFFUSE);
-    materials["VENUS_MATERIAL"] = venus_material;
-
-    auto earth_material = hellfire::MaterialBuilder::create("Earth Material");
-    earth_material->set_texture(planet_surface_dir + "earth_daymap.jpg", hellfire::TextureType::DIFFUSE);
-    materials["EARTH_MATERIAL"] = earth_material;
+    // sun_material->set_texture(planet_surface_dir + "sun.jpg", hellfire::TextureType::DIFFUSE);
+    // sun_material->set_uv_tiling(100.0f, 100.0f);
+    // materials["SUN_MATERIAL"] = sun_material;
+    //
+    // auto mercury_material = hellfire::MaterialBuilder::create("Mercury Material");
+    // mercury_material->set_texture(planet_surface_dir + "mercury.jpg", hellfire::TextureType::DIFFUSE);
+    // materials["MERCURY_MATERIAL"] = mercury_material;
+    //
+    // auto venus_material = hellfire::MaterialBuilder::create("Venus Material");
+    // venus_material->set_texture(planet_surface_dir + "venus_surface.jpg", hellfire::TextureType::DIFFUSE);
+    // materials["VENUS_MATERIAL"] = venus_material;
+    //
+    // auto earth_material = hellfire::MaterialBuilder::create("Earth Material");
+    // earth_material->set_texture(planet_surface_dir + "earth_daymap.jpg", hellfire::TextureType::DIFFUSE);
+    // materials["EARTH_MATERIAL"] = earth_material;
 
     auto dynamic_earth_material = hellfire::MaterialBuilder::create_custom(
         "Dynamic Earth Material", "assets/shaders/custom/earth_day_night.vert",
         "assets/shaders/custom/earth_day_night.frag");
     // dynamic_earth_material->set_property(planet_surface_dir + "earth_daymap.jpg", "uDayTexture", 0);
     // dynamic_earth_material->add_texture(planet_surface_dir + "earth_nightmap.jpg", "uNightTexture", 1);
-    materials["DYNAMIC_EARTH_MATERIAL"] = dynamic_earth_material;
-
-
-    auto earth_cloud_material = hellfire::MaterialBuilder::create("Earth Cloud Material");
-    earth_cloud_material->set_texture(planet_surface_dir + "earth_clouds.png", hellfire::TextureType::DIFFUSE);
-    earth_cloud_material->set_opacity(0.75f);
-    earth_cloud_material->set_property("useLuminanceAsAlpha", true);
-    materials["EARTH_CLOUD_MATERIAL"] = earth_cloud_material;
-
-    auto moon_material = hellfire::MaterialBuilder::create("Moon Material");
-    moon_material->set_texture(planet_surface_dir + "moon.jpg", hellfire::TextureType::DIFFUSE);
-    materials["MOON_MATERIAL"] = moon_material;
-
-    auto mars_material = hellfire::MaterialBuilder::create("Mars Material");
-    mars_material->set_texture(planet_surface_dir + "mars.jpg", hellfire::TextureType::DIFFUSE);
-    materials["MARS_MATERIAL"] = mars_material;
-
-    auto instanced_asteroid_material = hellfire::MaterialBuilder::create_custom(
-        "Instanced Asteroid Material",
-        "assets/shaders/instanced.vert",
-        "assets/shaders/instanced.frag"
-    );
-    instanced_asteroid_material->set_uv_tiling(glm::vec2(10.0f));
-    instanced_asteroid_material->set_texture(planet_surface_dir + "moon.jpg", hellfire::TextureType::DIFFUSE);
-    materials["ASTEROID_MATERIAL"] = instanced_asteroid_material;
-
-    auto jupiter_material = hellfire::MaterialBuilder::create("Jupiter Material");
-    jupiter_material->set_texture(planet_surface_dir + "jupiter.jpg", hellfire::TextureType::DIFFUSE);
-    materials["JUPITER_MATERIAL"] = jupiter_material;
-
-    auto saturn_surface_material = hellfire::MaterialBuilder::create("Saturn Surface Material");
-    saturn_surface_material->set_texture(planet_surface_dir + "saturn_surface.jpg", hellfire::TextureType::DIFFUSE);
-    materials["SATURN_SURFACE_MATERIAL"] = saturn_surface_material;
+    // materials["DYNAMIC_EARTH_MATERIAL"] = dynamic_earth_material;
+    //
+    //
+    // auto earth_cloud_material = hellfire::MaterialBuilder::create("Earth Cloud Material");
+    // earth_cloud_material->set_texture(planet_surface_dir + "earth_clouds.png", hellfire::TextureType::DIFFUSE);
+    // earth_cloud_material->set_opacity(0.75f);
+    // earth_cloud_material->set_property("useLuminanceAsAlpha", true);
+    // materials["EARTH_CLOUD_MATERIAL"] = earth_cloud_material;
+    //
+    // auto moon_material = hellfire::MaterialBuilder::create("Moon Material");
+    // moon_material->set_texture(planet_surface_dir + "moon.jpg", hellfire::TextureType::DIFFUSE);
+    // materials["MOON_MATERIAL"] = moon_material;
+    //
+    // auto mars_material = hellfire::MaterialBuilder::create("Mars Material");
+    // mars_material->set_texture(planet_surface_dir + "mars.jpg", hellfire::TextureType::DIFFUSE);
+    // materials["MARS_MATERIAL"] = mars_material;
+    //
+    // auto instanced_asteroid_material = hellfire::MaterialBuilder::create_custom(
+    //     "Instanced Asteroid Material",
+    //     "assets/shaders/instanced.vert",
+    //     "assets/shaders/instanced.frag"
+    // );
+    // instanced_asteroid_material->set_uv_tiling(glm::vec2(10.0f));
+    // instanced_asteroid_material->set_texture(planet_surface_dir + "moon.jpg", hellfire::TextureType::DIFFUSE);
+    // materials["ASTEROID_MATERIAL"] = instanced_asteroid_material;
+    //
+    // auto jupiter_material = hellfire::MaterialBuilder::create("Jupiter Material");
+    // jupiter_material->set_texture(planet_surface_dir + "jupiter.jpg", hellfire::TextureType::DIFFUSE);
+    // materials["JUPITER_MATERIAL"] = jupiter_material;
+    //
+    // auto saturn_surface_material = hellfire::MaterialBuilder::create("Saturn Surface Material");
+    // saturn_surface_material->set_texture(planet_surface_dir + "saturn_surface.jpg", hellfire::TextureType::DIFFUSE);
+    // materials["SATURN_SURFACE_MATERIAL"] = saturn_surface_material;
 
     return materials;
 }

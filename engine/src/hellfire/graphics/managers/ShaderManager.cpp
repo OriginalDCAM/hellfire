@@ -221,30 +221,11 @@ namespace hellfire {
             // Add automatic defines based on properties
             add_automatic_defines(material, variant.defines);
         } else {
-            // Use built-in shader based on material type
-            int material_type = material.get_builtin_material_type();
-                
-            switch (material_type) {
-                case 0: // Lambert
-                    variant.vertex_path = "./assets/shaders/standard.vert";
-                    variant.fragment_path = "./assets/shaders/lambert.frag";
-                    break;
-                case 1: // Phong
-                    variant.vertex_path = "./assets/shaders/standard.vert";
-                    variant.fragment_path = "./assets/shaders/phong.frag";
-                    break;
-                case 2: // PBR
-                    variant.vertex_path = "./assets/shaders/standard.vert";
-                    variant.fragment_path = "./assets/shaders/pbr.frag";
-                    break;
-                default:
-                    variant.vertex_path = "./assets/shaders/standard.vert";
-                    variant.fragment_path = "./assets/shaders/lambert.frag";
-                    break;
-            }
-                
             variant.vertex_path = "assets/shaders/standard.vert";
             variant.fragment_path = "assets/shaders/phong.frag";
+
+            // Add automatic defines for built-in shaders
+            add_automatic_defines(material, variant.defines);
         }
 
         uint32_t shader_id = load_shader(variant);

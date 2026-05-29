@@ -42,12 +42,15 @@ namespace hellfire {
         TextureWrap wrap_t = TextureWrap::REPEAT;
         bool generate_mipmaps = true;
         bool flip_vertically = false;
+        int desired_channels = 3;
 
         int max_size = -1;
     };
 
     class Texture {
     public:
+      Texture(TextureHandle handle, TextureType type, int width, int height, int channels);
+      
         Texture(const Texture &) = delete;
         Texture &operator=(const Texture &) = delete;
         Texture(Texture &&other) noexcept;
@@ -62,10 +65,6 @@ namespace hellfire {
         [[nodiscard]] bool is_valid() const;
 
     private:
-        friend class AssetManager;
-        
-        Texture(TextureHandle handle, TextureType type, int width, int height, int channels);
-        
         TextureType type_;
         TextureHandle texture_id_ = 0;
         int width_ = 0;

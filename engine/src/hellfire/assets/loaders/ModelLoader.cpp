@@ -1,16 +1,19 @@
-﻿#include "hellfire/assets/ModelLoader.h"
+﻿#include "ModelLoader.h"
+
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <iostream>
 
-#include "assimp/Importer.hpp"
-#include "hellfire/ecs/RenderableComponent.h"
 #include "../../ecs/Entity.h"
+#include "assimp/Importer.hpp"
+#include "hellfire/assets/AssetManager.h"
+#include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/ecs/TransformComponent.h"
 #include "hellfire/ecs/components/MeshComponent.h"
 #include "hellfire/scene/Scene.h"
+#include "hellfire/utilities/ServiceLocator.h"
 
 namespace fs = std::filesystem;
 
@@ -20,7 +23,7 @@ namespace hellfire::Addons {
     // Static member definitions
     std::unordered_map<std::string, std::shared_ptr<Mesh> > ModelLoader::mesh_cache;
     std::unordered_map<std::string, std::shared_ptr<Material> > ModelLoader::material_cache;
-    std::unordered_map<std::string, std::shared_ptr<Texture> > ModelLoader::texture_cache;
+    std::unordered_map<std::string, Texture*> ModelLoader::texture_cache;
 
     EntityID ModelLoader::load_model(Scene *scene, const std::filesystem::path &filepath, unsigned int import_flags) {
         const auto start_time = std::chrono::high_resolution_clock::now();
@@ -471,7 +474,8 @@ namespace hellfire::Addons {
 
                 try {
                     // Use the unified texture setting API
-                    material.set_texture(temp_filename, type, 0);
+                    auto* tex = ServiceLocator::get_service<AssetManager>()->get_texture(temp_filename, type);
+                    material.set_texture(tex, 0);
 
 
                     std::filesystem::remove(temp_filename);
@@ -529,7 +533,8 @@ namespace hellfire::Addons {
         return false;
     }
 
-    std::shared_ptr<Texture> ModelLoader::load_cached_texture(const std::string &path, TextureType type) {
+    Texture *ModelLoader::load_cached_texture(const std::string &path,
+                                              TextureType type) {
         const auto it = texture_cache.find(path);
         if (it != texture_cache.end()) {
             std::cout << "Using cached texture: " << path << std::endl;
@@ -537,7 +542,7 @@ namespace hellfire::Addons {
         }
 
         try {
-            auto texture = std::make_shared<Texture>(path, type);
+            auto* texture = ServiceLocator::get_service<AssetManager>()->get_texture(path, type);
             if (texture->is_valid()) {
                 texture_cache[path] = texture;
                 return texture;

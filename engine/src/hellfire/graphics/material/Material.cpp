@@ -42,7 +42,7 @@ namespace hellfire {
             // Track texture unit usage
             int start_texture_unit = texture_unit;
             
-            MaterialManager::bind_property_to_shader(property, shader_program, texture_unit);
+            MaterialManager::bind_property(property, shader_program, texture_unit);
 
             // If a texture was bound, track which unit it used
             if (property.type == PropertyType::TEXTURE && texture_unit > start_texture_unit) {

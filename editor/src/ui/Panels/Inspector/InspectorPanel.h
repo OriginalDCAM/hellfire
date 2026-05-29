@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "core/EditorAssetManager.h"
 #include "hellfire/ecs/components/MeshComponent.h"
 #include "ui/Panels/EditorPanel.h"
 
@@ -15,7 +16,7 @@ namespace hellfire::editor {
     class InspectorPanel : public EditorPanel {
     public:
         InspectorPanel() {
-            mesh_texture_ = TextureCache::load("assets/thumbnails/model_thumbnail.png");
+            mesh_texture_ = ServiceLocator::get_service<EditorAssetManager>()->load_icon("assets/thumbnails/model_thumbnail.png");
         }
         
         void render_add_component_context_menu(Entity *selected_entity);
@@ -42,7 +43,7 @@ namespace hellfire::editor {
         static void render_script_component(const ScriptComponent* script);
         
     private:
-        std::shared_ptr<Texture> mesh_texture_ = nullptr;
+        Texture* mesh_texture_ = nullptr;
         AssetID selected_asset_ = -1;
         float thumbnail_size_ = 80.0f;
         bool should_open_asset_selector_ = false;

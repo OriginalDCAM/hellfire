@@ -10,7 +10,6 @@
 #include "GLFW/glfw3.h"
 #include "IconsFontAwesome6.h"
 #include "hellfire/core/InputManager.h"
-#include "hellfire/ecs/RenderableComponent.h"
 #include "hellfire/graphics/geometry/Cube.h"
 #include "hellfire/graphics/geometry/Quad.h"
 #include "hellfire/graphics/geometry/Sphere.h"
@@ -213,43 +212,37 @@ void SceneHierarchyPanel::render_list_item(const EntityID entity_id) {
       } 
 
     if (entity_to_rename_ == entity_id) {
+      flags |= ImGuiTreeNodeFlags_AllowOverlap;
 
-        flags |= ImGuiTreeNodeFlags_AllowOverlap;
+      // Unique treenode for this entity (no visible label)
+      const auto unique_label_id = "##entity_" + std::to_string(entity_id);
+      node_open = ImGui::TreeNodeEx(
+          unique_label_id.c_str(),
+          flags);
 
+      ImGui::SameLine();
+      ImGui::SetNextItemWidth(150);
+      ImGui::SetKeyboardFocusHere();  
 
-        // Unique treenode for this entity (no visible label)
-        const auto unique_label_id = "##entity_" + std::to_string(entity_id);
-        node_open = ImGui::TreeNodeEx(
-            unique_label_id.c_str(),
-            flags);
+      static char name_buffer[256];
+      strncpy_s(name_buffer, entity->get_name().c_str(), 256);
 
-        // ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+      // Unique id for the input field, to prevent double id conflicts
+      std::string input_id = "##RenameField_" + std::to_string(entity_id);
 
-        // Inputfield on the same line as the treenode
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(150);
-        ImGui::SetKeyboardFocusHere();  // Cursor automatically gets put in the
-                                        // inputfield
-
-        static char name_buffer[256];
-        strncpy_s(name_buffer, entity->get_name().c_str(), 256);
-
-        // Unique id for the inputfield, to prevent double id conflicts
-        std::string input_id = "##RenameField_" + std::to_string(entity_id);
-
-        if (ImGui::InputText(input_id.c_str(), name_buffer, 256,
-                             ImGuiInputTextFlags_EnterReturnsTrue |
-                                 ImGuiInputTextFlags_AutoSelectAll)) {
-            entity->set_name(name_buffer);
-            entity_to_rename_ = 0;
-        }
-
-        // Leave rename modus when field is not focussed anymore
-        if (!ImGui::IsItemActive()) {
-            entity_to_rename_ = 0;
-        }
+      if (ImGui::InputText(input_id.c_str(), name_buffer, 256,
+                           ImGuiInputTextFlags_EnterReturnsTrue |
+                               ImGuiInputTextFlags_AutoSelectAll)) {
+        entity->set_name(name_buffer);
+        entity_to_rename_ = 0;
+                               }
+        
+      if (ImGui::IsItemDeactivated()) {
+        entity->set_name(name_buffer);
+        entity_to_rename_ = 0;
+      }
     } else {
-        node_open = ImGui::TreeNodeEx(display_name.c_str(), flags);
+      node_open = ImGui::TreeNodeEx(display_name.c_str(), flags);
     }
   
   entity_id_to_opened_nodes_[entity_id] = node_open;

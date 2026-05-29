@@ -3,12 +3,14 @@
 //
 
 #pragma once
-#include <vector>
 #include <string>
+#include <vector>
 
+#include "hellfire/assets/AssetManager.h"
 #include "hellfire/graphics/material/Material.h"
 #include "hellfire/graphics/material/MaterialConstants.h"
 #include "hellfire/graphics/texture/Texture.h"
+#include "hellfire/utilities/ServiceLocator.h"
 
 namespace hellfire {
     /**
@@ -111,7 +113,8 @@ namespace hellfire {
 
         // Enable a texture slot with a new texture
         static void enable_slot(Material& material, const SlotInfo& slot, const std::string& texture_path) {
-            material.set_texture(texture_path, slot.type, 0);
+            auto* tex = ServiceLocator::get_service<AssetManager>()->get_texture(texture_path, slot.type);
+            material.set_texture(tex, 0);
         }
 
         // Disable a texture slot

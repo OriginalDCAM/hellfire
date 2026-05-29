@@ -4,13 +4,14 @@
 
 #pragma once
 
-#include "imgui.h"
-#include "StateManager.h"
 #include "../ui/Panels/EditorPanel.h"
-#include "hellfire/Interfaces/IApplicationPlugin.h"
-#include "hellfire/platform/IWindow.h"
 #include "../ui/Panels/Inspector/InspectorPanel.h"
+#include "EditorAssetManager.h"
+#include "StateManager.h"
+#include "hellfire/Interfaces/IApplicationPlugin.h"
 #include "hellfire/core/Application.h"
+#include "hellfire/platform/IWindow.h"
+#include "imgui.h"
 
 namespace hellfire::editor {
     class EditorApplication : public IApplicationPlugin {
@@ -56,5 +57,6 @@ namespace hellfire::editor {
         bool imgui_initialized_ = false;
 
         StateManager state_manager_;
+        EditorAssetManager asset_manager_;
     };
 }

@@ -114,7 +114,8 @@ namespace hellfire::Addons {
                                               TextureType dcr_type, Material &material,
                                               const std::string &property_name);
 
-        static std::shared_ptr<Texture> load_cached_texture(const std::string &path, TextureType type);
+        static Texture *load_cached_texture(const std::string &path,
+                                            TextureType type);
 
         // Utility methods
         static std::string create_mesh_key(aiMesh *mesh, const std::string &filepath);
@@ -133,6 +134,6 @@ namespace hellfire::Addons {
         // Caching
         static std::unordered_map<std::string, std::shared_ptr<Mesh> > mesh_cache;
         static std::unordered_map<std::string, std::shared_ptr<Material> > material_cache;
-        static std::unordered_map<std::string, std::shared_ptr<Texture> > texture_cache;
+        static std::unordered_map<std::string, Texture*> texture_cache;
     };
 }

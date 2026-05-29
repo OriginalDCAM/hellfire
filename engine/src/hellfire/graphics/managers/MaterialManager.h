@@ -13,10 +13,11 @@ namespace hellfire {
     class MaterialManager {
     public:
         static void bind_material(const Material& material);
-    private:
         static void bind_property(const Material::Property& property, uint32_t shader_program, int& texture_unit);
+    private:
+     static const char* get_texture_flag_for_uniform(const std::string& uniform_name);
 
-        static std::string capitalize_first(const std::string& str);
+     static std::string capitalize_first(const std::string& str);
 
     };
 }

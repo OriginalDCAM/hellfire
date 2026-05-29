@@ -1,20 +1,20 @@
 #pragma once
+#include <glm/glm.hpp>
 #include <iostream>
+#include <nlohmann/json.hpp>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <variant>
-#include <optional>
-#include <glm/glm.hpp>
-#include <nlohmann/json.hpp>
 
 #include "MaterialConstants.h"
-#include "hellfire/graphics/texture/Texture.h"
 
 namespace hellfire {
     class MaterialInstance;
     class Application;
     class ShaderManager;
+    class Texture;
 }
 
 namespace hellfire {
@@ -132,12 +132,6 @@ namespace hellfire {
             }
             return default_value;
         }
-
-        // Texture Management
-        Material& set_texture(const std::string &path, TextureType type, int texture_slot = 0) {
-            auto* texture = new Texture(path, type);
-            return set_texture_internal(texture, type, texture_slot);
-        }
         
         Material& set_texture(const std::shared_ptr<Texture> &texture, int texture_slot = 0) {
             return set_texture_internal(texture.get(), texture->get_type(), texture_slot);
@@ -252,7 +246,8 @@ namespace hellfire {
     private:
         mutable std::vector<int> bound_texture_units_;
         
-        Material& set_texture_internal(Texture* texture, TextureType type, int texture_slot) {
+        Material& set_texture_internal(Texture* texture, const TextureType type,
+                                       const int texture_slot) {
             const char* uniform_name = MaterialConstants::get_texture_uniform_name(type);
             const char* flag_name = MaterialConstants::get_texture_flag_name(type);
 
@@ -262,7 +257,7 @@ namespace hellfire {
             }
 
             if (texture_slot >= 0) {
-                texture->set_slot(texture_slot);
+                // texture->set_slot(texture_slot);
                 set_property(uniform_name + std::string("Slot"), texture_slot);
             }
 

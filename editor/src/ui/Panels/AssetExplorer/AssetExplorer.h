@@ -3,6 +3,7 @@
 //
 #pragma once
 
+#include "core/EditorAssetManager.h"
 #include "hellfire/assets/models/ModelInstantiator.h"
 #include "hellfire/graphics/managers/TextureManager.h"
 #include "ui/Panels/EditorPanel.h"
@@ -11,7 +12,7 @@ namespace hellfire::editor {
 class AssetExplorer : public EditorPanel {
 public:
      AssetExplorer() {
-        model_texture_ = TextureCache::load("assets/thumbnails/model_thumbnail.png");
+        model_texture_ =  ServiceLocator::get_service<EditorAssetManager>()->load_icon("assets/thumbnails/model_thumbnail.png");
     }
     
     void render() override;
@@ -19,7 +20,7 @@ public:
 
 
  private:
-     std::shared_ptr<Texture> model_texture_ = nullptr;
+     Texture* model_texture_ = nullptr;
     AssetID selected_asset_ = -1;
     float thumbnail_size_ = 80.0f;
     
