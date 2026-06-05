@@ -17,8 +17,6 @@ public:
     
     void render() override;
 
-
-
  private:
      Texture* model_texture_ = nullptr;
     AssetID selected_asset_ = -1;
