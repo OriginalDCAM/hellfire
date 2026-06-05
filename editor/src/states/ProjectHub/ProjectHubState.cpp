@@ -96,8 +96,8 @@ namespace hellfire::editor {
     }
 
     void ProjectHubState::render_buttons() const {
-        float button_width = 140.0f;
-        float spacing = ImGui::GetContentRegionAvail().x - (button_width * 2) - ImGui::GetStyle().ItemSpacing.x;
+        constexpr float button_width = 140.0f;
+        const float spacing = ImGui::GetContentRegionAvail().x - (button_width * 2) - ImGui::GetStyle().ItemSpacing.x;
         
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + spacing);
     

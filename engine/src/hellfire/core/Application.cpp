@@ -117,7 +117,7 @@ namespace hellfire {
             input_manager_->update();
 
             // Update scene
-            if (auto sm = ServiceLocator::get_service<SceneManager>()) {
+            if (const auto sm = ServiceLocator::get_service<SceneManager>()) {
                 sm->update(Time::delta_time);
             }
 

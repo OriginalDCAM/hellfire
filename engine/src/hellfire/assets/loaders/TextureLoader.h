@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <memory>
 
-#include "stb_image.h"
+#include "stb/stb_image.h"
 #include "TextureLoader.h"
 #include "hellfire/graphics/texture/Texture.h"
 

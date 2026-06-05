@@ -30,8 +30,8 @@ namespace hellfire::editor {
             ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
         }) {
             // Center the form
-            float form_width = 500.0f;
-            float offset_x = (ImGui::GetContentRegionAvail().x - form_width) * 0.5f;
+            constexpr float form_width = 500.0f;
+            const float offset_x = (ImGui::GetContentRegionAvail().x - form_width) * 0.5f;
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset_x);
 
             if (ui::ChildWindow child{"CreatorForm", ImVec2(form_width, 0)}) {
@@ -46,7 +46,7 @@ namespace hellfire::editor {
     }
 
     void ProjectCreatorState::render_form() {
-        float label_width = 120.0f;
+        float label_width = 180.0f;
     
         // Project Name
         ImGui::Text("Project Name");
@@ -86,8 +86,8 @@ namespace hellfire::editor {
     
         if (ImGui::BeginListBox("##templates", ImVec2(-1, 80))) {
             for (int i = 0; i < templates_.size(); i++) {
-                bool selected = (selected_template_ == i);
-                if (ImGui::Selectable(templates_[i].name.c_str(), selected)) {
+              
+                if (ImGui::Selectable(templates_[i].name.c_str(), selected_template_ == i)) {
                     selected_template_ = i;
                 }
             }

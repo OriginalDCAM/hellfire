@@ -30,7 +30,7 @@ namespace hellfire {
         for (uint32_t i = 0; i < faces.size(); i++) {
             unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
             if (data) {
-                GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
+                const GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
                 glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                              0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
                 stbi_image_free(data);
