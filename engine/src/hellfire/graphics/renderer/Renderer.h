@@ -95,7 +95,7 @@ namespace hellfire {
 
         void set_fallback_shader(Shader &fallback_shader);
 
-        Shader &get_shader_for_material(Material *material);
+        Shader& get_shader_for_material(Material *material);
 
         uint32_t compile_material_shader(const Material *material);
 

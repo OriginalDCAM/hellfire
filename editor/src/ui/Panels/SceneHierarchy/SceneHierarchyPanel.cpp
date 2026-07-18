@@ -204,7 +204,7 @@ void SceneHierarchyPanel::render_list_item(const EntityID entity_id) {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
 
     // Render the tree node
-    std::string display_name = ICON_FA_CUBES " " + entity_name;
+    const std::string display_name = ICON_FA_CUBES " " + entity_name;
     bool node_open = false;
 
       if (entity_id_to_opened_nodes_[entity_id] == true) {
