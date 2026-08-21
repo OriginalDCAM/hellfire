@@ -53,12 +53,10 @@ namespace hellfire {
         // Bind cubemap
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_cubemap());
-        skybox_shader_.set_int("skyboxes", 0);
+        // skybox_shader_.set_int("skyboxes", 0);
 
         // Draw skyboxes cube
-        skybox_mesh_->bind();
         skybox_mesh_->draw();
-        skybox_mesh_->unbind();
 
         // Restore depth state
         glDepthFunc(GL_LESS);
