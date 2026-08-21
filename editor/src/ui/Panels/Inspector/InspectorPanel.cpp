@@ -6,7 +6,6 @@
 
 #include "IconsFontAwesome6.h"
 #include "imgui.h"
-#include "imgui/misc/cpp/imgui_stdlib.h"
 
 #include "hellfire/ecs/LightComponent.h"
 #include "hellfire/ecs/RenderableComponent.h"

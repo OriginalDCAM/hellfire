@@ -195,7 +195,10 @@ namespace hellfire::editor::ui {
             ImGui::BeginGroup();
 
             // Choose/Change button
-            if (ImGui::Button(current_texture ? "Change##tex" : "Choose##tex", ImVec2(120, 24))) {
+            const float lineHeight = ImGui::GetFrameHeight();
+            const float em = ImGui::GetFontSize();
+            const auto button_size = ImVec2(12.0f * em, lineHeight);
+          if (ImGui::Button(current_texture ? "Change##tex" : "Choose##tex", button_size)) {
                 Utility::FileFilter filter = {"Images", "*.png;*.jpg;*.jpeg;*.tga;*.bmp"};
                 const std::string path = Utility::FileDialog::open_file({filter});
 
@@ -209,7 +212,7 @@ namespace hellfire::editor::ui {
 
             // Clear button (only if texture exists)
             if (current_texture) {
-                if (ImGui::Button("Clear##tex", ImVec2(120, 24))) {
+                if (ImGui::Button("Clear##tex", button_size)) {
                     TextureSlotManager::disable_slot(*material, slot, true);
                     changed = true;
                 }
