@@ -47,8 +47,8 @@ namespace hellfire {
     AssetImportManager::AssetImportManager(AssetRegistry &registry, AssetManager &asset_manager,
                                            const std::filesystem::path &project_root) : registry_(registry),
         asset_manager_(asset_manager), project_root_(project_root),
-        import_output_dir_(project_root / "assets" / "imported") {
-        create_directory(import_output_dir_);
+        import_output_dir_(project_root / ".hellfire" / ".imported") {
+        std::filesystem::create_directories(import_output_dir_);
     }
 
     void AssetImportManager::import_all_pending() {
